@@ -188,13 +188,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           decoration: InputDecoration(labelText: t.loginFieldPassword),
                         ),
                         const SizedBox(height: 4),
-                        CheckboxListTile(
-                          value: _recordarSesion,
-                          onChanged: (valor) => setState(() => _recordarSesion = valor ?? true),
-                          controlAffinity: ListTileControlAffinity.leading,
-                          contentPadding: EdgeInsets.zero,
-                          dense: true,
-                          title: Text(t.loginRecordarSesion, style: const TextStyle(fontSize: 13.5)),
+                        // Material(type: transparency) a propósito: el
+                        // CheckboxListTile pinta su fondo/ripple en el
+                        // Material ancestro más cercano — sin esto, la
+                        // tarjeta contenedora (un Container con su
+                        // propio BoxDecoration, no un Material) se lo
+                        // "roba" y el ripple del checkbox queda
+                        // invisible (aviso real visto en ejecución).
+                        Material(
+                          type: MaterialType.transparency,
+                          child: CheckboxListTile(
+                            value: _recordarSesion,
+                            onChanged: (valor) => setState(() => _recordarSesion = valor ?? true),
+                            controlAffinity: ListTileControlAffinity.leading,
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            title: Text(t.loginRecordarSesion, style: const TextStyle(fontSize: 13.5)),
+                          ),
                         ),
                         const SizedBox(height: 8),
                         if (_errorValidacion != null || authState.error != null)
