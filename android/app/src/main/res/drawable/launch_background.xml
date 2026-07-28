@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modify this file to customize your launch splash screen -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Azul de marca en vez del blanco por defecto — la pantalla de
+         splash de Flutter (HogarSosSplashScreen) toma el relevo con el
+         logo animado en cuanto el motor pinta su primer frame, así que
+         este fondo nativo solo necesita ser del color correcto, sin
+         parpadeo de blanco/negro genérico entre medias. -->
+    <item android:drawable="@color/hogarsos_splash_background" />
+</layer-list>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "426602101481",
+    "project_id": "hogarsos",
+    "storage_bucket": "hogarsos.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:426602101481:android:d08320845515ec08274e78",
+        "android_client_info": {
+          "package_name": "com.example.hogarsos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDknprwo1qH3bd4x_lD9AsUh8pVH06zxsk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

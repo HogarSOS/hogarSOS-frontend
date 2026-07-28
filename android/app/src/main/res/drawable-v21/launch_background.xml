@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modify this file to customize your launch splash screen -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Azul de marca en vez del fondo del sistema — ver drawable/ (sin
+         -v21) para el porqué. -->
+    <item android:drawable="@color/hogarsos_splash_background" />
+</layer-list>
