@@ -230,6 +230,24 @@ abstract class AppLocalizations {
   /// **'Si existe una cuenta con ese email, te hemos enviado un enlace para restablecer la contraseña'**
   String get loginRecuperarExito;
 
+  /// No description provided for @errorConexion.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo conectar con el servidor. Comprueba tu conexión.'**
+  String get errorConexion;
+
+  /// No description provided for @errorServidorLento.
+  ///
+  /// In es, this message translates to:
+  /// **'El servidor tardó demasiado en responder.'**
+  String get errorServidorLento;
+
+  /// No description provided for @errorInesperado.
+  ///
+  /// In es, this message translates to:
+  /// **'Ocurrió un error inesperado.'**
+  String get errorInesperado;
+
   /// No description provided for @homeSaludo.
   ///
   /// In es, this message translates to:
@@ -281,7 +299,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeResumenActivas.
   ///
   /// In es, this message translates to:
-  /// **'Tienes {cantidad} solicitudes activas'**
+  /// **'Tienes {cantidad} {cantidad, plural, one{solicitud activa} other{solicitudes activas}}'**
   String homeResumenActivas(int cantidad);
 
   /// No description provided for @homeSubtitulo.
@@ -485,7 +503,7 @@ abstract class AppLocalizations {
   /// No description provided for @buscarTrabajos.
   ///
   /// In es, this message translates to:
-  /// **'{n} trabajos'**
+  /// **'{n} {n, plural, one{trabajo} other{trabajos}}'**
   String buscarTrabajos(int n);
 
   /// No description provided for @buscarDisponibleAhora.
@@ -571,6 +589,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Mis valoraciones'**
   String get misValoracionesTitulo;
+
+  /// No description provided for @misValoracionesError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron cargar tus valoraciones'**
+  String get misValoracionesError;
 
   /// No description provided for @perfilProSinOpiniones.
   ///
@@ -739,6 +763,138 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Veterinaria a domicilio'**
   String get categoriaVeterinaria;
+
+  /// No description provided for @wizardEjemploGenerico.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: se ha roto una tubería bajo el fregadero y hay una fuga...'**
+  String get wizardEjemploGenerico;
+
+  /// No description provided for @wizardEjemploElectricista.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: ha saltado el diferencial y no puedo volver a subirlo...'**
+  String get wizardEjemploElectricista;
+
+  /// No description provided for @wizardEjemploFontanero.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: tengo una fuga debajo del fregadero...'**
+  String get wizardEjemploFontanero;
+
+  /// No description provided for @wizardEjemploPintor.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: quiero pintar el salón, unos 20 m²...'**
+  String get wizardEjemploPintor;
+
+  /// No description provided for @wizardEjemploManitas.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: necesito montar unas estanterías...'**
+  String get wizardEjemploManitas;
+
+  /// No description provided for @wizardEjemploLimpieza.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: necesito una limpieza completa de un piso...'**
+  String get wizardEjemploLimpieza;
+
+  /// No description provided for @wizardEjemploJardineria.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: necesito podar el seto y cortar el césped...'**
+  String get wizardEjemploJardineria;
+
+  /// No description provided for @wizardEjemploCerrajeria.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: he perdido las llaves y no puedo entrar en casa...'**
+  String get wizardEjemploCerrajeria;
+
+  /// No description provided for @wizardEjemploReformas.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: quiero reformar el baño completo...'**
+  String get wizardEjemploReformas;
+
+  /// No description provided for @wizardEjemploAireAcondicionado.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: el aire acondicionado no enfría...'**
+  String get wizardEjemploAireAcondicionado;
+
+  /// No description provided for @wizardEjemploCarpinteria.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: necesito una puerta de armario a medida...'**
+  String get wizardEjemploCarpinteria;
+
+  /// No description provided for @wizardEjemploAlbanileria.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: tengo una grieta en la pared del salón...'**
+  String get wizardEjemploAlbanileria;
+
+  /// No description provided for @wizardEjemploTejados.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: tengo una gotera en el tejado...'**
+  String get wizardEjemploTejados;
+
+  /// No description provided for @wizardEjemploCristaleria.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: se ha roto el cristal de una ventana...'**
+  String get wizardEjemploCristaleria;
+
+  /// No description provided for @wizardEjemploCarpinteriaMetalica.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: necesito reparar una persiana metálica...'**
+  String get wizardEjemploCarpinteriaMetalica;
+
+  /// No description provided for @wizardEjemploAntenas.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: no tengo señal de antena en el televisor...'**
+  String get wizardEjemploAntenas;
+
+  /// No description provided for @wizardEjemploSeguridad.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: quiero instalar una alarma en casa...'**
+  String get wizardEjemploSeguridad;
+
+  /// No description provided for @wizardEjemploMudanzas.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: necesito ayuda para mudarme a un piso de 2 habitaciones...'**
+  String get wizardEjemploMudanzas;
+
+  /// No description provided for @wizardEjemploLimpiezaCristales.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: necesito limpiar los cristales de un tercer piso...'**
+  String get wizardEjemploLimpiezaCristales;
+
+  /// No description provided for @wizardEjemploPiscinas.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: mi piscina tiene el agua verde...'**
+  String get wizardEjemploPiscinas;
+
+  /// No description provided for @wizardEjemploControlPlagas.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: tengo cucarachas en la cocina...'**
+  String get wizardEjemploControlPlagas;
+
+  /// No description provided for @wizardEjemploVeterinaria.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: mi perro necesita una revisión a domicilio...'**
+  String get wizardEjemploVeterinaria;
 
   /// No description provided for @profesionalTituloSolicitudes.
   ///
@@ -1358,6 +1514,12 @@ abstract class AppLocalizations {
   /// **'Selecciona una puntuación'**
   String get valoracionErrorSeleccion;
 
+  /// No description provided for @valoracionErrorEnviar.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo enviar la valoración. Inténtalo de nuevo.'**
+  String get valoracionErrorEnviar;
+
   /// No description provided for @valoracionComentarioLabel.
   ///
   /// In es, this message translates to:
@@ -1478,12 +1640,6 @@ abstract class AppLocalizations {
   /// **'Cuanto más detalle des, mejor podrán ayudarte los profesionales'**
   String get wizardPaso2Ayuda;
 
-  /// No description provided for @wizardPaso2Hint.
-  ///
-  /// In es, this message translates to:
-  /// **'Ej: se ha roto una tubería bajo el fregadero y hay una fuga...'**
-  String get wizardPaso2Hint;
-
   /// No description provided for @wizardPaso3Titulo.
   ///
   /// In es, this message translates to:
@@ -1591,6 +1747,132 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Confirmar ubicación'**
   String get ubicacionConfirmar;
+
+  /// No description provided for @adminTituloPanel.
+  ///
+  /// In es, this message translates to:
+  /// **'Panel admin'**
+  String get adminTituloPanel;
+
+  /// No description provided for @adminTabVerificaciones.
+  ///
+  /// In es, this message translates to:
+  /// **'Verificaciones'**
+  String get adminTabVerificaciones;
+
+  /// No description provided for @adminTabDisputas.
+  ///
+  /// In es, this message translates to:
+  /// **'Disputas'**
+  String get adminTabDisputas;
+
+  /// No description provided for @adminVerificacionesVacio.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay verificaciones pendientes'**
+  String get adminVerificacionesVacio;
+
+  /// No description provided for @adminVerificacionesError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron cargar las verificaciones'**
+  String get adminVerificacionesError;
+
+  /// No description provided for @adminDisputasVacio.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay disputas abiertas'**
+  String get adminDisputasVacio;
+
+  /// No description provided for @adminDisputasError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron cargar las disputas'**
+  String get adminDisputasError;
+
+  /// No description provided for @adminCategoriasLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Categorías: {categorias}'**
+  String adminCategoriasLabel(String categorias);
+
+  /// No description provided for @adminRechazar.
+  ///
+  /// In es, this message translates to:
+  /// **'Rechazar'**
+  String get adminRechazar;
+
+  /// No description provided for @adminAprobar.
+  ///
+  /// In es, this message translates to:
+  /// **'Aprobar'**
+  String get adminAprobar;
+
+  /// No description provided for @adminFavorCliente.
+  ///
+  /// In es, this message translates to:
+  /// **'A favor del cliente'**
+  String get adminFavorCliente;
+
+  /// No description provided for @adminFavorProfesional.
+  ///
+  /// In es, this message translates to:
+  /// **'A favor del profesional'**
+  String get adminFavorProfesional;
+
+  /// No description provided for @adminMotivoRechazoTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Motivo del rechazo'**
+  String get adminMotivoRechazoTitulo;
+
+  /// No description provided for @adminMotivoRechazoHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Explica brevemente por qué se rechaza'**
+  String get adminMotivoRechazoHint;
+
+  /// No description provided for @adminMotivoRechazoAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Mínimo 5 caracteres — el profesional lo verá'**
+  String get adminMotivoRechazoAyuda;
+
+  /// No description provided for @adminNotasResolucionTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas de la resolución'**
+  String get adminNotasResolucionTitulo;
+
+  /// No description provided for @adminNotasResolucionHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Explica brevemente cómo se resolvió'**
+  String get adminNotasResolucionHint;
+
+  /// No description provided for @adminNotasResolucionAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Mínimo 5 caracteres — quedará registrado en la disputa'**
+  String get adminNotasResolucionAyuda;
+
+  /// No description provided for @adminConfirmar.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar'**
+  String get adminConfirmar;
+
+  /// No description provided for @adminDecisionError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo registrar la decisión. Inténtalo de nuevo.'**
+  String get adminDecisionError;
+
+  /// No description provided for @adminResolucionError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo registrar la resolución. Inténtalo de nuevo.'**
+  String get adminResolucionError;
 }
 
 class _AppLocalizationsDelegate

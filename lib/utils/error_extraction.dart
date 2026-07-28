@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../l10n/app_localizations.dart';
 
 /// Extrae un mensaje legible de un error de red.
 ///
@@ -11,7 +12,18 @@ import 'package:dio/dio.dart';
 /// algo había fallado — solo un texto técnico sin sentido. Esta
 /// función es la misma idea que `_mensajeDio` en auth_service.dart,
 /// generalizada para reutilizarla en cualquier pantalla.
-String mensajeDeError(Object error, {String? contexto}) {
+///
+/// `t` es opcional (no siempre hay un `BuildContext` a mano) — sin él,
+/// los mensajes de conexión/error genérico caen al español fijo, igual
+/// que antes de la Sprint 2. Pasándolo, esos mismos mensajes (los
+/// únicos que este archivo redacta directamente, no el resto que ya
+/// viene traducido en `contexto` o del backend) respetan el idioma
+/// activo de la app.
+String mensajeDeError(Object error, {String? contexto, AppLocalizations? t}) {
+  final errorConexion = t?.errorConexion ?? 'No se pudo conectar con el servidor. Comprueba tu conexión.';
+  final errorServidorLento = t?.errorServidorLento ?? 'El servidor tardó demasiado en responder.';
+  final errorInesperado = t?.errorInesperado ?? 'Ocurrió un error inesperado.';
+
   if (error is DioException) {
     final data = error.response?.data;
     if (data is Map && data['error'] is String) {
@@ -20,13 +32,13 @@ String mensajeDeError(Object error, {String? contexto}) {
     switch (error.type) {
       case DioExceptionType.connectionError:
       case DioExceptionType.connectionTimeout:
-        return 'No se pudo conectar con el servidor. Comprueba tu conexión.';
+        return errorConexion;
       case DioExceptionType.receiveTimeout:
       case DioExceptionType.sendTimeout:
-        return 'El servidor tardó demasiado en responder.';
+        return errorServidorLento;
       default:
-        return contexto ?? 'Ocurrió un error inesperado.';
+        return contexto ?? errorInesperado;
     }
   }
-  return contexto ?? 'Ocurrió un error inesperado.';
+  return contexto ?? errorInesperado;
 }

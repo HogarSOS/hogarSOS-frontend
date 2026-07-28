@@ -252,7 +252,10 @@ class _SolicitarWizardScreenState extends ConsumerState<SolicitarWizardScreen> {
                           _errorPaso = null;
                         }),
                       ),
-                    _PasoWizard.descripcion => _PasoDescripcion(controller: _descripcionController),
+                    _PasoWizard.descripcion => _PasoDescripcion(
+                        controller: _descripcionController,
+                        categoria: _categoria,
+                      ),
                     _PasoWizard.fotos => _PasoFotos(
                         fotos: _fotos,
                         onAgregar: _agregarFoto,
@@ -526,9 +529,13 @@ class _SelectorCategoriaSheet extends ConsumerWidget {
 // ─────────────────────────── Paso 2: Descripción ───────────────────────────
 
 class _PasoDescripcion extends StatelessWidget {
-  const _PasoDescripcion({required this.controller});
+  const _PasoDescripcion({required this.controller, required this.categoria});
 
   final TextEditingController controller;
+
+  /// Categoría ya elegida en el paso 1 — determina qué ejemplo de
+  /// descripción se muestra (ver ejemploDescripcionParaCategoria).
+  final ServiceCategory? categoria;
 
   @override
   Widget build(BuildContext context) {
@@ -545,7 +552,10 @@ class _PasoDescripcion extends StatelessWidget {
             maxLines: 8,
             maxLength: 1000,
             autofocus: true,
-            decoration: InputDecoration(hintText: t.wizardPaso2Hint, alignLabelWithHint: true),
+            decoration: InputDecoration(
+              hintText: ejemploDescripcionParaCategoria(context, categoria?.nombre),
+              alignLabelWithHint: true,
+            ),
           ),
         ],
       ),

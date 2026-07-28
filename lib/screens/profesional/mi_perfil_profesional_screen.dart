@@ -225,7 +225,7 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
       debugPrint('[MiPerfilProfesionalScreen] Error al guardar: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${t.miPerfilErrorGuardar}: ${mensajeDeError(e)}')),
+        SnackBar(content: Text('${t.miPerfilErrorGuardar}: ${mensajeDeError(e, t: t)}')),
       );
     } finally {
       if (mounted) setState(() => _guardando = false);

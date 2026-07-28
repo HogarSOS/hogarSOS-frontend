@@ -7,6 +7,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/service_request_provider.dart';
 import '../../services/service_request_service.dart';
 import '../../utils/error_extraction.dart';
+import '../../widgets/entrada_animada.dart';
 import '../chat_screen.dart';
 import '../cliente/valoracion_screen.dart';
 
@@ -77,7 +78,7 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
       debugPrint('[TrabajosActivosProfesionalScreen] Error al completar: $e');
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(mensajeDeError(e, contexto: t.trabajosActivosCompletadoError))),
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.trabajosActivosCompletadoError, t: t))),
       );
     }
   }
@@ -123,15 +124,18 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
                 final trabajo = trabajos[index];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: _TarjetaTrabajo(
-                    trabajo: trabajo,
-                    onChat: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => ChatScreen(serviceRequestId: trabajo.id, usuarioActualId: usuarioId),
+                  child: EntradaAnimada(
+                    retraso: Duration(milliseconds: 40 * index),
+                    child: _TarjetaTrabajo(
+                      trabajo: trabajo,
+                      onChat: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ChatScreen(serviceRequestId: trabajo.id, usuarioActualId: usuarioId),
+                        ),
                       ),
+                      onCompletar: () => _completar(context, ref, trabajo),
+                      onValorar: () => _valorar(context, ref, trabajo),
                     ),
-                    onCompletar: () => _completar(context, ref, trabajo),
-                    onValorar: () => _valorar(context, ref, trabajo),
                   ),
                 );
               },

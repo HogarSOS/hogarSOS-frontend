@@ -55,7 +55,7 @@ class _MisValoracionesScreenState extends ConsumerState<MisValoracionesScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text(t.trabajosActivosErrorCargar));
+            return Center(child: Text(t.misValoracionesError));
           }
           final (usuario, opiniones) = snapshot.data!;
           return ListView(

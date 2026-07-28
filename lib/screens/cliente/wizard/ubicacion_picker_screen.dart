@@ -67,6 +67,7 @@ class _UbicacionPickerScreenState extends State<UbicacionPickerScreen> {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(title: Text(t.ubicacionTitulo)),
@@ -91,10 +92,10 @@ class _UbicacionPickerScreenState extends State<UbicacionPickerScreen> {
                 // complejidad de un marcador arrastrable y es el patrón
                 // que ya reconocen los usuarios de Uber/Airbnb/Glovo.
                 if (!_cargandoUbicacionInicial)
-                  const IgnorePointer(
+                  IgnorePointer(
                     child: Padding(
-                      padding: EdgeInsets.only(bottom: 40),
-                      child: Icon(Icons.location_pin, size: 44, color: Colors.redAccent),
+                      padding: const EdgeInsets.only(bottom: 40),
+                      child: Icon(Icons.location_pin, size: 44, color: colorScheme.primary),
                     ),
                   ),
               ],

@@ -132,3 +132,70 @@ String nombreLocalizadoCategoria(BuildContext context, String nombreCanonico) {
       return nombreCanonico; // categoría futura aún sin traducir — no rompe la UI
   }
 }
+
+/// Ejemplo de descripción específico de la categoría, para el hint del
+/// paso 2 del asistente ("Describe el trabajo") — ver
+/// solicitar_wizard_screen.dart. Antes había un único ejemplo genérico
+/// de fontanería para todas las categorías (raro si estabas pidiendo un
+/// electricista); ahora cada oficio muestra un ejemplo realista del
+/// problema típico de esa categoría, que además sirve de guía implícita
+/// de qué tipo de detalle conviene dar. Si `nombreCanonico` es `null`
+/// (aún no se ha elegido categoría) o no está mapeado, cae en el
+/// ejemplo genérico.
+String ejemploDescripcionParaCategoria(BuildContext context, String? nombreCanonico) {
+  final t = AppLocalizations.of(context);
+  switch (nombreCanonico?.trim().toLowerCase()) {
+    case 'electricista':
+      return t.wizardEjemploElectricista;
+    case 'fontanero':
+      return t.wizardEjemploFontanero;
+    case 'pintor':
+      return t.wizardEjemploPintor;
+    case 'manitas':
+      return t.wizardEjemploManitas;
+    case 'limpieza':
+    case 'limpieza del hogar':
+      return t.wizardEjemploLimpieza;
+    case 'jardinería':
+    case 'jardineria':
+      return t.wizardEjemploJardineria;
+    case 'cerrajería':
+    case 'cerrajeria':
+    case 'cerrajero':
+      return t.wizardEjemploCerrajeria;
+    case 'reformas':
+      return t.wizardEjemploReformas;
+    case 'aire acondicionado':
+      return t.wizardEjemploAireAcondicionado;
+    case 'carpintería':
+    case 'carpinteria':
+      return t.wizardEjemploCarpinteria;
+    case 'albañilería':
+    case 'albanileria':
+      return t.wizardEjemploAlbanileria;
+    case 'tejados y cubiertas':
+      return t.wizardEjemploTejados;
+    case 'cristalería':
+    case 'cristaleria':
+      return t.wizardEjemploCristaleria;
+    case 'carpintería metálica':
+    case 'carpinteria metalica':
+      return t.wizardEjemploCarpinteriaMetalica;
+    case 'antenas y telecomunicaciones':
+      return t.wizardEjemploAntenas;
+    case 'sistemas de seguridad':
+      return t.wizardEjemploSeguridad;
+    case 'mudanzas':
+      return t.wizardEjemploMudanzas;
+    case 'limpieza de cristales':
+      return t.wizardEjemploLimpiezaCristales;
+    case 'piscinas':
+      return t.wizardEjemploPiscinas;
+    case 'control de plagas':
+      return t.wizardEjemploControlPlagas;
+    case 'veterinaria a domicilio':
+      return t.wizardEjemploVeterinaria;
+    default:
+      return t.wizardEjemploGenerico;
+  }
+}

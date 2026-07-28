@@ -26,6 +26,10 @@
   "loginRecuperarEnviar": "Enviar enlace",
   "loginRecuperarExito": "Si existe una cuenta con ese email, te hemos enviado un enlace para restablecer la contraseña",
 
+  "errorConexion": "No se pudo conectar con el servidor. Comprueba tu conexión.",
+  "errorServidorLento": "El servidor tardó demasiado en responder.",
+  "errorInesperado": "Ocurrió un error inesperado.",
+
   "homeSaludo": "Hola, {nombre} 👋",
   "@homeSaludo": {
     "placeholders": { "nombre": { "type": "String" } }
@@ -46,7 +50,7 @@
   "homeAccesoBuscar": "Buscar",
   "homeAccesoMisSolicitudes": "Mis solicitudes",
   "homeAccesoFavoritos": "Favoritos",
-  "homeResumenActivas": "Tienes {cantidad} solicitudes activas",
+  "homeResumenActivas": "Tienes {cantidad} {cantidad, plural, one{solicitud activa} other{solicitudes activas}}",
   "@homeResumenActivas": {
     "placeholders": { "cantidad": { "type": "int" } }
   },
@@ -92,7 +96,7 @@
   "@buscarDesde": {
     "placeholders": { "precio": { "type": "String" } }
   },
-  "buscarTrabajos": "{n} trabajos",
+  "buscarTrabajos": "{n} {n, plural, one{trabajo} other{trabajos}}",
   "@buscarTrabajos": {
     "placeholders": { "n": { "type": "int" } }
   },
@@ -115,6 +119,7 @@
     "placeholders": { "n": { "type": "int" } }
   },
   "misValoracionesTitulo": "Mis valoraciones",
+  "misValoracionesError": "No se pudieron cargar tus valoraciones",
   "perfilProSinOpiniones": "Aún no tiene opiniones",
   "perfilProGaleriaTitulo": "Galería de trabajos",
   "perfilProSinGaleria": "Este profesional aún no ha subido fotos de sus trabajos",
@@ -144,6 +149,29 @@
   "categoriaPiscinas": "Piscinas",
   "categoriaControlPlagas": "Control de plagas",
   "categoriaVeterinaria": "Veterinaria a domicilio",
+
+  "wizardEjemploGenerico": "Ej: se ha roto una tubería bajo el fregadero y hay una fuga...",
+  "wizardEjemploElectricista": "Ej: ha saltado el diferencial y no puedo volver a subirlo...",
+  "wizardEjemploFontanero": "Ej: tengo una fuga debajo del fregadero...",
+  "wizardEjemploPintor": "Ej: quiero pintar el salón, unos 20 m²...",
+  "wizardEjemploManitas": "Ej: necesito montar unas estanterías...",
+  "wizardEjemploLimpieza": "Ej: necesito una limpieza completa de un piso...",
+  "wizardEjemploJardineria": "Ej: necesito podar el seto y cortar el césped...",
+  "wizardEjemploCerrajeria": "Ej: he perdido las llaves y no puedo entrar en casa...",
+  "wizardEjemploReformas": "Ej: quiero reformar el baño completo...",
+  "wizardEjemploAireAcondicionado": "Ej: el aire acondicionado no enfría...",
+  "wizardEjemploCarpinteria": "Ej: necesito una puerta de armario a medida...",
+  "wizardEjemploAlbanileria": "Ej: tengo una grieta en la pared del salón...",
+  "wizardEjemploTejados": "Ej: tengo una gotera en el tejado...",
+  "wizardEjemploCristaleria": "Ej: se ha roto el cristal de una ventana...",
+  "wizardEjemploCarpinteriaMetalica": "Ej: necesito reparar una persiana metálica...",
+  "wizardEjemploAntenas": "Ej: no tengo señal de antena en el televisor...",
+  "wizardEjemploSeguridad": "Ej: quiero instalar una alarma en casa...",
+  "wizardEjemploMudanzas": "Ej: necesito ayuda para mudarme a un piso de 2 habitaciones...",
+  "wizardEjemploLimpiezaCristales": "Ej: necesito limpiar los cristales de un tercer piso...",
+  "wizardEjemploPiscinas": "Ej: mi piscina tiene el agua verde...",
+  "wizardEjemploControlPlagas": "Ej: tengo cucarachas en la cocina...",
+  "wizardEjemploVeterinaria": "Ej: mi perro necesita una revisión a domicilio...",
 
   "profesionalTituloSolicitudes": "Solicitudes cerca de ti",
   "salirPulsaOtraVez": "Pulsa atrás otra vez para salir",
@@ -255,6 +283,7 @@
   "pagoErrorStripeDefault": "El pago no se completó",
   "valoracionTitulo": "¿Cómo fue el servicio?",
   "valoracionErrorSeleccion": "Selecciona una puntuación",
+  "valoracionErrorEnviar": "No se pudo enviar la valoración. Inténtalo de nuevo.",
   "valoracionComentarioLabel": "Comentario (opcional)",
   "valoracionBtnEnviar": "Enviar valoración",
   "progresoBuscando": "Buscando profesionales",
@@ -280,7 +309,6 @@
   "wizardCategoriaElegirTitulo": "Elige una categoría",
   "wizardPaso2Titulo": "Describe el trabajo",
   "wizardPaso2Ayuda": "Cuanto más detalle des, mejor podrán ayudarte los profesionales",
-  "wizardPaso2Hint": "Ej: se ha roto una tubería bajo el fregadero y hay una fuga...",
   "wizardPaso3Titulo": "Añade fotos (opcional)",
   "wizardPaso3Ayuda": "Una foto ayuda al profesional a entender el problema antes de llegar",
   "wizardFotoCamara": "Hacer una foto",
@@ -299,5 +327,30 @@
 
   "ubicacionTitulo": "Elegir ubicación",
   "ubicacionDireccionOpcional": "Dirección o referencia (opcional)",
-  "ubicacionConfirmar": "Confirmar ubicación"
+  "ubicacionConfirmar": "Confirmar ubicación",
+
+  "adminTituloPanel": "Panel admin",
+  "adminTabVerificaciones": "Verificaciones",
+  "adminTabDisputas": "Disputas",
+  "adminVerificacionesVacio": "No hay verificaciones pendientes",
+  "adminVerificacionesError": "No se pudieron cargar las verificaciones",
+  "adminDisputasVacio": "No hay disputas abiertas",
+  "adminDisputasError": "No se pudieron cargar las disputas",
+  "adminCategoriasLabel": "Categorías: {categorias}",
+  "@adminCategoriasLabel": {
+    "placeholders": { "categorias": { "type": "String" } }
+  },
+  "adminRechazar": "Rechazar",
+  "adminAprobar": "Aprobar",
+  "adminFavorCliente": "A favor del cliente",
+  "adminFavorProfesional": "A favor del profesional",
+  "adminMotivoRechazoTitulo": "Motivo del rechazo",
+  "adminMotivoRechazoHint": "Explica brevemente por qué se rechaza",
+  "adminMotivoRechazoAyuda": "Mínimo 5 caracteres — el profesional lo verá",
+  "adminNotasResolucionTitulo": "Notas de la resolución",
+  "adminNotasResolucionHint": "Explica brevemente cómo se resolvió",
+  "adminNotasResolucionAyuda": "Mínimo 5 caracteres — quedará registrado en la disputa",
+  "adminConfirmar": "Confirmar",
+  "adminDecisionError": "No se pudo registrar la decisión. Inténtalo de nuevo.",
+  "adminResolucionError": "No se pudo registrar la resolución. Inténtalo de nuevo."
 }

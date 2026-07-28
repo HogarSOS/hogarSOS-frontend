@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/service_request_model.dart';
 import '../../providers/service_request_provider.dart';
+import '../../widgets/entrada_animada.dart';
 import 'trabajos_activos_profesional_screen.dart';
 
 /// Pestaña "Inicio" del Panel Profesional: solo la lista de solicitudes
@@ -89,10 +90,13 @@ class HomeProfesionalScreen extends ConsumerWidget {
                         final solicitud = solicitudes[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: _TarjetaSolicitudCercana(
-                            solicitud: solicitud,
-                            onIgnorar: () => ref.read(nearbyRequestsProvider.notifier).ocultar(solicitud.id),
-                            onAceptar: () => _aceptar(context, ref, solicitud),
+                          child: EntradaAnimada(
+                            retraso: Duration(milliseconds: 40 * index),
+                            child: _TarjetaSolicitudCercana(
+                              solicitud: solicitud,
+                              onIgnorar: () => ref.read(nearbyRequestsProvider.notifier).ocultar(solicitud.id),
+                              onAceptar: () => _aceptar(context, ref, solicitud),
+                            ),
                           ),
                         );
                       },

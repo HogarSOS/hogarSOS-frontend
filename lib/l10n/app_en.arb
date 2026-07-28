@@ -26,6 +26,10 @@
   "loginRecuperarEnviar": "Send link",
   "loginRecuperarExito": "If an account exists with that email, we've sent a password reset link",
 
+  "errorConexion": "Couldn't connect to the server. Check your connection.",
+  "errorServidorLento": "The server took too long to respond.",
+  "errorInesperado": "Something went wrong.",
+
   "homeSaludo": "Hi, {nombre} 👋",
   "@homeSaludo": {
     "placeholders": { "nombre": { "type": "String" } }
@@ -46,7 +50,7 @@
   "homeAccesoBuscar": "Search",
   "homeAccesoMisSolicitudes": "My requests",
   "homeAccesoFavoritos": "Favorites",
-  "homeResumenActivas": "You have {cantidad} active requests",
+  "homeResumenActivas": "You have {cantidad} active {cantidad, plural, one{request} other{requests}}",
   "@homeResumenActivas": {
     "placeholders": { "cantidad": { "type": "int" } }
   },
@@ -92,7 +96,7 @@
   "@buscarDesde": {
     "placeholders": { "precio": { "type": "String" } }
   },
-  "buscarTrabajos": "{n} jobs",
+  "buscarTrabajos": "{n} {n, plural, one{job} other{jobs}}",
   "@buscarTrabajos": {
     "placeholders": { "n": { "type": "int" } }
   },
@@ -115,6 +119,7 @@
     "placeholders": { "n": { "type": "int" } }
   },
   "misValoracionesTitulo": "My reviews",
+  "misValoracionesError": "Couldn't load your reviews",
   "perfilProSinOpiniones": "No reviews yet",
   "perfilProGaleriaTitulo": "Work gallery",
   "perfilProSinGaleria": "This professional hasn't uploaded any work photos yet",
@@ -144,6 +149,29 @@
   "categoriaPiscinas": "Pools",
   "categoriaControlPlagas": "Pest control",
   "categoriaVeterinaria": "Home veterinary services",
+
+  "wizardEjemploGenerico": "E.g.: a pipe burst under the sink and it's leaking...",
+  "wizardEjemploElectricista": "E.g.: the circuit breaker keeps tripping and won't reset...",
+  "wizardEjemploFontanero": "E.g.: I have a leak under the kitchen sink...",
+  "wizardEjemploPintor": "E.g.: I need my living room painted, about 20 m²...",
+  "wizardEjemploManitas": "E.g.: I need some shelves assembled...",
+  "wizardEjemploLimpieza": "E.g.: I need a full apartment cleaning...",
+  "wizardEjemploJardineria": "E.g.: I need the hedge trimmed and the lawn mowed...",
+  "wizardEjemploCerrajeria": "E.g.: I've lost my keys and I'm locked out...",
+  "wizardEjemploReformas": "E.g.: I want to fully renovate my bathroom...",
+  "wizardEjemploAireAcondicionado": "E.g.: my air conditioner isn't cooling...",
+  "wizardEjemploCarpinteria": "E.g.: I need a custom-made wardrobe door...",
+  "wizardEjemploAlbanileria": "E.g.: there's a crack in my living room wall...",
+  "wizardEjemploTejados": "E.g.: I have a leak in my roof...",
+  "wizardEjemploCristaleria": "E.g.: a window pane is broken...",
+  "wizardEjemploCarpinteriaMetalica": "E.g.: I need a metal shutter repaired...",
+  "wizardEjemploAntenas": "E.g.: I'm not getting antenna signal on my TV...",
+  "wizardEjemploSeguridad": "E.g.: I want to install a home alarm system...",
+  "wizardEjemploMudanzas": "E.g.: I need help moving to a 2-bedroom apartment...",
+  "wizardEjemploLimpiezaCristales": "E.g.: I need the windows cleaned on a third floor...",
+  "wizardEjemploPiscinas": "E.g.: my pool water has turned green...",
+  "wizardEjemploControlPlagas": "E.g.: I have cockroaches in my kitchen...",
+  "wizardEjemploVeterinaria": "E.g.: my dog needs a checkup at home...",
 
   "profesionalTituloSolicitudes": "Requests near you",
   "salirPulsaOtraVez": "Press back again to exit",
@@ -255,6 +283,7 @@
   "pagoErrorStripeDefault": "The payment wasn't completed",
   "valoracionTitulo": "How was the service?",
   "valoracionErrorSeleccion": "Select a rating",
+  "valoracionErrorEnviar": "Couldn't submit your rating. Please try again.",
   "valoracionComentarioLabel": "Comment (optional)",
   "valoracionBtnEnviar": "Submit rating",
   "progresoBuscando": "Finding professionals",
@@ -280,7 +309,6 @@
   "wizardCategoriaElegirTitulo": "Choose a category",
   "wizardPaso2Titulo": "Describe the job",
   "wizardPaso2Ayuda": "The more detail you give, the better professionals can help you",
-  "wizardPaso2Hint": "E.g.: a pipe burst under the sink and it's leaking...",
   "wizardPaso3Titulo": "Add photos (optional)",
   "wizardPaso3Ayuda": "A photo helps the professional understand the problem before arriving",
   "wizardFotoCamara": "Take a photo",
@@ -299,5 +327,30 @@
 
   "ubicacionTitulo": "Choose location",
   "ubicacionDireccionOpcional": "Address or reference (optional)",
-  "ubicacionConfirmar": "Confirm location"
+  "ubicacionConfirmar": "Confirm location",
+
+  "adminTituloPanel": "Admin panel",
+  "adminTabVerificaciones": "Verifications",
+  "adminTabDisputas": "Disputes",
+  "adminVerificacionesVacio": "No pending verifications",
+  "adminVerificacionesError": "Couldn't load verifications",
+  "adminDisputasVacio": "No open disputes",
+  "adminDisputasError": "Couldn't load disputes",
+  "adminCategoriasLabel": "Categories: {categorias}",
+  "@adminCategoriasLabel": {
+    "placeholders": { "categorias": { "type": "String" } }
+  },
+  "adminRechazar": "Reject",
+  "adminAprobar": "Approve",
+  "adminFavorCliente": "In favor of the customer",
+  "adminFavorProfesional": "In favor of the professional",
+  "adminMotivoRechazoTitulo": "Rejection reason",
+  "adminMotivoRechazoHint": "Briefly explain why it's being rejected",
+  "adminMotivoRechazoAyuda": "Minimum 5 characters — the professional will see this",
+  "adminNotasResolucionTitulo": "Resolution notes",
+  "adminNotasResolucionHint": "Briefly explain how it was resolved",
+  "adminNotasResolucionAyuda": "Minimum 5 characters — this will be recorded on the dispute",
+  "adminConfirmar": "Confirm",
+  "adminDecisionError": "Couldn't record the decision. Please try again.",
+  "adminResolucionError": "Couldn't record the resolution. Please try again."
 }

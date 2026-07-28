@@ -132,7 +132,7 @@ class _Contenido extends ConsumerWidget {
       debugPrint('[SeguimientoSolicitudScreen] Error al cancelar: $e');
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(mensajeDeError(e, contexto: t.seguimientoCancelarError))),
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.seguimientoCancelarError, t: t))),
       );
       onRecargar(); // por si el motivo es que ya no está pendiente (otro la aceptó justo ahora)
     }

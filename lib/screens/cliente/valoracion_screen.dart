@@ -48,7 +48,7 @@ class _ValoracionScreenState extends State<ValoracionScreen> {
       Navigator.of(context).pop(true);
     } catch (e) {
       debugPrint('[ValoracionScreen] Error al enviar la valoración: $e');
-      setState(() => _error = 'No se pudo enviar la valoración. Inténtalo de nuevo.');
+      setState(() => _error = t.valoracionErrorEnviar);
     } finally {
       if (mounted) setState(() => _enviando = false);
     }

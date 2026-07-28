@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/admin_models.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/admin_service.dart';
+import '../../utils/category_display.dart';
+import '../../widgets/entrada_animada.dart';
 import '../auth/login_screen.dart';
 
 class AdminScreen extends ConsumerStatefulWidget {
@@ -30,22 +33,23 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Panel admin'),
+          title: Text(t.adminTituloPanel),
           actions: [
             IconButton(
               icon: const Icon(Icons.logout),
-              tooltip: 'Cerrar sesión',
+              tooltip: t.perfilCerrarSesion,
               onPressed: _cerrarSesion,
             ),
           ],
-          bottom: const TabBar(
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Verificaciones'),
-              Tab(text: 'Disputas'),
+              Tab(text: t.adminTabVerificaciones),
+              Tab(text: t.adminTabDisputas),
             ],
           ),
         ),
@@ -58,6 +62,53 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
       ),
     );
   }
+}
+
+/// Diálogo de texto obligatorio con un mínimo de caracteres — mismo
+/// patrón para "motivo del rechazo" y "notas de la resolución". Antes
+/// cada uno tenía un TextField desnudo (sin label ni pista de qué
+/// escribir) y, si el texto quedaba demasiado corto, el diálogo se
+/// cerraba y la acción se descartaba en silencio — el admin nunca se
+/// enteraba de que no había pasado nada. Ahora el botón de confirmar
+/// permanece deshabilitado hasta que el texto es válido, con una ayuda
+/// visible explicando el mínimo.
+Future<String?> _pedirTextoObligatorio(
+  BuildContext context, {
+  required String titulo,
+  required String hint,
+  required String ayuda,
+  required String confirmar,
+  required String cancelar,
+}) {
+  final controller = TextEditingController();
+  return showDialog<String>(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) {
+        final valido = controller.text.trim().length >= 5;
+        return AlertDialog(
+          title: Text(titulo),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            maxLines: 3,
+            decoration: InputDecoration(hintText: hint, helperText: ayuda),
+            onChanged: (_) => setState(() {}),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(cancelar),
+            ),
+            FilledButton(
+              onPressed: valido ? () => Navigator.of(context).pop(controller.text.trim()) : null,
+              child: Text(confirmar),
+            ),
+          ],
+        );
+      },
+    ),
+  );
 }
 
 class _VerificacionesTab extends StatefulWidget {
@@ -77,91 +128,113 @@ class _VerificacionesTabState extends State<_VerificacionesTab> {
     _futuro = widget.adminService.listarVerificacionesPendientes();
   }
 
-  void _recargar() {
+  Future<void> _recargar() async {
     setState(() => _futuro = widget.adminService.listarVerificacionesPendientes());
+    await _futuro.catchError((_) => <PendingVerification>[]);
   }
 
   Future<void> _decidir(PendingVerification v, bool aprobar) async {
+    final t = AppLocalizations.of(context);
     String? motivo;
     if (!aprobar) {
-      motivo = await showDialog<String>(
-        context: context,
-        builder: (context) {
-          final controller = TextEditingController();
-          return AlertDialog(
-            title: const Text('Motivo del rechazo'),
-            content: TextField(controller: controller, autofocus: true),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(controller.text.trim()),
-                child: const Text('Confirmar'),
-              ),
-            ],
-          );
-        },
+      motivo = await _pedirTextoObligatorio(
+        context,
+        titulo: t.adminMotivoRechazoTitulo,
+        hint: t.adminMotivoRechazoHint,
+        ayuda: t.adminMotivoRechazoAyuda,
+        confirmar: t.adminConfirmar,
+        cancelar: t.perfilCancelar,
       );
-      if (motivo == null || motivo.length < 5) return; // cancelado o demasiado corto
+      if (motivo == null) return; // cancelado
     }
 
-    await widget.adminService.decidirVerificacion(
-      professionalId: v.userId,
-      aprobar: aprobar,
-      motivoRechazo: motivo,
-    );
-    _recargar();
+    try {
+      await widget.adminService.decidirVerificacion(
+        professionalId: v.userId,
+        aprobar: aprobar,
+        motivoRechazo: motivo,
+      );
+      if (!mounted) return;
+      await _recargar();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.adminDecisionError)));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return FutureBuilder<List<PendingVerification>>(
       future: _futuro,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (!snapshot.hasData && !snapshot.hasError) {
           return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return _EstadoLista(
+            icono: Icons.error_outline,
+            mensaje: t.adminVerificacionesError,
+            onRefresh: _recargar,
+          );
         }
         final verificaciones = snapshot.data!;
         if (verificaciones.isEmpty) {
-          return const Center(child: Text('No hay verificaciones pendientes'));
+          return _EstadoLista(
+            icono: Icons.verified_outlined,
+            mensaje: t.adminVerificacionesVacio,
+            onRefresh: _recargar,
+          );
         }
-        return ListView.builder(
-          padding: const EdgeInsets.all(12),
-          itemCount: verificaciones.length,
-          itemBuilder: (context, index) {
-            final v = verificaciones[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(v.nombre, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text(v.email, style: Theme.of(context).textTheme.bodySmall),
-                    const SizedBox(height: 4),
-                    Text('Categorías: ${v.categorias.join(", ")}'),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => _decidir(v, false),
-                            child: const Text('Rechazar'),
+        return RefreshIndicator(
+          onRefresh: _recargar,
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: verificaciones.length,
+            itemBuilder: (context, index) {
+              final v = verificaciones[index];
+              final categorias = v.categorias.map((c) => nombreLocalizadoCategoria(context, c)).join(', ');
+              return EntradaAnimada(
+                retraso: Duration(milliseconds: 30 * index),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(v.nombre, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15.5)),
+                          const SizedBox(height: 2),
+                          Text(v.email, style: Theme.of(context).textTheme.bodySmall),
+                          const SizedBox(height: 8),
+                          Text(t.adminCategoriasLabel(categorias), style: const TextStyle(fontSize: 13.5)),
+                          const SizedBox(height: 14),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () => _decidir(v, false),
+                                  child: Text(t.adminRechazar),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: FilledButton(
+                                  onPressed: () => _decidir(v, true),
+                                  child: Text(t.adminAprobar),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: FilledButton(
-                            onPressed: () => _decidir(v, true),
-                            child: const Text('Aprobar'),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       },
     );
@@ -185,87 +258,140 @@ class _DisputasTabState extends State<_DisputasTab> {
     _futuro = widget.adminService.listarDisputas();
   }
 
-  void _recargar() {
+  Future<void> _recargar() async {
     setState(() => _futuro = widget.adminService.listarDisputas());
+    await _futuro.catchError((_) => <DisputeSummary>[]);
   }
 
   Future<void> _resolver(DisputeSummary d, bool favorProfesional) async {
-    final notas = await showDialog<String>(
-      context: context,
-      builder: (context) {
-        final controller = TextEditingController();
-        return AlertDialog(
-          title: const Text('Notas de la resolución'),
-          content: TextField(controller: controller, autofocus: true),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(controller.text.trim()),
-              child: const Text('Confirmar'),
-            ),
-          ],
-        );
-      },
+    final t = AppLocalizations.of(context);
+    final notas = await _pedirTextoObligatorio(
+      context,
+      titulo: t.adminNotasResolucionTitulo,
+      hint: t.adminNotasResolucionHint,
+      ayuda: t.adminNotasResolucionAyuda,
+      confirmar: t.adminConfirmar,
+      cancelar: t.perfilCancelar,
     );
-    if (notas == null || notas.length < 5) return;
+    if (notas == null) return; // cancelado
 
-    await widget.adminService.resolverDisputa(
-      disputeId: d.id,
-      favorProfesional: favorProfesional,
-      notas: notas,
-    );
-    _recargar();
+    try {
+      await widget.adminService.resolverDisputa(
+        disputeId: d.id,
+        favorProfesional: favorProfesional,
+        notas: notas,
+      );
+      if (!mounted) return;
+      await _recargar();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.adminResolucionError)));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return FutureBuilder<List<DisputeSummary>>(
       future: _futuro,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (!snapshot.hasData && !snapshot.hasError) {
           return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return _EstadoLista(
+            icono: Icons.error_outline,
+            mensaje: t.adminDisputasError,
+            onRefresh: _recargar,
+          );
         }
         final disputas = snapshot.data!;
         if (disputas.isEmpty) {
-          return const Center(child: Text('No hay disputas abiertas'));
+          return _EstadoLista(
+            icono: Icons.gavel_outlined,
+            mensaje: t.adminDisputasVacio,
+            onRefresh: _recargar,
+          );
         }
-        return ListView.builder(
-          padding: const EdgeInsets.all(12),
-          itemCount: disputas.length,
-          itemBuilder: (context, index) {
-            final d = disputas[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(d.motivo),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => _resolver(d, false),
-                            child: const Text('A favor del cliente'),
+        return RefreshIndicator(
+          onRefresh: _recargar,
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: disputas.length,
+            itemBuilder: (context, index) {
+              final d = disputas[index];
+              return EntradaAnimada(
+                retraso: Duration(milliseconds: 30 * index),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(d.motivo, style: const TextStyle(fontSize: 14)),
+                          const SizedBox(height: 14),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () => _resolver(d, false),
+                                  child: Text(t.adminFavorCliente),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: FilledButton(
+                                  onPressed: () => _resolver(d, true),
+                                  child: Text(t.adminFavorProfesional),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: FilledButton(
-                            onPressed: () => _resolver(d, true),
-                            child: const Text('A favor del profesional'),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       },
+    );
+  }
+}
+
+/// Estado vacío/error de una lista del panel admin — mismo lenguaje
+/// visual que el resto de la app (icono + texto centrado, ver
+/// home_profesional_screen.dart) en vez del `Text` suelto que había
+/// antes. Envuelto en un `ListView` + `RefreshIndicator` (no un
+/// `Center` a secas) para que "tirar hacia abajo para reintentar"
+/// funcione también cuando la lista está vacía o falló la carga —
+/// antes, un fallo de red dejaba al admin sin ninguna forma de
+/// reintentar salvo salir y volver a entrar a la pantalla.
+class _EstadoLista extends StatelessWidget {
+  const _EstadoLista({required this.icono, required this.mensaje, required this.onRefresh});
+
+  final IconData icono;
+  final String mensaje;
+  final Future<void> Function() onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.18),
+          Icon(icono, size: 48, color: colorScheme.onSurfaceVariant),
+          const SizedBox(height: 16),
+          Text(mensaje, textAlign: TextAlign.center, style: const TextStyle(fontSize: 15)),
+        ],
+      ),
     );
   }
 }

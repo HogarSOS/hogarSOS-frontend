@@ -115,7 +115,7 @@ class _DisponibilidadProfesionalScreenState extends ConsumerState<Disponibilidad
       // motivo real que el backend sí manda (ej. "No puedes ponerte
       // disponible hasta ser verificado").
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(mensajeDeError(e, contexto: t.profesionalErrorDisponibilidad))),
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.profesionalErrorDisponibilidad, t: t))),
       );
     } finally {
       if (mounted) setState(() => _actualizando = false);

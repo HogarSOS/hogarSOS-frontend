@@ -102,7 +102,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
       debugPrint('[EditarPerfilScreen] Error al guardar: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(mensajeDeError(e, contexto: t.miPerfilErrorGuardar))),
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.miPerfilErrorGuardar, t: t))),
       );
     } finally {
       if (mounted) setState(() => _guardando = false);

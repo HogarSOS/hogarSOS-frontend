@@ -138,14 +138,14 @@ class _SolicitudTile extends StatelessWidget {
             if (textoUrgencia != null) ...[
               const SizedBox(width: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: colorScheme.errorContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   textoUrgencia,
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: colorScheme.onErrorContainer),
+                  style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: colorScheme.onErrorContainer),
                 ),
               ),
             ],

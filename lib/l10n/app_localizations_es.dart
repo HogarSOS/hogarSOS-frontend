@@ -76,6 +76,16 @@ class AppLocalizationsEs extends AppLocalizations {
       'Si existe una cuenta con ese email, te hemos enviado un enlace para restablecer la contraseña';
 
   @override
+  String get errorConexion =>
+      'No se pudo conectar con el servidor. Comprueba tu conexión.';
+
+  @override
+  String get errorServidorLento => 'El servidor tardó demasiado en responder.';
+
+  @override
+  String get errorInesperado => 'Ocurrió un error inesperado.';
+
+  @override
   String homeSaludo(String nombre) {
     return 'Hola, $nombre 👋';
   }
@@ -109,7 +119,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String homeResumenActivas(int cantidad) {
-    return 'Tienes $cantidad solicitudes activas';
+    String _temp0 = intl.Intl.pluralLogic(
+      cantidad,
+      locale: localeName,
+      other: 'solicitudes activas',
+      one: 'solicitud activa',
+    );
+    return 'Tienes $cantidad $_temp0';
   }
 
   @override
@@ -224,7 +240,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String buscarTrabajos(int n) {
-    return '$n trabajos';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'trabajos',
+      one: 'trabajo',
+    );
+    return '$n $_temp0';
   }
 
   @override
@@ -276,6 +298,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get misValoracionesTitulo => 'Mis valoraciones';
+
+  @override
+  String get misValoracionesError => 'No se pudieron cargar tus valoraciones';
 
   @override
   String get perfilProSinOpiniones => 'Aún no tiene opiniones';
@@ -363,6 +388,89 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get categoriaVeterinaria => 'Veterinaria a domicilio';
+
+  @override
+  String get wizardEjemploGenerico =>
+      'Ej: se ha roto una tubería bajo el fregadero y hay una fuga...';
+
+  @override
+  String get wizardEjemploElectricista =>
+      'Ej: ha saltado el diferencial y no puedo volver a subirlo...';
+
+  @override
+  String get wizardEjemploFontanero =>
+      'Ej: tengo una fuga debajo del fregadero...';
+
+  @override
+  String get wizardEjemploPintor => 'Ej: quiero pintar el salón, unos 20 m²...';
+
+  @override
+  String get wizardEjemploManitas => 'Ej: necesito montar unas estanterías...';
+
+  @override
+  String get wizardEjemploLimpieza =>
+      'Ej: necesito una limpieza completa de un piso...';
+
+  @override
+  String get wizardEjemploJardineria =>
+      'Ej: necesito podar el seto y cortar el césped...';
+
+  @override
+  String get wizardEjemploCerrajeria =>
+      'Ej: he perdido las llaves y no puedo entrar en casa...';
+
+  @override
+  String get wizardEjemploReformas => 'Ej: quiero reformar el baño completo...';
+
+  @override
+  String get wizardEjemploAireAcondicionado =>
+      'Ej: el aire acondicionado no enfría...';
+
+  @override
+  String get wizardEjemploCarpinteria =>
+      'Ej: necesito una puerta de armario a medida...';
+
+  @override
+  String get wizardEjemploAlbanileria =>
+      'Ej: tengo una grieta en la pared del salón...';
+
+  @override
+  String get wizardEjemploTejados => 'Ej: tengo una gotera en el tejado...';
+
+  @override
+  String get wizardEjemploCristaleria =>
+      'Ej: se ha roto el cristal de una ventana...';
+
+  @override
+  String get wizardEjemploCarpinteriaMetalica =>
+      'Ej: necesito reparar una persiana metálica...';
+
+  @override
+  String get wizardEjemploAntenas =>
+      'Ej: no tengo señal de antena en el televisor...';
+
+  @override
+  String get wizardEjemploSeguridad =>
+      'Ej: quiero instalar una alarma en casa...';
+
+  @override
+  String get wizardEjemploMudanzas =>
+      'Ej: necesito ayuda para mudarme a un piso de 2 habitaciones...';
+
+  @override
+  String get wizardEjemploLimpiezaCristales =>
+      'Ej: necesito limpiar los cristales de un tercer piso...';
+
+  @override
+  String get wizardEjemploPiscinas => 'Ej: mi piscina tiene el agua verde...';
+
+  @override
+  String get wizardEjemploControlPlagas =>
+      'Ej: tengo cucarachas en la cocina...';
+
+  @override
+  String get wizardEjemploVeterinaria =>
+      'Ej: mi perro necesita una revisión a domicilio...';
 
   @override
   String get profesionalTituloSolicitudes => 'Solicitudes cerca de ti';
@@ -712,6 +820,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get valoracionErrorSeleccion => 'Selecciona una puntuación';
 
   @override
+  String get valoracionErrorEnviar =>
+      'No se pudo enviar la valoración. Inténtalo de nuevo.';
+
+  @override
   String get valoracionComentarioLabel => 'Comentario (opcional)';
 
   @override
@@ -776,10 +888,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Cuanto más detalle des, mejor podrán ayudarte los profesionales';
 
   @override
-  String get wizardPaso2Hint =>
-      'Ej: se ha roto una tubería bajo el fregadero y hay una fuga...';
-
-  @override
   String get wizardPaso3Titulo => 'Añade fotos (opcional)';
 
   @override
@@ -834,4 +942,74 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get ubicacionConfirmar => 'Confirmar ubicación';
+
+  @override
+  String get adminTituloPanel => 'Panel admin';
+
+  @override
+  String get adminTabVerificaciones => 'Verificaciones';
+
+  @override
+  String get adminTabDisputas => 'Disputas';
+
+  @override
+  String get adminVerificacionesVacio => 'No hay verificaciones pendientes';
+
+  @override
+  String get adminVerificacionesError =>
+      'No se pudieron cargar las verificaciones';
+
+  @override
+  String get adminDisputasVacio => 'No hay disputas abiertas';
+
+  @override
+  String get adminDisputasError => 'No se pudieron cargar las disputas';
+
+  @override
+  String adminCategoriasLabel(String categorias) {
+    return 'Categorías: $categorias';
+  }
+
+  @override
+  String get adminRechazar => 'Rechazar';
+
+  @override
+  String get adminAprobar => 'Aprobar';
+
+  @override
+  String get adminFavorCliente => 'A favor del cliente';
+
+  @override
+  String get adminFavorProfesional => 'A favor del profesional';
+
+  @override
+  String get adminMotivoRechazoTitulo => 'Motivo del rechazo';
+
+  @override
+  String get adminMotivoRechazoHint => 'Explica brevemente por qué se rechaza';
+
+  @override
+  String get adminMotivoRechazoAyuda =>
+      'Mínimo 5 caracteres — el profesional lo verá';
+
+  @override
+  String get adminNotasResolucionTitulo => 'Notas de la resolución';
+
+  @override
+  String get adminNotasResolucionHint => 'Explica brevemente cómo se resolvió';
+
+  @override
+  String get adminNotasResolucionAyuda =>
+      'Mínimo 5 caracteres — quedará registrado en la disputa';
+
+  @override
+  String get adminConfirmar => 'Confirmar';
+
+  @override
+  String get adminDecisionError =>
+      'No se pudo registrar la decisión. Inténtalo de nuevo.';
+
+  @override
+  String get adminResolucionError =>
+      'No se pudo registrar la resolución. Inténtalo de nuevo.';
 }
