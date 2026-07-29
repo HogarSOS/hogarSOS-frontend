@@ -5,6 +5,7 @@ import '../../models/service_category_model.dart';
 import '../../models/service_request_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/service_request_provider.dart';
+import '../../theme/brand_mark.dart';
 import '../../utils/category_display.dart';
 import '../../widgets/entrada_animada.dart';
 import 'buscar_screen.dart';
@@ -56,18 +57,31 @@ class HomeClienteScreen extends ConsumerWidget {
                   retraso: Duration.zero,
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-                    child: Column(
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          _saludoPorHora(t, nombre),
-                          style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold, height: 1.2),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _saludoPorHora(t, nombre),
+                                style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold, height: 1.2),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                t.homeSubtitulo,
+                                style: TextStyle(fontSize: 15, color: colorScheme.onSurfaceVariant),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          t.homeSubtitulo,
-                          style: TextStyle(fontSize: 15, color: colorScheme.onSurfaceVariant),
-                        ),
+                        const SizedBox(width: 12),
+                        // Marca de hogarSOS en la pantalla de Inicio del cliente —
+                        // Inicio no tiene AppBar propio (ver diseño de Sprint 2),
+                        // así que sin esto la identidad visual solo aparecía en
+                        // login/splash y desaparecía en cuanto se entraba a la app.
+                        const HogarSosMark(size: 40),
                       ],
                     ),
                   ),

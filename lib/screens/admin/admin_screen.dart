@@ -4,6 +4,7 @@ import '../../l10n/app_localizations.dart';
 import '../../models/admin_models.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/admin_service.dart';
+import '../../theme/brand_mark.dart';
 import '../../utils/category_display.dart';
 import '../../widgets/entrada_animada.dart';
 import '../auth/login_screen.dart';
@@ -38,7 +39,14 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(t.adminTituloPanel),
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const HogarSosMark(size: 28),
+              const SizedBox(width: 10),
+              Text(t.adminTituloPanel),
+            ],
+          ),
           actions: [
             IconButton(
               icon: const Icon(Icons.logout),

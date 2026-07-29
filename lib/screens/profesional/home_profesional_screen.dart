@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/service_request_model.dart';
 import '../../providers/service_request_provider.dart';
+import '../../theme/brand_mark.dart';
 import '../../utils/error_extraction.dart';
 import '../../widgets/entrada_animada.dart';
 import 'trabajos_activos_profesional_screen.dart';
@@ -46,7 +47,16 @@ class HomeProfesionalScreen extends ConsumerWidget {
     final trabajosActivosAsync = ref.watch(assignedRequestsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(t.profesionalTituloSolicitudes)),
+      appBar: AppBar(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const HogarSosMark(size: 28),
+            const SizedBox(width: 10),
+            Text(t.profesionalTituloSolicitudes),
+          ],
+        ),
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           await ref.read(nearbyRequestsProvider.notifier).cargar();
