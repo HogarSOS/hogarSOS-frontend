@@ -477,103 +477,21 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                           subiendoFoto: _subiendoFoto,
                           onCambiarFoto: _elegirFoto,
                           onEditarNombre: _editarNombre,
+                          estadoIcono: _estadoIcono,
+                          estadoColor: _estadoColor(colorScheme),
+                          estadoLabel: _estadoLabel(t),
                         ),
                       ),
                       const SizedBox(height: 24),
+                      // Categorías va primero — es lo primero que un
+                      // profesional nuevo necesita elegir (hace falta para
+                      // poder enviar la verificación, justo debajo). La
+                      // cabecera ya muestra categoría y estado de un
+                      // vistazo (chips bajo el nombre), así que aquí ya no
+                      // hace falta repetir esa info en tarjetas de
+                      // estadística aparte.
                       EntradaAnimada(
-                        retraso: const Duration(milliseconds: 60),
-                        child: GridView.count(
-                          crossAxisCount: 2,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: 1.65,
-                          children: [
-                            _TarjetaEstadistica(
-                              icono: Icons.star_rounded,
-                              color: Colors.amber.shade700,
-                              valor: (_perfil?.valoracionMedia ?? 0).toStringAsFixed(1),
-                              etiqueta: t.miPerfilStatValoracion,
-                            ),
-                            _TarjetaEstadistica(
-                              icono: Icons.task_alt_rounded,
-                              color: colorScheme.primary,
-                              valor: '${_perfil?.totalTrabajos ?? 0}',
-                              etiqueta: t.miPerfilStatTrabajos,
-                            ),
-                            _TarjetaEstadistica(
-                              icono: Icons.payments_outlined,
-                              color: const Color(0xFF12B3A8),
-                              valor: (_perfil?.tarifaBase ?? 0) > 0
-                                  ? '${_perfil!.tarifaBase.toStringAsFixed(0)}€/h'
-                                  : '—',
-                              etiqueta: t.miPerfilStatTarifa,
-                            ),
-                            _TarjetaEstadistica(
-                              icono: _estadoIcono,
-                              color: _estadoColor(colorScheme),
-                              valor: _estadoLabel(t),
-                              etiqueta: t.miPerfilStatEstado,
-                            ),
-                          ],
-                        ),
-                      ),
-                      if ((_perfil?.estadoVerificacion ?? 'pendiente') != 'aprobado') ...[
-                        const SizedBox(height: 16),
-                        EntradaAnimada(
-                          retraso: const Duration(milliseconds: 100),
-                          child: _TarjetaVerificacion(
-                            estadoVerificacion: _perfil?.estadoVerificacion,
-                            documentoEnviado: _documentoIdentidadUrlActual != null,
-                            subiendoDocumento: _subiendoDocumento,
-                            enviando: _enviandoVerificacion,
-                            tarifaController: _tarifaController,
-                            onElegirDocumento: _elegirDocumento,
-                            onEnviar: _enviarVerificacion,
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-                      EntradaAnimada(
-                        retraso: const Duration(milliseconds: 140),
-                        child: _TarjetaInfo(
-                          icono: Icons.call_outlined,
-                          titulo: t.editarPerfilTelefono,
-                          onEditar: _editarTelefono,
-                          child: Text(
-                            (_perfil?.telefono?.isNotEmpty ?? false) ? _perfil!.telefono! : t.miPerfilTelefonoVacio,
-                            style: TextStyle(
-                              fontSize: 14.5,
-                              color: (_perfil?.telefono?.isNotEmpty ?? false)
-                                  ? colorScheme.onSurface
-                                  : colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      EntradaAnimada(
-                        retraso: const Duration(milliseconds: 170),
-                        child: _TarjetaInfo(
-                          icono: Icons.notes_outlined,
-                          titulo: t.miPerfilDescripcionLabel,
-                          onEditar: _editarDescripcion,
-                          child: Text(
-                            (_perfil?.descripcion?.isNotEmpty ?? false) ? _perfil!.descripcion! : t.miPerfilDescripcionVacia,
-                            style: TextStyle(
-                              fontSize: 14.5,
-                              height: 1.4,
-                              color: (_perfil?.descripcion?.isNotEmpty ?? false)
-                                  ? colorScheme.onSurface
-                                  : colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      EntradaAnimada(
-                        retraso: const Duration(milliseconds: 200),
+                        retraso: const Duration(milliseconds: 90),
                         child: _TarjetaInfo(
                           icono: Icons.category_outlined,
                           titulo: t.miPerfilCategoriasTitulo,
@@ -603,9 +521,34 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                                 ),
                         ),
                       ),
-                      const SizedBox(height: 14),
+                      if ((_perfil?.estadoVerificacion ?? 'pendiente') != 'aprobado') ...[
+                        const SizedBox(height: 16),
+                        EntradaAnimada(
+                          retraso: const Duration(milliseconds: 120),
+                          child: _TarjetaVerificacion(
+                            estadoVerificacion: _perfil?.estadoVerificacion,
+                            documentoEnviado: _documentoIdentidadUrlActual != null,
+                            subiendoDocumento: _subiendoDocumento,
+                            enviando: _enviandoVerificacion,
+                            tarifaController: _tarifaController,
+                            onElegirDocumento: _elegirDocumento,
+                            onEnviar: _enviarVerificacion,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 16),
                       EntradaAnimada(
-                        retraso: const Duration(milliseconds: 230),
+                        retraso: const Duration(milliseconds: 150),
+                        child: _TarjetaContacto(
+                          telefono: _perfil?.telefono ?? '',
+                          descripcion: _perfil?.descripcion ?? '',
+                          onEditarTelefono: _editarTelefono,
+                          onEditarDescripcion: _editarDescripcion,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      EntradaAnimada(
+                        retraso: const Duration(milliseconds: 210),
                         child: _TarjetaInfo(
                           icono: Icons.bolt_outlined,
                           titulo: t.disponibilidadTitulo,
@@ -661,6 +604,9 @@ class _Cabecera extends StatelessWidget {
     required this.subiendoFoto,
     required this.onCambiarFoto,
     required this.onEditarNombre,
+    required this.estadoIcono,
+    required this.estadoColor,
+    required this.estadoLabel,
   });
 
   final String nombre;
@@ -673,6 +619,9 @@ class _Cabecera extends StatelessWidget {
   final bool subiendoFoto;
   final VoidCallback onCambiarFoto;
   final VoidCallback onEditarNombre;
+  final IconData estadoIcono;
+  final Color estadoColor;
+  final String estadoLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -760,12 +709,7 @@ class _Cabecera extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 2),
-        Text(
-          oficio,
-          style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 6),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -789,60 +733,47 @@ class _Cabecera extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 12),
+        // Resumen rápido de categoría + estado justo bajo el nombre y la
+        // valoración — antes esta info solo se veía bajando hasta las
+        // tarjetas de Categorías/Verificación; con esto se ve de un
+        // vistazo sin desplazarse, y permite quitar la tarjeta de
+        // estadística "Estado" que quedaba redundante con esto.
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _ChipResumen(icono: Icons.category_outlined, color: colorScheme.primary, texto: oficio),
+            _ChipResumen(icono: estadoIcono, color: estadoColor, texto: estadoLabel),
+          ],
+        ),
       ],
     );
   }
 }
 
-/// Una de las cuatro tarjetas pequeñas de estadísticas de la cabecera.
-class _TarjetaEstadistica extends StatelessWidget {
-  const _TarjetaEstadistica({
-    required this.icono,
-    required this.color,
-    required this.valor,
-    required this.etiqueta,
-  });
+/// Chip compacto de solo lectura para el resumen rápido de la cabecera
+/// (categoría, estado) — a diferencia de [Chip] de Material, sin borde
+/// ni sombra, solo un fondo tenue del color dado.
+class _ChipResumen extends StatelessWidget {
+  const _ChipResumen({required this.icono, required this.color, required this.texto});
 
   final IconData icono;
   final Color color;
-  final String valor;
-  final String etiqueta;
+  final String texto;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.3)),
-        boxShadow: [
-          BoxShadow(color: colorScheme.shadow.withOpacity(0.05), blurRadius: 14, offset: const Offset(0, 4)),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(color: color.withOpacity(0.13), borderRadius: BorderRadius.circular(20)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(color: color.withOpacity(0.13), borderRadius: BorderRadius.circular(11)),
-            child: Icon(icono, size: 17, color: color),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            valor,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            etiqueta,
-            style: TextStyle(fontSize: 11.5, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
-          ),
+          Icon(icono, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(texto, style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: color)),
         ],
       ),
     );
@@ -872,8 +803,112 @@ class _TarjetaInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(color: colorScheme.shadow.withOpacity(0.05), blurRadius: 18, offset: const Offset(0, 6)),
+        ],
+      ),
+      padding: const EdgeInsets.all(18),
+      child: _FilaInfo(
+        icono: icono,
+        titulo: titulo,
+        onEditar: onEditar,
+        trailing: trailing,
+        requerido: requerido,
+        child: child,
+      ),
+    );
+  }
+}
+
+/// El contenido de una _TarjetaInfo (título con icono + botón de edición
+/// discreto + contenido) sin el contenedor exterior — se reutiliza para
+/// apilar más de un "tema" dentro de una misma tarjeta con sombra
+/// (ver la tarjeta combinada de Teléfono + Descripción), en vez de una
+/// tarjeta entera por cada dato suelto.
+class _FilaInfo extends StatelessWidget {
+  const _FilaInfo({
+    required this.icono,
+    required this.titulo,
+    required this.child,
+    this.onEditar,
+    this.trailing,
+    this.requerido = false,
+  });
+
+  final IconData icono;
+  final String titulo;
+  final Widget child;
+  final VoidCallback? onEditar;
+  final Widget? trailing;
+  final bool requerido;
+
+  @override
+  Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icono, size: 18, color: colorScheme.onSurfaceVariant),
+            const SizedBox(width: 8),
+            Text(
+              titulo,
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: colorScheme.onSurfaceVariant),
+            ),
+            if (requerido)
+              Text(' *', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: colorScheme.error)),
+            const Spacer(),
+            if (trailing != null) trailing!,
+            if (onEditar != null)
+              IconButton(
+                onPressed: onEditar,
+                icon: const Icon(Icons.edit_outlined, size: 17),
+                tooltip: t.miPerfilEditar,
+                visualDensity: VisualDensity.compact,
+                constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+              ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        child,
+      ],
+    );
+  }
+}
+
+/// Tarjeta combinada de Teléfono + Descripción — dos filas independientes
+/// (cada una con su propio botón de edición y su propio diálogo de
+/// guardado) dentro de una única tarjeta con sombra, en vez de dos
+/// tarjetas completas para dos datos sueltos de una línea cada uno.
+class _TarjetaContacto extends StatelessWidget {
+  const _TarjetaContacto({
+    required this.telefono,
+    required this.descripcion,
+    required this.onEditarTelefono,
+    required this.onEditarDescripcion,
+  });
+
+  final String telefono;
+  final String descripcion;
+  final VoidCallback onEditarTelefono;
+  final VoidCallback onEditarDescripcion;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final tieneTelefono = telefono.isNotEmpty;
+    final tieneDescripcion = descripcion.isNotEmpty;
 
     return Container(
       decoration: BoxDecoration(
@@ -888,30 +923,35 @@ class _TarjetaInfo extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icono, size: 18, color: colorScheme.onSurfaceVariant),
-              const SizedBox(width: 8),
-              Text(
-                titulo,
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: colorScheme.onSurfaceVariant),
+          _FilaInfo(
+            icono: Icons.call_outlined,
+            titulo: t.editarPerfilTelefono,
+            onEditar: onEditarTelefono,
+            child: Text(
+              tieneTelefono ? telefono : t.miPerfilTelefonoVacio,
+              style: TextStyle(
+                fontSize: 14.5,
+                color: tieneTelefono ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
               ),
-              if (requerido)
-                Text(' *', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: colorScheme.error)),
-              const Spacer(),
-              if (trailing != null) trailing!,
-              if (onEditar != null)
-                IconButton(
-                  onPressed: onEditar,
-                  icon: const Icon(Icons.edit_outlined, size: 17),
-                  tooltip: t.miPerfilEditar,
-                  visualDensity: VisualDensity.compact,
-                  constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
-                ),
-            ],
+            ),
           ),
-          const SizedBox(height: 10),
-          child,
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 14),
+            child: Divider(height: 1),
+          ),
+          _FilaInfo(
+            icono: Icons.notes_outlined,
+            titulo: t.miPerfilDescripcionLabel,
+            onEditar: onEditarDescripcion,
+            child: Text(
+              tieneDescripcion ? descripcion : t.miPerfilDescripcionVacia,
+              style: TextStyle(
+                fontSize: 14.5,
+                height: 1.4,
+                color: tieneDescripcion ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
         ],
       ),
     );

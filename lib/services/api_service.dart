@@ -58,21 +58,22 @@ class ApiService {
 
   /// URL base del backend.
   ///
-  /// ⚠️ ANTES ESTO ERA 'https://api.hogarsos.com/api' — un dominio que
-  /// NO EXISTE. Esa era la causa de "No se pudo completar el registro":
-  /// toda petición fallaba con un error de conexión que además quedaba
-  /// oculto por un catch genérico (ya corregido en auth_provider.dart).
+  /// El valor por defecto DEBE ser el backend real desplegado en Render
+  /// — así cualquier build sin --dart-define explícito (incluida la APK
+  /// que se reparte a los beta testers) funciona desde cualquier móvil
+  /// con internet, sin depender de que esté en la misma red WiFi que el
+  /// ordenador de desarrollo. Antes apuntaba a una IP de red local
+  /// (192.168.1.134) que solo era alcanzable desde esa red concreta —
+  /// cualquier APK compilada sin pasar la variable a mano fallaba con
+  /// error de conexión para cualquier usuario fuera de esa WiFi.
   ///
-  /// Pásala en tiempo de build según dónde estés probando:
+  /// Para desarrollo local, sobreescribe explícitamente:
   ///   - Emulador Android:  --dart-define=API_BASE_URL=http://10.0.2.2:3000/api
   ///   - Simulador iOS:     --dart-define=API_BASE_URL=http://localhost:3000/api
   ///   - Móvil físico:      --dart-define=API_BASE_URL=http://TU_IP_LOCAL:3000/api
-  ///     (la IP de tu ordenador en la red WiFi, ej. 192.168.1.35 — "localhost"
-  ///     en un móvil físico se refiere al propio móvil, no a tu ordenador)
-  ///   - Backend desplegado: --dart-define=API_BASE_URL=https://tu-dominio-real.com/api
   static const String _baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://192.168.1.134:3000/api', // por defecto: emulador Android
+    defaultValue: 'https://hogarsos-backend.onrender.com/api',
   );
 
   final Dio _dio = Dio(

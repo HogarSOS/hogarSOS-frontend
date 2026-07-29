@@ -186,19 +186,18 @@ class HomeClienteScreen extends ConsumerWidget {
               ),
               categoriasAsync.when(
                 data: (categorias) {
-                  // 7 categorías destacadas, en este orden — los oficios
-                  // más solicitados primero, para que tengan más
-                  // protagonismo en la pantalla de Inicio. El resto queda
-                  // accesible desde "Ver todas las categorías" sin dejar
-                  // de cargarse dinámicamente desde el backend. Se admite
-                  // con y sin tilde porque category_display.dart ya
+                  // 6 categorías destacadas (2 filas de 3), en este orden —
+                  // los oficios más solicitados primero, para que tengan
+                  // más protagonismo en la pantalla de Inicio. El resto
+                  // queda accesible desde "Ver todas las categorías" sin
+                  // dejar de cargarse dinámicamente desde el backend. Se
+                  // admite con y sin tilde porque category_display.dart ya
                   // contempla ambas variantes como sinónimos válidos.
                   const gruposDestacados = [
                     ['electricista'],
                     ['fontanero'],
                     ['pintor'],
                     ['cerrajería', 'cerrajeria', 'cerrajero'],
-                    ['carpintería', 'carpinteria'],
                     ['aire acondicionado'],
                     ['limpieza'],
                   ];
@@ -216,11 +215,16 @@ class HomeClienteScreen extends ConsumerWidget {
                   return SliverPadding(
                     padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
                     sliver: SliverGrid(
+                      // childAspectRatio más bajo que antes (más alto que
+                      // ancho): "Aire acondicionado" es más larga que el
+                      // resto de categorías destacadas y con el ratio
+                      // anterior desbordaba 2 líneas de texto por debajo
+                      // de la tarjeta en dispositivos reales.
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 3,
                         mainAxisSpacing: 16,
                         crossAxisSpacing: 12,
-                        childAspectRatio: 0.92,
+                        childAspectRatio: 0.8,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -454,23 +458,24 @@ class _TarjetaCategoriaDestacadaState extends State<_TarjetaCategoriaDestacada> 
           color: colorScheme.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(17)),
-                  child: Icon(iconoParaCategoria(widget.categoria.nombre), size: 28, color: color),
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(16)),
+                  child: Icon(iconoParaCategoria(widget.categoria.nombre), size: 27, color: color),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 Text(
                   nombreLocalizadoCategoria(context, widget.categoria.nombre),
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, height: 1.2),
+                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, height: 1.15),
                 ),
               ],
             ),
