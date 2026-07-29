@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/service_request_model.dart';
 import '../../providers/service_request_provider.dart';
+import '../../utils/error_extraction.dart';
 import '../../widgets/entrada_animada.dart';
 import 'trabajos_activos_profesional_screen.dart';
 
@@ -109,9 +110,18 @@ class HomeProfesionalScreen extends ConsumerWidget {
                 hasScrollBody: false,
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (_, __) => SliverFillRemaining(
+              // Antes mostraba siempre el mismo texto genérico, incluso
+              // cuando el motivo real (que el backend sí manda) es que la
+              // cuenta del profesional todavía no ha sido aprobada por un
+              // admin — un profesional recién registrado veía "error al
+              // cargar" sin ninguna pista de que solo tenía que esperar la
+              // verificación.
+              error: (error, __) => SliverFillRemaining(
                 hasScrollBody: false,
-                child: _EstadoVacio(icono: Icons.error_outline, titulo: t.profesionalErrorCargar),
+                child: _EstadoVacio(
+                  icono: Icons.error_outline,
+                  titulo: mensajeDeError(error, contexto: t.profesionalErrorCargar, t: t),
+                ),
               ),
             ),
           ],

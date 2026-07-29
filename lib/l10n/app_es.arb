@@ -304,6 +304,8 @@
   "wizardErrorDescripcion": "Describe el trabajo con un poco más de detalle",
   "wizardErrorUbicacion": "Elige dónde necesitas el servicio",
   "wizardErrorFecha": "Elige una fecha",
+  "wizardErrorFotosSubiendo": "Espera a que terminen de subirse las fotos",
+  "fotoErrorSubir": "No se pudo subir la foto. Inténtalo de nuevo.",
   "wizardPaso1Titulo": "¿Qué necesitas?",
   "wizardCategoriaCambiar": "Cambiar",
   "wizardCategoriaElegirTitulo": "Elige una categoría",

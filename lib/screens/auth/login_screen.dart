@@ -19,9 +19,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nombreController = TextEditingController();
+  final _passwordFocusNode = FocusNode();
   UserRole _rolSeleccionado = UserRole.cliente;
   bool _modoRegistro = false;
   bool _recordarSesion = true;
+  bool _passwordVisible = false;
   String? _errorValidacion;
 
   @override
@@ -29,6 +31,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _nombreController.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -161,6 +164,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         if (_modoRegistro) ...[
                           TextField(
                             controller: _nombreController,
+                            textInputAction: TextInputAction.next,
                             decoration: InputDecoration(labelText: t.loginFieldNombre),
                           ),
                           const SizedBox(height: 12),
@@ -179,13 +183,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         TextField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          onSubmitted: (_) => _passwordFocusNode.requestFocus(),
                           decoration: InputDecoration(labelText: t.loginFieldEmail),
                         ),
                         const SizedBox(height: 12),
                         TextField(
                           controller: _passwordController,
-                          obscureText: true,
-                          decoration: InputDecoration(labelText: t.loginFieldPassword),
+                          focusNode: _passwordFocusNode,
+                          obscureText: !_passwordVisible,
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (_) => _enviar(),
+                          decoration: InputDecoration(
+                            labelText: t.loginFieldPassword,
+                            suffixIcon: IconButton(
+                              icon: Icon(_passwordVisible ? Icons.visibility_off : Icons.visibility),
+                              onPressed: () => setState(() => _passwordVisible = !_passwordVisible),
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 4),
                         // Material(type: transparency) a propósito: el

@@ -20,11 +20,71 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _chatService = ChatService();
   final _mensajeController = TextEditingController();
+  final _scrollController = ScrollController();
+  final _campoFocusNode = FocusNode();
+
+  // Cuenta de mensajes del build anterior — permite distinguir "llegó un
+  // mensaje nuevo" (hay que bajar el scroll) de un rebuild cualquiera del
+  // StreamBuilder que no cambia el contenido (no hay que tocar el scroll).
+  int _mensajesPrevios = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Si el teclado tapa el último mensaje al enfocar el campo de texto,
+    // bajamos el scroll para que quede visible.
+    _campoFocusNode.addListener(() {
+      if (_campoFocusNode.hasFocus) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _scrollAlFinal());
+      }
+    });
+  }
 
   @override
   void dispose() {
     _mensajeController.dispose();
+    _scrollController.dispose();
+    _campoFocusNode.dispose();
     super.dispose();
+  }
+
+  void _scrollAlFinal({bool animado = true}) {
+    if (!_scrollController.hasClients) return;
+    final destino = _scrollController.position.maxScrollExtent;
+    if (animado) {
+      _scrollController.animateTo(
+        destino,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    } else {
+      _scrollController.jumpTo(destino);
+    }
+  }
+
+  /// Decide si hay que bajar el scroll al llegar mensajes nuevos: siempre
+  /// en la carga inicial, siempre si el mensaje nuevo es propio (lo acabo
+  /// de enviar yo), y si no, solo cuando ya estaba viendo el final de la
+  /// conversación — así no se interrumpe a quien subió a leer mensajes
+  /// antiguos cada vez que llega un mensaje nuevo.
+  void _procesarMensajesActualizados(List<ChatMessage> mensajes) {
+    if (mensajes.length <= _mensajesPrevios) {
+      _mensajesPrevios = mensajes.length;
+      return;
+    }
+
+    final esPrimeraCarga = _mensajesPrevios == 0;
+    final ultimoEsMio = mensajes.last.autorId == widget.usuarioActualId;
+    final estabaAlFinal = !_scrollController.hasClients ||
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 80;
+    _mensajesPrevios = mensajes.length;
+
+    if (esPrimeraCarga || ultimoEsMio || estabaAlFinal) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _scrollAlFinal(animado: !esPrimeraCarga),
+      );
+    }
   }
 
   Future<void> _enviar() async {
@@ -70,11 +130,14 @@ class _ChatScreenState extends State<ChatScreen> {
                 }
                 final mensajes = snapshot.data!;
                 if (mensajes.isEmpty) {
+                  _mensajesPrevios = 0;
                   return Center(
                     child: Text(t.chatSinMensajes, style: TextStyle(color: colorScheme.onSurfaceVariant)),
                   );
                 }
+                _procesarMensajesActualizados(mensajes);
                 return ListView.builder(
+                  controller: _scrollController,
                   padding: const EdgeInsets.all(16),
                   itemCount: mensajes.length,
                   itemBuilder: (context, index) {
@@ -116,6 +179,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   Expanded(
                     child: TextField(
                       controller: _mensajeController,
+                      focusNode: _campoFocusNode,
                       decoration: InputDecoration(hintText: t.chatHint),
                       onSubmitted: (_) => _enviar(),
                     ),

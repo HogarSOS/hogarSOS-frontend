@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../l10n/app_localizations.dart';
 import 'cliente/home_cliente_screen.dart';
 import 'cliente/buscar_screen.dart';
@@ -18,6 +19,7 @@ class ClienteShellScreen extends StatefulWidget {
 
 class _ClienteShellScreenState extends State<ClienteShellScreen> {
   int _indiceActual = 0;
+  DateTime? _ultimaPulsacionAtras;
 
   static const _pantallas = [
     HomeClienteScreen(),
@@ -26,11 +28,38 @@ class _ClienteShellScreenState extends State<ClienteShellScreen> {
     PerfilScreen(),
   ];
 
+  // Este shell es la raíz de la navegación tras el login/registro o al
+  // restaurar sesión — no hay nada debajo a lo que volver. Sin este
+  // PopScope, el botón atrás físico de Android cerraba la app de golpe
+  // desde Inicio (mismo problema ya resuelto en ProfesionalShellScreen,
+  // aquí faltaba igualarlo).
+  Future<void> _onPopInvoked(bool didPop) async {
+    if (didPop) return;
+    final t = AppLocalizations.of(context);
+    final ahora = DateTime.now();
+    final reciente = _ultimaPulsacionAtras != null &&
+        ahora.difference(_ultimaPulsacionAtras!) < const Duration(seconds: 2);
+
+    if (reciente) {
+      SystemNavigator.pop();
+      return;
+    }
+
+    _ultimaPulsacionAtras = ahora;
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(t.salirPulsaOtraVez), duration: const Duration(seconds: 2)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) => _onPopInvoked(didPop),
+      child: Scaffold(
       body: IndexedStack(index: _indiceActual, children: _pantallas),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _indiceActual,
@@ -57,6 +86,7 @@ class _ClienteShellScreenState extends State<ClienteShellScreen> {
             label: t.navPerfil,
           ),
         ],
+      ),
       ),
     );
   }

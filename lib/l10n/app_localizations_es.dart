@@ -872,6 +872,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get wizardErrorFecha => 'Elige una fecha';
 
   @override
+  String get wizardErrorFotosSubiendo =>
+      'Espera a que terminen de subirse las fotos';
+
+  @override
+  String get fotoErrorSubir => 'No se pudo subir la foto. Inténtalo de nuevo.';
+
+  @override
   String get wizardPaso1Titulo => '¿Qué necesitas?';
 
   @override

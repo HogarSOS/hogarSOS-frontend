@@ -1610,6 +1610,18 @@ abstract class AppLocalizations {
   /// **'Elige una fecha'**
   String get wizardErrorFecha;
 
+  /// No description provided for @wizardErrorFotosSubiendo.
+  ///
+  /// In es, this message translates to:
+  /// **'Espera a que terminen de subirse las fotos'**
+  String get wizardErrorFotosSubiendo;
+
+  /// No description provided for @fotoErrorSubir.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo subir la foto. Inténtalo de nuevo.'**
+  String get fotoErrorSubir;
+
   /// No description provided for @wizardPaso1Titulo.
   ///
   /// In es, this message translates to:

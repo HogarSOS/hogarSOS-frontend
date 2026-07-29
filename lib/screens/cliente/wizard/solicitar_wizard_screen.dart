@@ -162,6 +162,16 @@ class _SolicitarWizardScreenState extends ConsumerState<SolicitarWizardScreen> {
   }
 
   Future<void> _publicar() async {
+    final t = AppLocalizations.of(context);
+    // Sin este check, pulsar "Publicar" mientras una foto todavía se
+    // está subiendo la descartaba en silencio (solo se envían las que
+    // ya tienen `estado == lista`) — el usuario creía haber adjuntado
+    // N fotos y la solicitud salía con menos, sin ningún aviso.
+    if (_fotos.any((f) => f.estado == _EstadoFoto.subiendo)) {
+      setState(() => _errorPaso = t.wizardErrorFotosSubiendo);
+      return;
+    }
+
     setState(() => _publicando = true);
     try {
       final servicio = ref.read(serviceRequestServiceProvider);
@@ -185,7 +195,6 @@ class _SolicitarWizardScreenState extends ConsumerState<SolicitarWizardScreen> {
       );
     } catch (e) {
       debugPrint('[SolicitarWizardScreen] Error al publicar la solicitud: $e');
-      final t = AppLocalizations.of(context);
       setState(() => _errorPaso = t.homeErrorCrearSolicitud);
     } finally {
       if (mounted) setState(() => _publicando = false);

@@ -77,7 +77,11 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
     } catch (e) {
       debugPrint('[EditarPerfilScreen] Error al subir la foto: $e');
       if (!mounted) return;
+      final t = AppLocalizations.of(context);
       setState(() => _fotoLocalSeleccionada = null);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.fotoErrorSubir)),
+      );
     } finally {
       if (mounted) setState(() => _subiendoFoto = false);
     }

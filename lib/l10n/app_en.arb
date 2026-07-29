@@ -304,6 +304,8 @@
   "wizardErrorDescripcion": "Describe the job in a bit more detail",
   "wizardErrorUbicacion": "Choose where you need the service",
   "wizardErrorFecha": "Choose a date",
+  "wizardErrorFotosSubiendo": "Wait for the photos to finish uploading",
+  "fotoErrorSubir": "Couldn't upload the photo. Please try again.",
   "wizardPaso1Titulo": "What do you need?",
   "wizardCategoriaCambiar": "Change",
   "wizardCategoriaElegirTitulo": "Choose a category",

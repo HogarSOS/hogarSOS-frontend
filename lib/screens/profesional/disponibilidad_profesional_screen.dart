@@ -127,6 +127,16 @@ class _DisponibilidadProfesionalScreenState extends ConsumerState<Disponibilidad
     final t = AppLocalizations.of(context);
     final perfilCompleto = _perfil?.perfilCompleto ?? true; // evita parpadeo del aviso mientras carga
 
+    // ProfesionalShellScreen usa IndexedStack (mantiene las 3 pestañas
+    // vivas a la vez) — sin este listener, completar el perfil en "Mi
+    // perfil" y volver aquí seguía mostrando "completa tu perfil" con
+    // los datos de cuando se cargó esta pestaña por primera vez, porque
+    // _cargar() solo se llama una vez en initState y esta pantalla
+    // nunca se destruye al cambiar de pestaña.
+    ref.listen<int>(profesionalTabIndexProvider, (anterior, actual) {
+      if (actual == 1 && anterior != 1) _cargar();
+    });
+
     return Scaffold(
       appBar: AppBar(title: Text(t.disponibilidadTitulo)),
       body: _cargando
