@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import 'profesional/home_profesional_screen.dart';
 import 'profesional/disponibilidad_profesional_screen.dart';
 import 'profesional/mi_perfil_profesional_screen.dart';
+import 'profesional/trabajos_activos_profesional_screen.dart';
 
 /// Pestaña activa del shell del profesional — en un provider (no
 /// estado local del shell) para que otras pantallas dentro de una
@@ -22,7 +23,7 @@ final profesionalTabIndexProvider = StateProvider<int>((ref) => 0);
 class ProfesionalShellScreen extends ConsumerStatefulWidget {
   const ProfesionalShellScreen({super.key, this.pestanaInicial = 0});
 
-  /// Tras REGISTRARSE (no en un login normal) se pasa 2 (Perfil) desde
+  /// Tras REGISTRARSE (no en un login normal) se pasa 3 (Perfil) desde
   /// login_screen.dart — lo primero que debe ver un profesional recién
   /// creado es su propio perfil, para completarlo, no la lista de
   /// solicitudes cercanas (que además estará vacía: sin categoría
@@ -39,6 +40,7 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
   static const _pantallas = [
     HomeProfesionalScreen(),
     DisponibilidadProfesionalScreen(),
+    TrabajosActivosProfesionalScreen(),
     MiPerfilProfesionalScreen(),
   ];
 
@@ -97,6 +99,11 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
               icon: const Icon(Icons.bolt_outlined),
               selectedIcon: const Icon(Icons.bolt),
               label: t.navDisponibilidad,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.chat_bubble_outline),
+              selectedIcon: const Icon(Icons.chat_bubble),
+              label: t.navMensajes,
             ),
             NavigationDestination(
               icon: const Icon(Icons.person_outline),

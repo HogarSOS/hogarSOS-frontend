@@ -186,17 +186,20 @@ class HomeClienteScreen extends ConsumerWidget {
               ),
               categoriasAsync.when(
                 data: (categorias) {
-                  // 6 categorías destacadas, en este orden — el resto
-                  // queda accesible desde "Ver todas las categorías" sin
-                  // dejar de cargarse dinámicamente desde el backend.
-                  // Se admite con y sin tilde porque category_display.dart
-                  // ya contempla ambas variantes como sinónimos válidos.
+                  // 7 categorías destacadas, en este orden — los oficios
+                  // más solicitados primero, para que tengan más
+                  // protagonismo en la pantalla de Inicio. El resto queda
+                  // accesible desde "Ver todas las categorías" sin dejar
+                  // de cargarse dinámicamente desde el backend. Se admite
+                  // con y sin tilde porque category_display.dart ya
+                  // contempla ambas variantes como sinónimos válidos.
                   const gruposDestacados = [
-                    ['fontanero'],
                     ['electricista'],
+                    ['fontanero'],
+                    ['pintor'],
                     ['cerrajería', 'cerrajeria', 'cerrajero'],
                     ['carpintería', 'carpinteria'],
-                    ['manitas'],
+                    ['aire acondicionado'],
                     ['limpieza'],
                   ];
 
@@ -215,9 +218,9 @@ class HomeClienteScreen extends ConsumerWidget {
                     sliver: SliverGrid(
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 3,
-                        mainAxisSpacing: 14,
-                        crossAxisSpacing: 10,
-                        childAspectRatio: 0.95,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 0.92,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -451,23 +454,23 @@ class _TarjetaCategoriaDestacadaState extends State<_TarjetaCategoriaDestacada> 
           color: colorScheme.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(16)),
-                  child: Icon(iconoParaCategoria(widget.categoria.nombre), size: 26, color: color),
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(17)),
+                  child: Icon(iconoParaCategoria(widget.categoria.nombre), size: 28, color: color),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 Text(
                   nombreLocalizadoCategoria(context, widget.categoria.nombre),
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, height: 1.2),
                 ),
               ],
             ),

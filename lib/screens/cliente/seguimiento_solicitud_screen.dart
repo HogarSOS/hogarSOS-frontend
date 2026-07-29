@@ -209,7 +209,7 @@ class _Contenido extends ConsumerWidget {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => ChatScreen(serviceRequestId: solicitud.id, usuarioActualId: usuarioId),
+                  builder: (_) => ChatScreen(serviceRequestId: solicitud.id),
                 ),
               );
             },

@@ -721,6 +721,87 @@ class AppLocalizationsEs extends AppLocalizations {
   String get miPerfilErrorCargar => 'No se pudo cargar tu perfil';
 
   @override
+  String get miPerfilVerificacionTitulo => 'Verificación';
+
+  @override
+  String get miPerfilVerificacionEstadoAprobado =>
+      'Verificado — ya puedes aceptar trabajos.';
+
+  @override
+  String get miPerfilVerificacionEstadoPendiente =>
+      'En revisión. Te avisaremos cuando un administrador la apruebe.';
+
+  @override
+  String get miPerfilVerificacionEstadoRechazado =>
+      'Verificación rechazada. Corrige el documento o la tarifa y vuelve a enviarla.';
+
+  @override
+  String get miPerfilVerificacionEstadoSinEnviar =>
+      'Aún no has enviado tu documento de identidad — sin esto no podrás aceptar trabajos.';
+
+  @override
+  String get miPerfilDocumentoIdentidadLabel => 'Documento de identidad';
+
+  @override
+  String get miPerfilDocumentoSeleccionar => 'Seleccionar documento';
+
+  @override
+  String get miPerfilEnviarVerificacion => 'Enviar a verificación';
+
+  @override
+  String get miPerfilVerificacionExito =>
+      'Documentación enviada. Un administrador la revisará pronto.';
+
+  @override
+  String get miPerfilVerificacionErrorFaltaDocumento =>
+      'Sube tu documento de identidad primero';
+
+  @override
+  String get miPerfilVerificacionErrorFaltaTarifa =>
+      'Indica una tarifa base válida';
+
+  @override
+  String get miPerfilVerificacionErrorEnvio =>
+      'No se pudo enviar la verificación';
+
+  @override
+  String get miPerfilStatValoracion => 'Valoración';
+
+  @override
+  String get miPerfilStatTrabajos => 'Trabajos';
+
+  @override
+  String get miPerfilStatTarifa => 'Tarifa';
+
+  @override
+  String get miPerfilStatEstado => 'Estado';
+
+  @override
+  String get miPerfilEstadoAprobado => 'Aprobado';
+
+  @override
+  String get miPerfilEstadoPendiente => 'Pendiente';
+
+  @override
+  String get miPerfilEstadoRechazado => 'Rechazado';
+
+  @override
+  String get miPerfilEstadoSinEnviar => 'Sin enviar';
+
+  @override
+  String get miPerfilTelefonoVacio => 'Añade tu número de teléfono';
+
+  @override
+  String get miPerfilDescripcionVacia =>
+      'Añade una breve descripción para que los clientes te conozcan mejor';
+
+  @override
+  String get miPerfilCambiar => 'Cambiar';
+
+  @override
+  String get miPerfilEditar => 'Editar';
+
+  @override
   String get miPerfilCategoriasTitulo => 'Categorías';
 
   @override
@@ -747,7 +828,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudieron actualizar las categorías';
 
   @override
-  String get distintivoVerificado => 'Verificado';
+  String get distintivoVerificado => 'Profesional verificado';
 
   @override
   String get homeVerTodasCategorias => 'Ver todas las categorías';
@@ -976,6 +1057,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String adminCategoriasLabel(String categorias) {
     return 'Categorías: $categorias';
   }
+
+  @override
+  String get adminVerDocumento => 'Ver documento de identidad';
+
+  @override
+  String get adminDocumentoSinEnviar => 'Sin documento de identidad enviado';
 
   @override
   String get adminRechazar => 'Rechazar';

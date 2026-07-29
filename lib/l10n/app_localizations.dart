@@ -1328,6 +1328,150 @@ abstract class AppLocalizations {
   /// **'No se pudo cargar tu perfil'**
   String get miPerfilErrorCargar;
 
+  /// No description provided for @miPerfilVerificacionTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Verificación'**
+  String get miPerfilVerificacionTitulo;
+
+  /// No description provided for @miPerfilVerificacionEstadoAprobado.
+  ///
+  /// In es, this message translates to:
+  /// **'Verificado — ya puedes aceptar trabajos.'**
+  String get miPerfilVerificacionEstadoAprobado;
+
+  /// No description provided for @miPerfilVerificacionEstadoPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'En revisión. Te avisaremos cuando un administrador la apruebe.'**
+  String get miPerfilVerificacionEstadoPendiente;
+
+  /// No description provided for @miPerfilVerificacionEstadoRechazado.
+  ///
+  /// In es, this message translates to:
+  /// **'Verificación rechazada. Corrige el documento o la tarifa y vuelve a enviarla.'**
+  String get miPerfilVerificacionEstadoRechazado;
+
+  /// No description provided for @miPerfilVerificacionEstadoSinEnviar.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no has enviado tu documento de identidad — sin esto no podrás aceptar trabajos.'**
+  String get miPerfilVerificacionEstadoSinEnviar;
+
+  /// No description provided for @miPerfilDocumentoIdentidadLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Documento de identidad'**
+  String get miPerfilDocumentoIdentidadLabel;
+
+  /// No description provided for @miPerfilDocumentoSeleccionar.
+  ///
+  /// In es, this message translates to:
+  /// **'Seleccionar documento'**
+  String get miPerfilDocumentoSeleccionar;
+
+  /// No description provided for @miPerfilEnviarVerificacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar a verificación'**
+  String get miPerfilEnviarVerificacion;
+
+  /// No description provided for @miPerfilVerificacionExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Documentación enviada. Un administrador la revisará pronto.'**
+  String get miPerfilVerificacionExito;
+
+  /// No description provided for @miPerfilVerificacionErrorFaltaDocumento.
+  ///
+  /// In es, this message translates to:
+  /// **'Sube tu documento de identidad primero'**
+  String get miPerfilVerificacionErrorFaltaDocumento;
+
+  /// No description provided for @miPerfilVerificacionErrorFaltaTarifa.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica una tarifa base válida'**
+  String get miPerfilVerificacionErrorFaltaTarifa;
+
+  /// No description provided for @miPerfilVerificacionErrorEnvio.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo enviar la verificación'**
+  String get miPerfilVerificacionErrorEnvio;
+
+  /// No description provided for @miPerfilStatValoracion.
+  ///
+  /// In es, this message translates to:
+  /// **'Valoración'**
+  String get miPerfilStatValoracion;
+
+  /// No description provided for @miPerfilStatTrabajos.
+  ///
+  /// In es, this message translates to:
+  /// **'Trabajos'**
+  String get miPerfilStatTrabajos;
+
+  /// No description provided for @miPerfilStatTarifa.
+  ///
+  /// In es, this message translates to:
+  /// **'Tarifa'**
+  String get miPerfilStatTarifa;
+
+  /// No description provided for @miPerfilStatEstado.
+  ///
+  /// In es, this message translates to:
+  /// **'Estado'**
+  String get miPerfilStatEstado;
+
+  /// No description provided for @miPerfilEstadoAprobado.
+  ///
+  /// In es, this message translates to:
+  /// **'Aprobado'**
+  String get miPerfilEstadoAprobado;
+
+  /// No description provided for @miPerfilEstadoPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Pendiente'**
+  String get miPerfilEstadoPendiente;
+
+  /// No description provided for @miPerfilEstadoRechazado.
+  ///
+  /// In es, this message translates to:
+  /// **'Rechazado'**
+  String get miPerfilEstadoRechazado;
+
+  /// No description provided for @miPerfilEstadoSinEnviar.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin enviar'**
+  String get miPerfilEstadoSinEnviar;
+
+  /// No description provided for @miPerfilTelefonoVacio.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade tu número de teléfono'**
+  String get miPerfilTelefonoVacio;
+
+  /// No description provided for @miPerfilDescripcionVacia.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade una breve descripción para que los clientes te conozcan mejor'**
+  String get miPerfilDescripcionVacia;
+
+  /// No description provided for @miPerfilCambiar.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar'**
+  String get miPerfilCambiar;
+
+  /// No description provided for @miPerfilEditar.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar'**
+  String get miPerfilEditar;
+
   /// No description provided for @miPerfilCategoriasTitulo.
   ///
   /// In es, this message translates to:
@@ -1379,7 +1523,7 @@ abstract class AppLocalizations {
   /// No description provided for @distintivoVerificado.
   ///
   /// In es, this message translates to:
-  /// **'Verificado'**
+  /// **'Profesional verificado'**
   String get distintivoVerificado;
 
   /// No description provided for @homeVerTodasCategorias.
@@ -1807,6 +1951,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Categorías: {categorias}'**
   String adminCategoriasLabel(String categorias);
+
+  /// No description provided for @adminVerDocumento.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver documento de identidad'**
+  String get adminVerDocumento;
+
+  /// No description provided for @adminDocumentoSinEnviar.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin documento de identidad enviado'**
+  String get adminDocumentoSinEnviar;
 
   /// No description provided for @adminRechazar.
   ///

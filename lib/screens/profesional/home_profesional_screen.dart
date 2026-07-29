@@ -33,8 +33,15 @@ class HomeProfesionalScreen extends ConsumerWidget {
     } catch (e) {
       debugPrint('[HomeProfesionalScreen] Error al aceptar solicitud: $e');
       if (!context.mounted) return;
+      // Antes mostraba siempre el mismo texto genérico
+      // (profesionalYaNoDisponible) para CUALQUIER fallo — un 403 por
+      // no estar verificado se veía exactamente igual que un 409 por
+      // condición de carrera (otro profesional se adelantó). El
+      // backend ya manda mensajes distintos para cada caso (ver
+      // acceptServiceRequest en serviceRequest.controller.ts); esto
+      // solo hacía falta dejar de ignorarlos.
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.profesionalYaNoDisponible)),
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.profesionalYaNoDisponible, t: t))),
       );
       ref.read(nearbyRequestsProvider.notifier).cargar();
     }

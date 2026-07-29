@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/service_request_model.dart';
-import '../../providers/auth_provider.dart';
 import '../../providers/service_request_provider.dart';
 import '../../services/service_request_service.dart';
 import '../../utils/error_extraction.dart';
@@ -94,7 +93,6 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context);
     final trabajosAsync = ref.watch(assignedRequestsProvider);
-    final usuarioId = ref.watch(authProvider).usuario?.id ?? '';
 
     return Scaffold(
       appBar: AppBar(title: Text(t.trabajosActivosTitulo)),
@@ -130,7 +128,7 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
                       trabajo: trabajo,
                       onChat: () => Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => ChatScreen(serviceRequestId: trabajo.id, usuarioActualId: usuarioId),
+                          builder: (_) => ChatScreen(serviceRequestId: trabajo.id),
                         ),
                       ),
                       onCompletar: () => _completar(context, ref, trabajo),

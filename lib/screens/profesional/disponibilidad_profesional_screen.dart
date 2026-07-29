@@ -149,7 +149,7 @@ class _DisponibilidadProfesionalScreenState extends ConsumerState<Disponibilidad
                     padding: const EdgeInsets.only(bottom: 20),
                     child: EntradaAnimada(
                       child: _AvisoPerfilIncompleto(
-                        onCompletar: () => ref.read(profesionalTabIndexProvider.notifier).state = 2,
+                        onCompletar: () => ref.read(profesionalTabIndexProvider.notifier).state = 3,
                       ),
                     ),
                   )

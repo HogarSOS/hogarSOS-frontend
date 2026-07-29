@@ -217,6 +217,12 @@ class _VerificacionesTabState extends State<_VerificacionesTab> {
                           Text(v.email, style: Theme.of(context).textTheme.bodySmall),
                           const SizedBox(height: 8),
                           Text(t.adminCategoriasLabel(categorias), style: const TextStyle(fontSize: 13.5)),
+                          const SizedBox(height: 10),
+                          // Antes esta tarjeta no mostraba el documento de
+                          // identidad en ningún sitio — el admin aprobaba o
+                          // rechazaba sin poder ver lo que se supone que
+                          // está revisando.
+                          _DocumentoIdentidadPreview(url: v.documentoIdentidadUrl),
                           const SizedBox(height: 14),
                           Row(
                             children: [
@@ -398,6 +404,109 @@ class _EstadoLista extends StatelessWidget {
           Icon(icono, size: 48, color: colorScheme.onSurfaceVariant),
           const SizedBox(height: 16),
           Text(mensaje, textAlign: TextAlign.center, style: const TextStyle(fontSize: 15)),
+        ],
+      ),
+    );
+  }
+}
+
+/// Miniatura del documento de identidad enviado por el profesional, con
+/// zoom a pantalla completa al tocarla. Antes de esto el admin
+/// aprobaba/rechazaba solo con nombre + email + categorías, sin ver
+/// nunca el documento que se supone que está verificando — el propio
+/// modelo (`PendingVerification.documentoIdentidadUrl`) ya traía el
+/// dato desde el backend, solo no se pintaba en ningún sitio.
+class _DocumentoIdentidadPreview extends StatelessWidget {
+  const _DocumentoIdentidadPreview({required this.url});
+
+  final String url;
+
+  void _verEnGrande(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.all(12),
+        child: Stack(
+          children: [
+            InteractiveViewer(
+              child: Image.network(url, fit: BoxFit.contain),
+            ),
+            Positioned(
+              right: 4,
+              top: 4,
+              child: IconButton.filledTonal(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    // Registros de antes de que existiera el envío real de
+    // documentación (o en los que el profesional aún no ha completado
+    // el flujo) tienen documentoIdentidadUrl vacío — no hay nada que
+    // previsualizar, así que se avisa en vez de intentar cargar una
+    // imagen inexistente.
+    if (url.isEmpty) {
+      return Row(
+        children: [
+          Icon(Icons.warning_amber_rounded, size: 16, color: colorScheme.error),
+          const SizedBox(width: 6),
+          Text(
+            t.adminDocumentoSinEnviar,
+            style: TextStyle(fontSize: 12.5, color: colorScheme.error, fontWeight: FontWeight.w600),
+          ),
+        ],
+      );
+    }
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: () => _verEnGrande(context),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(
+              url,
+              width: 48,
+              height: 48,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                width: 48,
+                height: 48,
+                color: colorScheme.surfaceContainerHighest,
+                child: Icon(Icons.broken_image_outlined, size: 20, color: colorScheme.onSurfaceVariant),
+              ),
+              loadingBuilder: (context, child, progress) {
+                if (progress == null) return child;
+                return SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Center(
+                    child: CircularProgressIndicator(strokeWidth: 2, value: progress.expectedTotalBytes != null
+                        ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
+                        : null),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              t.adminVerDocumento,
+              style: TextStyle(fontSize: 12.5, color: colorScheme.primary, fontWeight: FontWeight.w600),
+            ),
+          ),
         ],
       ),
     );

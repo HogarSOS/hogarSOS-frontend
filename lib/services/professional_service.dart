@@ -74,6 +74,7 @@ class MiPerfilProfesional {
   final ModoDisponibilidad modoDisponibilidad;
   final String? descripcion;
   final String? fotoPerfilUrl;
+  final String? documentoIdentidadUrl;
   final List<String> categorias;
   final bool cuentaStripeConfigurada;
   final List<ProfessionalReview> opiniones;
@@ -89,6 +90,7 @@ class MiPerfilProfesional {
     required this.modoDisponibilidad,
     this.descripcion,
     this.fotoPerfilUrl,
+    this.documentoIdentidadUrl,
     required this.categorias,
     required this.cuentaStripeConfigurada,
     this.opiniones = const [],
@@ -121,6 +123,7 @@ class MiPerfilProfesional {
       modoDisponibilidad: ModoDisponibilidad.fromJson(json['modoDisponibilidad'] as String? ?? 'horario_laboral'),
       descripcion: json['descripcion'] as String?,
       fotoPerfilUrl: json['fotoPerfilUrl'] as String?,
+      documentoIdentidadUrl: json['documentoIdentidadUrl'] as String?,
       categorias: List<String>.from(json['categorias'] as List? ?? []),
       cuentaStripeConfigurada: json['cuentaStripeConfigurada'] as bool,
       opiniones: (json['opiniones'] as List? ?? [])
@@ -174,6 +177,24 @@ class ProfessionalService {
   /// estadoVerificacion).
   Future<void> actualizarCategorias(List<int> categoriaIds) async {
     await _api.patch('/professionals/me/categories', data: {'categoriaIds': categoriaIds});
+  }
+
+  /// Envía la documentación de verificación para revisión de un admin
+  /// (POST /professionals/me/verification). Antes de este método, el
+  /// backend tenía este endpoint completo pero ningún sitio del
+  /// frontend lo llamaba — un profesional podía completar foto +
+  /// categorías y creer que ya estaba listo, sin que se disparara
+  /// nunca el envío real de documentación que un admin pudiera aprobar.
+  Future<void> enviarVerificacion({
+    required String documentoIdentidadUrl,
+    required List<int> categoriaIds,
+    required double tarifaBase,
+  }) async {
+    await _api.post('/professionals/me/verification', data: {
+      'documentoIdentidadUrl': documentoIdentidadUrl,
+      'categoriaIds': categoriaIds,
+      'tarifaBase': tarifaBase,
+    });
   }
 
   Future<List<ProfessionalSummary>> buscar(

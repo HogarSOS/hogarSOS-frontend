@@ -75,10 +75,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (usuario == null) return; // el error ya se muestra vía authProvider.error
 
     final destino = switch (usuario.role) {
-      // pestanaInicial: 2 = Perfil, solo en registro — un profesional
+      // pestanaInicial: 3 = Perfil, solo en registro — un profesional
       // recién creado debe ver primero su propio perfil para
       // completarlo (foto, categorías...), no Inicio.
-      UserRole.profesional => ProfesionalShellScreen(pestanaInicial: _modoRegistro ? 2 : 0),
+      UserRole.profesional => ProfesionalShellScreen(pestanaInicial: _modoRegistro ? 3 : 0),
       UserRole.admin => const AdminScreen(),
       UserRole.cliente => const ClienteShellScreen(),
     };

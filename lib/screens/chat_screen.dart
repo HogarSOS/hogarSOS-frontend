@@ -1,5 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import '../l10n/app_localizations.dart';
 import '../services/chat_service.dart';
 
@@ -7,11 +7,9 @@ class ChatScreen extends StatefulWidget {
   const ChatScreen({
     super.key,
     required this.serviceRequestId,
-    required this.usuarioActualId,
   });
 
   final String serviceRequestId;
-  final String usuarioActualId; // para distinguir "mis mensajes" de los del otro
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -22,6 +20,14 @@ class _ChatScreenState extends State<ChatScreen> {
   final _mensajeController = TextEditingController();
   final _scrollController = ScrollController();
   final _campoFocusNode = FocusNode();
+
+  // El "autor" del mensaje SIEMPRE debe ser el UID de Firebase Auth, no
+  // el id de Postgres (AppUser.id) — es el único identificador que
+  // firestore.rules conoce (clienteFirebaseUid/profesionalFirebaseUid),
+  // y usar el otro dejaba el chat con una identidad de autor que nadie
+  // podía validar y que se rompería en cuanto las reglas exigieran
+  // request.resource.data.autorId == request.auth.uid.
+  String get _miUid => FirebaseAuth.instance.currentUser?.uid ?? '';
 
   // Cuenta de mensajes del build anterior — permite distinguir "llegó un
   // mensaje nuevo" (hay que bajar el scroll) de un rebuild cualquiera del
@@ -74,7 +80,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     final esPrimeraCarga = _mensajesPrevios == 0;
-    final ultimoEsMio = mensajes.last.autorId == widget.usuarioActualId;
+    final ultimoEsMio = mensajes.last.autorId == _miUid;
     final estabaAlFinal = !_scrollController.hasClients ||
         _scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 80;
@@ -96,7 +102,7 @@ class _ChatScreenState extends State<ChatScreen> {
       await _chatService.enviarMensaje(
         serviceRequestId: widget.serviceRequestId,
         texto: texto,
-        autorId: widget.usuarioActualId,
+        autorId: _miUid,
       );
     } catch (e) {
       debugPrint('[ChatScreen] Error al enviar mensaje: $e');
@@ -142,7 +148,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemCount: mensajes.length,
                   itemBuilder: (context, index) {
                     final mensaje = mensajes[index];
-                    final esMio = mensaje.autorId == widget.usuarioActualId;
+                    final esMio = mensaje.autorId == _miUid;
                     return Align(
                       alignment: esMio ? Alignment.centerRight : Alignment.centerLeft,
                       child: Container(
