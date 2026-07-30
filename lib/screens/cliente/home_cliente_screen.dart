@@ -42,6 +42,19 @@ class HomeClienteScreen extends ConsumerWidget {
     final categoriasAsync = ref.watch(categoriesProvider);
     final nombre = ref.watch(authProvider).usuario?.nombre.split(' ').first ?? '';
     final resumenAsync = ref.watch(resumenActividadClienteProvider);
+    // Mismo cálculo que antes usaba la tarjeta rosa de resumen (ya
+    // retirada, duplicaba lo que ya decía el acceso rápido "Mis
+    // solicitudes" de aquí abajo) — ahora alimenta el badge de ese
+    // acceso rápido en su lugar.
+    final activas = resumenAsync.maybeWhen(
+      data: (solicitudes) => solicitudes
+          .where((s) =>
+              s.estado == EstadoSolicitud.pendiente ||
+              s.estado == EstadoSolicitud.aceptada ||
+              s.estado == EstadoSolicitud.en_progreso)
+          .length,
+      orElse: () => 0,
+    );
 
     return Scaffold(
       body: SafeArea(
@@ -121,6 +134,7 @@ class HomeClienteScreen extends ConsumerWidget {
                           child: _AccesoRapido(
                             icono: Icons.receipt_long_outlined,
                             etiqueta: t.homeAccesoMisSolicitudes,
+                            contador: activas,
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(builder: (_) => const MisSolicitudesScreen()),
                             ),
@@ -141,37 +155,6 @@ class HomeClienteScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              // Resumen de actividad — datos reales de tus propias
-              // solicitudes; se oculta sin más si no hay ninguna activa,
-              // en vez de mostrar un hueco vacío o un dato inventado.
-              resumenAsync.when(
-                data: (solicitudes) {
-                  final activas = solicitudes
-                      .where((s) =>
-                          s.estado == EstadoSolicitud.pendiente ||
-                          s.estado == EstadoSolicitud.aceptada ||
-                          s.estado == EstadoSolicitud.en_progreso)
-                      .length;
-                  if (activas == 0) return const SliverToBoxAdapter(child: SizedBox.shrink());
-
-                  return SliverToBoxAdapter(
-                    child: EntradaAnimada(
-                      retraso: const Duration(milliseconds: 160),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                        child: _TarjetaResumen(
-                          cantidad: activas,
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const MisSolicitudesScreen()),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-                loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
-                error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
-              ),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 28, 20, 8),
                 sliver: SliverToBoxAdapter(
@@ -186,13 +169,15 @@ class HomeClienteScreen extends ConsumerWidget {
               ),
               categoriasAsync.when(
                 data: (categorias) {
-                  // 6 categorías destacadas (2 filas de 3), en este orden —
-                  // los oficios más solicitados primero, para que tengan
-                  // más protagonismo en la pantalla de Inicio. El resto
-                  // queda accesible desde "Ver todas las categorías" sin
-                  // dejar de cargarse dinámicamente desde el backend. Se
-                  // admite con y sin tilde porque category_display.dart ya
-                  // contempla ambas variantes como sinónimos válidos.
+                  // 9 categorías destacadas (3 filas de 3, antes 2) — al
+                  // quitar la tarjeta rosa de resumen quedó sitio de sobra
+                  // para que entren más sin tener que pulsar "Ver todas".
+                  // Orden: los oficios más solicitados primero, para que
+                  // tengan más protagonismo en la pantalla de Inicio. El
+                  // resto sigue accesible desde "Ver todas las categorías"
+                  // sin dejar de cargarse dinámicamente desde el backend.
+                  // Se admite con y sin tilde porque category_display.dart
+                  // ya contempla ambas variantes como sinónimos válidos.
                   const gruposDestacados = [
                     ['electricista'],
                     ['fontanero'],
@@ -200,6 +185,9 @@ class HomeClienteScreen extends ConsumerWidget {
                     ['cerrajería', 'cerrajeria', 'cerrajero'],
                     ['aire acondicionado'],
                     ['limpieza'],
+                    ['manitas'],
+                    ['albañilería', 'albanileria', 'albañil'],
+                    ['jardinería', 'jardineria'],
                   ];
 
                   final destacadas = <ServiceCategory>[];
@@ -349,17 +337,31 @@ class _TarjetaSolicitar extends StatelessWidget {
 }
 
 class _AccesoRapido extends StatelessWidget {
-  const _AccesoRapido({required this.icono, required this.etiqueta, required this.onTap});
+  const _AccesoRapido({
+    required this.icono,
+    required this.etiqueta,
+    required this.onTap,
+    this.contador = 0,
+  });
 
   final IconData icono;
   final String etiqueta;
   final VoidCallback onTap;
 
+  /// >0 pinta un badge con el número encima del icono (p. ej. "Mis
+  /// solicitudes" con solicitudes activas) — 0 deja el icono normal,
+  /// sin contador, como pedía el diseño.
+  final int contador;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final hayContador = contador > 0;
     return Material(
-      color: colorScheme.surfaceContainerHigh,
+      // Fondo ligeramente distinto (en vez del mismo neutro de
+      // siempre) cuando hay actividad pendiente — refuerzo sutil junto
+      // al badge, sin depender solo del número para llamar la atención.
+      color: hayContador ? colorScheme.tertiaryContainer.withOpacity(0.55) : colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -368,57 +370,28 @@ class _AccesoRapido extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
           child: Column(
             children: [
-              Icon(icono, size: 22, color: colorScheme.primary),
+              // Círculo tonal detrás del icono (patrón M3 de "tonal icon")
+              // en vez del icono suelto de antes — le da peso visual sin
+              // salirse del lenguaje ya usado en las tarjetas de categoría.
+              Badge(
+                isLabelVisible: hayContador,
+                label: Text('$contador'),
+                backgroundColor: colorScheme.error,
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(color: colorScheme.primaryContainer, shape: BoxShape.circle),
+                  child: Icon(icono, size: 19, color: colorScheme.onPrimaryContainer),
+                ),
+              ),
               const SizedBox(height: 6),
               Text(
                 etiqueta,
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: colorScheme.onSurface),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: colorScheme.onSurface),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TarjetaResumen extends StatelessWidget {
-  const _TarjetaResumen({required this.cantidad, required this.onTap});
-
-  final int cantidad;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Material(
-      color: colorScheme.tertiaryContainer,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Icon(Icons.pending_actions_outlined, color: colorScheme.onTertiaryContainer),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  t.homeResumenActivas(cantidad),
-                  style: TextStyle(
-                    color: colorScheme.onTertiaryContainer,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13.5,
-                  ),
-                ),
-              ),
-              Icon(Icons.chevron_right, color: colorScheme.onTertiaryContainer),
             ],
           ),
         ),
@@ -455,9 +428,21 @@ class _TarjetaCategoriaDestacadaState extends State<_TarjetaCategoriaDestacada> 
         duration: const Duration(milliseconds: 120),
         curve: Curves.easeOut,
         child: Material(
-          color: colorScheme.surfaceContainerHigh,
+          // El primer intento (solo pasar de surfaceContainerHigh a
+          // surfaceContainerHighest) resultó casi imperceptible: son dos
+          // pasos consecutivos de la escala tonal de M3, pensada para
+          // diferencias sutiles de "elevación", no para que una tarjeta
+          // destaque. Ahora se mezcla directamente un 10% del color propio
+          // de la categoría sobre la superficie — un cambio de verdad
+          // visible, y además coherente con el color de cada categoría en
+          // vez de un gris neutro genérico.
+          color: Color.lerp(colorScheme.surface, color, 0.10),
           borderRadius: BorderRadius.circular(20),
-          child: Padding(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: color.withOpacity(0.30), width: 1.2),
+            ),
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -466,7 +451,11 @@ class _TarjetaCategoriaDestacadaState extends State<_TarjetaCategoriaDestacada> 
                 Container(
                   width: 54,
                   height: 54,
-                  decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(16)),
+                  // 0.15 → 0.30 de opacidad: el tinte de color detrás del
+                  // icono se veía casi plano/pálido, sobre todo en tonos
+                  // ya de por sí claros como el celeste de "aire
+                  // acondicionado".
+                  decoration: BoxDecoration(color: color.withOpacity(0.30), borderRadius: BorderRadius.circular(16)),
                   child: Icon(iconoParaCategoria(widget.categoria.nombre), size: 27, color: color),
                 ),
                 const SizedBox(height: 8),
@@ -475,7 +464,16 @@ class _TarjetaCategoriaDestacadaState extends State<_TarjetaCategoriaDestacada> 
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, height: 1.15),
+                  // 11.5 → 13.5: se quedaba pequeño para leer cómodo,
+                  // sobre todo para gente mayor. maxLines + ellipsis ya
+                  // absorbe el texto más grande sin desbordar ni cambiar
+                  // el tamaño de la tarjeta/cuadrícula.
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    height: 1.15,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
               ],
             ),

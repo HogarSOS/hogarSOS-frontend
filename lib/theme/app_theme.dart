@@ -44,16 +44,24 @@ class AppTheme {
   }
 
   static TextTheme _textTheme(ColorScheme colorScheme) {
+    // OJO: hay que aplicar bodyColor/displayColor ANTES de derivar los
+    // overrides de peso de fuente de abajo. GoogleFonts.xTextTheme() sin
+    // argumentos devuelve una tipografía con colores fijos (pensada para
+    // fondo claro), sin conocimiento del ColorScheme. Si los overrides de
+    // titleLarge/Medium/Small/headlineSmall/labelLarge parten de ese
+    // `base` sin colorear (en vez de partir de `coloreada`), esos estilos
+    // quedan con un color casi negro fijo en light Y dark — invisibles
+    // sobre fondo oscuro (p. ej. el nombre de la otra persona en la
+    // AppBar del chat en modo oscuro, que usa titleLarge).
     final base = GoogleFonts.plusJakartaSansTextTheme();
-    return base
-        .apply(bodyColor: colorScheme.onSurface, displayColor: colorScheme.onSurface)
-        .copyWith(
-          headlineSmall: base.headlineSmall?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.4),
-          titleLarge: base.titleLarge?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.2),
-          titleMedium: base.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-          titleSmall: base.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-          labelLarge: base.labelLarge?.copyWith(fontWeight: FontWeight.w600, letterSpacing: 0.1),
-        );
+    final coloreada = base.apply(bodyColor: colorScheme.onSurface, displayColor: colorScheme.onSurface);
+    return coloreada.copyWith(
+      headlineSmall: coloreada.headlineSmall?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.4),
+      titleLarge: coloreada.titleLarge?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.2),
+      titleMedium: coloreada.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+      titleSmall: coloreada.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+      labelLarge: coloreada.labelLarge?.copyWith(fontWeight: FontWeight.w600, letterSpacing: 0.1),
+    );
   }
 
   static ThemeData _base(ColorScheme colorScheme) {
