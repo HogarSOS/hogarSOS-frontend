@@ -4,7 +4,7 @@
   "appTitle": "hogarSOS",
 
   "navInicio": "Home",
-  "navDisponibilidad": "Availability",
+  "navDisponibilidad": "Status",
   "navSolicitudesCercanas": "Requests",
   "navBuscar": "Search",
   "navMensajes": "Messages",

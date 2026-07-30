@@ -24,7 +24,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navPerfil => 'Profile';
 
   @override
-  String get navDisponibilidad => 'Availability';
+  String get navDisponibilidad => 'Status';
 
   @override
   String get navSolicitudesCercanas => 'Requests';

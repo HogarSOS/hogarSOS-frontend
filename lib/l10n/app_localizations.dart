@@ -131,7 +131,7 @@ abstract class AppLocalizations {
   /// No description provided for @navDisponibilidad.
   ///
   /// In es, this message translates to:
-  /// **'Disponibilidad'**
+  /// **'Estado'**
   String get navDisponibilidad;
 
   /// No description provided for @navSolicitudesCercanas.
