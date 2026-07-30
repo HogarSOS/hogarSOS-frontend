@@ -25,10 +25,18 @@ final estadoLecturaProvider = StreamProvider.autoDispose.family<EstadoLecturaCha
 /// cualquiera de los dos cambia.
 final unreadChatProvider = Provider.autoDispose.family<bool, String>((ref, serviceRequestId) {
   final miUid = FirebaseAuth.instance.currentUser?.uid ?? '';
-  final ultimo = ref.watch(_ultimoMensajeProvider(serviceRequestId)).value;
+  // valueOrNull, no .value a propósito: si el stream de Firestore de
+  // esta conversación falla (p. ej. PERMISSION_DENIED en un chat que
+  // nunca llegó a sincronizarse, ver sincronizarChatFirestore), .value
+  // RELANZA ese error en vez de devolver null — y como este provider se
+  // usa dentro del propio ProfesionalShellScreen/ClienteShellScreen
+  // para el punto rojo de la pestaña, ese error tumbaba el panel
+  // entero, no solo el chat. Con valueOrNull, un chat roto simplemente
+  // no cuenta como "no leído" en vez de romper toda la pantalla.
+  final ultimo = ref.watch(_ultimoMensajeProvider(serviceRequestId)).valueOrNull;
   if (ultimo == null || ultimo.autorId == miUid) return false;
 
-  final estado = ref.watch(estadoLecturaProvider(serviceRequestId)).value;
+  final estado = ref.watch(estadoLecturaProvider(serviceRequestId)).valueOrNull;
   final miLastRead = estado?.miLastRead(miUid);
   if (miLastRead == null) return true;
   return ultimo.enviadoEn.isAfter(miLastRead);

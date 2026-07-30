@@ -186,8 +186,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     // (primer frame, antes de que llegue el primer snapshot del
     // documento), se trata como "nadie ha leído nada aún" — un mensaje
     // recién enviado empieza en ✓, no en ✓✓, que es el estado correcto.
+    // valueOrNull, no .value: si el stream de este documento falla, no
+    // debe tumbar el chat entero, solo dejar los checks en su estado
+    // por defecto.
     final otroLastRead =
-        ref.watch(estadoLecturaProvider(widget.serviceRequestId)).value?.otroLastRead(_miUid);
+        ref.watch(estadoLecturaProvider(widget.serviceRequestId)).valueOrNull?.otroLastRead(_miUid);
 
     return Scaffold(
       appBar: AppBar(
