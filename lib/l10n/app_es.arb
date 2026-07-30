@@ -81,6 +81,14 @@
   "perfilFavoritos": "Favoritos",
   "perfilMisSolicitudes": "Mis solicitudes",
   "perfilConfiguracion": "Configuración",
+  "perfilPrivacidad": "Política de privacidad",
+  "perfilTerminos": "Términos de servicio",
+
+  "legalPrivacidadTitulo": "Política de privacidad",
+  "legalTerminosTitulo": "Términos de servicio",
+  "legalAceptacionPrefijo": "Al crear una cuenta, aceptas los ",
+  "legalAceptacionY": " y la ",
+  "pagoAceptacionTerminos": "Al continuar, aceptas los Términos de servicio y la política de cancelación",
 
   "proximamenteTitulo": "Próximamente",
   "buscarProximamenteDescripcion": "La búsqueda avanzada con filtros por precio, distancia y valoración llega en la próxima fase.",
@@ -150,6 +158,7 @@
   "categoriaPiscinas": "Piscinas",
   "categoriaControlPlagas": "Control de plagas",
   "categoriaVeterinaria": "Veterinaria a domicilio",
+  "categoriaTecnicoTelefonia": "Técnico de telefonía",
 
   "wizardEjemploGenerico": "Ej: se ha roto una tubería bajo el fregadero y hay una fuga...",
   "wizardEjemploElectricista": "Ej: ha saltado el diferencial y no puedo volver a subirlo...",
@@ -173,6 +182,7 @@
   "wizardEjemploPiscinas": "Ej: mi piscina tiene el agua verde...",
   "wizardEjemploControlPlagas": "Ej: tengo cucarachas en la cocina...",
   "wizardEjemploVeterinaria": "Ej: mi perro necesita una revisión a domicilio...",
+  "wizardEjemploTecnicoTelefonia": "Ej: se me ha roto la pantalla del móvil...",
 
   "profesionalTituloSolicitudes": "Solicitudes cerca de ti",
   "salirPulsaOtraVez": "Pulsa atrás otra vez para salir",
@@ -182,6 +192,13 @@
   "profesionalAceptar": "Aceptar",
   "profesionalSolicitudAceptada": "Solicitud aceptada. El cliente autorizará el pago.",
   "profesionalYaNoDisponible": "No se pudo aceptar — puede que ya no esté disponible",
+  "profesionalDisponibilidadTitulo": "¿Cuándo puedes hacer este trabajo?",
+  "profesionalDisponibilidadSubtitulo": "Cuéntaselo al cliente — se enviará como primer mensaje del chat (opcional)",
+  "profesionalDisponibilidadHint": "Ej: puedo ir mañana por la tarde...",
+  "profesionalDisponibilidadSugerencia1": "Puedo ir mañana por la tarde",
+  "profesionalDisponibilidadSugerencia2": "Estoy disponible el viernes a las 10:00",
+  "profesionalDisponibilidadSugerencia3": "Puedo pasar esta misma tarde",
+  "profesionalDisponibilidadConfirmar": "Aceptar solicitud",
   "profesionalDistanciaKm": "A {km} km",
   "profesionalTrabajosActivos": "Tienes {n} {n, plural, one{trabajo activo} other{trabajos activos}}",
   "@profesionalTrabajosActivos": {

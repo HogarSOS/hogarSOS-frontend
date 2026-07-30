@@ -81,6 +81,14 @@
   "perfilFavoritos": "Favorites",
   "perfilMisSolicitudes": "My requests",
   "perfilConfiguracion": "Settings",
+  "perfilPrivacidad": "Privacy policy",
+  "perfilTerminos": "Terms of service",
+
+  "legalPrivacidadTitulo": "Privacy policy",
+  "legalTerminosTitulo": "Terms of service",
+  "legalAceptacionPrefijo": "By creating an account, you agree to the ",
+  "legalAceptacionY": " and the ",
+  "pagoAceptacionTerminos": "By continuing, you agree to the Terms of service and cancellation policy",
 
   "proximamenteTitulo": "Coming soon",
   "buscarProximamenteDescripcion": "Advanced search with price, distance and rating filters is coming in the next phase.",
@@ -150,6 +158,7 @@
   "categoriaPiscinas": "Pools",
   "categoriaControlPlagas": "Pest control",
   "categoriaVeterinaria": "Home veterinary services",
+  "categoriaTecnicoTelefonia": "Phone technician",
 
   "wizardEjemploGenerico": "E.g.: a pipe burst under the sink and it's leaking...",
   "wizardEjemploElectricista": "E.g.: the circuit breaker keeps tripping and won't reset...",
@@ -173,6 +182,7 @@
   "wizardEjemploPiscinas": "E.g.: my pool water has turned green...",
   "wizardEjemploControlPlagas": "E.g.: I have cockroaches in my kitchen...",
   "wizardEjemploVeterinaria": "E.g.: my dog needs a checkup at home...",
+  "wizardEjemploTecnicoTelefonia": "E.g.: my phone screen is cracked...",
 
   "profesionalTituloSolicitudes": "Requests near you",
   "salirPulsaOtraVez": "Press back again to exit",
@@ -182,6 +192,13 @@
   "profesionalAceptar": "Accept",
   "profesionalSolicitudAceptada": "Request accepted. The customer will authorize payment.",
   "profesionalYaNoDisponible": "Couldn't accept — it may no longer be available",
+  "profesionalDisponibilidadTitulo": "When can you do this job?",
+  "profesionalDisponibilidadSubtitulo": "Let the customer know — it'll be sent as the first chat message (optional)",
+  "profesionalDisponibilidadHint": "E.g.: I can come tomorrow afternoon...",
+  "profesionalDisponibilidadSugerencia1": "I can come tomorrow afternoon",
+  "profesionalDisponibilidadSugerencia2": "I'm available Friday at 10:00",
+  "profesionalDisponibilidadSugerencia3": "I can come by this afternoon",
+  "profesionalDisponibilidadConfirmar": "Accept request",
   "profesionalDistanciaKm": "{km} km away",
   "profesionalTrabajosActivos": "You have {n} active {n, plural, one{job} other{jobs}}",
   "@profesionalTrabajosActivos": {

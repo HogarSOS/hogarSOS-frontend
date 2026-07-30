@@ -440,6 +440,48 @@ abstract class AppLocalizations {
   /// **'Configuración'**
   String get perfilConfiguracion;
 
+  /// No description provided for @perfilPrivacidad.
+  ///
+  /// In es, this message translates to:
+  /// **'Política de privacidad'**
+  String get perfilPrivacidad;
+
+  /// No description provided for @perfilTerminos.
+  ///
+  /// In es, this message translates to:
+  /// **'Términos de servicio'**
+  String get perfilTerminos;
+
+  /// No description provided for @legalPrivacidadTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Política de privacidad'**
+  String get legalPrivacidadTitulo;
+
+  /// No description provided for @legalTerminosTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Términos de servicio'**
+  String get legalTerminosTitulo;
+
+  /// No description provided for @legalAceptacionPrefijo.
+  ///
+  /// In es, this message translates to:
+  /// **'Al crear una cuenta, aceptas los '**
+  String get legalAceptacionPrefijo;
+
+  /// No description provided for @legalAceptacionY.
+  ///
+  /// In es, this message translates to:
+  /// **' y la '**
+  String get legalAceptacionY;
+
+  /// No description provided for @pagoAceptacionTerminos.
+  ///
+  /// In es, this message translates to:
+  /// **'Al continuar, aceptas los Términos de servicio y la política de cancelación'**
+  String get pagoAceptacionTerminos;
+
   /// No description provided for @proximamenteTitulo.
   ///
   /// In es, this message translates to:
@@ -770,6 +812,12 @@ abstract class AppLocalizations {
   /// **'Veterinaria a domicilio'**
   String get categoriaVeterinaria;
 
+  /// No description provided for @categoriaTecnicoTelefonia.
+  ///
+  /// In es, this message translates to:
+  /// **'Técnico de telefonía'**
+  String get categoriaTecnicoTelefonia;
+
   /// No description provided for @wizardEjemploGenerico.
   ///
   /// In es, this message translates to:
@@ -902,6 +950,12 @@ abstract class AppLocalizations {
   /// **'Ej: mi perro necesita una revisión a domicilio...'**
   String get wizardEjemploVeterinaria;
 
+  /// No description provided for @wizardEjemploTecnicoTelefonia.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: se me ha roto la pantalla del móvil...'**
+  String get wizardEjemploTecnicoTelefonia;
+
   /// No description provided for @profesionalTituloSolicitudes.
   ///
   /// In es, this message translates to:
@@ -949,6 +1003,48 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se pudo aceptar — puede que ya no esté disponible'**
   String get profesionalYaNoDisponible;
+
+  /// No description provided for @profesionalDisponibilidadTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cuándo puedes hacer este trabajo?'**
+  String get profesionalDisponibilidadTitulo;
+
+  /// No description provided for @profesionalDisponibilidadSubtitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuéntaselo al cliente — se enviará como primer mensaje del chat (opcional)'**
+  String get profesionalDisponibilidadSubtitulo;
+
+  /// No description provided for @profesionalDisponibilidadHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: puedo ir mañana por la tarde...'**
+  String get profesionalDisponibilidadHint;
+
+  /// No description provided for @profesionalDisponibilidadSugerencia1.
+  ///
+  /// In es, this message translates to:
+  /// **'Puedo ir mañana por la tarde'**
+  String get profesionalDisponibilidadSugerencia1;
+
+  /// No description provided for @profesionalDisponibilidadSugerencia2.
+  ///
+  /// In es, this message translates to:
+  /// **'Estoy disponible el viernes a las 10:00'**
+  String get profesionalDisponibilidadSugerencia2;
+
+  /// No description provided for @profesionalDisponibilidadSugerencia3.
+  ///
+  /// In es, this message translates to:
+  /// **'Puedo pasar esta misma tarde'**
+  String get profesionalDisponibilidadSugerencia3;
+
+  /// No description provided for @profesionalDisponibilidadConfirmar.
+  ///
+  /// In es, this message translates to:
+  /// **'Aceptar solicitud'**
+  String get profesionalDisponibilidadConfirmar;
 
   /// No description provided for @profesionalDistanciaKm.
   ///

@@ -204,6 +204,28 @@ class AppLocalizationsEs extends AppLocalizations {
   String get perfilConfiguracion => 'Configuración';
 
   @override
+  String get perfilPrivacidad => 'Política de privacidad';
+
+  @override
+  String get perfilTerminos => 'Términos de servicio';
+
+  @override
+  String get legalPrivacidadTitulo => 'Política de privacidad';
+
+  @override
+  String get legalTerminosTitulo => 'Términos de servicio';
+
+  @override
+  String get legalAceptacionPrefijo => 'Al crear una cuenta, aceptas los ';
+
+  @override
+  String get legalAceptacionY => ' y la ';
+
+  @override
+  String get pagoAceptacionTerminos =>
+      'Al continuar, aceptas los Términos de servicio y la política de cancelación';
+
+  @override
   String get proximamenteTitulo => 'Próximamente';
 
   @override
@@ -393,6 +415,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get categoriaVeterinaria => 'Veterinaria a domicilio';
 
   @override
+  String get categoriaTecnicoTelefonia => 'Técnico de telefonía';
+
+  @override
   String get wizardEjemploGenerico =>
       'Ej: se ha roto una tubería bajo el fregadero y hay una fuga...';
 
@@ -476,6 +501,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ej: mi perro necesita una revisión a domicilio...';
 
   @override
+  String get wizardEjemploTecnicoTelefonia =>
+      'Ej: se me ha roto la pantalla del móvil...';
+
+  @override
   String get profesionalTituloSolicitudes => 'Solicitudes cerca de ti';
 
   @override
@@ -501,6 +530,33 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get profesionalYaNoDisponible =>
       'No se pudo aceptar — puede que ya no esté disponible';
+
+  @override
+  String get profesionalDisponibilidadTitulo =>
+      '¿Cuándo puedes hacer este trabajo?';
+
+  @override
+  String get profesionalDisponibilidadSubtitulo =>
+      'Cuéntaselo al cliente — se enviará como primer mensaje del chat (opcional)';
+
+  @override
+  String get profesionalDisponibilidadHint =>
+      'Ej: puedo ir mañana por la tarde...';
+
+  @override
+  String get profesionalDisponibilidadSugerencia1 =>
+      'Puedo ir mañana por la tarde';
+
+  @override
+  String get profesionalDisponibilidadSugerencia2 =>
+      'Estoy disponible el viernes a las 10:00';
+
+  @override
+  String get profesionalDisponibilidadSugerencia3 =>
+      'Puedo pasar esta misma tarde';
+
+  @override
+  String get profesionalDisponibilidadConfirmar => 'Aceptar solicitud';
 
   @override
   String profesionalDistanciaKm(String km) {
