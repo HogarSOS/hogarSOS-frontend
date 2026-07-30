@@ -2012,6 +2012,12 @@ abstract class AppLocalizations {
   /// **'Confirmar ubicación'**
   String get ubicacionConfirmar;
 
+  /// No description provided for @ubicacionAvisoNoDetectada.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos detectar tu ubicación GPS — mueve el mapa hasta tu zona antes de confirmar'**
+  String get ubicacionAvisoNoDetectada;
+
   /// No description provided for @adminTituloPanel.
   ///
   /// In es, this message translates to:

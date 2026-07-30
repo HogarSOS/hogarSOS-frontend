@@ -1084,6 +1084,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ubicacionConfirmar => 'Confirm location';
 
   @override
+  String get ubicacionAvisoNoDetectada =>
+      'We couldn\'t detect your GPS location — move the map to your area before confirming';
+
+  @override
   String get adminTituloPanel => 'Admin panel';
 
   @override

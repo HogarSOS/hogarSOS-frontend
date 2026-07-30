@@ -373,6 +373,7 @@
   "ubicacionTitulo": "Choose location",
   "ubicacionDireccionOpcional": "Address or reference (optional)",
   "ubicacionConfirmar": "Confirm location",
+  "ubicacionAvisoNoDetectada": "We couldn't detect your GPS location — move the map to your area before confirming",
 
   "adminTituloPanel": "Admin panel",
   "adminTabVerificaciones": "Verifications",

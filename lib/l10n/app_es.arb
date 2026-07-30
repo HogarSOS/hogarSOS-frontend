@@ -373,6 +373,7 @@
   "ubicacionTitulo": "Elegir ubicación",
   "ubicacionDireccionOpcional": "Dirección o referencia (opcional)",
   "ubicacionConfirmar": "Confirmar ubicación",
+  "ubicacionAvisoNoDetectada": "No pudimos detectar tu ubicación GPS — mueve el mapa hasta tu zona antes de confirmar",
 
   "adminTituloPanel": "Panel admin",
   "adminTabVerificaciones": "Verificaciones",

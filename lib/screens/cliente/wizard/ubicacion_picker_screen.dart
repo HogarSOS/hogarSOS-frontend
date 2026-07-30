@@ -24,6 +24,7 @@ class _UbicacionPickerScreenState extends State<UbicacionPickerScreen> {
   LatLng _centro = const LatLng(40.4168, -3.7038); // Madrid, como fallback razonable antes de tener el GPS
   final _direccionController = TextEditingController();
   bool _cargandoUbicacionInicial = true;
+  bool _ubicacionRealObtenida = false;
 
   @override
   void initState() {
@@ -32,6 +33,7 @@ class _UbicacionPickerScreenState extends State<UbicacionPickerScreen> {
     if (widget.ubicacionInicial != null) {
       _centro = LatLng(widget.ubicacionInicial!.latitud, widget.ubicacionInicial!.longitud);
       _cargandoUbicacionInicial = false;
+      _ubicacionRealObtenida = true;
     } else {
       _obtenerUbicacionActual();
     }
@@ -52,13 +54,18 @@ class _UbicacionPickerScreenState extends State<UbicacionPickerScreen> {
       if (permiso != LocationPermission.denied && permiso != LocationPermission.deniedForever) {
         final posicion = await Geolocator.getCurrentPosition();
         if (mounted) {
-          setState(() => _centro = LatLng(posicion.latitude, posicion.longitude));
+          setState(() {
+            _centro = LatLng(posicion.latitude, posicion.longitude);
+            _ubicacionRealObtenida = true;
+          });
           _mapController?.animateCamera(CameraUpdate.newLatLng(_centro));
         }
       }
     } catch (_) {
       // Si falla, se queda con el fallback — el usuario siempre puede
-      // mover el mapa manualmente a su ubicación real.
+      // mover el mapa manualmente a su ubicación real, pero se avisa
+      // explícitamente para que no confirme sin darse cuenta (antes
+      // el botón quedaba activo con el pin todavía en Madrid).
     } finally {
       if (mounted) setState(() => _cargandoUbicacionInicial = false);
     }
@@ -83,7 +90,10 @@ class _UbicacionPickerScreenState extends State<UbicacionPickerScreen> {
                   GoogleMap(
                     initialCameraPosition: CameraPosition(target: _centro, zoom: 16),
                     onMapCreated: (controller) => _mapController = controller,
-                    onCameraMove: (posicion) => _centro = posicion.target,
+                    onCameraMove: (posicion) {
+                      _centro = posicion.target;
+                      _ubicacionRealObtenida = true;
+                    },
                     myLocationEnabled: true,
                     myLocationButtonEnabled: true,
                     zoomControlsEnabled: false,
@@ -106,6 +116,15 @@ class _UbicacionPickerScreenState extends State<UbicacionPickerScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (!_cargandoUbicacionInicial && !_ubicacionRealObtenida)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      t.ubicacionAvisoNoDetectada,
+                      style: TextStyle(color: colorScheme.error, fontSize: 12.5, fontWeight: FontWeight.w600),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 TextField(
                   controller: _direccionController,
                   decoration: InputDecoration(
@@ -115,17 +134,19 @@ class _UbicacionPickerScreenState extends State<UbicacionPickerScreen> {
                 ),
                 const SizedBox(height: 12),
                 FilledButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(
-                      UbicacionSeleccionada(
-                        latitud: _centro.latitude,
-                        longitud: _centro.longitude,
-                        direccionTexto: _direccionController.text.trim().isEmpty
-                            ? null
-                            : _direccionController.text.trim(),
-                      ),
-                    );
-                  },
+                  onPressed: _cargandoUbicacionInicial
+                      ? null
+                      : () {
+                          Navigator.of(context).pop(
+                            UbicacionSeleccionada(
+                              latitud: _centro.latitude,
+                              longitud: _centro.longitude,
+                              direccionTexto: _direccionController.text.trim().isEmpty
+                                  ? null
+                                  : _direccionController.text.trim(),
+                            ),
+                          );
+                        },
                   child: Text(t.ubicacionConfirmar),
                 ),
               ],
