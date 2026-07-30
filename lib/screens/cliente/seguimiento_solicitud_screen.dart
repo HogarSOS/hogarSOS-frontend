@@ -11,7 +11,9 @@ import '../../utils/category_display.dart';
 import '../../utils/error_extraction.dart';
 import '../../widgets/entrada_animada.dart';
 import '../chat_screen.dart';
+import '../reportar_problema_screen.dart';
 import 'pago_screen.dart';
+import 'seleccionar_profesional_screen.dart';
 import 'valoracion_screen.dart';
 
 /// Pantalla central del ciclo de vida de una solicitud. Se navega aquí
@@ -188,6 +190,24 @@ class _Contenido extends ConsumerWidget {
         EntradaAnimada(retraso: const Duration(milliseconds: 120), child: _EstadoBanner(estado: solicitud.estado)),
         const SizedBox(height: 24),
 
+        // Solo mientras sigue "pendiente" tiene sentido elegir — en
+        // cuanto hay alguien asignado ya no hay nada que comparar.
+        if (solicitud.estado == EstadoSolicitud.pendiente && solicitud.numCandidatos > 0) ...[
+          FilledButton.icon(
+            icon: const Icon(Icons.people_outline),
+            label: Text(t.seguimientoVerCandidatos(solicitud.numCandidatos)),
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => SeleccionarProfesionalScreen(serviceRequestId: solicitud.id),
+                ),
+              );
+              onRecargar();
+            },
+          ),
+          const SizedBox(height: 12),
+        ],
+
         // También se puede cancelar ya "aceptada" (antes solo mientras
         // "pendiente") — si la disponibilidad que propuso el
         // profesional al aceptar (ver home_profesional_screen.dart) no
@@ -264,6 +284,28 @@ class _Contenido extends ConsumerWidget {
               ],
             );
           }),
+        ],
+
+        // Disponible en cualquier estado a partir de "aceptada" — una
+        // vez hay profesional asignado puede haber algo que reportar
+        // (no se presentó, comportamiento, pago...), no solo tras
+        // completar. No se muestra en "disputada" porque ese estado YA
+        // es la reclamación abierta (ver _EstadoBanner).
+        if (solicitud.estado == EstadoSolicitud.aceptada ||
+            solicitud.estado == EstadoSolicitud.en_progreso ||
+            solicitud.estado == EstadoSolicitud.completada) ...[
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.report_gmailerrorred_outlined),
+            label: Text(t.reportarProblemaBoton),
+            style: OutlinedButton.styleFrom(foregroundColor: colorScheme.error),
+            onPressed: () async {
+              final resultado = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(builder: (_) => ReportarProblemaScreen(serviceRequestId: solicitud.id)),
+              );
+              if (resultado == true) onRecargar();
+            },
+          ),
         ],
       ],
     );

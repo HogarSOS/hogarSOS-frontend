@@ -1010,6 +1010,30 @@ abstract class AppLocalizations {
   /// **'No se pudo aceptar — puede que ya no esté disponible'**
   String get profesionalYaNoDisponible;
 
+  /// No description provided for @profesionalPostularme.
+  ///
+  /// In es, this message translates to:
+  /// **'Postularme'**
+  String get profesionalPostularme;
+
+  /// No description provided for @profesionalYaPostulado.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya te has postulado'**
+  String get profesionalYaPostulado;
+
+  /// No description provided for @profesionalPostulacionEnviada.
+  ///
+  /// In es, this message translates to:
+  /// **'Candidatura enviada — el cliente elegirá entre los profesionales interesados'**
+  String get profesionalPostulacionEnviada;
+
+  /// No description provided for @profesionalPostulacionMensajeObligatorio.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe cuándo puedes hacer el trabajo antes de postularte'**
+  String get profesionalPostulacionMensajeObligatorio;
+
   /// No description provided for @profesionalDisponibilidadTitulo.
   ///
   /// In es, this message translates to:
@@ -1019,7 +1043,7 @@ abstract class AppLocalizations {
   /// No description provided for @profesionalDisponibilidadSubtitulo.
   ///
   /// In es, this message translates to:
-  /// **'Cuéntaselo al cliente — se enviará como primer mensaje del chat (opcional)'**
+  /// **'El cliente lo verá en tu candidatura junto a tu foto y valoración'**
   String get profesionalDisponibilidadSubtitulo;
 
   /// No description provided for @profesionalDisponibilidadHint.
@@ -1670,6 +1694,12 @@ abstract class AppLocalizations {
   /// **'No se pudo enviar el mensaje'**
   String get chatErrorEnviar;
 
+  /// No description provided for @chatContactoBloqueado.
+  ///
+  /// In es, this message translates to:
+  /// **'Por seguridad, los datos de contacto solo podrán compartirse cuando el trabajo haya sido aceptado.'**
+  String get chatContactoBloqueado;
+
   /// No description provided for @chatHint.
   ///
   /// In es, this message translates to:
@@ -2185,6 +2215,138 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se pudo registrar la resolución. Inténtalo de nuevo.'**
   String get adminResolucionError;
+
+  /// No description provided for @reportarProblemaTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Reportar un problema'**
+  String get reportarProblemaTitulo;
+
+  /// No description provided for @reportarProblemaMotivoLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Qué ha pasado?'**
+  String get reportarProblemaMotivoLabel;
+
+  /// No description provided for @reportarProblemaMotivoProfesionalNoPresento.
+  ///
+  /// In es, this message translates to:
+  /// **'El profesional no se presentó'**
+  String get reportarProblemaMotivoProfesionalNoPresento;
+
+  /// No description provided for @reportarProblemaMotivoClienteAusente.
+  ///
+  /// In es, this message translates to:
+  /// **'El cliente no estaba en la dirección'**
+  String get reportarProblemaMotivoClienteAusente;
+
+  /// No description provided for @reportarProblemaMotivoTrabajoCancelado.
+  ///
+  /// In es, this message translates to:
+  /// **'El trabajo fue cancelado'**
+  String get reportarProblemaMotivoTrabajoCancelado;
+
+  /// No description provided for @reportarProblemaMotivoProblemaPago.
+  ///
+  /// In es, this message translates to:
+  /// **'Problema con el pago'**
+  String get reportarProblemaMotivoProblemaPago;
+
+  /// No description provided for @reportarProblemaMotivoComportamiento.
+  ///
+  /// In es, this message translates to:
+  /// **'Comportamiento inapropiado'**
+  String get reportarProblemaMotivoComportamiento;
+
+  /// No description provided for @reportarProblemaMotivoOtro.
+  ///
+  /// In es, this message translates to:
+  /// **'Otro'**
+  String get reportarProblemaMotivoOtro;
+
+  /// No description provided for @reportarProblemaDescripcionLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Describe lo ocurrido'**
+  String get reportarProblemaDescripcionLabel;
+
+  /// No description provided for @reportarProblemaDescripcionHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuéntanos con detalle qué ha pasado'**
+  String get reportarProblemaDescripcionHint;
+
+  /// No description provided for @reportarProblemaFotosLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Fotos (opcional)'**
+  String get reportarProblemaFotosLabel;
+
+  /// No description provided for @reportarProblemaEnviar.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar reclamación'**
+  String get reportarProblemaEnviar;
+
+  /// No description provided for @reportarProblemaExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Reclamación enviada — nuestro equipo la revisará'**
+  String get reportarProblemaExito;
+
+  /// No description provided for @reportarProblemaError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo enviar la reclamación'**
+  String get reportarProblemaError;
+
+  /// No description provided for @reportarProblemaBoton.
+  ///
+  /// In es, this message translates to:
+  /// **'Reportar un problema'**
+  String get reportarProblemaBoton;
+
+  /// No description provided for @seguimientoVerCandidatos.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver candidatos ({n})'**
+  String seguimientoVerCandidatos(int n);
+
+  /// No description provided for @seleccionarProfesionalTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir profesional'**
+  String get seleccionarProfesionalTitulo;
+
+  /// No description provided for @seleccionarProfesionalElegir.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir profesional'**
+  String get seleccionarProfesionalElegir;
+
+  /// No description provided for @seleccionarProfesionalConfirmarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Confirmar elección?'**
+  String get seleccionarProfesionalConfirmarTitulo;
+
+  /// No description provided for @seleccionarProfesionalConfirmarTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'{nombre} quedará asignado a este trabajo. El resto de candidatos serán descartados.'**
+  String seleccionarProfesionalConfirmarTexto(String nombre);
+
+  /// No description provided for @seleccionarProfesionalError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo completar la selección. Puede que otra persona ya haya elegido.'**
+  String get seleccionarProfesionalError;
+
+  /// No description provided for @seleccionarProfesionalVacio.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay ningún profesional postulado — vuelve más tarde'**
+  String get seleccionarProfesionalVacio;
 }
 
 class _AppLocalizationsDelegate

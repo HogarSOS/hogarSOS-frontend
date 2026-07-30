@@ -10,6 +10,7 @@ import '../../services/service_request_service.dart';
 import '../../utils/error_extraction.dart';
 import '../../widgets/entrada_animada.dart';
 import '../chat_screen.dart';
+import '../reportar_problema_screen.dart';
 import '../cliente/valoracion_screen.dart';
 
 /// Trabajos que el profesional aceptó — en curso o ya completados
@@ -139,6 +140,11 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
                       ),
                       onCompletar: () => _completar(context, ref, trabajo),
                       onValorar: () => _valorar(context, ref, trabajo),
+                      onReportar: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ReportarProblemaScreen(serviceRequestId: trabajo.id),
+                        ),
+                      ),
                     ),
                   ),
                 );
@@ -167,6 +173,7 @@ class _TarjetaTrabajo extends StatelessWidget {
     required this.onChat,
     required this.onCompletar,
     required this.onValorar,
+    required this.onReportar,
   });
 
   final AssignedRequest trabajo;
@@ -174,6 +181,7 @@ class _TarjetaTrabajo extends StatelessWidget {
   final VoidCallback onChat;
   final VoidCallback onCompletar;
   final VoidCallback onValorar;
+  final VoidCallback onReportar;
 
   @override
   Widget build(BuildContext context) {
@@ -305,6 +313,17 @@ class _TarjetaTrabajo extends StatelessWidget {
                   ),
                 ],
               ),
+            const SizedBox(height: 8),
+            Center(
+              child: TextButton.icon(
+                icon: Icon(Icons.report_gmailerrorred_outlined, size: 16, color: colorScheme.error),
+                label: Text(
+                  t.reportarProblemaBoton,
+                  style: TextStyle(color: colorScheme.error, fontSize: 12.5),
+                ),
+                onPressed: onReportar,
+              ),
+            ),
           ],
         ),
       ),

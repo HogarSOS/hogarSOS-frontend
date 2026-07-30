@@ -1,13 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/service_request_model.dart';
 import '../../providers/service_request_provider.dart';
-import '../../services/chat_service.dart';
-import '../../services/service_request_service.dart';
 import '../../theme/brand_mark.dart';
 import '../../utils/error_extraction.dart';
 import '../../widgets/entrada_animada.dart';
@@ -21,61 +18,30 @@ import 'trabajos_activos_profesional_screen.dart';
 class HomeProfesionalScreen extends ConsumerWidget {
   const HomeProfesionalScreen({super.key});
 
-  Future<void> _aceptar(BuildContext context, WidgetRef ref, NearbyRequest solicitud) async {
+  Future<void> _postularse(BuildContext context, WidgetRef ref, NearbyRequest solicitud) async {
     final t = AppLocalizations.of(context);
 
-    // Antes de confirmar la aceptación de verdad, se pregunta cuándo
-    // puede el profesional hacer el trabajo — un dato que el cliente
-    // hoy no ve hasta que alguien escribe en el chat por su cuenta.
-    // Devuelve null si canceló (no acepta nada), o un string (puede
-    // estar vacío si no quiso escribir nada) si confirmó.
-    final mensajeDisponibilidad = await _mostrarDialogoDisponibilidad(context, t);
-    if (mensajeDisponibilidad == null) return;
-    if (!context.mounted) return;
+    // Mismo diálogo que antes se usaba justo tras aceptar (¿cuándo
+    // puedes ir?) — ahora ese mensaje ES la candidatura en sí, no algo
+    // que se manda por chat después. Devuelve null si canceló.
+    final mensaje = await _mostrarDialogoDisponibilidad(context, t);
+    if (mensaje == null || !context.mounted) return;
+    if (mensaje.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.profesionalPostulacionMensajeObligatorio)),
+      );
+      return;
+    }
 
     try {
-      await ref.read(nearbyRequestsProvider.notifier).aceptar(solicitud.id);
-      // La solicitud recién aceptada ya cuenta como "trabajo activo" —
-      // sin invalidar esto aquí, el contador/tarjeta de "Trabajos
-      // activos" de esta misma pantalla se quedaba desactualizado hasta
-      // el próximo pull-to-refresh o hasta salir y volver a entrar.
-      ref.invalidate(assignedRequestsProvider);
-
-      // El mensaje de disponibilidad se manda como un mensaje de chat
-      // normal, justo tras aceptar — acceptServiceRequest ya sincroniza
-      // los UIDs de Firebase en Firestore antes de responder con éxito,
-      // así que el chat ya está listo para escribir en él en este
-      // punto. Si de todos modos fallara (p. ej. esa sincronización
-      // concreta falló en su momento), no debe romper la aceptación:
-      // el trabajo ya quedó aceptado igualmente, y el cliente puede
-      // seguir viendo la conversación normal después.
-      if (mensajeDisponibilidad.isNotEmpty) {
-        try {
-          await ServiceRequestService().sincronizarChat(solicitud.id);
-          await ChatService().enviarMensaje(
-            serviceRequestId: solicitud.id,
-            texto: mensajeDisponibilidad,
-            autorId: FirebaseAuth.instance.currentUser?.uid ?? '',
-          );
-        } catch (e) {
-          debugPrint('[HomeProfesionalScreen] No se pudo enviar el mensaje de disponibilidad: $e');
-        }
-      }
-
+      await ref.read(nearbyRequestsProvider.notifier).postularse(solicitud.id, mensaje: mensaje);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.profesionalSolicitudAceptada)),
+        SnackBar(content: Text(t.profesionalPostulacionEnviada)),
       );
     } catch (e) {
-      debugPrint('[HomeProfesionalScreen] Error al aceptar solicitud: $e');
+      debugPrint('[HomeProfesionalScreen] Error al postularse: $e');
       if (!context.mounted) return;
-      // Antes mostraba siempre el mismo texto genérico
-      // (profesionalYaNoDisponible) para CUALQUIER fallo — un 403 por
-      // no estar verificado se veía exactamente igual que un 409 por
-      // condición de carrera (otro profesional se adelantó). El
-      // backend ya manda mensajes distintos para cada caso (ver
-      // acceptServiceRequest en serviceRequest.controller.ts); esto
-      // solo hacía falta dejar de ignorarlos.
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(mensajeDeError(e, contexto: t.profesionalYaNoDisponible, t: t))),
       );
@@ -201,7 +167,7 @@ class HomeProfesionalScreen extends ConsumerWidget {
                             child: _TarjetaSolicitudCercana(
                               solicitud: solicitud,
                               onIgnorar: () => ref.read(nearbyRequestsProvider.notifier).ocultar(solicitud.id),
-                              onAceptar: () => _aceptar(context, ref, solicitud),
+                              onPostularse: () => _postularse(context, ref, solicitud),
                             ),
                           ),
                         );
@@ -282,12 +248,12 @@ class _TarjetaSolicitudCercana extends StatelessWidget {
   const _TarjetaSolicitudCercana({
     required this.solicitud,
     required this.onIgnorar,
-    required this.onAceptar,
+    required this.onPostularse,
   });
 
   final NearbyRequest solicitud;
   final VoidCallback onIgnorar;
-  final VoidCallback onAceptar;
+  final VoidCallback onPostularse;
 
   @override
   Widget build(BuildContext context) {
@@ -359,23 +325,44 @@ class _TarjetaSolicitudCercana extends StatelessWidget {
               style: const TextStyle(fontSize: 14, height: 1.35),
             ),
             const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: onIgnorar,
-                    child: Text(t.profesionalIgnorar),
-                  ),
+            if (solicitud.yaPostulado)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: onAceptar,
-                    child: Text(t.profesionalAceptar),
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.check_circle_outline, size: 16, color: colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 6),
+                    Text(
+                      t.profesionalYaPostulado,
+                      style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              )
+            else
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: onIgnorar,
+                      child: Text(t.profesionalIgnorar),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: onPostularse,
+                      child: Text(t.profesionalPostularme),
+                    ),
+                  ),
+                ],
+              ),
           ],
         ),
       ),

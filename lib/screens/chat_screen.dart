@@ -8,6 +8,7 @@ import '../l10n/app_localizations.dart';
 import '../providers/chat_read_provider.dart';
 import '../services/chat_service.dart';
 import '../services/service_request_service.dart';
+import '../utils/contact_filter.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({
@@ -159,6 +160,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> _enviar() async {
     final texto = _mensajeController.text.trim();
     if (texto.isEmpty) return;
+
+    // Por seguridad: nada de teléfonos ni emails por chat antes de la
+    // contratación (y, por simplicidad, tampoco después — hoy nada
+    // depende de poder compartirlos ahí). El mensaje se queda en el
+    // campo, editable, en vez de perderse.
+    if (razonBloqueoMensaje(texto) != null) {
+      final t = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.chatContactoBloqueado)),
+      );
+      return;
+    }
 
     _mensajeController.clear();
     try {

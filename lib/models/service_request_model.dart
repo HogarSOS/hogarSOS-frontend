@@ -88,6 +88,7 @@ class ServiceRequestModel {
   final DateTime createdAt;
   final PaymentInfo? payment;
   final List<ReviewInfo> reviews;
+  final int numCandidatos;
 
   ServiceRequestModel({
     required this.id,
@@ -104,6 +105,7 @@ class ServiceRequestModel {
     required this.createdAt,
     this.payment,
     this.reviews = const [],
+    this.numCandidatos = 0,
   });
 
   /// La valoración que dejó ESTE usuario (no la que recibió) — null si
@@ -133,6 +135,7 @@ class ServiceRequestModel {
       reviews: (json['reviews'] as List? ?? [])
           .map((r) => ReviewInfo.fromJson(r as Map<String, dynamic>))
           .toList(),
+      numCandidatos: (json['numCandidatos'] as num?)?.toInt() ?? 0,
     );
   }
 }
@@ -243,6 +246,7 @@ class NearbyRequest {
   final UrgenciaSolicitud urgencia;
   final String clienteNombre;
   final String? clienteFotoUrl;
+  final bool yaPostulado;
 
   NearbyRequest({
     required this.id,
@@ -252,6 +256,7 @@ class NearbyRequest {
     this.urgencia = UrgenciaSolicitud.loAntesPosible,
     required this.clienteNombre,
     this.clienteFotoUrl,
+    this.yaPostulado = false,
   });
 
   factory NearbyRequest.fromJson(Map<String, dynamic> json) {
@@ -263,6 +268,7 @@ class NearbyRequest {
       urgencia: urgenciaFromString(json['urgencia'] as String? ?? 'lo_antes_posible'),
       clienteNombre: json['cliente_nombre'] as String? ?? '',
       clienteFotoUrl: json['cliente_foto_url'] as String?,
+      yaPostulado: json['ya_postulado'] as bool? ?? false,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import '../models/postulacion_model.dart';
 import '../models/service_category_model.dart';
 import '../models/service_request_model.dart';
 import 'api_service.dart';
@@ -75,8 +76,21 @@ class ServiceRequestService {
     return lista.map((json) => AssignedRequest.fromJson(json as Map<String, dynamic>)).toList();
   }
 
-  Future<void> aceptar(String id) async {
-    await _api.patch('/service-requests/$id/accept');
+  /// Se postula a una solicitud pendiente con un mensaje corto de
+  /// disponibilidad — quien queda asignado lo decide el cliente después
+  /// (ver seleccionarProfesional, más abajo).
+  Future<void> postularse(String id, {required String mensaje}) async {
+    await _api.post('/service-requests/$id/postulaciones', data: {'mensaje': mensaje});
+  }
+
+  Future<List<PostulacionCandidate>> listarPostulaciones(String id) async {
+    final respuesta = await _api.get('/service-requests/$id/postulaciones');
+    final lista = respuesta.data['postulaciones'] as List;
+    return lista.map((json) => PostulacionCandidate.fromJson(json as Map<String, dynamic>)).toList();
+  }
+
+  Future<void> seleccionarProfesional(String id, String postulacionId) async {
+    await _api.post('/service-requests/$id/postulaciones/$postulacionId/seleccionar');
   }
 
   Future<void> completar(String id, {required double precioFinal}) async {

@@ -193,8 +193,12 @@
   "profesionalAceptar": "Aceptar",
   "profesionalSolicitudAceptada": "Solicitud aceptada. El cliente autorizará el pago.",
   "profesionalYaNoDisponible": "No se pudo aceptar — puede que ya no esté disponible",
+  "profesionalPostularme": "Postularme",
+  "profesionalYaPostulado": "Ya te has postulado",
+  "profesionalPostulacionEnviada": "Candidatura enviada — el cliente elegirá entre los profesionales interesados",
+  "profesionalPostulacionMensajeObligatorio": "Escribe cuándo puedes hacer el trabajo antes de postularte",
   "profesionalDisponibilidadTitulo": "¿Cuándo puedes hacer este trabajo?",
-  "profesionalDisponibilidadSubtitulo": "Cuéntaselo al cliente — se enviará como primer mensaje del chat (opcional)",
+  "profesionalDisponibilidadSubtitulo": "El cliente lo verá en tu candidatura junto a tu foto y valoración",
   "profesionalDisponibilidadHint": "Ej: puedo ir mañana por la tarde...",
   "profesionalDisponibilidadSugerencia1": "Puedo ir mañana por la tarde",
   "profesionalDisponibilidadSugerencia2": "Estoy disponible el viernes a las 10:00",
@@ -310,6 +314,7 @@
   "chatSinMensajes": "Aún no hay mensajes",
   "chatErrorCargar": "No se pudo cargar el chat",
   "chatErrorEnviar": "No se pudo enviar el mensaje",
+  "chatContactoBloqueado": "Por seguridad, los datos de contacto solo podrán compartirse cuando el trabajo haya sido aceptado.",
   "chatHint": "Escribe un mensaje...",
   "seguimientoAutorizarPago": "Autorizar pago",
   "seguimientoValorar": "Valorar servicio",
@@ -405,5 +410,35 @@
   "adminNotasResolucionAyuda": "Mínimo 5 caracteres — quedará registrado en la disputa",
   "adminConfirmar": "Confirmar",
   "adminDecisionError": "No se pudo registrar la decisión. Inténtalo de nuevo.",
-  "adminResolucionError": "No se pudo registrar la resolución. Inténtalo de nuevo."
+  "adminResolucionError": "No se pudo registrar la resolución. Inténtalo de nuevo.",
+
+  "reportarProblemaTitulo": "Reportar un problema",
+  "reportarProblemaMotivoLabel": "¿Qué ha pasado?",
+  "reportarProblemaMotivoProfesionalNoPresento": "El profesional no se presentó",
+  "reportarProblemaMotivoClienteAusente": "El cliente no estaba en la dirección",
+  "reportarProblemaMotivoTrabajoCancelado": "El trabajo fue cancelado",
+  "reportarProblemaMotivoProblemaPago": "Problema con el pago",
+  "reportarProblemaMotivoComportamiento": "Comportamiento inapropiado",
+  "reportarProblemaMotivoOtro": "Otro",
+  "reportarProblemaDescripcionLabel": "Describe lo ocurrido",
+  "reportarProblemaDescripcionHint": "Cuéntanos con detalle qué ha pasado",
+  "reportarProblemaFotosLabel": "Fotos (opcional)",
+  "reportarProblemaEnviar": "Enviar reclamación",
+  "reportarProblemaExito": "Reclamación enviada — nuestro equipo la revisará",
+  "reportarProblemaError": "No se pudo enviar la reclamación",
+  "reportarProblemaBoton": "Reportar un problema",
+  "seguimientoVerCandidatos": "Ver candidatos ({n})",
+  "@seguimientoVerCandidatos": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+
+  "seleccionarProfesionalTitulo": "Elegir profesional",
+  "seleccionarProfesionalElegir": "Elegir profesional",
+  "seleccionarProfesionalConfirmarTitulo": "¿Confirmar elección?",
+  "seleccionarProfesionalConfirmarTexto": "{nombre} quedará asignado a este trabajo. El resto de candidatos serán descartados.",
+  "@seleccionarProfesionalConfirmarTexto": {
+    "placeholders": { "nombre": { "type": "String" } }
+  },
+  "seleccionarProfesionalError": "No se pudo completar la selección. Puede que otra persona ya haya elegido.",
+  "seleccionarProfesionalVacio": "Todavía no hay ningún profesional postulado — vuelve más tarde"
 }

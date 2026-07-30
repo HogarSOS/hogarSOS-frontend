@@ -42,13 +42,27 @@ class NearbyRequestsNotifier extends StateNotifier<AsyncValue<List<NearbyRequest
     );
   }
 
-  /// Acepta una solicitud y la quita de la lista local inmediatamente
-  /// (optimista), para que el profesional no vea un parpadeo mientras
-  /// se recarga toda la lista desde el servidor.
-  Future<void> aceptar(String solicitudId) async {
-    await _servicio.aceptar(solicitudId);
+  /// Se postula a una solicitud — a diferencia de aceptar, NO la quita
+  /// de la lista (sigue "pendiente" y visible para otros profesionales
+  /// hasta que el cliente elija a alguien); solo marca localmente
+  /// `yaPostulado` para que esta tarjeta deje de ofrecer el botón.
+  Future<void> postularse(String solicitudId, {required String mensaje}) async {
+    await _servicio.postularse(solicitudId, mensaje: mensaje);
     state = state.whenData(
-      (lista) => lista.where((s) => s.id != solicitudId).toList(),
+      (lista) => lista
+          .map((s) => s.id == solicitudId
+              ? NearbyRequest(
+                  id: s.id,
+                  descripcion: s.descripcion,
+                  distanciaMetros: s.distanciaMetros,
+                  createdAt: s.createdAt,
+                  urgencia: s.urgencia,
+                  clienteNombre: s.clienteNombre,
+                  clienteFotoUrl: s.clienteFotoUrl,
+                  yaPostulado: true,
+                )
+              : s)
+          .toList(),
     );
   }
 }

@@ -535,12 +535,26 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo aceptar — puede que ya no esté disponible';
 
   @override
+  String get profesionalPostularme => 'Postularme';
+
+  @override
+  String get profesionalYaPostulado => 'Ya te has postulado';
+
+  @override
+  String get profesionalPostulacionEnviada =>
+      'Candidatura enviada — el cliente elegirá entre los profesionales interesados';
+
+  @override
+  String get profesionalPostulacionMensajeObligatorio =>
+      'Escribe cuándo puedes hacer el trabajo antes de postularte';
+
+  @override
   String get profesionalDisponibilidadTitulo =>
       '¿Cuándo puedes hacer este trabajo?';
 
   @override
   String get profesionalDisponibilidadSubtitulo =>
-      'Cuéntaselo al cliente — se enviará como primer mensaje del chat (opcional)';
+      'El cliente lo verá en tu candidatura junto a tu foto y valoración';
 
   @override
   String get profesionalDisponibilidadHint =>
@@ -911,6 +925,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get chatErrorEnviar => 'No se pudo enviar el mensaje';
 
   @override
+  String get chatContactoBloqueado =>
+      'Por seguridad, los datos de contacto solo podrán compartirse cuando el trabajo haya sido aceptado.';
+
+  @override
   String get chatHint => 'Escribe un mensaje...';
 
   @override
@@ -1188,4 +1206,82 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get adminResolucionError =>
       'No se pudo registrar la resolución. Inténtalo de nuevo.';
+
+  @override
+  String get reportarProblemaTitulo => 'Reportar un problema';
+
+  @override
+  String get reportarProblemaMotivoLabel => '¿Qué ha pasado?';
+
+  @override
+  String get reportarProblemaMotivoProfesionalNoPresento =>
+      'El profesional no se presentó';
+
+  @override
+  String get reportarProblemaMotivoClienteAusente =>
+      'El cliente no estaba en la dirección';
+
+  @override
+  String get reportarProblemaMotivoTrabajoCancelado =>
+      'El trabajo fue cancelado';
+
+  @override
+  String get reportarProblemaMotivoProblemaPago => 'Problema con el pago';
+
+  @override
+  String get reportarProblemaMotivoComportamiento =>
+      'Comportamiento inapropiado';
+
+  @override
+  String get reportarProblemaMotivoOtro => 'Otro';
+
+  @override
+  String get reportarProblemaDescripcionLabel => 'Describe lo ocurrido';
+
+  @override
+  String get reportarProblemaDescripcionHint =>
+      'Cuéntanos con detalle qué ha pasado';
+
+  @override
+  String get reportarProblemaFotosLabel => 'Fotos (opcional)';
+
+  @override
+  String get reportarProblemaEnviar => 'Enviar reclamación';
+
+  @override
+  String get reportarProblemaExito =>
+      'Reclamación enviada — nuestro equipo la revisará';
+
+  @override
+  String get reportarProblemaError => 'No se pudo enviar la reclamación';
+
+  @override
+  String get reportarProblemaBoton => 'Reportar un problema';
+
+  @override
+  String seguimientoVerCandidatos(int n) {
+    return 'Ver candidatos ($n)';
+  }
+
+  @override
+  String get seleccionarProfesionalTitulo => 'Elegir profesional';
+
+  @override
+  String get seleccionarProfesionalElegir => 'Elegir profesional';
+
+  @override
+  String get seleccionarProfesionalConfirmarTitulo => '¿Confirmar elección?';
+
+  @override
+  String seleccionarProfesionalConfirmarTexto(String nombre) {
+    return '$nombre quedará asignado a este trabajo. El resto de candidatos serán descartados.';
+  }
+
+  @override
+  String get seleccionarProfesionalError =>
+      'No se pudo completar la selección. Puede que otra persona ya haya elegido.';
+
+  @override
+  String get seleccionarProfesionalVacio =>
+      'Todavía no hay ningún profesional postulado — vuelve más tarde';
 }

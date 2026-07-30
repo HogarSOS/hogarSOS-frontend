@@ -193,8 +193,12 @@
   "profesionalAceptar": "Accept",
   "profesionalSolicitudAceptada": "Request accepted. The customer will authorize payment.",
   "profesionalYaNoDisponible": "Couldn't accept — it may no longer be available",
+  "profesionalPostularme": "Apply",
+  "profesionalYaPostulado": "You've already applied",
+  "profesionalPostulacionEnviada": "Application sent — the customer will choose among interested professionals",
+  "profesionalPostulacionMensajeObligatorio": "Write when you can do the job before applying",
   "profesionalDisponibilidadTitulo": "When can you do this job?",
-  "profesionalDisponibilidadSubtitulo": "Let the customer know — it'll be sent as the first chat message (optional)",
+  "profesionalDisponibilidadSubtitulo": "The customer will see this on your application, along with your photo and rating",
   "profesionalDisponibilidadHint": "E.g.: I can come tomorrow afternoon...",
   "profesionalDisponibilidadSugerencia1": "I can come tomorrow afternoon",
   "profesionalDisponibilidadSugerencia2": "I'm available Friday at 10:00",
@@ -310,6 +314,7 @@
   "chatSinMensajes": "No messages yet",
   "chatErrorCargar": "Couldn't load the chat",
   "chatErrorEnviar": "Couldn't send the message",
+  "chatContactoBloqueado": "For your safety, contact details can only be shared once the job has been accepted.",
   "chatHint": "Write a message...",
   "seguimientoAutorizarPago": "Authorize payment",
   "seguimientoValorar": "Rate service",
@@ -405,5 +410,35 @@
   "adminNotasResolucionAyuda": "Minimum 5 characters — this will be recorded on the dispute",
   "adminConfirmar": "Confirm",
   "adminDecisionError": "Couldn't record the decision. Please try again.",
-  "adminResolucionError": "Couldn't record the resolution. Please try again."
+  "adminResolucionError": "Couldn't record the resolution. Please try again.",
+
+  "reportarProblemaTitulo": "Report a problem",
+  "reportarProblemaMotivoLabel": "What happened?",
+  "reportarProblemaMotivoProfesionalNoPresento": "The professional didn't show up",
+  "reportarProblemaMotivoClienteAusente": "The customer wasn't at the address",
+  "reportarProblemaMotivoTrabajoCancelado": "The job was cancelled",
+  "reportarProblemaMotivoProblemaPago": "Payment issue",
+  "reportarProblemaMotivoComportamiento": "Inappropriate behavior",
+  "reportarProblemaMotivoOtro": "Other",
+  "reportarProblemaDescripcionLabel": "Describe what happened",
+  "reportarProblemaDescripcionHint": "Tell us in detail what happened",
+  "reportarProblemaFotosLabel": "Photos (optional)",
+  "reportarProblemaEnviar": "Send report",
+  "reportarProblemaExito": "Report sent — our team will review it",
+  "reportarProblemaError": "Couldn't send the report",
+  "reportarProblemaBoton": "Report a problem",
+  "seguimientoVerCandidatos": "See candidates ({n})",
+  "@seguimientoVerCandidatos": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+
+  "seleccionarProfesionalTitulo": "Choose professional",
+  "seleccionarProfesionalElegir": "Choose professional",
+  "seleccionarProfesionalConfirmarTitulo": "Confirm your choice?",
+  "seleccionarProfesionalConfirmarTexto": "{nombre} will be assigned to this job. The other candidates will be dismissed.",
+  "@seleccionarProfesionalConfirmarTexto": {
+    "placeholders": { "nombre": { "type": "String" } }
+  },
+  "seleccionarProfesionalError": "Couldn't complete the selection. Someone else may have already chosen.",
+  "seleccionarProfesionalVacio": "No professionals have applied yet — check back later"
 }
