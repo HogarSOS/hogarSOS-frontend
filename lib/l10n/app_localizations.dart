@@ -134,6 +134,12 @@ abstract class AppLocalizations {
   /// **'Disponibilidad'**
   String get navDisponibilidad;
 
+  /// No description provided for @navSolicitudesCercanas.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitudes'**
+  String get navSolicitudesCercanas;
+
   /// No description provided for @loginTagline.
   ///
   /// In es, this message translates to:

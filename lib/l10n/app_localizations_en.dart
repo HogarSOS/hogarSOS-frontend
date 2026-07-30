@@ -27,6 +27,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navDisponibilidad => 'Availability';
 
   @override
+  String get navSolicitudesCercanas => 'Requests';
+
+  @override
   String get loginTagline => 'Trusted home services';
 
   @override

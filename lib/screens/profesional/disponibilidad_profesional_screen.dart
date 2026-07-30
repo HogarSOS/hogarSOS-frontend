@@ -133,8 +133,11 @@ class _DisponibilidadProfesionalScreenState extends ConsumerState<Disponibilidad
     // los datos de cuando se cargó esta pestaña por primera vez, porque
     // _cargar() solo se llama una vez en initState y esta pantalla
     // nunca se destruye al cambiar de pestaña.
+    // Orden actual del shell: 0 Perfil, 1 Solicitudes, 2 Disponibilidad
+    // (esta pantalla), 3 Mensajes — índice 2, no 1 como antes de
+    // reordenar las pestañas.
     ref.listen<int>(profesionalTabIndexProvider, (anterior, actual) {
-      if (actual == 1 && anterior != 1) _cargar();
+      if (actual == 2 && anterior != 2) _cargar();
     });
 
     return Scaffold(
@@ -149,7 +152,8 @@ class _DisponibilidadProfesionalScreenState extends ConsumerState<Disponibilidad
                     padding: const EdgeInsets.only(bottom: 20),
                     child: EntradaAnimada(
                       child: _AvisoPerfilIncompleto(
-                        onCompletar: () => ref.read(profesionalTabIndexProvider.notifier).state = 3,
+                        // 0 = Perfil (ver orden arriba).
+                        onCompletar: () => ref.read(profesionalTabIndexProvider.notifier).state = 0,
                       ),
                     ),
                   )

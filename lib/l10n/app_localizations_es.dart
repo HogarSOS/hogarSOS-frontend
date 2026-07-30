@@ -27,6 +27,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get navDisponibilidad => 'Disponibilidad';
 
   @override
+  String get navSolicitudesCercanas => 'Solicitudes';
+
+  @override
   String get loginTagline => 'Servicios a domicilio de confianza';
 
   @override

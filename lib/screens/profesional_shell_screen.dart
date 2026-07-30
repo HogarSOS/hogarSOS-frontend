@@ -39,11 +39,16 @@ class ProfesionalShellScreen extends ConsumerStatefulWidget {
 class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen> {
   DateTime? _ultimaPulsacionAtras;
 
+  // Orden pedido por el usuario tras probar la beta: Perfil primero (es
+  // lo primero que se ve al entrar, en vez de tener que ir a buscarlo a
+  // la derecha), y "Inicio" renombrado a "Solicitudes" porque eso es
+  // literalmente lo que muestra esa pantalla (solicitudes cercanas sin
+  // aceptar) — "Inicio" no decía nada sobre su contenido real.
   static const _pantallas = [
+    MiPerfilProfesionalScreen(),
     HomeProfesionalScreen(),
     DisponibilidadProfesionalScreen(),
     TrabajosActivosProfesionalScreen(),
-    MiPerfilProfesionalScreen(),
   ];
 
   @override
@@ -102,9 +107,14 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
           onDestinationSelected: (i) => ref.read(profesionalTabIndexProvider.notifier).state = i,
           destinations: [
             NavigationDestination(
-              icon: const Icon(Icons.home_outlined),
-              selectedIcon: const Icon(Icons.home),
-              label: t.navInicio,
+              icon: const Icon(Icons.person_outline),
+              selectedIcon: const Icon(Icons.person),
+              label: t.navPerfil,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.home_repair_service_outlined),
+              selectedIcon: const Icon(Icons.home_repair_service),
+              label: t.navSolicitudesCercanas,
             ),
             NavigationDestination(
               icon: const Icon(Icons.bolt_outlined),
@@ -115,11 +125,6 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
               icon: Badge(isLabelVisible: hayMensajesNoLeidos, child: const Icon(Icons.chat_bubble_outline)),
               selectedIcon: Badge(isLabelVisible: hayMensajesNoLeidos, child: const Icon(Icons.chat_bubble)),
               label: t.navMensajes,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.person_outline),
-              selectedIcon: const Icon(Icons.person),
-              label: t.navPerfil,
             ),
           ],
         ),
