@@ -87,6 +87,13 @@ class ServiceRequestService {
     await _api.patch('/service-requests/$id/cancel');
   }
 
+  /// Borra del historial una solicitud que nadie llegó a aceptar
+  /// (pendiente o cancelada, sin profesional asignado) — el backend
+  /// rechaza el borrado si ya hubo un profesional de por medio.
+  Future<void> borrar(String id) async {
+    await _api.delete('/service-requests/$id');
+  }
+
   /// Reintenta la sincronización del chat de esta solicitud a Firestore
   /// (UIDs de Firebase de cliente y profesional). La sincronización
   /// automática al aceptar puede fallar en silencio del lado del

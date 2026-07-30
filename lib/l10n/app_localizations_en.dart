@@ -979,6 +979,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get misSolicitudesVacio => 'You haven\'t made any requests yet';
 
   @override
+  String get misSolicitudesBorrarTitulo => 'Delete this request?';
+
+  @override
+  String get misSolicitudesBorrarMensaje =>
+      'It will be removed from your history. This can\'t be undone.';
+
+  @override
+  String get misSolicitudesBorrarConfirmar => 'Delete';
+
+  @override
+  String get misSolicitudesBorrarExito => 'Request deleted';
+
+  @override
+  String get misSolicitudesBorrarError => 'Couldn\'t delete the request';
+
+  @override
   String get wizardTitulo => 'New request';
 
   @override

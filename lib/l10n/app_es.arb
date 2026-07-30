@@ -335,6 +335,11 @@
 
   "misSolicitudesError": "No se pudieron cargar tus solicitudes",
   "misSolicitudesVacio": "Aún no has hecho ninguna solicitud",
+  "misSolicitudesBorrarTitulo": "¿Borrar esta solicitud?",
+  "misSolicitudesBorrarMensaje": "Se eliminará de tu historial. Esta acción no se puede deshacer.",
+  "misSolicitudesBorrarConfirmar": "Borrar",
+  "misSolicitudesBorrarExito": "Solicitud borrada",
+  "misSolicitudesBorrarError": "No se pudo borrar la solicitud",
 
   "wizardTitulo": "Nueva solicitud",
   "wizardPaso": "Paso {actual} de {total}",

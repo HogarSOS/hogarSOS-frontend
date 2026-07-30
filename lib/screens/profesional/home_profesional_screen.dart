@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -304,6 +305,28 @@ class _TarjetaSolicitudCercana extends StatelessWidget {
           children: [
             Row(
               children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: colorScheme.primaryContainer,
+                  backgroundImage: solicitud.clienteFotoUrl != null
+                      ? CachedNetworkImageProvider(solicitud.clienteFotoUrl!)
+                      : null,
+                  child: solicitud.clienteFotoUrl == null
+                      ? Text(
+                          solicitud.clienteNombre.isNotEmpty ? solicitud.clienteNombre[0].toUpperCase() : '?',
+                          style: TextStyle(color: colorScheme.onPrimaryContainer, fontWeight: FontWeight.bold),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    solicitud.clienteNombre,
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(

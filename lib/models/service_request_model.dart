@@ -193,6 +193,7 @@ class AssignedRequest {
   final String? direccionTexto;
   final String clienteNombre;
   final String? clienteTelefono;
+  final String? clienteFotoUrl;
   final double? precioEstimado;
   final double? precioFinal;
   final DateTime createdAt;
@@ -207,6 +208,7 @@ class AssignedRequest {
     this.direccionTexto,
     required this.clienteNombre,
     this.clienteTelefono,
+    this.clienteFotoUrl,
     this.precioEstimado,
     this.precioFinal,
     required this.createdAt,
@@ -223,6 +225,7 @@ class AssignedRequest {
       direccionTexto: json['direccionTexto'] as String?,
       clienteNombre: json['clienteNombre'] as String,
       clienteTelefono: json['clienteTelefono'] as String?,
+      clienteFotoUrl: json['clienteFotoUrl'] as String?,
       precioEstimado: (json['precioEstimado'] as num?)?.toDouble(),
       precioFinal: (json['precioFinal'] as num?)?.toDouble(),
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -238,6 +241,8 @@ class NearbyRequest {
   final double distanciaMetros;
   final DateTime createdAt;
   final UrgenciaSolicitud urgencia;
+  final String clienteNombre;
+  final String? clienteFotoUrl;
 
   NearbyRequest({
     required this.id,
@@ -245,6 +250,8 @@ class NearbyRequest {
     required this.distanciaMetros,
     required this.createdAt,
     this.urgencia = UrgenciaSolicitud.loAntesPosible,
+    required this.clienteNombre,
+    this.clienteFotoUrl,
   });
 
   factory NearbyRequest.fromJson(Map<String, dynamic> json) {
@@ -254,6 +261,8 @@ class NearbyRequest {
       distanciaMetros: (json['distancia_metros'] as num).toDouble(),
       createdAt: DateTime.parse(json['created_at'] as String),
       urgencia: urgenciaFromString(json['urgencia'] as String? ?? 'lo_antes_posible'),
+      clienteNombre: json['cliente_nombre'] as String? ?? '',
+      clienteFotoUrl: json['cliente_foto_url'] as String?,
     );
   }
 }

@@ -335,6 +335,11 @@
 
   "misSolicitudesError": "Couldn't load your requests",
   "misSolicitudesVacio": "You haven't made any requests yet",
+  "misSolicitudesBorrarTitulo": "Delete this request?",
+  "misSolicitudesBorrarMensaje": "It will be removed from your history. This can't be undone.",
+  "misSolicitudesBorrarConfirmar": "Delete",
+  "misSolicitudesBorrarExito": "Request deleted",
+  "misSolicitudesBorrarError": "Couldn't delete the request",
 
   "wizardTitulo": "New request",
   "wizardPaso": "Step {actual} of {total}",

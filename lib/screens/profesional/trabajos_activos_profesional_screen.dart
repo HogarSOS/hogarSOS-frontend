@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -192,10 +193,15 @@ class _TarjetaTrabajo extends StatelessWidget {
               children: [
                 CircleAvatar(
                   backgroundColor: colorScheme.primaryContainer,
-                  child: Text(
-                    trabajo.clienteNombre.isNotEmpty ? trabajo.clienteNombre[0].toUpperCase() : '?',
-                    style: TextStyle(color: colorScheme.onPrimaryContainer, fontWeight: FontWeight.bold),
-                  ),
+                  backgroundImage: trabajo.clienteFotoUrl != null
+                      ? CachedNetworkImageProvider(trabajo.clienteFotoUrl!)
+                      : null,
+                  child: trabajo.clienteFotoUrl == null
+                      ? Text(
+                          trabajo.clienteNombre.isNotEmpty ? trabajo.clienteNombre[0].toUpperCase() : '?',
+                          style: TextStyle(color: colorScheme.onPrimaryContainer, fontWeight: FontWeight.bold),
+                        )
+                      : null,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

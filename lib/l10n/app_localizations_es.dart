@@ -988,6 +988,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String get misSolicitudesVacio => 'Aún no has hecho ninguna solicitud';
 
   @override
+  String get misSolicitudesBorrarTitulo => '¿Borrar esta solicitud?';
+
+  @override
+  String get misSolicitudesBorrarMensaje =>
+      'Se eliminará de tu historial. Esta acción no se puede deshacer.';
+
+  @override
+  String get misSolicitudesBorrarConfirmar => 'Borrar';
+
+  @override
+  String get misSolicitudesBorrarExito => 'Solicitud borrada';
+
+  @override
+  String get misSolicitudesBorrarError => 'No se pudo borrar la solicitud';
+
+  @override
   String get wizardTitulo => 'Nueva solicitud';
 
   @override

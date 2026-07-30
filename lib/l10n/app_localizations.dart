@@ -1814,6 +1814,36 @@ abstract class AppLocalizations {
   /// **'Aún no has hecho ninguna solicitud'**
   String get misSolicitudesVacio;
 
+  /// No description provided for @misSolicitudesBorrarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Borrar esta solicitud?'**
+  String get misSolicitudesBorrarTitulo;
+
+  /// No description provided for @misSolicitudesBorrarMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Se eliminará de tu historial. Esta acción no se puede deshacer.'**
+  String get misSolicitudesBorrarMensaje;
+
+  /// No description provided for @misSolicitudesBorrarConfirmar.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar'**
+  String get misSolicitudesBorrarConfirmar;
+
+  /// No description provided for @misSolicitudesBorrarExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud borrada'**
+  String get misSolicitudesBorrarExito;
+
+  /// No description provided for @misSolicitudesBorrarError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo borrar la solicitud'**
+  String get misSolicitudesBorrarError;
+
   /// No description provided for @wizardTitulo.
   ///
   /// In es, this message translates to:

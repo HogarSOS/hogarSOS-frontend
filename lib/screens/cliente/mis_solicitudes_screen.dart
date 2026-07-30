@@ -34,6 +34,43 @@ class _MisSolicitudesScreenState extends ConsumerState<MisSolicitudesScreen> {
     ref.invalidate(resumenActividadClienteProvider);
   }
 
+  Future<bool> _confirmarBorrado(BuildContext context) async {
+    final t = AppLocalizations.of(context);
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t.misSolicitudesBorrarTitulo),
+        content: Text(t.misSolicitudesBorrarMensaje),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(t.perfilCancelar),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(t.misSolicitudesBorrarConfirmar),
+          ),
+        ],
+      ),
+    );
+    return confirmado ?? false;
+  }
+
+  Future<void> _borrar(String id) async {
+    final t = AppLocalizations.of(context);
+    try {
+      await _servicio.borrar(id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.misSolicitudesBorrarExito)));
+      _recargar();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.misSolicitudesBorrarError)));
+      _recargar(); // por si el Dismissible ya la quitó visualmente antes de fallar
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
@@ -75,9 +112,28 @@ class _MisSolicitudesScreenState extends ConsumerState<MisSolicitudesScreen> {
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
                 final s = solicitudes[index];
-                return EntradaAnimada(
+                final borrable = s.profesionalNombre == null &&
+                    (s.estado == EstadoSolicitud.pendiente || s.estado == EstadoSolicitud.cancelada);
+                final tile = EntradaAnimada(
                   retraso: Duration(milliseconds: 40 * index),
                   child: _SolicitudTile(solicitud: s, onRegresar: _recargar),
+                );
+                if (!borrable) return tile;
+                return Dismissible(
+                  key: ValueKey(s.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.error,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.onError),
+                  ),
+                  confirmDismiss: (_) => _confirmarBorrado(context),
+                  onDismissed: (_) => _borrar(s.id),
+                  child: tile,
                 );
               },
             ),
