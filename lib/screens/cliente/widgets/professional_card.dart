@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/professional_summary_model.dart';
@@ -43,8 +44,14 @@ class ProfessionalCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: colorCategoria.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(14),
+                    // CachedNetworkImageProvider (con caché de disco) en vez
+                    // de NetworkImage (solo caché en memoria, se pierde en
+                    // cuanto el widget se recrea): el mismo profesional
+                    // aparece en la búsqueda, en su detalle y en su perfil,
+                    // así que sin caché de disco su foto se re-descarga cada
+                    // vez que se reconstruye esta tarjeta.
                     image: p.fotoPerfilUrl != null
-                        ? DecorationImage(image: NetworkImage(p.fotoPerfilUrl!), fit: BoxFit.cover)
+                        ? DecorationImage(image: CachedNetworkImageProvider(p.fotoPerfilUrl!), fit: BoxFit.cover)
                         : null,
                   ),
                   child: p.fotoPerfilUrl == null

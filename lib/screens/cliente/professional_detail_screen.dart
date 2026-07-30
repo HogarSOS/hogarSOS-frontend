@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/professional_summary_model.dart';
@@ -69,7 +70,8 @@ class _Contenido extends StatelessWidget {
                     child: CircleAvatar(
                       radius: 44,
                       backgroundColor: colorScheme.primary,
-                      backgroundImage: perfil.fotoPerfilUrl != null ? NetworkImage(perfil.fotoPerfilUrl!) : null,
+                      backgroundImage:
+                          perfil.fotoPerfilUrl != null ? CachedNetworkImageProvider(perfil.fotoPerfilUrl!) : null,
                       child: perfil.fotoPerfilUrl == null
                           ? Text(
                               perfil.nombre.isNotEmpty ? perfil.nombre[0].toUpperCase() : '?',

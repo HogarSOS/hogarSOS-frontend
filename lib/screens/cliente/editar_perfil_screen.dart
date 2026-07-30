@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -134,7 +135,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                         backgroundImage: _fotoLocalSeleccionada != null
                             ? FileImage(_fotoLocalSeleccionada!)
                             : (_fotoPerfilUrlActual != null
-                                ? NetworkImage(_fotoPerfilUrlActual!)
+                                ? CachedNetworkImageProvider(_fotoPerfilUrlActual!)
                                 : null) as ImageProvider?,
                         child: (_fotoLocalSeleccionada == null && _fotoPerfilUrlActual == null)
                             ? Text(

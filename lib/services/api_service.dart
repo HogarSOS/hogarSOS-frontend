@@ -80,6 +80,15 @@ class ApiService {
     BaseOptions(
       baseUrl: _baseUrl,
       connectTimeout: const Duration(seconds: 10),
+      // Sin receiveTimeout/sendTimeout, una respuesta que nunca llega
+      // (backend colgado, no solo lento) deja el spinner girando sin
+      // límite en vez de fallar con un error recuperable. 60s en
+      // receive porque el backend está en el plan gratuito de Render y
+      // el cold start tras inactividad puede tardar ~50s (ver
+      // dev_environment notes) — un timeout más corto convertiría ese
+      // caso ya conocido en un error falso en vez de solo lento.
+      receiveTimeout: const Duration(seconds: 60),
+      sendTimeout: const Duration(seconds: 30),
     ),
   );
 

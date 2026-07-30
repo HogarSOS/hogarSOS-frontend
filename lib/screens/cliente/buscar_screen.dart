@@ -6,6 +6,7 @@ import '../../providers/search_provider.dart';
 import '../../providers/service_request_provider.dart';
 import '../../utils/category_display.dart';
 import '../../widgets/entrada_animada.dart';
+import '../cliente_shell_screen.dart';
 import 'professional_detail_screen.dart';
 import 'widgets/filtros_sheet.dart';
 import 'widgets/professional_card.dart';
@@ -77,8 +78,16 @@ class _BuscarScreenState extends ConsumerState<BuscarScreen> {
     final searchNotifier = ref.read(searchProvider.notifier);
 
     // Primera carga: muestra resultados desde el principio (no espera
-    // a que el usuario escriba o toque un filtro).
-    if (!_yaBuscoInicial) {
+    // a que el usuario escriba o toque un filtro). Se espera a que esta
+    // pestaña esté realmente seleccionada (índice 1 en
+    // ClienteShellScreen) antes de disparar la búsqueda inicial y el
+    // permiso de ubicación que conlleva — como ClienteShellScreen usa
+    // IndexedStack, este widget se construye en cuanto se inicia sesión
+    // aunque el usuario esté viendo "Inicio"; sin este guardado, la
+    // búsqueda (y el diálogo de permiso de ubicación) se disparaba de
+    // inmediato al hacer login, compitiendo por red con las llamadas
+    // que sí hacían falta para pintar Inicio.
+    if (!_yaBuscoInicial && ref.watch(clienteTabIndexProvider) == 1) {
       _yaBuscoInicial = true;
       WidgetsBinding.instance.addPostFrameCallback((_) => searchNotifier.buscarInicial());
     }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/service_request_model.dart';
-import '../../services/service_request_service.dart';
+import '../../providers/chat_read_provider.dart';
+import '../../providers/service_request_provider.dart';
 import '../../utils/category_display.dart';
 import '../../widgets/entrada_animada.dart';
 import '../chat_screen.dart';
@@ -18,61 +20,46 @@ import '../chat_screen.dart';
 /// activas (aceptada/en_progreso) — mismo criterio que ya usa el botón
 /// de chat en seguimiento_solicitud_screen.dart, para no inventar un
 /// criterio nuevo y distinto.
-class MensajesScreen extends StatefulWidget {
+// ConsumerWidget en vez de StatefulWidget con su propio
+// ServiceRequestService(): antes esta pantalla pedía su propia copia de
+// "mis solicitudes" (GET /service-requests/mine) por su cuenta, exactamente
+// la misma llamada que ya hace resumenActividadClienteProvider para el
+// banner de Inicio — como ClienteShellScreen mantiene las 4 pestañas
+// montadas a la vez (IndexedStack), eso disparaba dos peticiones idénticas
+// en paralelo nada más iniciar sesión. Al compartir el provider, Riverpod
+// cachea el resultado una sola vez para toda la sesión del cliente.
+class MensajesScreen extends ConsumerWidget {
   const MensajesScreen({super.key});
 
   @override
-  State<MensajesScreen> createState() => _MensajesScreenState();
-}
-
-class _MensajesScreenState extends State<MensajesScreen> {
-  final _servicio = ServiceRequestService();
-  late Future<List<MyServiceRequestSummary>> _futuro;
-
-  @override
-  void initState() {
-    super.initState();
-    _futuro = _servicio.listarMisSolicitudes();
-  }
-
-  void _recargar() {
-    setState(() => _futuro = _servicio.listarMisSolicitudes());
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final resumenAsync = ref.watch(resumenActividadClienteProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(t.navMensajes)),
-      body: FutureBuilder<List<MyServiceRequestSummary>>(
-        future: _futuro,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData && !snapshot.hasError) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return RefreshIndicator(
-              onRefresh: () async => _recargar(),
-              child: ListView(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Center(child: Text(t.misSolicitudesError)),
-                  ),
-                ],
+      body: resumenAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, __) => RefreshIndicator(
+          onRefresh: () async => ref.invalidate(resumenActividadClienteProvider),
+          child: ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(32),
+                child: Center(child: Text(t.misSolicitudesError)),
               ),
-            );
-          }
-
-          final conversaciones = snapshot.data!
+            ],
+          ),
+        ),
+        data: (solicitudes) {
+          final conversaciones = solicitudes
               .where((s) => s.estado == EstadoSolicitud.aceptada || s.estado == EstadoSolicitud.en_progreso)
               .toList();
 
           if (conversaciones.isEmpty) {
             return RefreshIndicator(
-              onRefresh: () async => _recargar(),
+              onRefresh: () async => ref.invalidate(resumenActividadClienteProvider),
               child: ListView(
                 children: [
                   Padding(
@@ -108,7 +95,7 @@ class _MensajesScreenState extends State<MensajesScreen> {
           }
 
           return RefreshIndicator(
-            onRefresh: () async => _recargar(),
+            onRefresh: () async => ref.invalidate(resumenActividadClienteProvider),
             child: ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: conversaciones.length,
@@ -116,6 +103,7 @@ class _MensajesScreenState extends State<MensajesScreen> {
               itemBuilder: (context, index) {
                 final s = conversaciones[index];
                 final color = colorParaCategoria(s.categoria);
+                final noLeido = ref.watch(unreadChatProvider(s.id));
                 return EntradaAnimada(
                   retraso: Duration(milliseconds: 40 * index),
                   child: Card(
@@ -127,13 +115,23 @@ class _MensajesScreenState extends State<MensajesScreen> {
                         decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(12)),
                         child: Icon(iconoParaCategoria(s.categoria), color: color, size: 22),
                       ),
-                      title: Text(nombreLocalizadoCategoria(context, s.categoria)),
+                      title: Text(
+                        nombreLocalizadoCategoria(context, s.categoria),
+                        style: TextStyle(fontWeight: noLeido ? FontWeight.w800 : FontWeight.w400),
+                      ),
                       subtitle: Text(
                         s.descripcion,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontWeight: noLeido ? FontWeight.w600 : FontWeight.normal),
                       ),
-                      trailing: const Icon(Icons.chat_bubble_outline),
+                      trailing: noLeido
+                          ? Container(
+                              width: 12,
+                              height: 12,
+                              decoration: BoxDecoration(color: colorScheme.error, shape: BoxShape.circle),
+                            )
+                          : const Icon(Icons.chat_bubble_outline),
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => ChatScreen(serviceRequestId: s.id, nombreContraparte: s.profesionalNombre),
