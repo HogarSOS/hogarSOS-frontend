@@ -26,6 +26,16 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>hogarSOS usa tu ubicación para mostrarte profesionales cercanos y para que los profesionales aparezcan en las búsquedas de clientes cerca de ellos.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>hogarSOS usa la cámara para hacer fotos del problema al pedir un servicio y para subir tu documento de identidad al verificarte como profesional.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>hogarSOS accede a tus fotos para adjuntarlas a una solicitud de servicio o a tu perfil.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

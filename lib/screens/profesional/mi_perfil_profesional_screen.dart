@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,6 +13,8 @@ import '../../utils/category_display.dart';
 import '../../utils/error_extraction.dart';
 import '../../widgets/entrada_animada.dart';
 import '../../widgets/lista_opiniones.dart';
+import '../legal/privacidad_screen.dart';
+import '../legal/terminos_screen.dart';
 import '../../widgets/verification_badge.dart';
 import '../auth/login_screen.dart';
 import 'disponibilidad_profesional_screen.dart';
@@ -583,7 +586,31 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                           ),
                         ),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 24),
+                      EntradaAnimada(
+                        retraso: const Duration(milliseconds: 290),
+                        child: Center(
+                          child: Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 4,
+                            children: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const PrivacidadScreen()),
+                                ),
+                                child: Text(t.perfilPrivacidad, style: const TextStyle(fontSize: 12.5)),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const TerminosScreen()),
+                                ),
+                                child: Text(t.perfilTerminos, style: const TextStyle(fontSize: 12.5)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       EntradaAnimada(
                         retraso: const Duration(milliseconds: 300),
                         child: Center(
@@ -658,7 +685,7 @@ class _Cabecera extends StatelessWidget {
                 backgroundColor: colorScheme.primaryContainer,
                 backgroundImage: fotoLocal != null
                     ? FileImage(fotoLocal!)
-                    : (fotoUrl != null ? NetworkImage(fotoUrl!) : null) as ImageProvider?,
+                    : (fotoUrl != null ? CachedNetworkImageProvider(fotoUrl!) : null) as ImageProvider?,
                 child: (fotoLocal == null && fotoUrl == null)
                     ? Text(
                         nombre.isNotEmpty ? nombre[0].toUpperCase() : '?',

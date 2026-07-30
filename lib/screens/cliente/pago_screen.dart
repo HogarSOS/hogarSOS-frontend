@@ -4,6 +4,7 @@ import 'package:flutter_stripe/flutter_stripe.dart' hide Card;
 import '../../l10n/app_localizations.dart';
 import '../../services/payment_service.dart';
 import '../../widgets/entrada_animada.dart';
+import '../legal/terminos_screen.dart';
 
 class PagoScreen extends StatefulWidget {
   const PagoScreen({super.key, required this.serviceRequestId});
@@ -94,6 +95,22 @@ class _PagoScreenState extends State<PagoScreen> {
               ),
             ),
             const Spacer(),
+            // Enlace real a los términos (incluye cancelación/reembolso)
+            // justo antes de pagar — no basta con tenerlos enterrados en
+            // el perfil, las tiendas de apps piden que sean visibles en
+            // el propio flujo de pago.
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const TerminosScreen()),
+                ),
+                child: Text(
+                  t.pagoAceptacionTerminos,
+                  style: const TextStyle(fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
             if (_error != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),

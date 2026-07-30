@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
@@ -6,6 +7,8 @@ import '../../providers/auth_provider.dart';
 import '../../theme/brand_mark.dart';
 import '../admin/admin_screen.dart';
 import '../cliente_shell_screen.dart';
+import '../legal/privacidad_screen.dart';
+import '../legal/terminos_screen.dart';
 import '../profesional_shell_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -221,6 +224,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             title: Text(t.loginRecordarSesion, style: const TextStyle(fontSize: 13.5)),
                           ),
                         ),
+                        if (_modoRegistro) ...[
+                          _AvisoLegal(t: t, colorScheme: colorScheme),
+                          const SizedBox(height: 12),
+                        ],
                         const SizedBox(height: 8),
                         if (_errorValidacion != null || authState.error != null)
                           Padding(
@@ -262,6 +269,54 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Aviso de "al registrarte, aceptas..." con enlaces reales a las
+/// pantallas legales — antes no existía ningún punto de aceptación
+/// explícito en el registro, algo que las tiendas de apps exigen ver
+/// antes o durante el alta de cuenta, no solo escondido en el perfil.
+/// Construido a partir de fragmentos traducidos por separado (prefijo /
+/// "y" / sufijo) en vez de buscar dónde caen los enlaces dentro de una
+/// única frase ya traducida — más simple y no depende de que el texto
+/// de cada idioma coincida carácter a carácter con las claves de perfil.
+class _AvisoLegal extends StatelessWidget {
+  const _AvisoLegal({required this.t, required this.colorScheme});
+
+  final AppLocalizations t;
+  final ColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final estilo = TextStyle(fontSize: 11.5, color: colorScheme.onSurfaceVariant);
+    final estiloEnlace = estilo.copyWith(color: colorScheme.primary, fontWeight: FontWeight.w600);
+
+    return Text.rich(
+      TextSpan(
+        style: estilo,
+        children: [
+          TextSpan(text: t.legalAceptacionPrefijo),
+          TextSpan(
+            text: t.perfilTerminos,
+            style: estiloEnlace,
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const TerminosScreen()),
+                  ),
+          ),
+          TextSpan(text: t.legalAceptacionY),
+          TextSpan(
+            text: t.perfilPrivacidad,
+            style: estiloEnlace,
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const PrivacidadScreen()),
+                  ),
+          ),
+        ],
+      ),
+      textAlign: TextAlign.center,
     );
   }
 }

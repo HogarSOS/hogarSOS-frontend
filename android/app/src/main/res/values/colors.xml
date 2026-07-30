@@ -4,5 +4,5 @@
          HogarSosColors.primary) — fondo de la pantalla de splash nativa,
          para que la primera imagen al abrir la app ya sea de marca en
          vez del blanco/negro por defecto de Flutter. -->
-    <color name="hogarsos_splash_background">#FF1554F0</color>
+    <color name="hogarsos_splash_background">#FF3D4FE0</color>
 </resources>
