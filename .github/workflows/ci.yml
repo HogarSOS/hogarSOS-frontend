@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.8'
+          channel: 'stable'
+
+      - run: flutter pub get
+
+      # --no-fatal-infos: el proyecto arrastra ~49 avisos de nivel
+      # "info" ya conocidos (sobre todo withOpacity deprecado — ver
+      # docs/SPRINT_4_BACKLOG.md), señalados como limpieza de baja
+      # prioridad, no bloqueantes. Sin este flag, flutter analyze
+      # devuelve código de salida 1 con CUALQUIER info pendiente, lo que
+      # tumbaría el CI en cada PR por avisos ya aceptados de antemano en
+      # vez de por errores/warnings reales (que sí siguen bloqueando).
+      - run: flutter analyze --no-fatal-infos
+
+      - run: flutter test

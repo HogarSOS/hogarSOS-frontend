@@ -26,9 +26,9 @@ enum _EstadoFoto { subiendo, lista, error }
 
 class _FotoWizard {
   final File archivo;
-  _EstadoFoto estado;
+  _EstadoFoto estado = _EstadoFoto.subiendo;
   String? url;
-  _FotoWizard(this.archivo, {this.estado = _EstadoFoto.subiendo, this.url});
+  _FotoWizard(this.archivo);
 }
 
 enum _PasoWizard { categoria, descripcion, fotos, ubicacion, urgencia, revision }
