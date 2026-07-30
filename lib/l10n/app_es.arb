@@ -85,6 +85,7 @@
   "proximamenteTitulo": "Próximamente",
   "buscarProximamenteDescripcion": "La búsqueda avanzada con filtros por precio, distancia y valoración llega en la próxima fase.",
   "mensajesProximamenteDescripcion": "Aquí verás todas tus conversaciones con clientes y profesionales.",
+  "mensajesVacioTitulo": "Sin conversaciones todavía",
 
   "buscarHint": "Busca por nombre...",
   "buscarFiltros": "Filtros",

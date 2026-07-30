@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../services/chat_service.dart';
+import '../services/service_request_service.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({
@@ -34,6 +35,17 @@ class _ChatScreenState extends State<ChatScreen> {
   // StreamBuilder que no cambia el contenido (no hay que tocar el scroll).
   int _mensajesPrevios = 0;
 
+  // La sincronización a Firestore de acceptServiceRequest puede haber
+  // fallado en silencio del lado del backend (ver
+  // serviceRequest.controller.ts::sincronizarChatFirestore) — sin
+  // reintentarla aquí, esa solicitud se queda con el chat roto para
+  // siempre, con un PERMISSION_DENIED en cuanto se intenta leer o
+  // escribir. Se espera a que termine (con éxito o no) ANTES de
+  // suscribirse a observarMensajes: un listener de Firestore que ya
+  // recibió un permission-denied no se reintenta solo aunque los
+  // permisos cambien después.
+  bool _listo = false;
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +56,17 @@ class _ChatScreenState extends State<ChatScreen> {
         WidgetsBinding.instance.addPostFrameCallback((_) => _scrollAlFinal());
       }
     });
+    _prepararChat();
+  }
+
+  Future<void> _prepararChat() async {
+    try {
+      await ServiceRequestService().sincronizarChat(widget.serviceRequestId);
+    } catch (e) {
+      debugPrint('[ChatScreen] No se pudo sincronizar el chat, se intenta igualmente: $e');
+    }
+    if (!mounted) return;
+    setState(() => _listo = true);
   }
 
   @override
@@ -125,7 +148,11 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(
             child: StreamBuilder<List<ChatMessage>>(
-              stream: _chatService.observarMensajes(widget.serviceRequestId),
+              // stream: null mientras _prepararChat() no ha terminado —
+              // StreamBuilder se queda en la rama "sin datos todavía"
+              // (el mismo spinner que ya mostraba mientras cargaban los
+              // primeros mensajes), sin suscribirse todavía a Firestore.
+              stream: _listo ? _chatService.observarMensajes(widget.serviceRequestId) : null,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   debugPrint('[ChatScreen] Error en el stream de mensajes: ${snapshot.error}');

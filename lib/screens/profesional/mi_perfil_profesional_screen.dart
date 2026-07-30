@@ -14,7 +14,7 @@ import '../../widgets/entrada_animada.dart';
 import '../../widgets/lista_opiniones.dart';
 import '../../widgets/verification_badge.dart';
 import '../auth/login_screen.dart';
-import '../profesional_shell_screen.dart';
+import 'disponibilidad_profesional_screen.dart';
 
 /// Perfil del profesional — rediseño "tarjetas independientes": cada
 /// dato editable (teléfono, descripción, categorías) tiene su propio
@@ -553,7 +553,18 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                           icono: Icons.bolt_outlined,
                           titulo: t.disponibilidadTitulo,
                           trailing: TextButton(
-                            onPressed: () => ref.read(profesionalTabIndexProvider.notifier).state = 1,
+                            // Antes cambiaba de pestaña (profesionalTabIndexProvider)
+                            // en vez de navegar — sin AppBar propio ni botón
+                            // "atrás" para volver a Perfil, el único camino
+                            // de vuelta era tocar la pestaña de nuevo a mano.
+                            // Empujar la pantalla como ruta normal le da el
+                            // back button automático de Flutter.
+                            onPressed: () async {
+                              await Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const DisponibilidadProfesionalScreen()),
+                              );
+                              _cargarPerfil();
+                            },
                             child: Text(t.miPerfilCambiar),
                           ),
                           child: _EstadoDisponibilidad(perfil: _perfil),

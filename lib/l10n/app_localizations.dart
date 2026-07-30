@@ -458,6 +458,12 @@ abstract class AppLocalizations {
   /// **'Aquí verás todas tus conversaciones con clientes y profesionales.'**
   String get mensajesProximamenteDescripcion;
 
+  /// No description provided for @mensajesVacioTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin conversaciones todavía'**
+  String get mensajesVacioTitulo;
+
   /// No description provided for @buscarHint.
   ///
   /// In es, this message translates to:

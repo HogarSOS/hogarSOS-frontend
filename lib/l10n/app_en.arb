@@ -85,6 +85,7 @@
   "proximamenteTitulo": "Coming soon",
   "buscarProximamenteDescripcion": "Advanced search with price, distance and rating filters is coming in the next phase.",
   "mensajesProximamenteDescripcion": "This is where you'll see all your conversations with customers and professionals.",
+  "mensajesVacioTitulo": "No conversations yet",
 
   "buscarHint": "Search by name...",
   "buscarFiltros": "Filters",

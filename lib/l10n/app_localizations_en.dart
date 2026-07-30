@@ -214,6 +214,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'This is where you\'ll see all your conversations with customers and professionals.';
 
   @override
+  String get mensajesVacioTitulo => 'No conversations yet';
+
+  @override
   String get buscarHint => 'Search by name...';
 
   @override

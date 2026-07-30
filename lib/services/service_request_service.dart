@@ -86,4 +86,17 @@ class ServiceRequestService {
   Future<void> cancelar(String id) async {
     await _api.patch('/service-requests/$id/cancel');
   }
+
+  /// Reintenta la sincronización del chat de esta solicitud a Firestore
+  /// (UIDs de Firebase de cliente y profesional). La sincronización
+  /// automática al aceptar puede fallar en silencio del lado del
+  /// backend (credenciales de Firebase Admin, API deshabilitada...) —
+  /// esto existe para que abrir el chat se autorrepare en vez de
+  /// quedar roto para siempre. Se llama antes de suscribirse a los
+  /// mensajes (ver chat_screen.dart); si falla, el chat sigue
+  /// intentando cargar igual — el error real de Firestore ya se
+  /// muestra por su cuenta si la sincronización de verdad hacía falta.
+  Future<void> sincronizarChat(String id) async {
+    await _api.post('/service-requests/$id/sync-chat');
+  }
 }
