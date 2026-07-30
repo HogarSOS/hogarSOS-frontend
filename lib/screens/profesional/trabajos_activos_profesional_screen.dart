@@ -128,7 +128,10 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
                       trabajo: trabajo,
                       onChat: () => Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => ChatScreen(serviceRequestId: trabajo.id),
+                          builder: (_) => ChatScreen(
+                            serviceRequestId: trabajo.id,
+                            nombreContraparte: trabajo.clienteNombre,
+                          ),
                         ),
                       ),
                       onCompletar: () => _completar(context, ref, trabajo),

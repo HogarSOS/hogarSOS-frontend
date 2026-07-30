@@ -8,9 +8,18 @@ class ChatScreen extends StatefulWidget {
   const ChatScreen({
     super.key,
     required this.serviceRequestId,
+    this.nombreContraparte,
   });
 
   final String serviceRequestId;
+
+  /// Nombre de con quién se está hablando (el otro cliente/profesional
+  /// de esta solicitud) — antes el AppBar solo mostraba el título
+  /// genérico "Chat" sin decir con quién, en las tres pantallas que
+  /// abren ChatScreen. Opcional: si no se pasa (o el backend no lo
+  /// devolvió todavía, p. ej. una solicitud sin profesional asignado),
+  /// cae al título genérico en vez de mostrar un hueco en blanco.
+  final String? nombreContraparte;
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -143,7 +152,9 @@ class _ChatScreenState extends State<ChatScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: Text(t.chatTitulo)),
+      appBar: AppBar(
+        title: Text(widget.nombreContraparte?.isNotEmpty == true ? widget.nombreContraparte! : t.chatTitulo),
+      ),
       body: Column(
         children: [
           Expanded(

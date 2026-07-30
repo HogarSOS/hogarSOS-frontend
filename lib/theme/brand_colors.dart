@@ -17,8 +17,13 @@ import 'package:flutter/material.dart';
 class HogarSosColors {
   HogarSosColors._();
 
-  static const Color primary = Color(0xFF1554F0);
-  static const Color primaryDeep = Color(0xFF0C3AC2);
+  // Antes 0xFF1554F0 — un azul casi idéntico en tono al de Facebook
+  // (~214° de matiz). Este es la misma familia "azul confiado" pero
+  // desplazado hacia índigo (~236°), lo bastante distinto para no
+  // leerse como una copia de otra marca, sin perder la sensación de
+  // seguridad/profesionalidad que se buscaba con el azul original.
+  static const Color primary = Color(0xFF3D4FE0);
+  static const Color primaryDeep = Color(0xFF2635A8);
   static const Color accent = Color(0xFFFF6A4D);
   static const Color accentDeep = Color(0xFFE8532F);
   static const Color ink = Color(0xFF101828);

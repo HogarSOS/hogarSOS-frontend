@@ -30,7 +30,7 @@ final Map<String, CategoriaEstilo> _estilos = {
   'fontanero': const CategoriaEstilo(Icons.plumbing_outlined, Color(0xFF2E90FA)),
   'pintor': const CategoriaEstilo(Icons.format_paint_outlined, Color(0xFF7A5AF8)),
   'manitas': const CategoriaEstilo(Icons.handyman_outlined, Color(0xFFF76B1C)),
-  'limpieza': const CategoriaEstilo(Icons.cleaning_services_outlined, Color(0xFF12B3A8)),
+  'limpieza': const CategoriaEstilo(Icons.auto_awesome_outlined, Color(0xFF12B3A8)),
   'jardinería': const CategoriaEstilo(Icons.grass_outlined, Color(0xFF3FB950)),
   'jardineria': const CategoriaEstilo(Icons.grass_outlined, Color(0xFF3FB950)),
   'cerrajería': const CategoriaEstilo(Icons.key_outlined, Color(0xFF4C5FD5)),
@@ -55,7 +55,7 @@ final Map<String, CategoriaEstilo> _estilos = {
   'control de plagas': const CategoriaEstilo(Icons.pest_control_outlined, Color(0xFF4C9A2A)),
   'veterinaria a domicilio': const CategoriaEstilo(Icons.pets_outlined, Color(0xFFEC4899)),
   // Compatibilidad con nombres antiguos usados antes de la Fase 2:
-  'limpieza del hogar': const CategoriaEstilo(Icons.cleaning_services_outlined, Color(0xFF12B3A8)),
+  'limpieza del hogar': const CategoriaEstilo(Icons.auto_awesome_outlined, Color(0xFF12B3A8)),
   'otras': _estiloGenerico,
 };
 

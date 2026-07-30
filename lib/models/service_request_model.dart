@@ -77,6 +77,7 @@ class ServiceRequestModel {
   final String id;
   final String categoria;
   final String descripcion;
+  final String? profesionalNombre;
   final List<String> fotosUrls;
   final String? direccionTexto;
   final UrgenciaSolicitud urgencia;
@@ -92,6 +93,7 @@ class ServiceRequestModel {
     required this.id,
     required this.categoria,
     required this.descripcion,
+    this.profesionalNombre,
     this.fotosUrls = const [],
     this.direccionTexto,
     this.urgencia = UrgenciaSolicitud.loAntesPosible,
@@ -118,6 +120,7 @@ class ServiceRequestModel {
       id: json['id'] as String,
       categoria: json['categoria'] as String,
       descripcion: json['descripcion'] as String,
+      profesionalNombre: json['profesionalNombre'] as String?,
       fotosUrls: List<String>.from(json['fotosUrls'] as List? ?? []),
       direccionTexto: json['direccionTexto'] as String?,
       urgencia: urgenciaFromString(json['urgencia'] as String? ?? 'lo_antes_posible'),
@@ -140,6 +143,7 @@ class MyServiceRequestSummary {
   final String id;
   final String categoria;
   final String descripcion;
+  final String? profesionalNombre;
   final EstadoSolicitud estado;
   final UrgenciaSolicitud urgencia;
   final double? precioEstimado;
@@ -152,6 +156,7 @@ class MyServiceRequestSummary {
     required this.id,
     required this.categoria,
     required this.descripcion,
+    this.profesionalNombre,
     required this.estado,
     this.urgencia = UrgenciaSolicitud.loAntesPosible,
     this.precioEstimado,
@@ -166,6 +171,7 @@ class MyServiceRequestSummary {
       id: json['id'] as String,
       categoria: json['categoria'] as String,
       descripcion: json['descripcion'] as String,
+      profesionalNombre: json['profesionalNombre'] as String?,
       estado: estadoFromString(json['estado'] as String),
       urgencia: urgenciaFromString(json['urgencia'] as String? ?? 'lo_antes_posible'),
       precioEstimado: (json['precioEstimado'] as num?)?.toDouble(),

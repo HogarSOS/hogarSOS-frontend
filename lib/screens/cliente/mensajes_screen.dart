@@ -135,7 +135,9 @@ class _MensajesScreenState extends State<MensajesScreen> {
                       ),
                       trailing: const Icon(Icons.chat_bubble_outline),
                       onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => ChatScreen(serviceRequestId: s.id)),
+                        MaterialPageRoute(
+                          builder: (_) => ChatScreen(serviceRequestId: s.id, nombreContraparte: s.profesionalNombre),
+                        ),
                       ),
                     ),
                   ),
