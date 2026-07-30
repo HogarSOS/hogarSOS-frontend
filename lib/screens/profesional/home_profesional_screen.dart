@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/service_request_model.dart';
 import '../../providers/service_request_provider.dart';
+import '../../services/chat_service.dart';
+import '../../services/service_request_service.dart';
 import '../../theme/brand_mark.dart';
 import '../../utils/error_extraction.dart';
 import '../../widgets/entrada_animada.dart';
@@ -19,6 +22,16 @@ class HomeProfesionalScreen extends ConsumerWidget {
 
   Future<void> _aceptar(BuildContext context, WidgetRef ref, NearbyRequest solicitud) async {
     final t = AppLocalizations.of(context);
+
+    // Antes de confirmar la aceptación de verdad, se pregunta cuándo
+    // puede el profesional hacer el trabajo — un dato que el cliente
+    // hoy no ve hasta que alguien escribe en el chat por su cuenta.
+    // Devuelve null si canceló (no acepta nada), o un string (puede
+    // estar vacío si no quiso escribir nada) si confirmó.
+    final mensajeDisponibilidad = await _mostrarDialogoDisponibilidad(context, t);
+    if (mensajeDisponibilidad == null) return;
+    if (!context.mounted) return;
+
     try {
       await ref.read(nearbyRequestsProvider.notifier).aceptar(solicitud.id);
       // La solicitud recién aceptada ya cuenta como "trabajo activo" —
@@ -26,6 +39,28 @@ class HomeProfesionalScreen extends ConsumerWidget {
       // activos" de esta misma pantalla se quedaba desactualizado hasta
       // el próximo pull-to-refresh o hasta salir y volver a entrar.
       ref.invalidate(assignedRequestsProvider);
+
+      // El mensaje de disponibilidad se manda como un mensaje de chat
+      // normal, justo tras aceptar — acceptServiceRequest ya sincroniza
+      // los UIDs de Firebase en Firestore antes de responder con éxito,
+      // así que el chat ya está listo para escribir en él en este
+      // punto. Si de todos modos fallara (p. ej. esa sincronización
+      // concreta falló en su momento), no debe romper la aceptación:
+      // el trabajo ya quedó aceptado igualmente, y el cliente puede
+      // seguir viendo la conversación normal después.
+      if (mensajeDisponibilidad.isNotEmpty) {
+        try {
+          await ServiceRequestService().sincronizarChat(solicitud.id);
+          await ChatService().enviarMensaje(
+            serviceRequestId: solicitud.id,
+            texto: mensajeDisponibilidad,
+            autorId: FirebaseAuth.instance.currentUser?.uid ?? '',
+          );
+        } catch (e) {
+          debugPrint('[HomeProfesionalScreen] No se pudo enviar el mensaje de disponibilidad: $e');
+        }
+      }
+
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(t.profesionalSolicitudAceptada)),
@@ -45,6 +80,58 @@ class HomeProfesionalScreen extends ConsumerWidget {
       );
       ref.read(nearbyRequestsProvider.notifier).cargar();
     }
+  }
+
+  Future<String?> _mostrarDialogoDisponibilidad(BuildContext context, AppLocalizations t) {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t.profesionalDisponibilidadTitulo),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              t.profesionalDisponibilidadSubtitulo,
+              style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                t.profesionalDisponibilidadSugerencia1,
+                t.profesionalDisponibilidadSugerencia2,
+                t.profesionalDisponibilidadSugerencia3,
+              ]
+                  .map((sugerencia) => ActionChip(
+                        label: Text(sugerencia, style: const TextStyle(fontSize: 12.5)),
+                        onPressed: () => controller.text = sugerencia,
+                      ))
+                  .toList(),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: controller,
+              maxLines: 2,
+              minLines: 1,
+              decoration: InputDecoration(hintText: t.profesionalDisponibilidadHint),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(t.perfilCancelar),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+            child: Text(t.profesionalDisponibilidadConfirmar),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

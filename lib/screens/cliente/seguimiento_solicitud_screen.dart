@@ -188,11 +188,13 @@ class _Contenido extends ConsumerWidget {
         EntradaAnimada(retraso: const Duration(milliseconds: 120), child: _EstadoBanner(estado: solicitud.estado)),
         const SizedBox(height: 24),
 
-        // Cancelar solo tiene sentido mientras nadie la ha aceptado —
-        // en cuanto pasa a "aceptada" el botón desaparece solo, porque
-        // esta condición deja de cumplirse (no hace falta lógica
-        // aparte para "ocultarlo tras aceptar").
-        if (solicitud.estado == EstadoSolicitud.pendiente) ...[
+        // También se puede cancelar ya "aceptada" (antes solo mientras
+        // "pendiente") — si la disponibilidad que propuso el
+        // profesional al aceptar (ver home_profesional_screen.dart) no
+        // le sirve al cliente, necesita una forma real de decir que no.
+        // Deja de poder cancelarse en cuanto pasa a "en_progreso": ahí
+        // ya se considera que el trabajo empezó de verdad.
+        if (solicitud.estado == EstadoSolicitud.pendiente || solicitud.estado == EstadoSolicitud.aceptada) ...[
           OutlinedButton.icon(
             icon: const Icon(Icons.close),
             label: Text(t.seguimientoCancelarTitulo),
