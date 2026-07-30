@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
+import '../providers/chat_read_provider.dart';
+import '../providers/service_request_provider.dart';
 import 'profesional/home_profesional_screen.dart';
 import 'profesional/disponibilidad_profesional_screen.dart';
 import 'profesional/mi_perfil_profesional_screen.dart';
@@ -81,6 +83,15 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
     final t = AppLocalizations.of(context);
     final indiceActual = ref.watch(profesionalTabIndexProvider);
 
+    // Punto rojo en la pestaña "Mensajes" (aquí es "Trabajos activos")
+    // si algún trabajo asignado tiene un mensaje nuevo sin abrir.
+    final trabajosAsync = ref.watch(assignedRequestsProvider);
+    final idsTrabajos = trabajosAsync.maybeWhen(
+      data: (lista) => lista.map((t) => t.id),
+      orElse: () => const Iterable<String>.empty(),
+    );
+    final hayMensajesNoLeidos = idsTrabajos.any((id) => ref.watch(unreadChatProvider(id)));
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) => _onPopInvoked(didPop),
@@ -101,8 +112,8 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
               label: t.navDisponibilidad,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.chat_bubble_outline),
-              selectedIcon: const Icon(Icons.chat_bubble),
+              icon: Badge(isLabelVisible: hayMensajesNoLeidos, child: const Icon(Icons.chat_bubble_outline)),
+              selectedIcon: Badge(isLabelVisible: hayMensajesNoLeidos, child: const Icon(Icons.chat_bubble)),
               label: t.navMensajes,
             ),
             NavigationDestination(

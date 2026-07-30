@@ -99,4 +99,11 @@ class ServiceRequestService {
   Future<void> sincronizarChat(String id) async {
     await _api.post('/service-requests/$id/sync-chat');
   }
+
+  /// Marca el chat como leído por mí (ver chat_read_provider.dart) —
+  /// escribe en Firestore vía el backend, porque el cliente Flutter no
+  /// tiene permiso de escritura directa sobre ese documento.
+  Future<void> marcarChatLeido(String id) async {
+    await _api.post('/service-requests/$id/mark-chat-read');
+  }
 }

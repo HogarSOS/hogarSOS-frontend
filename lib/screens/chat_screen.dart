@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
+import '../providers/chat_read_provider.dart';
 import '../services/chat_service.dart';
 import '../services/service_request_service.dart';
 
-class ChatScreen extends StatefulWidget {
+class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({
     super.key,
     required this.serviceRequestId,
@@ -22,10 +27,10 @@ class ChatScreen extends StatefulWidget {
   final String? nombreContraparte;
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _chatService = ChatService();
   final _mensajeController = TextEditingController();
   final _scrollController = ScrollController();
@@ -70,16 +75,42 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _prepararChat() async {
     try {
-      await ServiceRequestService().sincronizarChat(widget.serviceRequestId);
+      // Timeout corto a propósito: esta llamada es una red de
+      // seguridad para el caso raro de un chat que quedó sin
+      // sincronizar (ver el comentario de más arriba), no algo que
+      // deba bloquear abrir un chat que ya funciona bien — sin este
+      // límite, un backend "dormido" (plan gratuito de Render, cold
+      // start de hasta ~50s) dejaba CUALQUIER chat tardando ese mismo
+      // tiempo en mostrar el primer mensaje, aunque no hiciera falta
+      // ninguna reparación. Si se agota el timeout, se sigue
+      // igualmente (la sincronización real sigue en marcha en el
+      // backend en segundo plano) — mismo comportamiento que cualquier
+      // otro fallo de esta llamada, ya tolerado más abajo.
+      await ServiceRequestService()
+          .sincronizarChat(widget.serviceRequestId)
+          .timeout(const Duration(seconds: 5));
     } catch (e) {
       debugPrint('[ChatScreen] No se pudo sincronizar el chat, se intenta igualmente: $e');
     }
+    // Marca la conversación como leída ya al entrar (no solo al salir) —
+    // así si alguien abre el chat, mira brevemente y sale sin llegar a
+    // mandar mensaje, igual queda como "leído" en vez de seguir marcando
+    // "nuevo" en la lista de conversaciones.
+    unawaited(ServiceRequestService().marcarChatLeido(widget.serviceRequestId));
     if (!mounted) return;
     setState(() => _listo = true);
   }
 
   @override
   void dispose() {
+    // Vuelve a marcar como leído al salir: cubre los mensajes que
+    // hayan llegado mientras la pantalla estaba abierta (la primera
+    // marca, en _prepararChat, solo cubre el momento de entrar). No
+    // hace falta invalidar ningún provider a mano: el estado de lectura
+    // vive en Firestore (ver chat_read_provider.dart), así que en
+    // cuanto este POST escribe el campo, el stream ya activo en la
+    // lista de conversaciones/badge se actualiza solo.
+    unawaited(ServiceRequestService().marcarChatLeido(widget.serviceRequestId));
     _mensajeController.dispose();
     _scrollController.dispose();
     _campoFocusNode.dispose();
@@ -150,6 +181,13 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    // Hasta cuándo ha leído la OTRA persona — para pintar ✓ (enviado) o
+    // ✓✓ (leído) en mis propios mensajes. Mientras no hay dato todavía
+    // (primer frame, antes de que llegue el primer snapshot del
+    // documento), se trata como "nadie ha leído nada aún" — un mensaje
+    // recién enviado empieza en ✓, no en ✓✓, que es el estado correcto.
+    final otroLastRead =
+        ref.watch(estadoLecturaProvider(widget.serviceRequestId)).value?.otroLastRead(_miUid);
 
     return Scaffold(
       appBar: AppBar(
@@ -187,6 +225,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemBuilder: (context, index) {
                     final mensaje = mensajes[index];
                     final esMio = mensaje.autorId == _miUid;
+                    // Leído por la otra persona: solo tiene sentido para
+                    // mis propios mensajes (nunca pinto un check en los
+                    // mensajes ajenos, como en cualquier app de chat).
+                    final leido = esMio && otroLastRead != null && !mensaje.enviadoEn.isAfter(otroLastRead);
                     return Align(
                       alignment: esMio ? Alignment.centerRight : Alignment.centerLeft,
                       child: Container(
@@ -196,7 +238,12 @@ class _ChatScreenState extends State<ChatScreen> {
                           maxWidth: MediaQuery.of(context).size.width * 0.75,
                         ),
                         decoration: BoxDecoration(
-                          color: esMio ? colorScheme.primary : colorScheme.surfaceContainerHigh,
+                          // Un color para "lo mío", otro claramente
+                          // distinto para "lo del otro" — antes la
+                          // burbuja ajena usaba un gris neutro sin
+                          // identidad propia, ahora un segundo color de
+                          // marca en vez de un simple "no-color".
+                          color: esMio ? colorScheme.primary : colorScheme.secondaryContainer,
                           borderRadius: BorderRadius.only(
                             topLeft: const Radius.circular(18),
                             topRight: const Radius.circular(18),
@@ -204,9 +251,41 @@ class _ChatScreenState extends State<ChatScreen> {
                             bottomRight: Radius.circular(esMio ? 4 : 18),
                           ),
                         ),
-                        child: Text(
-                          mensaje.texto,
-                          style: TextStyle(color: esMio ? colorScheme.onPrimary : colorScheme.onSurface),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              mensaje.texto,
+                              style: TextStyle(
+                                color: esMio ? colorScheme.onPrimary : colorScheme.onSecondaryContainer,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  DateFormat('HH:mm').format(mensaje.enviadoEn),
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    color: (esMio ? colorScheme.onPrimary : colorScheme.onSecondaryContainer)
+                                        .withOpacity(0.75),
+                                  ),
+                                ),
+                                if (esMio) ...[
+                                  const SizedBox(width: 3),
+                                  Icon(
+                                    leido ? Icons.done_all : Icons.done,
+                                    size: 14,
+                                    color: leido
+                                        ? colorScheme.onPrimary
+                                        : colorScheme.onPrimary.withOpacity(0.75),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     );

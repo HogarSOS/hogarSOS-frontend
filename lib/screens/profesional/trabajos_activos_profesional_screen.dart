@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/service_request_model.dart';
+import '../../providers/chat_read_provider.dart';
 import '../../providers/service_request_provider.dart';
 import '../../services/service_request_service.dart';
 import '../../utils/error_extraction.dart';
@@ -126,6 +127,7 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
                     retraso: Duration(milliseconds: 40 * index),
                     child: _TarjetaTrabajo(
                       trabajo: trabajo,
+                      noLeido: ref.watch(unreadChatProvider(trabajo.id)),
                       onChat: () => Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => ChatScreen(
@@ -160,12 +162,14 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
 class _TarjetaTrabajo extends StatelessWidget {
   const _TarjetaTrabajo({
     required this.trabajo,
+    required this.noLeido,
     required this.onChat,
     required this.onCompletar,
     required this.onValorar,
   });
 
   final AssignedRequest trabajo;
+  final bool noLeido;
   final VoidCallback onChat;
   final VoidCallback onCompletar;
   final VoidCallback onValorar;
@@ -245,7 +249,7 @@ class _TarjetaTrabajo extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      icon: const Icon(Icons.chat_bubble_outline, size: 18),
+                      icon: Badge(isLabelVisible: noLeido, child: const Icon(Icons.chat_bubble_outline, size: 18)),
                       label: Text(t.trabajosActivosChat),
                       onPressed: onChat,
                     ),
@@ -280,7 +284,7 @@ class _TarjetaTrabajo extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      icon: const Icon(Icons.chat_bubble_outline, size: 18),
+                      icon: Badge(isLabelVisible: noLeido, child: const Icon(Icons.chat_bubble_outline, size: 18)),
                       label: Text(t.trabajosActivosChat),
                       onPressed: onChat,
                     ),

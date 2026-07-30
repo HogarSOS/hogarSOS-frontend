@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
@@ -8,6 +9,8 @@ import '../../widgets/entrada_animada.dart';
 import 'editar_perfil_screen.dart';
 import 'mis_solicitudes_screen.dart';
 import 'mis_valoraciones_screen.dart';
+import '../legal/privacidad_screen.dart';
+import '../legal/terminos_screen.dart';
 
 class PerfilScreen extends ConsumerWidget {
   const PerfilScreen({super.key});
@@ -71,7 +74,9 @@ class PerfilScreen extends ConsumerWidget {
                 CircleAvatar(
                   radius: 44,
                   backgroundColor: colorScheme.primaryContainer,
-                  backgroundImage: usuario?.fotoPerfilUrl != null ? NetworkImage(usuario!.fotoPerfilUrl!) : null,
+                  backgroundImage: usuario?.fotoPerfilUrl != null
+                      ? CachedNetworkImageProvider(usuario!.fotoPerfilUrl!)
+                      : null,
                   child: usuario?.fotoPerfilUrl == null
                       ? Text(
                           (usuario?.nombre.isNotEmpty ?? false) ? usuario!.nombre[0].toUpperCase() : '?',
@@ -175,6 +180,24 @@ class PerfilScreen extends ConsumerWidget {
                         SnackBar(content: Text(t.proximamenteTitulo)),
                       );
                     },
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.privacy_tip_outlined),
+                    title: Text(t.perfilPrivacidad),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const PrivacidadScreen()),
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.description_outlined),
+                    title: Text(t.perfilTerminos),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const TerminosScreen()),
+                    ),
                   ),
                 ],
               ),
