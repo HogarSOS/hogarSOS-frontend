@@ -440,5 +440,47 @@
     "placeholders": { "nombre": { "type": "String" } }
   },
   "seleccionarProfesionalError": "No se pudo completar la selección. Puede que otra persona ya haya elegido.",
-  "seleccionarProfesionalVacio": "Todavía no hay ninguna candidatura recibida — vuelve más tarde"
+  "seleccionarProfesionalVacio": "Todavía no hay ninguna candidatura recibida — vuelve más tarde",
+
+  "trabajosActivosEnviarPresupuesto": "Enviar presupuesto",
+  "trabajosActivosPresupuestoEsperando": "Esperando respuesta del cliente",
+  "trabajosActivosHorasRealesTitulo": "Horas reales trabajadas",
+  "trabajosActivosHorasRealesTarifa": "Tarifa acordada: {tarifa} €/hora",
+  "@trabajosActivosHorasRealesTarifa": {
+    "placeholders": { "tarifa": { "type": "String" } }
+  },
+  "trabajosActivosHorasRealesHint": "Horas",
+  "trabajosActivosCompletarCerradoConfirmar": "¿Confirmas que el trabajo está completado? Se liberará el pago del presupuesto acordado.",
+
+  "presupuestoDialogoTitulo": "Enviar presupuesto",
+  "presupuestoTipoCerrado": "Precio cerrado",
+  "presupuestoTipoPorHoras": "Por horas",
+  "presupuestoDialogoMontoHint": "Importe (€)",
+  "presupuestoDialogoTarifaHint": "Tarifa por hora (€)",
+  "presupuestoDialogoHorasEstimadasHint": "Horas estimadas",
+  "presupuestoDialogoMensajeHint": "Mensaje para el cliente (opcional)",
+  "presupuestoEnviadoExito": "Presupuesto enviado",
+  "presupuestoEnviadoError": "No se pudo enviar el presupuesto",
+
+  "seguimientoEsperandoPresupuesto": "Esperando el presupuesto del profesional",
+  "seguimientoPresupuestoTitulo": "El profesional ha enviado un presupuesto",
+  "seguimientoPresupuestoCerradoDetalle": "Presupuesto: {monto} €",
+  "@seguimientoPresupuestoCerradoDetalle": {
+    "placeholders": { "monto": { "type": "String" } }
+  },
+  "seguimientoPresupuestoPorHorasDetalle": "{tarifa} €/hora × {horas} horas estimadas — importe máximo autorizado: {total} €",
+  "@seguimientoPresupuestoPorHorasDetalle": {
+    "placeholders": {
+      "tarifa": { "type": "String" },
+      "horas": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "seguimientoPresupuestoAceptar": "Aceptar",
+  "seguimientoPresupuestoRechazar": "Rechazar",
+  "seguimientoPresupuestoRechazarConfirmar": "¿Seguro que quieres rechazar este presupuesto? El profesional podrá enviarte uno nuevo.",
+  "seguimientoPresupuestoAceptadoExito": "Presupuesto aceptado — ya puedes autorizar el pago",
+  "seguimientoPresupuestoRechazadoExito": "Presupuesto rechazado",
+  "seguimientoPresupuestoRechazadoInfo": "Rechazaste el presupuesto anterior — esperando uno nuevo del profesional",
+  "seguimientoPresupuestoError": "No se pudo responder al presupuesto"
 }

@@ -1284,4 +1284,98 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get seleccionarProfesionalVacio =>
       'Todavía no hay ninguna candidatura recibida — vuelve más tarde';
+
+  @override
+  String get trabajosActivosEnviarPresupuesto => 'Enviar presupuesto';
+
+  @override
+  String get trabajosActivosPresupuestoEsperando =>
+      'Esperando respuesta del cliente';
+
+  @override
+  String get trabajosActivosHorasRealesTitulo => 'Horas reales trabajadas';
+
+  @override
+  String trabajosActivosHorasRealesTarifa(String tarifa) {
+    return 'Tarifa acordada: $tarifa €/hora';
+  }
+
+  @override
+  String get trabajosActivosHorasRealesHint => 'Horas';
+
+  @override
+  String get trabajosActivosCompletarCerradoConfirmar =>
+      '¿Confirmas que el trabajo está completado? Se liberará el pago del presupuesto acordado.';
+
+  @override
+  String get presupuestoDialogoTitulo => 'Enviar presupuesto';
+
+  @override
+  String get presupuestoTipoCerrado => 'Precio cerrado';
+
+  @override
+  String get presupuestoTipoPorHoras => 'Por horas';
+
+  @override
+  String get presupuestoDialogoMontoHint => 'Importe (€)';
+
+  @override
+  String get presupuestoDialogoTarifaHint => 'Tarifa por hora (€)';
+
+  @override
+  String get presupuestoDialogoHorasEstimadasHint => 'Horas estimadas';
+
+  @override
+  String get presupuestoDialogoMensajeHint =>
+      'Mensaje para el cliente (opcional)';
+
+  @override
+  String get presupuestoEnviadoExito => 'Presupuesto enviado';
+
+  @override
+  String get presupuestoEnviadoError => 'No se pudo enviar el presupuesto';
+
+  @override
+  String get seguimientoEsperandoPresupuesto =>
+      'Esperando el presupuesto del profesional';
+
+  @override
+  String get seguimientoPresupuestoTitulo =>
+      'El profesional ha enviado un presupuesto';
+
+  @override
+  String seguimientoPresupuestoCerradoDetalle(String monto) {
+    return 'Presupuesto: $monto €';
+  }
+
+  @override
+  String seguimientoPresupuestoPorHorasDetalle(
+      String tarifa, String horas, String total) {
+    return '$tarifa €/hora × $horas horas estimadas — importe máximo autorizado: $total €';
+  }
+
+  @override
+  String get seguimientoPresupuestoAceptar => 'Aceptar';
+
+  @override
+  String get seguimientoPresupuestoRechazar => 'Rechazar';
+
+  @override
+  String get seguimientoPresupuestoRechazarConfirmar =>
+      '¿Seguro que quieres rechazar este presupuesto? El profesional podrá enviarte uno nuevo.';
+
+  @override
+  String get seguimientoPresupuestoAceptadoExito =>
+      'Presupuesto aceptado — ya puedes autorizar el pago';
+
+  @override
+  String get seguimientoPresupuestoRechazadoExito => 'Presupuesto rechazado';
+
+  @override
+  String get seguimientoPresupuestoRechazadoInfo =>
+      'Rechazaste el presupuesto anterior — esperando uno nuevo del profesional';
+
+  @override
+  String get seguimientoPresupuestoError =>
+      'No se pudo responder al presupuesto';
 }

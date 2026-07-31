@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import '../models/postulacion_model.dart';
+import '../models/presupuesto_model.dart';
 import '../models/service_category_model.dart';
 import '../models/service_request_model.dart';
 import 'api_service.dart';
@@ -35,7 +36,6 @@ class ServiceRequestService {
     required double longitud,
     List<String>? fotosUrls,
     String? direccionTexto,
-    double? precioEstimado,
     UrgenciaSolicitud urgencia = UrgenciaSolicitud.loAntesPosible,
     DateTime? fechaDeseada,
   }) async {
@@ -46,7 +46,6 @@ class ServiceRequestService {
       'longitud': longitud,
       if (fotosUrls != null && fotosUrls.isNotEmpty) 'fotosUrls': fotosUrls,
       if (direccionTexto != null) 'direccionTexto': direccionTexto,
-      if (precioEstimado != null) 'precioEstimado': precioEstimado,
       'urgencia': urgencia.valorApi,
       if (fechaDeseada != null) 'fechaDeseada': fechaDeseada.toUtc().toIso8601String(),
     });
@@ -93,8 +92,39 @@ class ServiceRequestService {
     await _api.post('/service-requests/$id/postulaciones/$postulacionId/seleccionar');
   }
 
-  Future<void> completar(String id, {required double precioFinal}) async {
-    await _api.patch('/service-requests/$id/complete', data: {'precioFinal': precioFinal});
+  /// Envía un presupuesto real tras ser elegido — cerrado (monto fijo)
+  /// o por horas (tarifaHora + horasEstimadas, el importe que se
+  /// autoriza al aceptar es tarifaHora × horasEstimadas).
+  Future<void> enviarPresupuesto(
+    String id, {
+    required TipoPresupuesto tipo,
+    double? monto,
+    double? tarifaHora,
+    double? horasEstimadas,
+    String? mensaje,
+  }) async {
+    await _api.post('/service-requests/$id/presupuesto', data: {
+      'tipo': tipoPresupuestoToApi(tipo),
+      if (monto != null) 'monto': monto,
+      if (tarifaHora != null) 'tarifaHora': tarifaHora,
+      if (horasEstimadas != null) 'horasEstimadas': horasEstimadas,
+      if (mensaje != null && mensaje.isNotEmpty) 'mensaje': mensaje,
+    });
+  }
+
+  Future<void> responderPresupuesto(String id, String presupuestoId, {required bool aceptar}) async {
+    await _api.post('/service-requests/$id/presupuesto/$presupuestoId/responder', data: {
+      'accion': aceptar ? 'aceptar' : 'rechazar',
+    });
+  }
+
+  /// Marca un trabajo como completado. Sin argumentos para presupuesto
+  /// "cerrado" (el importe ya lo fija el presupuesto aceptado); con
+  /// `horasReales` para "por_horas" (el backend calcula tarifa × horas).
+  Future<void> completar(String id, {double? horasReales}) async {
+    await _api.patch('/service-requests/$id/complete', data: {
+      if (horasReales != null) 'horasReales': horasReales,
+    });
   }
 
   Future<void> cancelar(String id) async {

@@ -440,5 +440,47 @@
     "placeholders": { "nombre": { "type": "String" } }
   },
   "seleccionarProfesionalError": "Couldn't complete the selection. Someone else may have already chosen.",
-  "seleccionarProfesionalVacio": "No applications received yet — check back later"
+  "seleccionarProfesionalVacio": "No applications received yet — check back later",
+
+  "trabajosActivosEnviarPresupuesto": "Send quote",
+  "trabajosActivosPresupuestoEsperando": "Waiting for the client's response",
+  "trabajosActivosHorasRealesTitulo": "Actual hours worked",
+  "trabajosActivosHorasRealesTarifa": "Agreed rate: €{tarifa}/hour",
+  "@trabajosActivosHorasRealesTarifa": {
+    "placeholders": { "tarifa": { "type": "String" } }
+  },
+  "trabajosActivosHorasRealesHint": "Hours",
+  "trabajosActivosCompletarCerradoConfirmar": "Confirm the job is complete? The agreed payment will be released.",
+
+  "presupuestoDialogoTitulo": "Send quote",
+  "presupuestoTipoCerrado": "Fixed price",
+  "presupuestoTipoPorHoras": "Hourly rate",
+  "presupuestoDialogoMontoHint": "Amount (€)",
+  "presupuestoDialogoTarifaHint": "Rate per hour (€)",
+  "presupuestoDialogoHorasEstimadasHint": "Estimated hours",
+  "presupuestoDialogoMensajeHint": "Message for the client (optional)",
+  "presupuestoEnviadoExito": "Quote sent",
+  "presupuestoEnviadoError": "Couldn't send the quote",
+
+  "seguimientoEsperandoPresupuesto": "Waiting for the professional's quote",
+  "seguimientoPresupuestoTitulo": "The professional has sent a quote",
+  "seguimientoPresupuestoCerradoDetalle": "Quote: €{monto}",
+  "@seguimientoPresupuestoCerradoDetalle": {
+    "placeholders": { "monto": { "type": "String" } }
+  },
+  "seguimientoPresupuestoPorHorasDetalle": "€{tarifa}/hour × {horas} estimated hours — maximum authorized amount: €{total}",
+  "@seguimientoPresupuestoPorHorasDetalle": {
+    "placeholders": {
+      "tarifa": { "type": "String" },
+      "horas": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "seguimientoPresupuestoAceptar": "Accept",
+  "seguimientoPresupuestoRechazar": "Decline",
+  "seguimientoPresupuestoRechazarConfirmar": "Are you sure you want to decline this quote? The professional will be able to send a new one.",
+  "seguimientoPresupuestoAceptadoExito": "Quote accepted — you can now authorize payment",
+  "seguimientoPresupuestoRechazadoExito": "Quote declined",
+  "seguimientoPresupuestoRechazadoInfo": "You declined the previous quote — waiting for a new one from the professional",
+  "seguimientoPresupuestoError": "Couldn't respond to the quote"
 }

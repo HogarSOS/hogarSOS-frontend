@@ -2347,6 +2347,163 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Todavía no hay ninguna candidatura recibida — vuelve más tarde'**
   String get seleccionarProfesionalVacio;
+
+  /// No description provided for @trabajosActivosEnviarPresupuesto.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar presupuesto'**
+  String get trabajosActivosEnviarPresupuesto;
+
+  /// No description provided for @trabajosActivosPresupuestoEsperando.
+  ///
+  /// In es, this message translates to:
+  /// **'Esperando respuesta del cliente'**
+  String get trabajosActivosPresupuestoEsperando;
+
+  /// No description provided for @trabajosActivosHorasRealesTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Horas reales trabajadas'**
+  String get trabajosActivosHorasRealesTitulo;
+
+  /// No description provided for @trabajosActivosHorasRealesTarifa.
+  ///
+  /// In es, this message translates to:
+  /// **'Tarifa acordada: {tarifa} €/hora'**
+  String trabajosActivosHorasRealesTarifa(String tarifa);
+
+  /// No description provided for @trabajosActivosHorasRealesHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Horas'**
+  String get trabajosActivosHorasRealesHint;
+
+  /// No description provided for @trabajosActivosCompletarCerradoConfirmar.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Confirmas que el trabajo está completado? Se liberará el pago del presupuesto acordado.'**
+  String get trabajosActivosCompletarCerradoConfirmar;
+
+  /// No description provided for @presupuestoDialogoTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar presupuesto'**
+  String get presupuestoDialogoTitulo;
+
+  /// No description provided for @presupuestoTipoCerrado.
+  ///
+  /// In es, this message translates to:
+  /// **'Precio cerrado'**
+  String get presupuestoTipoCerrado;
+
+  /// No description provided for @presupuestoTipoPorHoras.
+  ///
+  /// In es, this message translates to:
+  /// **'Por horas'**
+  String get presupuestoTipoPorHoras;
+
+  /// No description provided for @presupuestoDialogoMontoHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Importe (€)'**
+  String get presupuestoDialogoMontoHint;
+
+  /// No description provided for @presupuestoDialogoTarifaHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Tarifa por hora (€)'**
+  String get presupuestoDialogoTarifaHint;
+
+  /// No description provided for @presupuestoDialogoHorasEstimadasHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Horas estimadas'**
+  String get presupuestoDialogoHorasEstimadasHint;
+
+  /// No description provided for @presupuestoDialogoMensajeHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Mensaje para el cliente (opcional)'**
+  String get presupuestoDialogoMensajeHint;
+
+  /// No description provided for @presupuestoEnviadoExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Presupuesto enviado'**
+  String get presupuestoEnviadoExito;
+
+  /// No description provided for @presupuestoEnviadoError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo enviar el presupuesto'**
+  String get presupuestoEnviadoError;
+
+  /// No description provided for @seguimientoEsperandoPresupuesto.
+  ///
+  /// In es, this message translates to:
+  /// **'Esperando el presupuesto del profesional'**
+  String get seguimientoEsperandoPresupuesto;
+
+  /// No description provided for @seguimientoPresupuestoTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'El profesional ha enviado un presupuesto'**
+  String get seguimientoPresupuestoTitulo;
+
+  /// No description provided for @seguimientoPresupuestoCerradoDetalle.
+  ///
+  /// In es, this message translates to:
+  /// **'Presupuesto: {monto} €'**
+  String seguimientoPresupuestoCerradoDetalle(String monto);
+
+  /// No description provided for @seguimientoPresupuestoPorHorasDetalle.
+  ///
+  /// In es, this message translates to:
+  /// **'{tarifa} €/hora × {horas} horas estimadas — importe máximo autorizado: {total} €'**
+  String seguimientoPresupuestoPorHorasDetalle(
+      String tarifa, String horas, String total);
+
+  /// No description provided for @seguimientoPresupuestoAceptar.
+  ///
+  /// In es, this message translates to:
+  /// **'Aceptar'**
+  String get seguimientoPresupuestoAceptar;
+
+  /// No description provided for @seguimientoPresupuestoRechazar.
+  ///
+  /// In es, this message translates to:
+  /// **'Rechazar'**
+  String get seguimientoPresupuestoRechazar;
+
+  /// No description provided for @seguimientoPresupuestoRechazarConfirmar.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Seguro que quieres rechazar este presupuesto? El profesional podrá enviarte uno nuevo.'**
+  String get seguimientoPresupuestoRechazarConfirmar;
+
+  /// No description provided for @seguimientoPresupuestoAceptadoExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Presupuesto aceptado — ya puedes autorizar el pago'**
+  String get seguimientoPresupuestoAceptadoExito;
+
+  /// No description provided for @seguimientoPresupuestoRechazadoExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Presupuesto rechazado'**
+  String get seguimientoPresupuestoRechazadoExito;
+
+  /// No description provided for @seguimientoPresupuestoRechazadoInfo.
+  ///
+  /// In es, this message translates to:
+  /// **'Rechazaste el presupuesto anterior — esperando uno nuevo del profesional'**
+  String get seguimientoPresupuestoRechazadoInfo;
+
+  /// No description provided for @seguimientoPresupuestoError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo responder al presupuesto'**
+  String get seguimientoPresupuestoError;
 }
 
 class _AppLocalizationsDelegate

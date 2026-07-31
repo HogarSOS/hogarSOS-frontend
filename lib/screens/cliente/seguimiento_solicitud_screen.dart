@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/presupuesto_model.dart';
 import '../../models/service_request_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/service_request_provider.dart';
@@ -240,7 +241,19 @@ class _Contenido extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 10),
-          if (solicitud.payment == null)
+          if (solicitud.payment != null)
+            _EstadoPagoChip(payment: solicitud.payment!)
+          else if (solicitud.presupuesto == null)
+            _EsperandoPresupuesto(texto: t.seguimientoEsperandoPresupuesto)
+          else if (solicitud.presupuesto!.estado == EstadoPresupuesto.pendiente)
+            _PresupuestoPendienteCard(
+              serviceRequestId: solicitud.id,
+              presupuesto: solicitud.presupuesto!,
+              onRespondido: onRecargar,
+            )
+          else if (solicitud.presupuesto!.estado == EstadoPresupuesto.rechazado)
+            _EsperandoPresupuesto(texto: t.seguimientoPresupuestoRechazadoInfo)
+          else
             OutlinedButton.icon(
               icon: const Icon(Icons.payment_outlined),
               label: Text(t.seguimientoAutorizarPago),
@@ -250,9 +263,7 @@ class _Contenido extends ConsumerWidget {
                 );
                 if (resultado == true) onRecargar();
               },
-            )
-          else
-            _EstadoPagoChip(payment: solicitud.payment!),
+            ),
         ],
 
         if (solicitud.estado == EstadoSolicitud.completada) ...[
@@ -351,6 +362,153 @@ class _EstadoBanner extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(texto, style: TextStyle(fontWeight: FontWeight.w600, color: color)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Texto informativo simple, sin acción — usado tanto para "todavía no
+/// hay presupuesto" como para "rechazaste el anterior, esperando uno
+/// nuevo del profesional".
+class _EsperandoPresupuesto extends StatelessWidget {
+  const _EsperandoPresupuesto({required this.texto});
+
+  final String texto;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.hourglass_empty, size: 18, color: colorScheme.onSurfaceVariant),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(texto, style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tarjeta con el presupuesto pendiente de respuesta — muestra el
+/// importe según el tipo (monto fijo, o tarifa × horas estimadas con
+/// el techo que se autorizará) y los botones aceptar/rechazar.
+class _PresupuestoPendienteCard extends StatelessWidget {
+  const _PresupuestoPendienteCard({
+    required this.serviceRequestId,
+    required this.presupuesto,
+    required this.onRespondido,
+  });
+
+  final String serviceRequestId;
+  final PresupuestoInfo presupuesto;
+  final Future<void> Function({bool silencioso}) onRespondido;
+
+  Future<void> _responder(BuildContext context, bool aceptar) async {
+    final t = AppLocalizations.of(context);
+
+    if (!aceptar) {
+      final confirmado = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(t.seguimientoPresupuestoRechazar),
+          content: Text(t.seguimientoPresupuestoRechazarConfirmar),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(t.perfilCancelar),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(t.seguimientoPresupuestoRechazar),
+            ),
+          ],
+        ),
+      );
+      if (confirmado != true || !context.mounted) return;
+    }
+
+    try {
+      await ServiceRequestService().responderPresupuesto(serviceRequestId, presupuesto.id, aceptar: aceptar);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(aceptar ? t.seguimientoPresupuestoAceptadoExito : t.seguimientoPresupuestoRechazadoExito)),
+      );
+      onRespondido();
+    } catch (e) {
+      debugPrint('[SeguimientoSolicitudScreen] Error al responder presupuesto: $e');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.seguimientoPresupuestoError, t: t))),
+      );
+      onRespondido();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final esPorHoras = presupuesto.tipo == TipoPresupuesto.porHoras;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer.withOpacity(0.35),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(t.seguimientoPresupuestoTitulo, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5)),
+          const SizedBox(height: 8),
+          Text(
+            esPorHoras
+                ? t.seguimientoPresupuestoPorHorasDetalle(
+                    presupuesto.tarifaHora!.toStringAsFixed(2),
+                    presupuesto.horasEstimadas!.toStringAsFixed(1),
+                    presupuesto.importeTotal.toStringAsFixed(2),
+                  )
+                : t.seguimientoPresupuestoCerradoDetalle(presupuesto.monto!.toStringAsFixed(2)),
+            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+          ),
+          if (presupuesto.mensaje != null && presupuesto.mensaje!.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              '"${presupuesto.mensaje}"',
+              style: TextStyle(fontSize: 13, fontStyle: FontStyle.italic, color: colorScheme.onSurfaceVariant),
+            ),
+          ],
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(foregroundColor: colorScheme.error),
+                  onPressed: () => _responder(context, false),
+                  child: Text(t.seguimientoPresupuestoRechazar),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () => _responder(context, true),
+                  child: Text(t.seguimientoPresupuestoAceptar),
+                ),
+              ),
+            ],
           ),
         ],
       ),

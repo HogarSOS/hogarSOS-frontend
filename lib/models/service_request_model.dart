@@ -1,3 +1,5 @@
+import 'presupuesto_model.dart';
+
 enum EstadoSolicitud { pendiente, aceptada, en_progreso, completada, cancelada, disputada }
 
 EstadoSolicitud estadoFromString(String value) {
@@ -83,12 +85,12 @@ class ServiceRequestModel {
   final UrgenciaSolicitud urgencia;
   final DateTime? fechaDeseada;
   final EstadoSolicitud estado;
-  final double? precioEstimado;
   final double? precioFinal;
   final DateTime createdAt;
   final PaymentInfo? payment;
   final List<ReviewInfo> reviews;
   final int numCandidatos;
+  final PresupuestoInfo? presupuesto;
 
   ServiceRequestModel({
     required this.id,
@@ -100,12 +102,12 @@ class ServiceRequestModel {
     this.urgencia = UrgenciaSolicitud.loAntesPosible,
     this.fechaDeseada,
     required this.estado,
-    this.precioEstimado,
     this.precioFinal,
     required this.createdAt,
     this.payment,
     this.reviews = const [],
     this.numCandidatos = 0,
+    this.presupuesto,
   });
 
   /// La valoración que dejó ESTE usuario (no la que recibió) — null si
@@ -128,7 +130,6 @@ class ServiceRequestModel {
       urgencia: urgenciaFromString(json['urgencia'] as String? ?? 'lo_antes_posible'),
       fechaDeseada: json['fechaDeseada'] != null ? DateTime.parse(json['fechaDeseada'] as String) : null,
       estado: estadoFromString(json['estado'] as String),
-      precioEstimado: (json['precioEstimado'] as num?)?.toDouble(),
       precioFinal: (json['precioFinal'] as num?)?.toDouble(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       payment: json['payment'] != null ? PaymentInfo.fromJson(json['payment'] as Map<String, dynamic>) : null,
@@ -136,6 +137,8 @@ class ServiceRequestModel {
           .map((r) => ReviewInfo.fromJson(r as Map<String, dynamic>))
           .toList(),
       numCandidatos: (json['numCandidatos'] as num?)?.toInt() ?? 0,
+      presupuesto:
+          json['presupuesto'] != null ? PresupuestoInfo.fromJson(json['presupuesto'] as Map<String, dynamic>) : null,
     );
   }
 }
@@ -149,7 +152,6 @@ class MyServiceRequestSummary {
   final String? profesionalNombre;
   final EstadoSolicitud estado;
   final UrgenciaSolicitud urgencia;
-  final double? precioEstimado;
   final double? precioFinal;
   final DateTime createdAt;
   final bool tienePago;
@@ -162,7 +164,6 @@ class MyServiceRequestSummary {
     this.profesionalNombre,
     required this.estado,
     this.urgencia = UrgenciaSolicitud.loAntesPosible,
-    this.precioEstimado,
     this.precioFinal,
     required this.createdAt,
     required this.tienePago,
@@ -177,7 +178,6 @@ class MyServiceRequestSummary {
       profesionalNombre: json['profesionalNombre'] as String?,
       estado: estadoFromString(json['estado'] as String),
       urgencia: urgenciaFromString(json['urgencia'] as String? ?? 'lo_antes_posible'),
-      precioEstimado: (json['precioEstimado'] as num?)?.toDouble(),
       precioFinal: (json['precioFinal'] as num?)?.toDouble(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       tienePago: json['tienePago'] as bool,
@@ -197,11 +197,11 @@ class AssignedRequest {
   final String clienteNombre;
   final String? clienteTelefono;
   final String? clienteFotoUrl;
-  final double? precioEstimado;
   final double? precioFinal;
   final DateTime createdAt;
   final bool tienePago;
   final bool tieneValoracion;
+  final PresupuestoInfo? presupuesto;
 
   AssignedRequest({
     required this.id,
@@ -212,11 +212,11 @@ class AssignedRequest {
     required this.clienteNombre,
     this.clienteTelefono,
     this.clienteFotoUrl,
-    this.precioEstimado,
     this.precioFinal,
     required this.createdAt,
     required this.tienePago,
     required this.tieneValoracion,
+    this.presupuesto,
   });
 
   factory AssignedRequest.fromJson(Map<String, dynamic> json) {
@@ -229,11 +229,12 @@ class AssignedRequest {
       clienteNombre: json['clienteNombre'] as String,
       clienteTelefono: json['clienteTelefono'] as String?,
       clienteFotoUrl: json['clienteFotoUrl'] as String?,
-      precioEstimado: (json['precioEstimado'] as num?)?.toDouble(),
       precioFinal: (json['precioFinal'] as num?)?.toDouble(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       tieneValoracion: json['tieneValoracion'] as bool,
       tienePago: json['tienePago'] as bool,
+      presupuesto:
+          json['presupuesto'] != null ? PresupuestoInfo.fromJson(json['presupuesto'] as Map<String, dynamic>) : null,
     );
   }
 }

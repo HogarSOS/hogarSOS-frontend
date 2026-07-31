@@ -1271,4 +1271,97 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get seleccionarProfesionalVacio =>
       'No applications received yet — check back later';
+
+  @override
+  String get trabajosActivosEnviarPresupuesto => 'Send quote';
+
+  @override
+  String get trabajosActivosPresupuestoEsperando =>
+      'Waiting for the client\'s response';
+
+  @override
+  String get trabajosActivosHorasRealesTitulo => 'Actual hours worked';
+
+  @override
+  String trabajosActivosHorasRealesTarifa(String tarifa) {
+    return 'Agreed rate: €$tarifa/hour';
+  }
+
+  @override
+  String get trabajosActivosHorasRealesHint => 'Hours';
+
+  @override
+  String get trabajosActivosCompletarCerradoConfirmar =>
+      'Confirm the job is complete? The agreed payment will be released.';
+
+  @override
+  String get presupuestoDialogoTitulo => 'Send quote';
+
+  @override
+  String get presupuestoTipoCerrado => 'Fixed price';
+
+  @override
+  String get presupuestoTipoPorHoras => 'Hourly rate';
+
+  @override
+  String get presupuestoDialogoMontoHint => 'Amount (€)';
+
+  @override
+  String get presupuestoDialogoTarifaHint => 'Rate per hour (€)';
+
+  @override
+  String get presupuestoDialogoHorasEstimadasHint => 'Estimated hours';
+
+  @override
+  String get presupuestoDialogoMensajeHint =>
+      'Message for the client (optional)';
+
+  @override
+  String get presupuestoEnviadoExito => 'Quote sent';
+
+  @override
+  String get presupuestoEnviadoError => 'Couldn\'t send the quote';
+
+  @override
+  String get seguimientoEsperandoPresupuesto =>
+      'Waiting for the professional\'s quote';
+
+  @override
+  String get seguimientoPresupuestoTitulo =>
+      'The professional has sent a quote';
+
+  @override
+  String seguimientoPresupuestoCerradoDetalle(String monto) {
+    return 'Quote: €$monto';
+  }
+
+  @override
+  String seguimientoPresupuestoPorHorasDetalle(
+      String tarifa, String horas, String total) {
+    return '€$tarifa/hour × $horas estimated hours — maximum authorized amount: €$total';
+  }
+
+  @override
+  String get seguimientoPresupuestoAceptar => 'Accept';
+
+  @override
+  String get seguimientoPresupuestoRechazar => 'Decline';
+
+  @override
+  String get seguimientoPresupuestoRechazarConfirmar =>
+      'Are you sure you want to decline this quote? The professional will be able to send a new one.';
+
+  @override
+  String get seguimientoPresupuestoAceptadoExito =>
+      'Quote accepted — you can now authorize payment';
+
+  @override
+  String get seguimientoPresupuestoRechazadoExito => 'Quote declined';
+
+  @override
+  String get seguimientoPresupuestoRechazadoInfo =>
+      'You declined the previous quote — waiting for a new one from the professional';
+
+  @override
+  String get seguimientoPresupuestoError => 'Couldn\'t respond to the quote';
 }

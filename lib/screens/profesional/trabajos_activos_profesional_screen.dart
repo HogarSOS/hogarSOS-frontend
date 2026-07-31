@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/presupuesto_model.dart';
 import '../../models/service_request_model.dart';
 import '../../providers/chat_read_provider.dart';
 import '../../providers/service_request_provider.dart';
@@ -26,42 +27,77 @@ import '../cliente/valoracion_screen.dart';
 class TrabajosActivosProfesionalScreen extends ConsumerWidget {
   const TrabajosActivosProfesionalScreen({super.key});
 
+  /// Completa el trabajo. El importe sale siempre del presupuesto ya
+  /// aceptado (`trabajo.presupuesto`), nunca de un número escrito a
+  /// mano: para "cerrado" solo hace falta confirmar, para "por_horas"
+  /// se piden las horas reales y el backend calcula tarifa × horas.
   Future<void> _completar(BuildContext context, WidgetRef ref, AssignedRequest trabajo) async {
     final t = AppLocalizations.of(context);
-    final controller = TextEditingController(
-      text: trabajo.precioEstimado?.toStringAsFixed(2) ?? '',
-    );
+    final presupuesto = trabajo.presupuesto;
+    double? horasReales;
 
-    final precio = await showDialog<double>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(t.trabajosActivosPrecioFinalTitulo),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(labelText: t.trabajosActivosPrecioFinalHint),
+    if (presupuesto?.tipo == TipoPresupuesto.porHoras) {
+      final controller = TextEditingController();
+      horasReales = await showDialog<double>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(t.trabajosActivosHorasRealesTitulo),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                t.trabajosActivosHorasRealesTarifa(presupuesto!.tarifaHora!.toStringAsFixed(2)),
+                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: controller,
+                autofocus: true,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(labelText: t.trabajosActivosHorasRealesHint),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(t.perfilCancelar),
+            ),
+            FilledButton(
+              onPressed: () {
+                final valor = double.tryParse(controller.text.replaceAll(',', '.'));
+                Navigator.of(context).pop(valor);
+              },
+              child: Text(t.trabajosActivosPrecioFinalConfirmar),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(t.perfilCancelar),
-          ),
-          FilledButton(
-            onPressed: () {
-              final valor = double.tryParse(controller.text.replaceAll(',', '.'));
-              Navigator.of(context).pop(valor);
-            },
-            child: Text(t.trabajosActivosPrecioFinalConfirmar),
-          ),
-        ],
-      ),
-    );
-
-    if (precio == null || precio <= 0 || !context.mounted) return;
+      );
+      if (horasReales == null || horasReales <= 0 || !context.mounted) return;
+    } else {
+      final confirmado = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(t.trabajosActivosPrecioFinalTitulo),
+          content: Text(t.trabajosActivosCompletarCerradoConfirmar),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(t.perfilCancelar),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(t.trabajosActivosPrecioFinalConfirmar),
+            ),
+          ],
+        ),
+      );
+      if (confirmado != true || !context.mounted) return;
+    }
 
     try {
-      await ServiceRequestService().completar(trabajo.id, precioFinal: precio);
+      await ServiceRequestService().completar(trabajo.id, horasReales: horasReales);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(t.trabajosActivosCompletadoExito)),
@@ -82,6 +118,121 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(mensajeDeError(e, contexto: t.trabajosActivosCompletadoError, t: t))),
       );
+    }
+  }
+
+  /// Diálogo para enviar un presupuesto — cerrado (monto fijo) o por
+  /// horas (tarifa + horas estimadas). Mismo patrón de AlertDialog con
+  /// StatefulBuilder que el resto de diálogos de esta pantalla, para
+  /// poder alternar los campos visibles según el tipo elegido.
+  Future<void> _enviarPresupuesto(BuildContext context, WidgetRef ref, AssignedRequest trabajo) async {
+    final t = AppLocalizations.of(context);
+    var tipo = TipoPresupuesto.cerrado;
+    final montoController = TextEditingController();
+    final tarifaController = TextEditingController();
+    final horasController = TextEditingController();
+    final mensajeController = TextEditingController();
+
+    final enviado = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(t.presupuestoDialogoTitulo),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SegmentedButton<TipoPresupuesto>(
+                  segments: [
+                    ButtonSegment(value: TipoPresupuesto.cerrado, label: Text(t.presupuestoTipoCerrado)),
+                    ButtonSegment(value: TipoPresupuesto.porHoras, label: Text(t.presupuestoTipoPorHoras)),
+                  ],
+                  selected: {tipo},
+                  onSelectionChanged: (seleccion) => setState(() => tipo = seleccion.first),
+                ),
+                const SizedBox(height: 14),
+                if (tipo == TipoPresupuesto.cerrado)
+                  TextField(
+                    controller: montoController,
+                    autofocus: true,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(labelText: t.presupuestoDialogoMontoHint),
+                  )
+                else ...[
+                  TextField(
+                    controller: tarifaController,
+                    autofocus: true,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(labelText: t.presupuestoDialogoTarifaHint),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: horasController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(labelText: t.presupuestoDialogoHorasEstimadasHint),
+                  ),
+                ],
+                const SizedBox(height: 10),
+                TextField(
+                  controller: mensajeController,
+                  maxLines: 2,
+                  minLines: 1,
+                  decoration: InputDecoration(hintText: t.presupuestoDialogoMensajeHint),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(t.perfilCancelar),
+            ),
+            FilledButton(
+              onPressed: () async {
+                final mensaje = mensajeController.text.trim();
+                try {
+                  if (tipo == TipoPresupuesto.cerrado) {
+                    final monto = double.tryParse(montoController.text.replaceAll(',', '.'));
+                    if (monto == null || monto <= 0) return;
+                    await ServiceRequestService().enviarPresupuesto(
+                      trabajo.id,
+                      tipo: tipo,
+                      monto: monto,
+                      mensaje: mensaje,
+                    );
+                  } else {
+                    final tarifa = double.tryParse(tarifaController.text.replaceAll(',', '.'));
+                    final horas = double.tryParse(horasController.text.replaceAll(',', '.'));
+                    if (tarifa == null || tarifa <= 0 || horas == null || horas <= 0) return;
+                    await ServiceRequestService().enviarPresupuesto(
+                      trabajo.id,
+                      tipo: tipo,
+                      tarifaHora: tarifa,
+                      horasEstimadas: horas,
+                      mensaje: mensaje,
+                    );
+                  }
+                  if (!context.mounted) return;
+                  Navigator.of(context).pop(true);
+                } catch (e) {
+                  debugPrint('[TrabajosActivosProfesionalScreen] Error al enviar presupuesto: $e');
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(mensajeDeError(e, contexto: t.presupuestoEnviadoError, t: t))),
+                  );
+                }
+              },
+              child: Text(t.trabajosActivosPrecioFinalConfirmar),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (enviado == true && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.presupuestoEnviadoExito)));
+      ref.invalidate(assignedRequestsProvider);
     }
   }
 
@@ -139,6 +290,7 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
                         ),
                       ),
                       onCompletar: () => _completar(context, ref, trabajo),
+                      onEnviarPresupuesto: () => _enviarPresupuesto(context, ref, trabajo),
                       onValorar: () => _valorar(context, ref, trabajo),
                       onReportar: () => Navigator.of(context).push(
                         MaterialPageRoute(
@@ -172,6 +324,7 @@ class _TarjetaTrabajo extends StatelessWidget {
     required this.noLeido,
     required this.onChat,
     required this.onCompletar,
+    required this.onEnviarPresupuesto,
     required this.onValorar,
     required this.onReportar,
   });
@@ -180,6 +333,7 @@ class _TarjetaTrabajo extends StatelessWidget {
   final bool noLeido;
   final VoidCallback onChat;
   final VoidCallback onCompletar;
+  final VoidCallback onEnviarPresupuesto;
   final VoidCallback onValorar;
   final VoidCallback onReportar;
 
@@ -304,13 +458,7 @@ class _TarjetaTrabajo extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Expanded(
-                    child: FilledButton.icon(
-                      icon: const Icon(Icons.check_circle_outline, size: 18),
-                      label: Text(t.trabajosActivosCompletar),
-                      onPressed: onCompletar,
-                    ),
-                  ),
+                  Expanded(child: _botonSegunPresupuesto(t, colorScheme)),
                 ],
               ),
             const SizedBox(height: 8),
@@ -327,6 +475,42 @@ class _TarjetaTrabajo extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// Sin presupuesto o rechazado: hay que enviar uno antes de poder
+  /// completar (el backend rechazaría "completar" con un 409 porque
+  /// sin presupuesto aceptado no puede haber pago autorizado). Con uno
+  /// pendiente: nada que hacer todavía, solo esperar. Con uno aceptado:
+  /// el flujo normal de completar.
+  Widget _botonSegunPresupuesto(AppLocalizations t, ColorScheme colorScheme) {
+    final presupuesto = trabajo.presupuesto;
+    if (presupuesto == null || presupuesto.estado == EstadoPresupuesto.rechazado) {
+      return FilledButton.icon(
+        icon: const Icon(Icons.request_quote_outlined, size: 18),
+        label: Text(t.trabajosActivosEnviarPresupuesto),
+        onPressed: onEnviarPresupuesto,
+      );
+    }
+    if (presupuesto.estado == EstadoPresupuesto.pendiente) {
+      return Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          t.trabajosActivosPresupuestoEsperando,
+          style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+    return FilledButton.icon(
+      icon: const Icon(Icons.check_circle_outline, size: 18),
+      label: Text(t.trabajosActivosCompletar),
+      onPressed: onCompletar,
     );
   }
 }
