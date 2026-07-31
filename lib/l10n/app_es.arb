@@ -193,10 +193,10 @@
   "profesionalAceptar": "Aceptar",
   "profesionalSolicitudAceptada": "Solicitud aceptada. El cliente autorizará el pago.",
   "profesionalYaNoDisponible": "No se pudo aceptar — puede que ya no esté disponible",
-  "profesionalPostularme": "Postularme",
-  "profesionalYaPostulado": "Ya te has postulado",
+  "profesionalPostularme": "Enviar candidatura",
+  "profesionalYaPostulado": "Candidatura enviada",
   "profesionalPostulacionEnviada": "Candidatura enviada — el cliente elegirá entre los profesionales interesados",
-  "profesionalPostulacionMensajeObligatorio": "Escribe cuándo puedes hacer el trabajo antes de postularte",
+  "profesionalPostulacionMensajeObligatorio": "Escribe cuándo puedes hacer el trabajo antes de enviar tu candidatura",
   "profesionalDisponibilidadTitulo": "¿Cuándo puedes hacer este trabajo?",
   "profesionalDisponibilidadSubtitulo": "El cliente lo verá en tu candidatura junto a tu foto y valoración",
   "profesionalDisponibilidadHint": "Ej: puedo ir mañana por la tarde...",
@@ -440,5 +440,5 @@
     "placeholders": { "nombre": { "type": "String" } }
   },
   "seleccionarProfesionalError": "No se pudo completar la selección. Puede que otra persona ya haya elegido.",
-  "seleccionarProfesionalVacio": "Todavía no hay ningún profesional postulado — vuelve más tarde"
+  "seleccionarProfesionalVacio": "Todavía no hay ninguna candidatura recibida — vuelve más tarde"
 }

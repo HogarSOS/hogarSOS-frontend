@@ -193,10 +193,10 @@
   "profesionalAceptar": "Accept",
   "profesionalSolicitudAceptada": "Request accepted. The customer will authorize payment.",
   "profesionalYaNoDisponible": "Couldn't accept — it may no longer be available",
-  "profesionalPostularme": "Apply",
-  "profesionalYaPostulado": "You've already applied",
+  "profesionalPostularme": "Send application",
+  "profesionalYaPostulado": "Application sent",
   "profesionalPostulacionEnviada": "Application sent — the customer will choose among interested professionals",
-  "profesionalPostulacionMensajeObligatorio": "Write when you can do the job before applying",
+  "profesionalPostulacionMensajeObligatorio": "Write when you can do the job before sending your application",
   "profesionalDisponibilidadTitulo": "When can you do this job?",
   "profesionalDisponibilidadSubtitulo": "The customer will see this on your application, along with your photo and rating",
   "profesionalDisponibilidadHint": "E.g.: I can come tomorrow afternoon...",
@@ -440,5 +440,5 @@
     "placeholders": { "nombre": { "type": "String" } }
   },
   "seleccionarProfesionalError": "Couldn't complete the selection. Someone else may have already chosen.",
-  "seleccionarProfesionalVacio": "No professionals have applied yet — check back later"
+  "seleccionarProfesionalVacio": "No applications received yet — check back later"
 }

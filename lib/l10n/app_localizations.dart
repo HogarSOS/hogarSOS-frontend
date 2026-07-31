@@ -1013,13 +1013,13 @@ abstract class AppLocalizations {
   /// No description provided for @profesionalPostularme.
   ///
   /// In es, this message translates to:
-  /// **'Postularme'**
+  /// **'Enviar candidatura'**
   String get profesionalPostularme;
 
   /// No description provided for @profesionalYaPostulado.
   ///
   /// In es, this message translates to:
-  /// **'Ya te has postulado'**
+  /// **'Candidatura enviada'**
   String get profesionalYaPostulado;
 
   /// No description provided for @profesionalPostulacionEnviada.
@@ -1031,7 +1031,7 @@ abstract class AppLocalizations {
   /// No description provided for @profesionalPostulacionMensajeObligatorio.
   ///
   /// In es, this message translates to:
-  /// **'Escribe cuándo puedes hacer el trabajo antes de postularte'**
+  /// **'Escribe cuándo puedes hacer el trabajo antes de enviar tu candidatura'**
   String get profesionalPostulacionMensajeObligatorio;
 
   /// No description provided for @profesionalDisponibilidadTitulo.
@@ -2345,7 +2345,7 @@ abstract class AppLocalizations {
   /// No description provided for @seleccionarProfesionalVacio.
   ///
   /// In es, this message translates to:
-  /// **'Todavía no hay ningún profesional postulado — vuelve más tarde'**
+  /// **'Todavía no hay ninguna candidatura recibida — vuelve más tarde'**
   String get seleccionarProfesionalVacio;
 }
 

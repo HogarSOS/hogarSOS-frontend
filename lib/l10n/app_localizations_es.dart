@@ -535,10 +535,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo aceptar — puede que ya no esté disponible';
 
   @override
-  String get profesionalPostularme => 'Postularme';
+  String get profesionalPostularme => 'Enviar candidatura';
 
   @override
-  String get profesionalYaPostulado => 'Ya te has postulado';
+  String get profesionalYaPostulado => 'Candidatura enviada';
 
   @override
   String get profesionalPostulacionEnviada =>
@@ -546,7 +546,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profesionalPostulacionMensajeObligatorio =>
-      'Escribe cuándo puedes hacer el trabajo antes de postularte';
+      'Escribe cuándo puedes hacer el trabajo antes de enviar tu candidatura';
 
   @override
   String get profesionalDisponibilidadTitulo =>
@@ -1283,5 +1283,5 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get seleccionarProfesionalVacio =>
-      'Todavía no hay ningún profesional postulado — vuelve más tarde';
+      'Todavía no hay ninguna candidatura recibida — vuelve más tarde';
 }
