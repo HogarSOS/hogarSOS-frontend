@@ -28,6 +28,15 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="hogarsos_notifications" />
+        <!-- Impeller (el backend de render por defecto en Android desde
+             Flutter 3.x) se queda colgado sin dibujar ni un frame en el
+             Realme RMX3853 de pruebas (SurfaceView "didn't commit buffer"
+             en logcat, indefinidamente) — problema conocido de
+             compatibilidad Impeller+Vulkan con ciertos drivers Adreno.
+             Skia es más lento en algunos efectos pero no se cuelga aquí. -->
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableImpeller"
+            android:value="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

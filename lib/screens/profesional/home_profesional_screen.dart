@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -15,8 +16,35 @@ import 'trabajos_activos_profesional_screen.dart';
 /// ya no viven aquí — tienen sus propias pestañas en
 /// ProfesionalShellScreen, así no hay dos sitios distintos para lo
 /// mismo ni hace falta un botón extra en el AppBar para llegar a ellos.
-class HomeProfesionalScreen extends ConsumerWidget {
+class HomeProfesionalScreen extends ConsumerStatefulWidget {
   const HomeProfesionalScreen({super.key});
+
+  @override
+  ConsumerState<HomeProfesionalScreen> createState() => _HomeProfesionalScreenState();
+}
+
+class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen> {
+  Timer? _polling;
+
+  @override
+  void initState() {
+    super.initState();
+    // Antes solo se cargaba una vez al entrar y con pull-to-refresh
+    // manual — un profesional que se quedaba con la pestaña abierta no
+    // veía solicitudes nuevas sin deslizar. Mismo patrón de sondeo que
+    // seguimiento_solicitud_screen.dart, pero cada 10s (no 5s): es una
+    // lista, no un trabajo concreto ya aceptado, así que hay menos
+    // urgencia y así se reduce la carga de red.
+    _polling = Timer.periodic(const Duration(seconds: 10), (_) {
+      ref.read(nearbyRequestsProvider.notifier).cargar();
+    });
+  }
+
+  @override
+  void dispose() {
+    _polling?.cancel();
+    super.dispose();
+  }
 
   Future<void> _postularse(BuildContext context, WidgetRef ref, NearbyRequest solicitud) async {
     final t = AppLocalizations.of(context);
@@ -102,7 +130,7 @@ class HomeProfesionalScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final solicitudesAsync = ref.watch(nearbyRequestsProvider);
     final trabajosActivosAsync = ref.watch(assignedRequestsProvider);

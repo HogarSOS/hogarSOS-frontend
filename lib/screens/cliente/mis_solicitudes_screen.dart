@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
@@ -17,16 +18,43 @@ class MisSolicitudesScreen extends ConsumerStatefulWidget {
 
 class _MisSolicitudesScreenState extends ConsumerState<MisSolicitudesScreen> {
   final _servicio = ServiceRequestService();
-  late Future<List<MyServiceRequestSummary>> _futuro;
+  List<MyServiceRequestSummary>? _solicitudes;
+  bool _error = false;
+  Timer? _polling;
 
   @override
   void initState() {
     super.initState();
-    _futuro = _servicio.listarMisSolicitudes();
+    _cargar();
+    // Antes solo se cargaba una vez al entrar y con pull-to-refresh
+    // manual — una solicitud nueva o un cambio de estado (candidato
+    // nuevo, aceptada...) no se veía sin deslizar. Mismo patrón de
+    // sondeo silencioso que seguimiento_solicitud_screen.dart.
+    _polling = Timer.periodic(const Duration(seconds: 10), (_) => _cargar(silencioso: true));
+  }
+
+  @override
+  void dispose() {
+    _polling?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _cargar({bool silencioso = false}) async {
+    try {
+      final solicitudes = await _servicio.listarMisSolicitudes();
+      if (!mounted) return;
+      setState(() {
+        _solicitudes = solicitudes;
+        _error = false;
+      });
+    } catch (e) {
+      if (!mounted || silencioso) return; // en el sondeo de fondo, un fallo puntual no debe mostrar error
+      setState(() => _error = true);
+    }
   }
 
   void _recargar() {
-    setState(() => _futuro = _servicio.listarMisSolicitudes());
+    _cargar();
     // El estado de una solicitud pudo cambiar mientras se veía su
     // detalle (cancelada, aceptada...) — el banner de Inicio usa un
     // provider aparte que hay que invalidar explícitamente, ver la
@@ -77,69 +105,64 @@ class _MisSolicitudesScreenState extends ConsumerState<MisSolicitudesScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(t.perfilMisSolicitudes)),
-      body: FutureBuilder<List<MyServiceRequestSummary>>(
-        future: _futuro,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData && !snapshot.hasError) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text(t.misSolicitudesError));
-          }
-          final solicitudes = snapshot.data!;
-          if (solicitudes.isEmpty) {
-            final colorScheme = Theme.of(context).colorScheme;
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.receipt_long_outlined, size: 48, color: colorScheme.onSurfaceVariant),
-                    const SizedBox(height: 16),
-                    Text(t.misSolicitudesVacio, textAlign: TextAlign.center),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async => _recargar(),
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: solicitudes.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final s = solicitudes[index];
-                final borrable = s.profesionalNombre == null &&
-                    (s.estado == EstadoSolicitud.pendiente || s.estado == EstadoSolicitud.cancelada);
-                final tile = EntradaAnimada(
-                  retraso: Duration(milliseconds: 40 * index),
-                  child: _SolicitudTile(solicitud: s, onRegresar: _recargar),
-                );
-                if (!borrable) return tile;
-                return Dismissible(
-                  key: ValueKey(s.id),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 20),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.error,
-                      borderRadius: BorderRadius.circular(12),
+      body: _solicitudes == null
+          ? (_error
+              ? Center(child: Text(t.misSolicitudesError))
+              : const Center(child: CircularProgressIndicator()))
+          : Builder(builder: (context) {
+              final solicitudes = _solicitudes!;
+              if (solicitudes.isEmpty) {
+                final colorScheme = Theme.of(context).colorScheme;
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.receipt_long_outlined, size: 48, color: colorScheme.onSurfaceVariant),
+                        const SizedBox(height: 16),
+                        Text(t.misSolicitudesVacio, textAlign: TextAlign.center),
+                      ],
                     ),
-                    child: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.onError),
                   ),
-                  confirmDismiss: (_) => _confirmarBorrado(context),
-                  onDismissed: (_) => _borrar(s.id),
-                  child: tile,
                 );
-              },
-            ),
-          );
-        },
-      ),
+              }
+
+              return RefreshIndicator(
+                onRefresh: () => _cargar(),
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: solicitudes.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (context, index) {
+                    final s = solicitudes[index];
+                    final borrable = s.profesionalNombre == null &&
+                        (s.estado == EstadoSolicitud.pendiente || s.estado == EstadoSolicitud.cancelada);
+                    final tile = EntradaAnimada(
+                      retraso: Duration(milliseconds: 40 * index),
+                      child: _SolicitudTile(solicitud: s, onRegresar: _recargar),
+                    );
+                    if (!borrable) return tile;
+                    return Dismissible(
+                      key: ValueKey(s.id),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 20),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.error,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.onError),
+                      ),
+                      confirmDismiss: (_) => _confirmarBorrado(context),
+                      onDismissed: (_) => _borrar(s.id),
+                      child: tile,
+                    );
+                  },
+                ),
+              );
+            }),
     );
   }
 }
