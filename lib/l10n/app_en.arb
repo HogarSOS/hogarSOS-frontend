@@ -492,15 +492,32 @@
   "trabajosActivosPedirAmpliacion": "Ask for more hours",
   "trabajosActivosAmpliacionEsperando": "Waiting for a response to your extension request",
   "trabajosActivosCierreEsperando": "Waiting for the client to confirm the hours",
+  "trabajosActivosAmpliarPresupuesto": "Extend budget",
+  "trabajosActivosAmpliarPresupuestoTitulo": "Extend budget",
+  "trabajosActivosAmpliarPresupuestoMontoHint": "Additional amount (€)",
+  "trabajosActivosAmpliacionMotivoHint": "Reason (optional)",
+  "trabajosActivosEstadoSinPresupuesto": "No budget",
+  "trabajosActivosEstadoPresupuestoPendiente": "Pending",
+  "trabajosActivosEstadoPresupuestoAceptado": "Accepted",
+  "trabajosActivosEstadoAmpliacionPendiente": "Extension pending",
+  "trabajosActivosEstadoCierrePendiente": "Confirmation pending",
+  "trabajosActivosEstadoPagoLiberado": "Payment released",
 
   "seguimientoAmpliacionAceptadaExito": "Extension accepted",
   "seguimientoAmpliacionRechazadaExito": "Extension declined",
   "seguimientoAmpliacionError": "Couldn't respond to the extension request",
   "seguimientoAmpliacionTitulo": "The professional needs more time",
+  "seguimientoAmpliacionTituloMonto": "The professional is requesting a budget extension",
   "seguimientoAmpliacionDetalle": "{horas} additional hours — additional amount: €{importe}",
   "@seguimientoAmpliacionDetalle": {
     "placeholders": {
       "horas": { "type": "String" },
+      "importe": { "type": "String" }
+    }
+  },
+  "seguimientoAmpliacionMontoDetalle": "Additional amount: €{importe}",
+  "@seguimientoAmpliacionMontoDetalle": {
+    "placeholders": {
       "importe": { "type": "String" }
     }
   },

@@ -215,6 +215,7 @@ class AssignedRequest {
   final PresupuestoInfo? presupuesto;
   final AmpliacionInfo? ampliacion;
   final CierreHorasInfo? cierreHoras;
+  final PaymentInfo? payment;
 
   AssignedRequest({
     required this.id,
@@ -232,6 +233,7 @@ class AssignedRequest {
     this.presupuesto,
     this.ampliacion,
     this.cierreHoras,
+    this.payment,
   });
 
   factory AssignedRequest.fromJson(Map<String, dynamic> json) {
@@ -254,6 +256,7 @@ class AssignedRequest {
           json['ampliacion'] != null ? AmpliacionInfo.fromJson(json['ampliacion'] as Map<String, dynamic>) : null,
       cierreHoras:
           json['cierreHoras'] != null ? CierreHorasInfo.fromJson(json['cierreHoras'] as Map<String, dynamic>) : null,
+      payment: json['payment'] != null ? PaymentInfo.fromJson(json['payment'] as Map<String, dynamic>) : null,
     );
   }
 }

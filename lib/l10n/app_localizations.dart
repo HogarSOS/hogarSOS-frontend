@@ -2553,6 +2553,66 @@ abstract class AppLocalizations {
   /// **'Esperando que el cliente confirme las horas'**
   String get trabajosActivosCierreEsperando;
 
+  /// No description provided for @trabajosActivosAmpliarPresupuesto.
+  ///
+  /// In es, this message translates to:
+  /// **'Ampliar presupuesto'**
+  String get trabajosActivosAmpliarPresupuesto;
+
+  /// No description provided for @trabajosActivosAmpliarPresupuestoTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Ampliar presupuesto'**
+  String get trabajosActivosAmpliarPresupuestoTitulo;
+
+  /// No description provided for @trabajosActivosAmpliarPresupuestoMontoHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Importe adicional (€)'**
+  String get trabajosActivosAmpliarPresupuestoMontoHint;
+
+  /// No description provided for @trabajosActivosAmpliacionMotivoHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Motivo (opcional)'**
+  String get trabajosActivosAmpliacionMotivoHint;
+
+  /// No description provided for @trabajosActivosEstadoSinPresupuesto.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin presupuesto'**
+  String get trabajosActivosEstadoSinPresupuesto;
+
+  /// No description provided for @trabajosActivosEstadoPresupuestoPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Pendiente'**
+  String get trabajosActivosEstadoPresupuestoPendiente;
+
+  /// No description provided for @trabajosActivosEstadoPresupuestoAceptado.
+  ///
+  /// In es, this message translates to:
+  /// **'Aceptado'**
+  String get trabajosActivosEstadoPresupuestoAceptado;
+
+  /// No description provided for @trabajosActivosEstadoAmpliacionPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Ampliación pendiente'**
+  String get trabajosActivosEstadoAmpliacionPendiente;
+
+  /// No description provided for @trabajosActivosEstadoCierrePendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmación pendiente'**
+  String get trabajosActivosEstadoCierrePendiente;
+
+  /// No description provided for @trabajosActivosEstadoPagoLiberado.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago liberado'**
+  String get trabajosActivosEstadoPagoLiberado;
+
   /// No description provided for @seguimientoAmpliacionAceptadaExito.
   ///
   /// In es, this message translates to:
@@ -2577,11 +2637,23 @@ abstract class AppLocalizations {
   /// **'El profesional necesita más tiempo'**
   String get seguimientoAmpliacionTitulo;
 
+  /// No description provided for @seguimientoAmpliacionTituloMonto.
+  ///
+  /// In es, this message translates to:
+  /// **'El profesional pide ampliar el presupuesto'**
+  String get seguimientoAmpliacionTituloMonto;
+
   /// No description provided for @seguimientoAmpliacionDetalle.
   ///
   /// In es, this message translates to:
   /// **'{horas} horas adicionales — importe adicional: {importe} €'**
   String seguimientoAmpliacionDetalle(String horas, String importe);
+
+  /// No description provided for @seguimientoAmpliacionMontoDetalle.
+  ///
+  /// In es, this message translates to:
+  /// **'Importe adicional: {importe} €'**
+  String seguimientoAmpliacionMontoDetalle(String importe);
 
   /// No description provided for @seguimientoCierreHorasConfirmadoExito.
   ///

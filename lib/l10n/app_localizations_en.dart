@@ -1394,6 +1394,37 @@ class AppLocalizationsEn extends AppLocalizations {
       'Waiting for the client to confirm the hours';
 
   @override
+  String get trabajosActivosAmpliarPresupuesto => 'Extend budget';
+
+  @override
+  String get trabajosActivosAmpliarPresupuestoTitulo => 'Extend budget';
+
+  @override
+  String get trabajosActivosAmpliarPresupuestoMontoHint =>
+      'Additional amount (€)';
+
+  @override
+  String get trabajosActivosAmpliacionMotivoHint => 'Reason (optional)';
+
+  @override
+  String get trabajosActivosEstadoSinPresupuesto => 'No budget';
+
+  @override
+  String get trabajosActivosEstadoPresupuestoPendiente => 'Pending';
+
+  @override
+  String get trabajosActivosEstadoPresupuestoAceptado => 'Accepted';
+
+  @override
+  String get trabajosActivosEstadoAmpliacionPendiente => 'Extension pending';
+
+  @override
+  String get trabajosActivosEstadoCierrePendiente => 'Confirmation pending';
+
+  @override
+  String get trabajosActivosEstadoPagoLiberado => 'Payment released';
+
+  @override
   String get seguimientoAmpliacionAceptadaExito => 'Extension accepted';
 
   @override
@@ -1407,8 +1438,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get seguimientoAmpliacionTitulo => 'The professional needs more time';
 
   @override
+  String get seguimientoAmpliacionTituloMonto =>
+      'The professional is requesting a budget extension';
+
+  @override
   String seguimientoAmpliacionDetalle(String horas, String importe) {
     return '$horas additional hours — additional amount: €$importe';
+  }
+
+  @override
+  String seguimientoAmpliacionMontoDetalle(String importe) {
+    return 'Additional amount: €$importe';
   }
 
   @override

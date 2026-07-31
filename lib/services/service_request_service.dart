@@ -131,9 +131,12 @@ class ServiceRequestService {
 
   /// Pide sumar más horas a un presupuesto "por_horas" ya aceptado,
   /// cuando el trabajo se alarga más de lo estimado.
-  Future<void> pedirAmpliacion(String id, {required double horasAdicionales, String? mensaje}) async {
+  /// Exactamente uno de los dos según el tipo del presupuesto aceptado:
+  /// `horasAdicionales` para "por_horas", `montoAdicional` para "cerrado".
+  Future<void> pedirAmpliacion(String id, {double? horasAdicionales, double? montoAdicional, String? mensaje}) async {
     await _api.post('/service-requests/$id/ampliacion', data: {
-      'horasAdicionales': horasAdicionales,
+      if (horasAdicionales != null) 'horasAdicionales': horasAdicionales,
+      if (montoAdicional != null) 'montoAdicional': montoAdicional,
       if (mensaje != null && mensaje.isNotEmpty) 'mensaje': mensaje,
     });
   }

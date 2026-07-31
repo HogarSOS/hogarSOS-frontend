@@ -1408,6 +1408,37 @@ class AppLocalizationsEs extends AppLocalizations {
       'Esperando que el cliente confirme las horas';
 
   @override
+  String get trabajosActivosAmpliarPresupuesto => 'Ampliar presupuesto';
+
+  @override
+  String get trabajosActivosAmpliarPresupuestoTitulo => 'Ampliar presupuesto';
+
+  @override
+  String get trabajosActivosAmpliarPresupuestoMontoHint =>
+      'Importe adicional (€)';
+
+  @override
+  String get trabajosActivosAmpliacionMotivoHint => 'Motivo (opcional)';
+
+  @override
+  String get trabajosActivosEstadoSinPresupuesto => 'Sin presupuesto';
+
+  @override
+  String get trabajosActivosEstadoPresupuestoPendiente => 'Pendiente';
+
+  @override
+  String get trabajosActivosEstadoPresupuestoAceptado => 'Aceptado';
+
+  @override
+  String get trabajosActivosEstadoAmpliacionPendiente => 'Ampliación pendiente';
+
+  @override
+  String get trabajosActivosEstadoCierrePendiente => 'Confirmación pendiente';
+
+  @override
+  String get trabajosActivosEstadoPagoLiberado => 'Pago liberado';
+
+  @override
   String get seguimientoAmpliacionAceptadaExito => 'Ampliación aceptada';
 
   @override
@@ -1422,8 +1453,17 @@ class AppLocalizationsEs extends AppLocalizations {
       'El profesional necesita más tiempo';
 
   @override
+  String get seguimientoAmpliacionTituloMonto =>
+      'El profesional pide ampliar el presupuesto';
+
+  @override
   String seguimientoAmpliacionDetalle(String horas, String importe) {
     return '$horas horas adicionales — importe adicional: $importe €';
+  }
+
+  @override
+  String seguimientoAmpliacionMontoDetalle(String importe) {
+    return 'Importe adicional: $importe €';
   }
 
   @override

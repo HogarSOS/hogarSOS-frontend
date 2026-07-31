@@ -492,15 +492,32 @@
   "trabajosActivosPedirAmpliacion": "Pedir más horas",
   "trabajosActivosAmpliacionEsperando": "Esperando respuesta a tu petición de más horas",
   "trabajosActivosCierreEsperando": "Esperando que el cliente confirme las horas",
+  "trabajosActivosAmpliarPresupuesto": "Ampliar presupuesto",
+  "trabajosActivosAmpliarPresupuestoTitulo": "Ampliar presupuesto",
+  "trabajosActivosAmpliarPresupuestoMontoHint": "Importe adicional (€)",
+  "trabajosActivosAmpliacionMotivoHint": "Motivo (opcional)",
+  "trabajosActivosEstadoSinPresupuesto": "Sin presupuesto",
+  "trabajosActivosEstadoPresupuestoPendiente": "Pendiente",
+  "trabajosActivosEstadoPresupuestoAceptado": "Aceptado",
+  "trabajosActivosEstadoAmpliacionPendiente": "Ampliación pendiente",
+  "trabajosActivosEstadoCierrePendiente": "Confirmación pendiente",
+  "trabajosActivosEstadoPagoLiberado": "Pago liberado",
 
   "seguimientoAmpliacionAceptadaExito": "Ampliación aceptada",
   "seguimientoAmpliacionRechazadaExito": "Ampliación rechazada",
   "seguimientoAmpliacionError": "No se pudo responder a la ampliación",
   "seguimientoAmpliacionTitulo": "El profesional necesita más tiempo",
+  "seguimientoAmpliacionTituloMonto": "El profesional pide ampliar el presupuesto",
   "seguimientoAmpliacionDetalle": "{horas} horas adicionales — importe adicional: {importe} €",
   "@seguimientoAmpliacionDetalle": {
     "placeholders": {
       "horas": { "type": "String" },
+      "importe": { "type": "String" }
+    }
+  },
+  "seguimientoAmpliacionMontoDetalle": "Importe adicional: {importe} €",
+  "@seguimientoAmpliacionMontoDetalle": {
+    "placeholders": {
       "importe": { "type": "String" }
     }
   },

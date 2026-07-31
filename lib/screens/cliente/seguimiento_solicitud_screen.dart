@@ -570,25 +570,30 @@ class _AmpliacionPendienteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final importeAdicional = (tarifaHora ?? 0) * ampliacion.horasAdicionales;
+    final importeAdicional = ampliacion.importeAdicional(tarifaHora);
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.tertiaryContainer.withOpacity(0.35),
+        color: colorScheme.tertiaryContainer.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(t.seguimientoAmpliacionTitulo, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5)),
+          Text(
+            ampliacion.esPorHoras ? t.seguimientoAmpliacionTitulo : t.seguimientoAmpliacionTituloMonto,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5),
+          ),
           const SizedBox(height: 8),
           Text(
-            t.seguimientoAmpliacionDetalle(
-              ampliacion.horasAdicionales.toStringAsFixed(1),
-              importeAdicional.toStringAsFixed(2),
-            ),
+            ampliacion.esPorHoras
+                ? t.seguimientoAmpliacionDetalle(
+                    ampliacion.horasAdicionales!.toStringAsFixed(1),
+                    importeAdicional.toStringAsFixed(2),
+                  )
+                : t.seguimientoAmpliacionMontoDetalle(importeAdicional.toStringAsFixed(2)),
             style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
           ),
           if (ampliacion.mensaje != null && ampliacion.mensaje!.isNotEmpty) ...[

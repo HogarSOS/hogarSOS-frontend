@@ -128,34 +128,43 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
     }
   }
 
-  /// Diálogo para pedir más horas cuando un trabajo "por_horas" se
-  /// alarga más de lo estimado — nunca se cobra el exceso fuera de la
-  /// app, hay que pasar por aquí y que el cliente lo acepte.
+  /// Diálogo para pedir más margen cuando el trabajo se complica más de
+  /// lo previsto — nunca se cobra el exceso fuera de la app, hay que
+  /// pasar por aquí y que el cliente lo acepte. Mismo patrón para las
+  /// dos modalidades de presupuesto: "por_horas" pide horas
+  /// adicionales, "cerrado" pide un importe adicional + motivo (ej.
+  /// "+40€, hay que sustituir una válvula") — un único flujo, sin
+  /// duplicar lógica entre los dos casos.
   Future<void> _pedirAmpliacion(BuildContext context, WidgetRef ref, AssignedRequest trabajo) async {
     final t = AppLocalizations.of(context);
-    final horasController = TextEditingController();
+    final esCerrado = trabajo.presupuesto?.tipo == TipoPresupuesto.cerrado;
+    final valorController = TextEditingController();
     final mensajeController = TextEditingController();
 
     final pedido = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(t.trabajosActivosPedirAmpliacionTitulo),
+        title: Text(esCerrado ? t.trabajosActivosAmpliarPresupuestoTitulo : t.trabajosActivosPedirAmpliacionTitulo),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
-              controller: horasController,
+              controller: valorController,
               autofocus: true,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(labelText: t.trabajosActivosPedirAmpliacionHorasHint),
+              decoration: InputDecoration(
+                labelText: esCerrado
+                    ? t.trabajosActivosAmpliarPresupuestoMontoHint
+                    : t.trabajosActivosPedirAmpliacionHorasHint,
+              ),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: mensajeController,
               maxLines: 2,
               minLines: 1,
-              decoration: InputDecoration(hintText: t.presupuestoDialogoMensajeHint),
+              decoration: InputDecoration(hintText: t.trabajosActivosAmpliacionMotivoHint),
             ),
           ],
         ),
@@ -166,12 +175,13 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
           ),
           FilledButton(
             onPressed: () async {
-              final horas = double.tryParse(horasController.text.replaceAll(',', '.'));
-              if (horas == null || horas <= 0) return;
+              final valor = double.tryParse(valorController.text.replaceAll(',', '.'));
+              if (valor == null || valor <= 0) return;
               try {
                 await ServiceRequestService().pedirAmpliacion(
                   trabajo.id,
-                  horasAdicionales: horas,
+                  horasAdicionales: esCerrado ? null : valor,
+                  montoAdicional: esCerrado ? valor : null,
                   mensaje: mensajeController.text.trim(),
                 );
                 if (!context.mounted) return;
@@ -394,6 +404,18 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
   }
 }
 
+/// Descripción visual de un estado: texto + colores + icono. Un único
+/// sitio que decide "qué chip se ve" para toda la tarjeta, en vez de
+/// repartir esa decisión entre varios widgets.
+class _EstadoVisual {
+  const _EstadoVisual(this.texto, this.icono, this.fondo, this.contenido);
+
+  final String texto;
+  final IconData icono;
+  final Color fondo;
+  final Color contenido;
+}
+
 class _TarjetaTrabajo extends StatelessWidget {
   const _TarjetaTrabajo({
     required this.trabajo,
@@ -415,11 +437,45 @@ class _TarjetaTrabajo extends StatelessWidget {
   final VoidCallback onValorar;
   final VoidCallback onReportar;
 
+  static const _tamanoIconoAccion = 17.0;
+  static const _anchoBotonChat = 92.0;
+
+  bool get _completado => trabajo.estado == EstadoSolicitud.completada;
+
+  /// Un único chip de estado, con prioridad de lo más urgente/reciente
+  /// a lo más asentado — evita mezclar varias señales a la vez en la
+  /// misma tarjeta.
+  _EstadoVisual _estadoVisual(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final presupuesto = trabajo.presupuesto;
+
+    if (trabajo.cierreHoras?.estado == EstadoPresupuesto.pendiente) {
+      return _EstadoVisual(t.trabajosActivosEstadoCierrePendiente, Icons.verified_user_outlined, Colors.blue.shade50, Colors.blue.shade800);
+    }
+    if (trabajo.ampliacion?.estado == EstadoPresupuesto.pendiente) {
+      return _EstadoVisual(t.trabajosActivosEstadoAmpliacionPendiente, Icons.hourglass_top, Colors.orange.shade50, Colors.orange.shade800);
+    }
+    if (_completado && trabajo.payment?.estado == 'liberado') {
+      return _EstadoVisual(t.trabajosActivosEstadoPagoLiberado, Icons.account_balance_wallet_outlined, Colors.green.shade100, Colors.green.shade900);
+    }
+    if (_completado) {
+      return _EstadoVisual(t.seguimientoCompletada, Icons.task_alt, Colors.green.shade50, Colors.green.shade800);
+    }
+    if (presupuesto == null || presupuesto.estado == EstadoPresupuesto.rechazado) {
+      final colorScheme = Theme.of(context).colorScheme;
+      return _EstadoVisual(t.trabajosActivosEstadoSinPresupuesto, Icons.request_quote_outlined, colorScheme.surfaceContainerHighest, colorScheme.onSurfaceVariant);
+    }
+    if (presupuesto.estado == EstadoPresupuesto.pendiente) {
+      return _EstadoVisual(t.trabajosActivosEstadoPresupuestoPendiente, Icons.hourglass_top, Colors.amber.shade50, Colors.amber.shade900);
+    }
+    return _EstadoVisual(t.trabajosActivosEstadoPresupuestoAceptado, Icons.task_alt, Colors.green.shade50, Colors.green.shade800);
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final completado = trabajo.estado == EstadoSolicitud.completada;
+    final estado = _estadoVisual(context);
 
     return Material(
       color: colorScheme.surfaceContainerHigh,
@@ -429,7 +485,9 @@ class _TarjetaTrabajo extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // --- Cabecera: quién y qué, con el chip de estado siempre visible ---
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
                   backgroundColor: colorScheme.primaryContainer,
@@ -448,26 +506,23 @@ class _TarjetaTrabajo extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(trabajo.clienteNombre, style: const TextStyle(fontWeight: FontWeight.w700)),
+                      Text(
+                        trabajo.clienteNombre,
+                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       Text(
                         trabajo.categoria,
                         style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
-                if (completado)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      t.seguimientoCompletada,
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.green),
-                    ),
-                  ),
+                const SizedBox(width: 8),
+                _ChipEstado(estado: estado),
               ],
             ),
             const SizedBox(height: 12),
@@ -490,16 +545,15 @@ class _TarjetaTrabajo extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 14),
-            if (completado)
+            Divider(height: 1, color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+            const SizedBox(height: 14),
+
+            // --- Acciones: Chat con ancho fijo (no compite por espacio),
+            // la acción principal se lleva el resto — así nunca se parte. ---
+            if (_completado)
               Row(
                 children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      icon: Badge(isLabelVisible: noLeido, child: const Icon(Icons.chat_bubble_outline, size: 18)),
-                      label: Text(t.trabajosActivosChat),
-                      onPressed: onChat,
-                    ),
-                  ),
+                  SizedBox(width: _anchoBotonChat, child: _botonChat(t)),
                   const SizedBox(width: 8),
                   Expanded(
                     child: trabajo.tieneValoracion
@@ -512,15 +566,17 @@ class _TarjetaTrabajo extends StatelessWidget {
                                 child: Text(
                                   t.seguimientoYaValorado,
                                   style: const TextStyle(fontSize: 12.5),
+                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
                           )
-                        : FilledButton.icon(
-                            icon: const Icon(Icons.star_outline, size: 18),
-                            label: Text(t.seguimientoValorar),
+                        : _botonAccion(
+                            icon: Icons.star_outline,
+                            label: t.seguimientoValorar,
                             onPressed: onValorar,
+                            relleno: true,
                           ),
                   ),
                 ],
@@ -528,13 +584,7 @@ class _TarjetaTrabajo extends StatelessWidget {
             else ...[
               Row(
                 children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      icon: Badge(isLabelVisible: noLeido, child: const Icon(Icons.chat_bubble_outline, size: 18)),
-                      label: Text(t.trabajosActivosChat),
-                      onPressed: onChat,
-                    ),
-                  ),
+                  SizedBox(width: _anchoBotonChat, child: _botonChat(t)),
                   const SizedBox(width: 8),
                   Expanded(child: _botonSegunPresupuesto(t, colorScheme)),
                 ],
@@ -543,33 +593,24 @@ class _TarjetaTrabajo extends StatelessWidget {
                 const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.more_time, size: 18),
-                    label: Text(t.trabajosActivosPedirAmpliacion),
+                  child: _botonAccion(
+                    icon: Icons.add_circle_outline,
+                    label: trabajo.presupuesto?.tipo == TipoPresupuesto.cerrado
+                        ? t.trabajosActivosAmpliarPresupuesto
+                        : t.trabajosActivosPedirAmpliacion,
                     onPressed: onPedirAmpliacion,
+                    relleno: false,
                   ),
                 ),
               ] else if (trabajo.ampliacion?.estado == EstadoPresupuesto.pendiente) ...[
                 const SizedBox(height: 8),
-                Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    t.trabajosActivosAmpliacionEsperando,
-                    style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                _chipEspera(colorScheme, Icons.hourglass_top, t.trabajosActivosAmpliacionEsperando),
               ],
             ],
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Center(
               child: TextButton.icon(
-                icon: Icon(Icons.report_gmailerrorred_outlined, size: 16, color: colorScheme.error),
+                icon: Icon(Icons.report_problem_outlined, size: 16, color: colorScheme.error),
                 label: Text(
                   t.reportarProblemaBoton,
                   style: TextStyle(color: colorScheme.error, fontSize: 12.5),
@@ -583,6 +624,68 @@ class _TarjetaTrabajo extends StatelessWidget {
     );
   }
 
+  Widget _botonChat(AppLocalizations t) {
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+        visualDensity: VisualDensity.compact,
+      ),
+      onPressed: onChat,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Badge(isLabelVisible: noLeido, child: const Icon(Icons.chat_bubble_outline, size: _tamanoIconoAccion)),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              t.trabajosActivosChat,
+              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              softWrap: false,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Botón compacto que nunca parte el texto en varias líneas — icono
+  /// pequeño + label a tamaño reducido + padding ajustado, en vez de
+  /// depender del padding/tamaño por defecto de FilledButton.icon.
+  Widget _botonAccion({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    required bool relleno,
+  }) {
+    final contenido = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: _tamanoIconoAccion),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            softWrap: false,
+          ),
+        ),
+      ],
+    );
+    final estilo = ButtonStyle(
+      padding: WidgetStateProperty.all(const EdgeInsets.symmetric(horizontal: 10, vertical: 10)),
+      visualDensity: VisualDensity.compact,
+    );
+    return relleno
+        ? FilledButton(style: estilo, onPressed: onPressed, child: contenido)
+        : OutlinedButton(style: estilo, onPressed: onPressed, child: contenido);
+  }
+
   /// Sin presupuesto o rechazado: hay que enviar uno antes de poder
   /// completar (el backend rechazaría "completar" con un 409 porque
   /// sin presupuesto aceptado no puede haber pago autorizado). Con uno
@@ -593,51 +696,101 @@ class _TarjetaTrabajo extends StatelessWidget {
   Widget _botonSegunPresupuesto(AppLocalizations t, ColorScheme colorScheme) {
     final presupuesto = trabajo.presupuesto;
     if (presupuesto == null || presupuesto.estado == EstadoPresupuesto.rechazado) {
-      return FilledButton.icon(
-        icon: const Icon(Icons.request_quote_outlined, size: 18),
-        label: Text(t.trabajosActivosEnviarPresupuesto),
+      return _botonAccion(
+        icon: Icons.request_quote,
+        label: t.trabajosActivosEnviarPresupuesto,
         onPressed: onEnviarPresupuesto,
+        relleno: true,
       );
     }
     if (presupuesto.estado == EstadoPresupuesto.pendiente) {
-      return _chipEspera(colorScheme, t.trabajosActivosPresupuestoEsperando);
+      return _chipEspera(colorScheme, Icons.hourglass_top, t.trabajosActivosPresupuestoEsperando);
     }
     if (trabajo.cierreHoras?.estado == EstadoPresupuesto.pendiente) {
-      return _chipEspera(colorScheme, t.trabajosActivosCierreEsperando);
+      return _chipEspera(colorScheme, Icons.verified_user_outlined, t.trabajosActivosCierreEsperando);
     }
-    return FilledButton.icon(
-      icon: const Icon(Icons.check_circle_outline, size: 18),
-      label: Text(t.trabajosActivosCompletar),
+    return _botonAccion(
+      icon: Icons.task_alt,
+      label: t.trabajosActivosCompletar,
       onPressed: onCompletar,
+      relleno: true,
     );
   }
 
-  Widget _chipEspera(ColorScheme colorScheme, String texto) {
+  Widget _chipEspera(ColorScheme colorScheme, IconData icono, String texto) {
     return Container(
+      width: double.infinity,
       alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 8),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(
-        texto,
-        style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
-        textAlign: TextAlign.center,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icono, size: 16, color: colorScheme.onSurfaceVariant),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              texto,
+              style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  /// El botón de "Pedir ampliación" solo tiene sentido con un
-  /// presupuesto "por_horas" ya aceptado, sin una ampliación ya
+  /// El botón de ampliación (horas o importe, según el tipo) solo tiene
+  /// sentido con un presupuesto ya aceptado, sin una ampliación ya
   /// pendiente de respuesta, y sin un cierre de horas ya en curso (no
-  /// tiene sentido pedir más tiempo si ya se está cerrando el trabajo).
+  /// tiene sentido pedir más margen si ya se está cerrando el trabajo).
   bool get _mostrarBotonAmpliacion {
     final presupuesto = trabajo.presupuesto;
-    if (presupuesto == null || presupuesto.tipo != TipoPresupuesto.porHoras) return false;
+    if (presupuesto == null) return false;
     if (presupuesto.estado != EstadoPresupuesto.aceptado) return false;
     if (trabajo.cierreHoras?.estado == EstadoPresupuesto.pendiente) return false;
     if (trabajo.ampliacion?.estado == EstadoPresupuesto.pendiente) return false;
     return true;
+  }
+}
+
+/// Chip de estado compacto, con color propio por estado (ver
+/// _EstadoVisual) — el mismo lenguaje visual en todas las tarjetas.
+class _ChipEstado extends StatelessWidget {
+  const _ChipEstado({required this.estado});
+
+  final _EstadoVisual estado;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 130),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: estado.fondo,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(estado.icono, size: 13, color: estado.contenido),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              estado.texto,
+              style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: estado.contenido),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
