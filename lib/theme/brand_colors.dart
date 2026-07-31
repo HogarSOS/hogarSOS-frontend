@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 /// cambian algún día, cambian aquí y se propagan solos a ambos sitios
 /// — nunca a valores sueltos copiados en cada archivo.
 ///
-/// - [primary] (azul confiado): color principal, transmite seguridad y
-///   profesionalidad — el rol que ya cumplía el antiguo `brandSeed`.
+/// - [primary] (verde confianza): color principal, transmite seguridad,
+///   estabilidad y "hogar" — el rol que antes cumplía el azul.
 /// - [accent] (coral cálido): color de energía/urgencia, reservado a
 ///   momentos puntuales (el punto de "señal" del logo, la parte "SOS"
 ///   del wordmark, algún acento de llamada a la acción) — nunca como
@@ -17,13 +17,12 @@ import 'package:flutter/material.dart';
 class HogarSosColors {
   HogarSosColors._();
 
-  // Antes 0xFF1554F0 — un azul casi idéntico en tono al de Facebook
-  // (~214° de matiz). Este es la misma familia "azul confiado" pero
-  // desplazado hacia índigo (~236°), lo bastante distinto para no
-  // leerse como una copia de otra marca, sin perder la sensación de
-  // seguridad/profesionalidad que se buscaba con el azul original.
-  static const Color primary = Color(0xFF3D4FE0);
-  static const Color primaryDeep = Color(0xFF2635A8);
+  // Antes 0xFF3D4FE0 (azul índigo). Verde bosque profesional — misma
+  // familia tonal de "confianza" que el azul, pero con connotación más
+  // directa de hogar/seguridad, y contrasta mejor con el coral del
+  // acento "SOS" que el azul anterior.
+  static const Color primary = Color(0xFF1E8A5A);
+  static const Color primaryDeep = Color(0xFF146B45);
   static const Color accent = Color(0xFFFF6A4D);
   static const Color accentDeep = Color(0xFFE8532F);
   static const Color ink = Color(0xFF101828);
