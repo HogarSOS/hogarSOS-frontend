@@ -378,15 +378,34 @@ class _TarjetaSolicitudCercana extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                      ),
                       onPressed: onIgnorar,
-                      child: Text(t.profesionalIgnorar),
+                      child: Text(
+                        t.profesionalIgnorar,
+                        style: const TextStyle(fontSize: 13),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
+                    flex: 2,
                     child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                      ),
                       onPressed: onPostularse,
-                      child: Text(t.profesionalPostularme),
+                      child: Text(
+                        t.profesionalPostularme,
+                        style: const TextStyle(fontSize: 13),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                      ),
                     ),
                   ),
                 ],
