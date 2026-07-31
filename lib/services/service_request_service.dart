@@ -120,10 +120,36 @@ class ServiceRequestService {
 
   /// Marca un trabajo como completado. Sin argumentos para presupuesto
   /// "cerrado" (el importe ya lo fija el presupuesto aceptado); con
-  /// `horasReales` para "por_horas" (el backend calcula tarifa × horas).
+  /// `horasReales` para "por_horas" (el backend calcula tarifa × horas,
+  /// pero no libera el pago todavía — hace falta que el cliente
+  /// confirme, ver responderCierreHoras).
   Future<void> completar(String id, {double? horasReales}) async {
     await _api.patch('/service-requests/$id/complete', data: {
       if (horasReales != null) 'horasReales': horasReales,
+    });
+  }
+
+  /// Pide sumar más horas a un presupuesto "por_horas" ya aceptado,
+  /// cuando el trabajo se alarga más de lo estimado.
+  Future<void> pedirAmpliacion(String id, {required double horasAdicionales, String? mensaje}) async {
+    await _api.post('/service-requests/$id/ampliacion', data: {
+      'horasAdicionales': horasAdicionales,
+      if (mensaje != null && mensaje.isNotEmpty) 'mensaje': mensaje,
+    });
+  }
+
+  Future<void> responderAmpliacion(String id, String ampliacionId, {required bool aceptar}) async {
+    await _api.post('/service-requests/$id/ampliacion/$ampliacionId/responder', data: {
+      'accion': aceptar ? 'aceptar' : 'rechazar',
+    });
+  }
+
+  /// El cliente confirma (o rechaza) las horas reales que declaró el
+  /// profesional al completar un trabajo "por_horas" — aceptar es lo
+  /// que de verdad completa la solicitud y libera el pago.
+  Future<void> responderCierreHoras(String id, String cierreId, {required bool aceptar}) async {
+    await _api.post('/service-requests/$id/cierre-horas/$cierreId/responder', data: {
+      'accion': aceptar ? 'aceptar' : 'rechazar',
     });
   }
 

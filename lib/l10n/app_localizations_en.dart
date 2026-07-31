@@ -1364,4 +1364,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get seguimientoPresupuestoError => 'Couldn\'t respond to the quote';
+
+  @override
+  String get trabajosActivosHorasEnviadasExito =>
+      'Hours sent — waiting for the client to confirm them';
+
+  @override
+  String get trabajosActivosPedirAmpliacionTitulo => 'Ask for more hours';
+
+  @override
+  String get trabajosActivosPedirAmpliacionHorasHint => 'Additional hours';
+
+  @override
+  String get trabajosActivosPedirAmpliacionError =>
+      'Couldn\'t send the extension request';
+
+  @override
+  String get trabajosActivosPedirAmpliacionExito => 'Extension request sent';
+
+  @override
+  String get trabajosActivosPedirAmpliacion => 'Ask for more hours';
+
+  @override
+  String get trabajosActivosAmpliacionEsperando =>
+      'Waiting for a response to your extension request';
+
+  @override
+  String get trabajosActivosCierreEsperando =>
+      'Waiting for the client to confirm the hours';
+
+  @override
+  String get seguimientoAmpliacionAceptadaExito => 'Extension accepted';
+
+  @override
+  String get seguimientoAmpliacionRechazadaExito => 'Extension declined';
+
+  @override
+  String get seguimientoAmpliacionError =>
+      'Couldn\'t respond to the extension request';
+
+  @override
+  String get seguimientoAmpliacionTitulo => 'The professional needs more time';
+
+  @override
+  String seguimientoAmpliacionDetalle(String horas, String importe) {
+    return '$horas additional hours — additional amount: €$importe';
+  }
+
+  @override
+  String get seguimientoCierreHorasConfirmadoExito =>
+      'Hours confirmed — payment released';
+
+  @override
+  String get seguimientoCierreHorasError =>
+      'Couldn\'t respond to the hours closure';
+
+  @override
+  String get seguimientoCierreHorasTitulo =>
+      'The professional has finished the job';
+
+  @override
+  String seguimientoCierreHorasDetalle(String horas, String importe) {
+    return 'Hours declared: $horas — amount: €$importe';
+  }
+
+  @override
+  String get seguimientoCierreHorasReclamar => 'Report an issue';
+
+  @override
+  String get seguimientoCierreHorasConfirmar => 'Confirm';
 }

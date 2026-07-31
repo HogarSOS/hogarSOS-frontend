@@ -241,7 +241,32 @@ class _Contenido extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 10),
-          if (solicitud.payment != null)
+          if (solicitud.cierreHoras?.estado == EstadoPresupuesto.pendiente)
+            _CierreHorasPendienteCard(
+              serviceRequestId: solicitud.id,
+              cierreHoras: solicitud.cierreHoras!,
+              tarifaHora: solicitud.presupuesto?.tarifaHora,
+              onRespondido: onRecargar,
+            )
+          else if (solicitud.ampliacion?.estado == EstadoPresupuesto.pendiente)
+            _AmpliacionPendienteCard(
+              serviceRequestId: solicitud.id,
+              ampliacion: solicitud.ampliacion!,
+              tarifaHora: solicitud.presupuesto?.tarifaHora,
+              onRespondido: onRecargar,
+            )
+          else if (solicitud.pagoPendienteDeAutorizar)
+            OutlinedButton.icon(
+              icon: const Icon(Icons.payment_outlined),
+              label: Text(t.seguimientoAutorizarPago),
+              onPressed: () async {
+                final resultado = await Navigator.of(context).push<bool>(
+                  MaterialPageRoute(builder: (_) => PagoScreen(serviceRequestId: solicitud.id)),
+                );
+                if (resultado == true) onRecargar();
+              },
+            )
+          else if (solicitud.payment != null)
             _EstadoPagoChip(payment: solicitud.payment!)
           else if (solicitud.presupuesto == null)
             _EsperandoPresupuesto(texto: t.seguimientoEsperandoPresupuesto)
@@ -252,18 +277,7 @@ class _Contenido extends ConsumerWidget {
               onRespondido: onRecargar,
             )
           else if (solicitud.presupuesto!.estado == EstadoPresupuesto.rechazado)
-            _EsperandoPresupuesto(texto: t.seguimientoPresupuestoRechazadoInfo)
-          else
-            OutlinedButton.icon(
-              icon: const Icon(Icons.payment_outlined),
-              label: Text(t.seguimientoAutorizarPago),
-              onPressed: () async {
-                final resultado = await Navigator.of(context).push<bool>(
-                  MaterialPageRoute(builder: (_) => PagoScreen(serviceRequestId: solicitud.id)),
-                );
-                if (resultado == true) onRecargar();
-              },
-            ),
+            _EsperandoPresupuesto(texto: t.seguimientoPresupuestoRechazadoInfo),
         ],
 
         if (solicitud.estado == EstadoSolicitud.completada) ...[
@@ -506,6 +520,185 @@ class _PresupuestoPendienteCard extends StatelessWidget {
                 child: FilledButton(
                   onPressed: () => _responder(context, true),
                   child: Text(t.seguimientoPresupuestoAceptar),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tarjeta con una ampliación de horas pendiente de respuesta — el
+/// profesional pide más tiempo del estimado, el cliente acepta (se
+/// autorizará el importe adicional en un paso aparte, ver
+/// `pagoPendienteDeAutorizar`) o rechaza (el trabajo sigue igual).
+class _AmpliacionPendienteCard extends StatelessWidget {
+  const _AmpliacionPendienteCard({
+    required this.serviceRequestId,
+    required this.ampliacion,
+    required this.tarifaHora,
+    required this.onRespondido,
+  });
+
+  final String serviceRequestId;
+  final AmpliacionInfo ampliacion;
+  final double? tarifaHora;
+  final Future<void> Function({bool silencioso}) onRespondido;
+
+  Future<void> _responder(BuildContext context, bool aceptar) async {
+    final t = AppLocalizations.of(context);
+    try {
+      await ServiceRequestService().responderAmpliacion(serviceRequestId, ampliacion.id, aceptar: aceptar);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(aceptar ? t.seguimientoAmpliacionAceptadaExito : t.seguimientoAmpliacionRechazadaExito)),
+      );
+      onRespondido();
+    } catch (e) {
+      debugPrint('[SeguimientoSolicitudScreen] Error al responder ampliación: $e');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.seguimientoAmpliacionError, t: t))),
+      );
+      onRespondido();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final importeAdicional = (tarifaHora ?? 0) * ampliacion.horasAdicionales;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.tertiaryContainer.withOpacity(0.35),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(t.seguimientoAmpliacionTitulo, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5)),
+          const SizedBox(height: 8),
+          Text(
+            t.seguimientoAmpliacionDetalle(
+              ampliacion.horasAdicionales.toStringAsFixed(1),
+              importeAdicional.toStringAsFixed(2),
+            ),
+            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+          ),
+          if (ampliacion.mensaje != null && ampliacion.mensaje!.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              '"${ampliacion.mensaje}"',
+              style: TextStyle(fontSize: 13, fontStyle: FontStyle.italic, color: colorScheme.onSurfaceVariant),
+            ),
+          ],
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(foregroundColor: colorScheme.error),
+                  onPressed: () => _responder(context, false),
+                  child: Text(t.seguimientoPresupuestoRechazar),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () => _responder(context, true),
+                  child: Text(t.seguimientoPresupuestoAceptar),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tarjeta con las horas declaradas por el profesional al terminar un
+/// trabajo "por_horas" — el cliente las confirma (eso libera el pago)
+/// o, si no está de acuerdo, abre una reclamación (no hay
+/// renegociación automática, se resuelve por chat o soporte).
+class _CierreHorasPendienteCard extends StatelessWidget {
+  const _CierreHorasPendienteCard({
+    required this.serviceRequestId,
+    required this.cierreHoras,
+    required this.tarifaHora,
+    required this.onRespondido,
+  });
+
+  final String serviceRequestId;
+  final CierreHorasInfo cierreHoras;
+  final double? tarifaHora;
+  final Future<void> Function({bool silencioso}) onRespondido;
+
+  Future<void> _confirmar(BuildContext context) async {
+    final t = AppLocalizations.of(context);
+    try {
+      await ServiceRequestService().responderCierreHoras(serviceRequestId, cierreHoras.id, aceptar: true);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.seguimientoCierreHorasConfirmadoExito)));
+      onRespondido();
+    } catch (e) {
+      debugPrint('[SeguimientoSolicitudScreen] Error al confirmar horas: $e');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.seguimientoCierreHorasError, t: t))),
+      );
+      onRespondido();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final importeFinal = (tarifaHora ?? 0) * cierreHoras.horasReales;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer.withOpacity(0.35),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(t.seguimientoCierreHorasTitulo, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5)),
+          const SizedBox(height: 8),
+          Text(
+            t.seguimientoCierreHorasDetalle(cierreHoras.horasReales.toStringAsFixed(1), importeFinal.toStringAsFixed(2)),
+            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(foregroundColor: colorScheme.error),
+                  onPressed: () async {
+                    final resultado = await Navigator.of(context).push<bool>(
+                      MaterialPageRoute(builder: (_) => ReportarProblemaScreen(serviceRequestId: serviceRequestId)),
+                    );
+                    if (resultado == true) onRespondido();
+                  },
+                  child: Text(t.seguimientoCierreHorasReclamar),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () => _confirmar(context),
+                  child: Text(t.seguimientoCierreHorasConfirmar),
                 ),
               ),
             ],

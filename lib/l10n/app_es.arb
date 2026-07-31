@@ -482,5 +482,38 @@
   "seguimientoPresupuestoAceptadoExito": "Presupuesto aceptado — ya puedes autorizar el pago",
   "seguimientoPresupuestoRechazadoExito": "Presupuesto rechazado",
   "seguimientoPresupuestoRechazadoInfo": "Rechazaste el presupuesto anterior — esperando uno nuevo del profesional",
-  "seguimientoPresupuestoError": "No se pudo responder al presupuesto"
+  "seguimientoPresupuestoError": "No se pudo responder al presupuesto",
+
+  "trabajosActivosHorasEnviadasExito": "Horas enviadas — esperando que el cliente las confirme",
+  "trabajosActivosPedirAmpliacionTitulo": "Pedir más horas",
+  "trabajosActivosPedirAmpliacionHorasHint": "Horas adicionales",
+  "trabajosActivosPedirAmpliacionError": "No se pudo enviar la petición de ampliación",
+  "trabajosActivosPedirAmpliacionExito": "Ampliación enviada",
+  "trabajosActivosPedirAmpliacion": "Pedir más horas",
+  "trabajosActivosAmpliacionEsperando": "Esperando respuesta a tu petición de más horas",
+  "trabajosActivosCierreEsperando": "Esperando que el cliente confirme las horas",
+
+  "seguimientoAmpliacionAceptadaExito": "Ampliación aceptada",
+  "seguimientoAmpliacionRechazadaExito": "Ampliación rechazada",
+  "seguimientoAmpliacionError": "No se pudo responder a la ampliación",
+  "seguimientoAmpliacionTitulo": "El profesional necesita más tiempo",
+  "seguimientoAmpliacionDetalle": "{horas} horas adicionales — importe adicional: {importe} €",
+  "@seguimientoAmpliacionDetalle": {
+    "placeholders": {
+      "horas": { "type": "String" },
+      "importe": { "type": "String" }
+    }
+  },
+  "seguimientoCierreHorasConfirmadoExito": "Horas confirmadas — pago liberado",
+  "seguimientoCierreHorasError": "No se pudo responder al cierre de horas",
+  "seguimientoCierreHorasTitulo": "El profesional ha terminado el trabajo",
+  "seguimientoCierreHorasDetalle": "Horas declaradas: {horas} — importe: {importe} €",
+  "@seguimientoCierreHorasDetalle": {
+    "placeholders": {
+      "horas": { "type": "String" },
+      "importe": { "type": "String" }
+    }
+  },
+  "seguimientoCierreHorasReclamar": "Reclamar",
+  "seguimientoCierreHorasConfirmar": "Confirmar"
 }

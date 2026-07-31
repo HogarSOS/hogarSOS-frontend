@@ -1378,4 +1378,74 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get seguimientoPresupuestoError =>
       'No se pudo responder al presupuesto';
+
+  @override
+  String get trabajosActivosHorasEnviadasExito =>
+      'Horas enviadas — esperando que el cliente las confirme';
+
+  @override
+  String get trabajosActivosPedirAmpliacionTitulo => 'Pedir más horas';
+
+  @override
+  String get trabajosActivosPedirAmpliacionHorasHint => 'Horas adicionales';
+
+  @override
+  String get trabajosActivosPedirAmpliacionError =>
+      'No se pudo enviar la petición de ampliación';
+
+  @override
+  String get trabajosActivosPedirAmpliacionExito => 'Ampliación enviada';
+
+  @override
+  String get trabajosActivosPedirAmpliacion => 'Pedir más horas';
+
+  @override
+  String get trabajosActivosAmpliacionEsperando =>
+      'Esperando respuesta a tu petición de más horas';
+
+  @override
+  String get trabajosActivosCierreEsperando =>
+      'Esperando que el cliente confirme las horas';
+
+  @override
+  String get seguimientoAmpliacionAceptadaExito => 'Ampliación aceptada';
+
+  @override
+  String get seguimientoAmpliacionRechazadaExito => 'Ampliación rechazada';
+
+  @override
+  String get seguimientoAmpliacionError =>
+      'No se pudo responder a la ampliación';
+
+  @override
+  String get seguimientoAmpliacionTitulo =>
+      'El profesional necesita más tiempo';
+
+  @override
+  String seguimientoAmpliacionDetalle(String horas, String importe) {
+    return '$horas horas adicionales — importe adicional: $importe €';
+  }
+
+  @override
+  String get seguimientoCierreHorasConfirmadoExito =>
+      'Horas confirmadas — pago liberado';
+
+  @override
+  String get seguimientoCierreHorasError =>
+      'No se pudo responder al cierre de horas';
+
+  @override
+  String get seguimientoCierreHorasTitulo =>
+      'El profesional ha terminado el trabajo';
+
+  @override
+  String seguimientoCierreHorasDetalle(String horas, String importe) {
+    return 'Horas declaradas: $horas — importe: $importe €';
+  }
+
+  @override
+  String get seguimientoCierreHorasReclamar => 'Reclamar';
+
+  @override
+  String get seguimientoCierreHorasConfirmar => 'Confirmar';
 }

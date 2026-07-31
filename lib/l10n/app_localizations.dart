@@ -2504,6 +2504,120 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se pudo responder al presupuesto'**
   String get seguimientoPresupuestoError;
+
+  /// No description provided for @trabajosActivosHorasEnviadasExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Horas enviadas — esperando que el cliente las confirme'**
+  String get trabajosActivosHorasEnviadasExito;
+
+  /// No description provided for @trabajosActivosPedirAmpliacionTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedir más horas'**
+  String get trabajosActivosPedirAmpliacionTitulo;
+
+  /// No description provided for @trabajosActivosPedirAmpliacionHorasHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Horas adicionales'**
+  String get trabajosActivosPedirAmpliacionHorasHint;
+
+  /// No description provided for @trabajosActivosPedirAmpliacionError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo enviar la petición de ampliación'**
+  String get trabajosActivosPedirAmpliacionError;
+
+  /// No description provided for @trabajosActivosPedirAmpliacionExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Ampliación enviada'**
+  String get trabajosActivosPedirAmpliacionExito;
+
+  /// No description provided for @trabajosActivosPedirAmpliacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedir más horas'**
+  String get trabajosActivosPedirAmpliacion;
+
+  /// No description provided for @trabajosActivosAmpliacionEsperando.
+  ///
+  /// In es, this message translates to:
+  /// **'Esperando respuesta a tu petición de más horas'**
+  String get trabajosActivosAmpliacionEsperando;
+
+  /// No description provided for @trabajosActivosCierreEsperando.
+  ///
+  /// In es, this message translates to:
+  /// **'Esperando que el cliente confirme las horas'**
+  String get trabajosActivosCierreEsperando;
+
+  /// No description provided for @seguimientoAmpliacionAceptadaExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Ampliación aceptada'**
+  String get seguimientoAmpliacionAceptadaExito;
+
+  /// No description provided for @seguimientoAmpliacionRechazadaExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Ampliación rechazada'**
+  String get seguimientoAmpliacionRechazadaExito;
+
+  /// No description provided for @seguimientoAmpliacionError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo responder a la ampliación'**
+  String get seguimientoAmpliacionError;
+
+  /// No description provided for @seguimientoAmpliacionTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'El profesional necesita más tiempo'**
+  String get seguimientoAmpliacionTitulo;
+
+  /// No description provided for @seguimientoAmpliacionDetalle.
+  ///
+  /// In es, this message translates to:
+  /// **'{horas} horas adicionales — importe adicional: {importe} €'**
+  String seguimientoAmpliacionDetalle(String horas, String importe);
+
+  /// No description provided for @seguimientoCierreHorasConfirmadoExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Horas confirmadas — pago liberado'**
+  String get seguimientoCierreHorasConfirmadoExito;
+
+  /// No description provided for @seguimientoCierreHorasError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo responder al cierre de horas'**
+  String get seguimientoCierreHorasError;
+
+  /// No description provided for @seguimientoCierreHorasTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'El profesional ha terminado el trabajo'**
+  String get seguimientoCierreHorasTitulo;
+
+  /// No description provided for @seguimientoCierreHorasDetalle.
+  ///
+  /// In es, this message translates to:
+  /// **'Horas declaradas: {horas} — importe: {importe} €'**
+  String seguimientoCierreHorasDetalle(String horas, String importe);
+
+  /// No description provided for @seguimientoCierreHorasReclamar.
+  ///
+  /// In es, this message translates to:
+  /// **'Reclamar'**
+  String get seguimientoCierreHorasReclamar;
+
+  /// No description provided for @seguimientoCierreHorasConfirmar.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar'**
+  String get seguimientoCierreHorasConfirmar;
 }
 
 class _AppLocalizationsDelegate

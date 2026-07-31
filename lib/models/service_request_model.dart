@@ -91,6 +91,9 @@ class ServiceRequestModel {
   final List<ReviewInfo> reviews;
   final int numCandidatos;
   final PresupuestoInfo? presupuesto;
+  final AmpliacionInfo? ampliacion;
+  final CierreHorasInfo? cierreHoras;
+  final bool pagoPendienteDeAutorizar;
 
   ServiceRequestModel({
     required this.id,
@@ -108,6 +111,9 @@ class ServiceRequestModel {
     this.reviews = const [],
     this.numCandidatos = 0,
     this.presupuesto,
+    this.ampliacion,
+    this.cierreHoras,
+    this.pagoPendienteDeAutorizar = false,
   });
 
   /// La valoración que dejó ESTE usuario (no la que recibió) — null si
@@ -139,6 +145,11 @@ class ServiceRequestModel {
       numCandidatos: (json['numCandidatos'] as num?)?.toInt() ?? 0,
       presupuesto:
           json['presupuesto'] != null ? PresupuestoInfo.fromJson(json['presupuesto'] as Map<String, dynamic>) : null,
+      ampliacion:
+          json['ampliacion'] != null ? AmpliacionInfo.fromJson(json['ampliacion'] as Map<String, dynamic>) : null,
+      cierreHoras:
+          json['cierreHoras'] != null ? CierreHorasInfo.fromJson(json['cierreHoras'] as Map<String, dynamic>) : null,
+      pagoPendienteDeAutorizar: json['pagoPendienteDeAutorizar'] as bool? ?? false,
     );
   }
 }
@@ -202,6 +213,8 @@ class AssignedRequest {
   final bool tienePago;
   final bool tieneValoracion;
   final PresupuestoInfo? presupuesto;
+  final AmpliacionInfo? ampliacion;
+  final CierreHorasInfo? cierreHoras;
 
   AssignedRequest({
     required this.id,
@@ -217,6 +230,8 @@ class AssignedRequest {
     required this.tienePago,
     required this.tieneValoracion,
     this.presupuesto,
+    this.ampliacion,
+    this.cierreHoras,
   });
 
   factory AssignedRequest.fromJson(Map<String, dynamic> json) {
@@ -235,6 +250,10 @@ class AssignedRequest {
       tienePago: json['tienePago'] as bool,
       presupuesto:
           json['presupuesto'] != null ? PresupuestoInfo.fromJson(json['presupuesto'] as Map<String, dynamic>) : null,
+      ampliacion:
+          json['ampliacion'] != null ? AmpliacionInfo.fromJson(json['ampliacion'] as Map<String, dynamic>) : null,
+      cierreHoras:
+          json['cierreHoras'] != null ? CierreHorasInfo.fromJson(json['cierreHoras'] as Map<String, dynamic>) : null,
     );
   }
 }

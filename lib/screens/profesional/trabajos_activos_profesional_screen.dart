@@ -96,13 +96,20 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
       if (confirmado != true || !context.mounted) return;
     }
 
+    final esPorHoras = presupuesto?.tipo == TipoPresupuesto.porHoras;
+
     try {
       await ServiceRequestService().completar(trabajo.id, horasReales: horasReales);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.trabajosActivosCompletadoExito)),
+        SnackBar(content: Text(esPorHoras ? t.trabajosActivosHorasEnviadasExito : t.trabajosActivosCompletadoExito)),
       );
       ref.invalidate(assignedRequestsProvider);
+
+      // "Por horas" no completa aquí de verdad — queda pendiente de que
+      // el cliente confirme las horas (ver responderCierreHoras), así
+      // que no tiene sentido invitar a valorar todavía.
+      if (esPorHoras) return;
 
       // Invitación automática a valorar al cliente, justo al completar
       // — el profesional puede omitirla (botón atrás) y valorar más
@@ -118,6 +125,74 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(mensajeDeError(e, contexto: t.trabajosActivosCompletadoError, t: t))),
       );
+    }
+  }
+
+  /// Diálogo para pedir más horas cuando un trabajo "por_horas" se
+  /// alarga más de lo estimado — nunca se cobra el exceso fuera de la
+  /// app, hay que pasar por aquí y que el cliente lo acepte.
+  Future<void> _pedirAmpliacion(BuildContext context, WidgetRef ref, AssignedRequest trabajo) async {
+    final t = AppLocalizations.of(context);
+    final horasController = TextEditingController();
+    final mensajeController = TextEditingController();
+
+    final pedido = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t.trabajosActivosPedirAmpliacionTitulo),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: horasController,
+              autofocus: true,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(labelText: t.trabajosActivosPedirAmpliacionHorasHint),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: mensajeController,
+              maxLines: 2,
+              minLines: 1,
+              decoration: InputDecoration(hintText: t.presupuestoDialogoMensajeHint),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(t.perfilCancelar),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final horas = double.tryParse(horasController.text.replaceAll(',', '.'));
+              if (horas == null || horas <= 0) return;
+              try {
+                await ServiceRequestService().pedirAmpliacion(
+                  trabajo.id,
+                  horasAdicionales: horas,
+                  mensaje: mensajeController.text.trim(),
+                );
+                if (!context.mounted) return;
+                Navigator.of(context).pop(true);
+              } catch (e) {
+                debugPrint('[TrabajosActivosProfesionalScreen] Error al pedir ampliación: $e');
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(mensajeDeError(e, contexto: t.trabajosActivosPedirAmpliacionError, t: t))),
+                );
+              }
+            },
+            child: Text(t.trabajosActivosPrecioFinalConfirmar),
+          ),
+        ],
+      ),
+    );
+
+    if (pedido == true && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.trabajosActivosPedirAmpliacionExito)));
+      ref.invalidate(assignedRequestsProvider);
     }
   }
 
@@ -291,6 +366,7 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
                       ),
                       onCompletar: () => _completar(context, ref, trabajo),
                       onEnviarPresupuesto: () => _enviarPresupuesto(context, ref, trabajo),
+                      onPedirAmpliacion: () => _pedirAmpliacion(context, ref, trabajo),
                       onValorar: () => _valorar(context, ref, trabajo),
                       onReportar: () => Navigator.of(context).push(
                         MaterialPageRoute(
@@ -325,6 +401,7 @@ class _TarjetaTrabajo extends StatelessWidget {
     required this.onChat,
     required this.onCompletar,
     required this.onEnviarPresupuesto,
+    required this.onPedirAmpliacion,
     required this.onValorar,
     required this.onReportar,
   });
@@ -334,6 +411,7 @@ class _TarjetaTrabajo extends StatelessWidget {
   final VoidCallback onChat;
   final VoidCallback onCompletar;
   final VoidCallback onEnviarPresupuesto;
+  final VoidCallback onPedirAmpliacion;
   final VoidCallback onValorar;
   final VoidCallback onReportar;
 
@@ -447,7 +525,7 @@ class _TarjetaTrabajo extends StatelessWidget {
                   ),
                 ],
               )
-            else
+            else ...[
               Row(
                 children: [
                   Expanded(
@@ -461,6 +539,33 @@ class _TarjetaTrabajo extends StatelessWidget {
                   Expanded(child: _botonSegunPresupuesto(t, colorScheme)),
                 ],
               ),
+              if (_mostrarBotonAmpliacion) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.more_time, size: 18),
+                    label: Text(t.trabajosActivosPedirAmpliacion),
+                    onPressed: onPedirAmpliacion,
+                  ),
+                ),
+              ] else if (trabajo.ampliacion?.estado == EstadoPresupuesto.pendiente) ...[
+                const SizedBox(height: 8),
+                Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    t.trabajosActivosAmpliacionEsperando,
+                    style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ],
             const SizedBox(height: 8),
             Center(
               child: TextButton.icon(
@@ -482,7 +587,9 @@ class _TarjetaTrabajo extends StatelessWidget {
   /// completar (el backend rechazaría "completar" con un 409 porque
   /// sin presupuesto aceptado no puede haber pago autorizado). Con uno
   /// pendiente: nada que hacer todavía, solo esperar. Con uno aceptado:
-  /// el flujo normal de completar.
+  /// si ya se declararon las horas y el cliente todavía no las ha
+  /// confirmado (cierreHoras pendiente), esperar esa confirmación en
+  /// vez de ofrecer completar otra vez. Si no, el flujo normal.
   Widget _botonSegunPresupuesto(AppLocalizations t, ColorScheme colorScheme) {
     final presupuesto = trabajo.presupuesto;
     if (presupuesto == null || presupuesto.estado == EstadoPresupuesto.rechazado) {
@@ -493,24 +600,44 @@ class _TarjetaTrabajo extends StatelessWidget {
       );
     }
     if (presupuesto.estado == EstadoPresupuesto.pendiente) {
-      return Container(
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          t.trabajosActivosPresupuestoEsperando,
-          style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
-          textAlign: TextAlign.center,
-        ),
-      );
+      return _chipEspera(colorScheme, t.trabajosActivosPresupuestoEsperando);
+    }
+    if (trabajo.cierreHoras?.estado == EstadoPresupuesto.pendiente) {
+      return _chipEspera(colorScheme, t.trabajosActivosCierreEsperando);
     }
     return FilledButton.icon(
       icon: const Icon(Icons.check_circle_outline, size: 18),
       label: Text(t.trabajosActivosCompletar),
       onPressed: onCompletar,
     );
+  }
+
+  Widget _chipEspera(ColorScheme colorScheme, String texto) {
+    return Container(
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        texto,
+        style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  /// El botón de "Pedir ampliación" solo tiene sentido con un
+  /// presupuesto "por_horas" ya aceptado, sin una ampliación ya
+  /// pendiente de respuesta, y sin un cierre de horas ya en curso (no
+  /// tiene sentido pedir más tiempo si ya se está cerrando el trabajo).
+  bool get _mostrarBotonAmpliacion {
+    final presupuesto = trabajo.presupuesto;
+    if (presupuesto == null || presupuesto.tipo != TipoPresupuesto.porHoras) return false;
+    if (presupuesto.estado != EstadoPresupuesto.aceptado) return false;
+    if (trabajo.cierreHoras?.estado == EstadoPresupuesto.pendiente) return false;
+    if (trabajo.ampliacion?.estado == EstadoPresupuesto.pendiente) return false;
+    return true;
   }
 }

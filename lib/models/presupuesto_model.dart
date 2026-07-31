@@ -58,3 +58,53 @@ class PresupuestoInfo {
     );
   }
 }
+
+/// Petición del profesional para sumar más horas a un presupuesto
+/// "por_horas" ya aceptado, cuando el trabajo se alarga más de lo
+/// estimado — nunca se cobra el exceso fuera de la app, hay que pasar
+/// por aquí y que el cliente lo acepte.
+class AmpliacionInfo {
+  final String id;
+  final double horasAdicionales;
+  final String? mensaje;
+  final EstadoPresupuesto estado;
+  final DateTime createdAt;
+
+  AmpliacionInfo({
+    required this.id,
+    required this.horasAdicionales,
+    this.mensaje,
+    required this.estado,
+    required this.createdAt,
+  });
+
+  factory AmpliacionInfo.fromJson(Map<String, dynamic> json) {
+    return AmpliacionInfo(
+      id: json['id'] as String,
+      horasAdicionales: (json['horasAdicionales'] as num).toDouble(),
+      mensaje: json['mensaje'] as String?,
+      estado: estadoPresupuestoFromString(json['estado'] as String),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+    );
+  }
+}
+
+/// Cierre de un trabajo "por_horas": el profesional declara las horas
+/// reales, pero el pago no se libera hasta que el cliente lo confirma.
+class CierreHorasInfo {
+  final String id;
+  final double horasReales;
+  final EstadoPresupuesto estado;
+  final DateTime createdAt;
+
+  CierreHorasInfo({required this.id, required this.horasReales, required this.estado, required this.createdAt});
+
+  factory CierreHorasInfo.fromJson(Map<String, dynamic> json) {
+    return CierreHorasInfo(
+      id: json['id'] as String,
+      horasReales: (json['horasReales'] as num).toDouble(),
+      estado: estadoPresupuestoFromString(json['estado'] as String),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+    );
+  }
+}
