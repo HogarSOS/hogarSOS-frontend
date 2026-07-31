@@ -345,6 +345,17 @@
   "misSolicitudesBorrarConfirmar": "Borrar",
   "misSolicitudesBorrarExito": "Solicitud borrada",
   "misSolicitudesBorrarError": "No se pudo borrar la solicitud",
+  "misSolicitudesArchivarTitulo": "¿Quitar esta solicitud de la lista?",
+  "misSolicitudesArchivarMensaje": "Se ocultará de tu historial, pero el pago, el chat y las valoraciones se conservan.",
+  "misSolicitudesArchivarConfirmar": "Quitar",
+  "misSolicitudesArchivarExito": "Solicitud quitada de la lista",
+  "misSolicitudesArchivarError": "No se pudo quitar la solicitud",
+
+  "trabajosActivosArchivarTitulo": "¿Quitar este trabajo de la lista?",
+  "trabajosActivosArchivarMensaje": "Se ocultará de tu historial, pero el pago, el chat y las valoraciones se conservan.",
+  "trabajosActivosArchivarConfirmar": "Quitar",
+  "trabajosActivosArchivarExito": "Trabajo quitado de la lista",
+  "trabajosActivosArchivarError": "No se pudo quitar el trabajo",
 
   "wizardTitulo": "Nueva solicitud",
   "wizardPaso": "Paso {actual} de {total}",

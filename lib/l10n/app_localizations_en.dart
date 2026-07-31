@@ -1013,6 +1013,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get misSolicitudesBorrarError => 'Couldn\'t delete the request';
 
   @override
+  String get misSolicitudesArchivarTitulo =>
+      'Remove this request from the list?';
+
+  @override
+  String get misSolicitudesArchivarMensaje =>
+      'It will be hidden from your history, but the payment, chat, and reviews are kept.';
+
+  @override
+  String get misSolicitudesArchivarConfirmar => 'Remove';
+
+  @override
+  String get misSolicitudesArchivarExito => 'Request removed from the list';
+
+  @override
+  String get misSolicitudesArchivarError => 'Couldn\'t remove the request';
+
+  @override
+  String get trabajosActivosArchivarTitulo => 'Remove this job from the list?';
+
+  @override
+  String get trabajosActivosArchivarMensaje =>
+      'It will be hidden from your history, but the payment, chat, and reviews are kept.';
+
+  @override
+  String get trabajosActivosArchivarConfirmar => 'Remove';
+
+  @override
+  String get trabajosActivosArchivarExito => 'Job removed from the list';
+
+  @override
+  String get trabajosActivosArchivarError => 'Couldn\'t remove the job';
+
+  @override
   String get wizardTitulo => 'New request';
 
   @override

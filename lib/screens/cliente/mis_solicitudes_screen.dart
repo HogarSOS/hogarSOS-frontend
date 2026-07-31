@@ -62,13 +62,13 @@ class _MisSolicitudesScreenState extends ConsumerState<MisSolicitudesScreen> {
     ref.invalidate(resumenActividadClienteProvider);
   }
 
-  Future<bool> _confirmarBorrado(BuildContext context) async {
+  Future<bool> _confirmarBorrado(BuildContext context, {required bool archivar}) async {
     final t = AppLocalizations.of(context);
     final confirmado = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(t.misSolicitudesBorrarTitulo),
-        content: Text(t.misSolicitudesBorrarMensaje),
+        title: Text(archivar ? t.misSolicitudesArchivarTitulo : t.misSolicitudesBorrarTitulo),
+        content: Text(archivar ? t.misSolicitudesArchivarMensaje : t.misSolicitudesBorrarMensaje),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -77,7 +77,7 @@ class _MisSolicitudesScreenState extends ConsumerState<MisSolicitudesScreen> {
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(t.misSolicitudesBorrarConfirmar),
+            child: Text(archivar ? t.misSolicitudesArchivarConfirmar : t.misSolicitudesBorrarConfirmar),
           ),
         ],
       ),
@@ -85,16 +85,27 @@ class _MisSolicitudesScreenState extends ConsumerState<MisSolicitudesScreen> {
     return confirmado ?? false;
   }
 
-  Future<void> _borrar(String id) async {
+  /// `archivar`: la solicitud ya tuvo profesional de por medio (pago/chat
+  /// posible) — se oculta de la lista sin borrar nada. Si no, es una
+  /// solicitud huérfana (nadie la aceptó nunca) y se borra de verdad.
+  Future<void> _quitar(String id, {required bool archivar}) async {
     final t = AppLocalizations.of(context);
     try {
-      await _servicio.borrar(id);
+      if (archivar) {
+        await _servicio.archivar(id);
+      } else {
+        await _servicio.borrar(id);
+      }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.misSolicitudesBorrarExito)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(archivar ? t.misSolicitudesArchivarExito : t.misSolicitudesBorrarExito)),
+      );
       _recargar();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.misSolicitudesBorrarError)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(archivar ? t.misSolicitudesArchivarError : t.misSolicitudesBorrarError)),
+      );
       _recargar(); // por si el Dismissible ya la quitó visualmente antes de fallar
     }
   }
@@ -136,13 +147,18 @@ class _MisSolicitudesScreenState extends ConsumerState<MisSolicitudesScreen> {
                   separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final s = solicitudes[index];
-                    final borrable = s.profesionalNombre == null &&
+                    // Huérfana (nadie la aceptó nunca) -> se borra de verdad.
+                    // Terminada con profesional de por medio -> se archiva
+                    // (se oculta, conserva pago/chat/valoraciones).
+                    final huerfana = s.profesionalNombre == null &&
                         (s.estado == EstadoSolicitud.pendiente || s.estado == EstadoSolicitud.cancelada);
+                    final archivable = s.estado == EstadoSolicitud.completada ||
+                        (s.estado == EstadoSolicitud.cancelada && s.profesionalNombre != null);
                     final tile = EntradaAnimada(
                       retraso: Duration(milliseconds: 40 * index),
                       child: _SolicitudTile(solicitud: s, onRegresar: _recargar),
                     );
-                    if (!borrable) return tile;
+                    if (!huerfana && !archivable) return tile;
                     return Dismissible(
                       key: ValueKey(s.id),
                       direction: DismissDirection.endToStart,
@@ -155,8 +171,8 @@ class _MisSolicitudesScreenState extends ConsumerState<MisSolicitudesScreen> {
                         ),
                         child: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.onError),
                       ),
-                      confirmDismiss: (_) => _confirmarBorrado(context),
-                      onDismissed: (_) => _borrar(s.id),
+                      confirmDismiss: (_) => _confirmarBorrado(context, archivar: archivable),
+                      onDismissed: (_) => _quitar(s.id, archivar: archivable),
                       child: tile,
                     );
                   },

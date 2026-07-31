@@ -345,6 +345,17 @@
   "misSolicitudesBorrarConfirmar": "Delete",
   "misSolicitudesBorrarExito": "Request deleted",
   "misSolicitudesBorrarError": "Couldn't delete the request",
+  "misSolicitudesArchivarTitulo": "Remove this request from the list?",
+  "misSolicitudesArchivarMensaje": "It will be hidden from your history, but the payment, chat, and reviews are kept.",
+  "misSolicitudesArchivarConfirmar": "Remove",
+  "misSolicitudesArchivarExito": "Request removed from the list",
+  "misSolicitudesArchivarError": "Couldn't remove the request",
+
+  "trabajosActivosArchivarTitulo": "Remove this job from the list?",
+  "trabajosActivosArchivarMensaje": "It will be hidden from your history, but the payment, chat, and reviews are kept.",
+  "trabajosActivosArchivarConfirmar": "Remove",
+  "trabajosActivosArchivarExito": "Job removed from the list",
+  "trabajosActivosArchivarError": "Couldn't remove the job",
 
   "wizardTitulo": "New request",
   "wizardPaso": "Step {actual} of {total}",

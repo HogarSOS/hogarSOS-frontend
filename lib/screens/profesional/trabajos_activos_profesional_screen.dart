@@ -328,6 +328,45 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
     if (resultado == true) ref.invalidate(assignedRequestsProvider);
   }
 
+  /// Solo aplica a trabajos ya completados — se oculta de esta lista sin
+  /// borrar nada (pago/chat/valoraciones se conservan), el cliente lo
+  /// sigue viendo en la suya hasta que también lo archive.
+  Future<bool> _confirmarArchivar(BuildContext context) async {
+    final t = AppLocalizations.of(context);
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t.trabajosActivosArchivarTitulo),
+        content: Text(t.trabajosActivosArchivarMensaje),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(t.perfilCancelar)),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(t.trabajosActivosArchivarConfirmar),
+          ),
+        ],
+      ),
+    );
+    return confirmado ?? false;
+  }
+
+  Future<void> _archivar(BuildContext context, WidgetRef ref, String id) async {
+    final t = AppLocalizations.of(context);
+    try {
+      await ServiceRequestService().archivar(id);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.trabajosActivosArchivarExito)));
+      ref.invalidate(assignedRequestsProvider);
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.trabajosActivosArchivarError, t: t))),
+      );
+      ref.invalidate(assignedRequestsProvider); // por si el Dismissible ya lo quitó visualmente antes de fallar
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context);
@@ -359,31 +398,52 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
               itemCount: trabajos.length,
               itemBuilder: (context, index) {
                 final trabajo = trabajos[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: EntradaAnimada(
-                    retraso: Duration(milliseconds: 40 * index),
-                    child: _TarjetaTrabajo(
-                      trabajo: trabajo,
-                      noLeido: ref.watch(unreadChatProvider(trabajo.id)),
-                      onChat: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => ChatScreen(
-                            serviceRequestId: trabajo.id,
-                            nombreContraparte: trabajo.clienteNombre,
-                          ),
-                        ),
-                      ),
-                      onCompletar: () => _completar(context, ref, trabajo),
-                      onEnviarPresupuesto: () => _enviarPresupuesto(context, ref, trabajo),
-                      onPedirAmpliacion: () => _pedirAmpliacion(context, ref, trabajo),
-                      onValorar: () => _valorar(context, ref, trabajo),
-                      onReportar: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => ReportarProblemaScreen(serviceRequestId: trabajo.id),
+                final tarjeta = EntradaAnimada(
+                  retraso: Duration(milliseconds: 40 * index),
+                  child: _TarjetaTrabajo(
+                    trabajo: trabajo,
+                    noLeido: ref.watch(unreadChatProvider(trabajo.id)),
+                    onChat: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ChatScreen(
+                          serviceRequestId: trabajo.id,
+                          nombreContraparte: trabajo.clienteNombre,
                         ),
                       ),
                     ),
+                    onCompletar: () => _completar(context, ref, trabajo),
+                    onEnviarPresupuesto: () => _enviarPresupuesto(context, ref, trabajo),
+                    onPedirAmpliacion: () => _pedirAmpliacion(context, ref, trabajo),
+                    onValorar: () => _valorar(context, ref, trabajo),
+                    onReportar: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ReportarProblemaScreen(serviceRequestId: trabajo.id),
+                      ),
+                    ),
+                  ),
+                );
+
+                if (trabajo.estado != EstadoSolicitud.completada) {
+                  return Padding(padding: const EdgeInsets.only(bottom: 12), child: tarjeta);
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Dismissible(
+                    key: ValueKey(trabajo.id),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 20),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.error,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.onError),
+                    ),
+                    confirmDismiss: (_) => _confirmarArchivar(context),
+                    onDismissed: (_) => _archivar(context, ref, trabajo.id),
+                    child: tarjeta,
                   ),
                 );
               },

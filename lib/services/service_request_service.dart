@@ -167,6 +167,15 @@ class ServiceRequestService {
     await _api.delete('/service-requests/$id');
   }
 
+  /// Quita una solicitud terminada (completada o cancelada) de MI lista
+  /// sin borrar nada — a diferencia de `borrar`, que solo vale para
+  /// solicitudes que nadie llegó a aceptar. El historial de pago/chat/
+  /// valoraciones se conserva; la otra parte sigue viéndola hasta que
+  /// también la archive.
+  Future<void> archivar(String id) async {
+    await _api.patch('/service-requests/$id/archive');
+  }
+
   /// Reintenta la sincronización del chat de esta solicitud a Firestore
   /// (UIDs de Firebase de cliente y profesional). La sincronización
   /// automática al aceptar puede fallar en silencio del lado del

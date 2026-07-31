@@ -1874,6 +1874,66 @@ abstract class AppLocalizations {
   /// **'No se pudo borrar la solicitud'**
   String get misSolicitudesBorrarError;
 
+  /// No description provided for @misSolicitudesArchivarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Quitar esta solicitud de la lista?'**
+  String get misSolicitudesArchivarTitulo;
+
+  /// No description provided for @misSolicitudesArchivarMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Se ocultará de tu historial, pero el pago, el chat y las valoraciones se conservan.'**
+  String get misSolicitudesArchivarMensaje;
+
+  /// No description provided for @misSolicitudesArchivarConfirmar.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar'**
+  String get misSolicitudesArchivarConfirmar;
+
+  /// No description provided for @misSolicitudesArchivarExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud quitada de la lista'**
+  String get misSolicitudesArchivarExito;
+
+  /// No description provided for @misSolicitudesArchivarError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo quitar la solicitud'**
+  String get misSolicitudesArchivarError;
+
+  /// No description provided for @trabajosActivosArchivarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Quitar este trabajo de la lista?'**
+  String get trabajosActivosArchivarTitulo;
+
+  /// No description provided for @trabajosActivosArchivarMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Se ocultará de tu historial, pero el pago, el chat y las valoraciones se conservan.'**
+  String get trabajosActivosArchivarMensaje;
+
+  /// No description provided for @trabajosActivosArchivarConfirmar.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar'**
+  String get trabajosActivosArchivarConfirmar;
+
+  /// No description provided for @trabajosActivosArchivarExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Trabajo quitado de la lista'**
+  String get trabajosActivosArchivarExito;
+
+  /// No description provided for @trabajosActivosArchivarError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo quitar el trabajo'**
+  String get trabajosActivosArchivarError;
+
   /// No description provided for @wizardTitulo.
   ///
   /// In es, this message translates to:

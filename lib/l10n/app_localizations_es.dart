@@ -1022,6 +1022,40 @@ class AppLocalizationsEs extends AppLocalizations {
   String get misSolicitudesBorrarError => 'No se pudo borrar la solicitud';
 
   @override
+  String get misSolicitudesArchivarTitulo =>
+      '¿Quitar esta solicitud de la lista?';
+
+  @override
+  String get misSolicitudesArchivarMensaje =>
+      'Se ocultará de tu historial, pero el pago, el chat y las valoraciones se conservan.';
+
+  @override
+  String get misSolicitudesArchivarConfirmar => 'Quitar';
+
+  @override
+  String get misSolicitudesArchivarExito => 'Solicitud quitada de la lista';
+
+  @override
+  String get misSolicitudesArchivarError => 'No se pudo quitar la solicitud';
+
+  @override
+  String get trabajosActivosArchivarTitulo =>
+      '¿Quitar este trabajo de la lista?';
+
+  @override
+  String get trabajosActivosArchivarMensaje =>
+      'Se ocultará de tu historial, pero el pago, el chat y las valoraciones se conservan.';
+
+  @override
+  String get trabajosActivosArchivarConfirmar => 'Quitar';
+
+  @override
+  String get trabajosActivosArchivarExito => 'Trabajo quitado de la lista';
+
+  @override
+  String get trabajosActivosArchivarError => 'No se pudo quitar el trabajo';
+
+  @override
   String get wizardTitulo => 'Nueva solicitud';
 
   @override
