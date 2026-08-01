@@ -4,9 +4,16 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import android.os.Bundle
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity : FlutterActivity() {
+// FlutterFragmentActivity, no FlutterActivity: flutter_stripe necesita
+// registrar un ActivityResultLauncher para el Payment Sheet nativo, algo
+// que solo una FragmentActivity soporta — con FlutterActivity a secas,
+// Stripe.instance.presentPaymentSheet() fallaba SIEMPRE con
+// "flutter_stripe initialization failed" antes incluso de llegar a
+// mostrar la hoja de pago (el pago nunca llegó a funcionar en ningún
+// build hasta este fix, es requisito documentado de flutter_stripe).
+class MainActivity : FlutterFragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         crearCanalNotificaciones()
