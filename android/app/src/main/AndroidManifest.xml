@@ -11,9 +11,7 @@
     <application
     android:label="Hogar SOS"
     android:name="${applicationName}"
-    android:icon="@mipmap/ic_launcher"
-    android:usesCleartextTraffic="true"
-    android:networkSecurityConfig="@xml/network_security_config">
+    android:icon="@mipmap/ic_launcher">
         <!--
           Clave de Google Maps restringida en Google Cloud Console
           (proyecto "hogarsos") a Maps SDK for Android + huellas SHA-1

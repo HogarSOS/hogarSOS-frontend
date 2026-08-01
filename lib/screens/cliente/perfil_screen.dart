@@ -161,17 +161,11 @@ class PerfilScreen extends ConsumerWidget {
                       );
                     },
                   ),
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.settings_outlined),
-                    title: Text(t.perfilConfiguracion),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(t.proximamenteTitulo)),
-                      );
-                    },
-                  ),
+                  // "Configuración" oculto temporalmente, mismo motivo que
+                  // Favoritos arriba: nunca se implementó de verdad, solo
+                  // mostraba "Próximamente". No se borra t.perfilConfiguracion
+                  // ni el icono, solo este acceso — hasta que haya algo real
+                  // que configurar (notificaciones, idioma, etc.).
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.privacy_tip_outlined),

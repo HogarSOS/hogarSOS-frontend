@@ -182,10 +182,8 @@ class AuthService {
   String _mensajeFirebase(fb.FirebaseAuthException e) {
     switch (e.code) {
       case 'email-already-in-use':
-        return 'Ya existe una cuenta de Firebase con este email (puede ser de un '
-            'registro anterior que falló a mitad de camino). Revisa Firebase '
-            'Console → Authentication → Users para confirmarlo, o prueba con '
-            'otro email.';
+        return 'Ya existe una cuenta con este email. Intenta iniciar sesión o '
+            'usa "He olvidado mi contraseña" si no la recuerdas.';
       case 'invalid-email':
         return 'El email no tiene un formato válido.';
       case 'weak-password':

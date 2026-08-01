@@ -2,8 +2,8 @@
   <title>hogarSOS — logotipo horizontal (fondo oscuro)</title>
   <defs>
     <linearGradient id="hogarsos-bg" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#1554F0"/>
-      <stop offset="1" stop-color="#0C3AC2"/>
+      <stop offset="0" stop-color="#1E8A5A"/>
+      <stop offset="1" stop-color="#146B45"/>
     </linearGradient>
   </defs>
   <rect x="0" y="0" width="100" height="100" rx="22" fill="url(#hogarsos-bg)"/>
