@@ -79,6 +79,45 @@ class AppLocalizationsEs extends AppLocalizations {
       'Si existe una cuenta con ese email, te hemos enviado un enlace para restablecer la contraseña';
 
   @override
+  String get loginModoEmail => 'Email';
+
+  @override
+  String get loginModoTelefono => 'Teléfono';
+
+  @override
+  String get loginFieldTelefono => 'Teléfono';
+
+  @override
+  String get loginTelefonoAyuda =>
+      'Incluye el prefijo de tu país, ej. +34612345678';
+
+  @override
+  String get loginBtnEnviarCodigo => 'Enviar código';
+
+  @override
+  String get otpTitulo => 'Verifica tu número';
+
+  @override
+  String otpDescripcion(String telefono) {
+    return 'Te hemos enviado un código de 6 dígitos por SMS a $telefono';
+  }
+
+  @override
+  String get otpFieldCodigo => 'Código de 6 dígitos';
+
+  @override
+  String get otpBtnConfirmar => 'Confirmar';
+
+  @override
+  String get otpReenviarCodigo => 'Reenviar código';
+
+  @override
+  String get otpCodigoReenviado => 'Código reenviado';
+
+  @override
+  String get otpCambiarNumero => 'Cambiar de número';
+
+  @override
   String get errorConexion =>
       'No se pudo conectar con el servidor. Comprueba tu conexión.';
 
@@ -215,6 +254,30 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get perfilTerminos => 'Términos de servicio';
+
+  @override
+  String get perfilEmailSinVerificarTitulo => 'Verifica tu email';
+
+  @override
+  String get perfilEmailSinVerificarDescripcion =>
+      'Te hemos enviado un enlace de confirmación. Revisa tu bandeja de entrada (y la carpeta de spam).';
+
+  @override
+  String get perfilEmailSinVerificarReenviar => 'Reenviar email';
+
+  @override
+  String get perfilEmailSinVerificarYaConfirme => 'Ya lo confirmé';
+
+  @override
+  String get perfilEmailVerificacionReenviada =>
+      'Email de verificación reenviado';
+
+  @override
+  String get perfilEmailAunNoVerificado =>
+      'Todavía no lo detectamos. Si acabas de confirmarlo, espera unos segundos e inténtalo de nuevo.';
+
+  @override
+  String get perfilEmailVerificadoExito => '¡Email verificado!';
 
   @override
   String get legalPrivacidadTitulo => 'Política de privacidad';

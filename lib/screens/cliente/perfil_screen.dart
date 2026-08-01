@@ -12,8 +12,51 @@ import 'mis_valoraciones_screen.dart';
 import '../legal/privacidad_screen.dart';
 import '../legal/terminos_screen.dart';
 
-class PerfilScreen extends ConsumerWidget {
+class PerfilScreen extends ConsumerStatefulWidget {
   const PerfilScreen({super.key});
+
+  @override
+  ConsumerState<PerfilScreen> createState() => _PerfilScreenState();
+}
+
+class _PerfilScreenState extends ConsumerState<PerfilScreen> {
+  // Se recalcula en build() a partir de AuthService — no es un simple
+  // `final bool` de una vez, porque "Ya lo confirmé" necesita volver a
+  // preguntarle a Firebase (reload()) y reflejar el resultado aquí.
+  bool _emailVerificado = true;
+  bool _comprobandoVerificacion = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailVerificado = ref.read(authServiceProvider).emailVerificado;
+  }
+
+  Future<void> _reenviarVerificacion(BuildContext context, AppLocalizations t) async {
+    try {
+      await ref.read(authServiceProvider).reenviarEmailVerificacion();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.perfilEmailVerificacionReenviada)),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+    }
+  }
+
+  Future<void> _comprobarVerificacion(BuildContext context, AppLocalizations t) async {
+    setState(() => _comprobandoVerificacion = true);
+    final verificado = await ref.read(authServiceProvider).recargarYComprobarEmailVerificado();
+    if (!context.mounted) return;
+    setState(() {
+      _emailVerificado = verificado;
+      _comprobandoVerificacion = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(verificado ? t.perfilEmailVerificadoExito : t.perfilEmailAunNoVerificado)),
+    );
+  }
 
   String _rolTexto(AppLocalizations t, UserRole role) {
     switch (role) {
@@ -57,7 +100,7 @@ class PerfilScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final usuario = ref.watch(authProvider).usuario;
@@ -67,6 +110,65 @@ class PerfilScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          if (!_emailVerificado)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: EntradaAnimada(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: colorScheme.tertiaryContainer,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.mark_email_unread_outlined, color: colorScheme.onTertiaryContainer),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              t.perfilEmailSinVerificarTitulo,
+                              style: TextStyle(fontWeight: FontWeight.w700, color: colorScheme.onTertiaryContainer),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        t.perfilEmailSinVerificarDescripcion,
+                        style: TextStyle(fontSize: 13, color: colorScheme.onTertiaryContainer, height: 1.4),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => _reenviarVerificacion(context, t),
+                              child: Text(t.perfilEmailSinVerificarReenviar, style: const TextStyle(fontSize: 12.5)),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: _comprobandoVerificacion ? null : () => _comprobarVerificacion(context, t),
+                              child: _comprobandoVerificacion
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    )
+                                  : Text(t.perfilEmailSinVerificarYaConfirme, style: const TextStyle(fontSize: 12.5)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           EntradaAnimada(
             child: Center(
             child: Column(

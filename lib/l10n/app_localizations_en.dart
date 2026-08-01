@@ -79,6 +79,45 @@ class AppLocalizationsEn extends AppLocalizations {
       'If an account exists with that email, we\'ve sent a password reset link';
 
   @override
+  String get loginModoEmail => 'Email';
+
+  @override
+  String get loginModoTelefono => 'Phone';
+
+  @override
+  String get loginFieldTelefono => 'Phone number';
+
+  @override
+  String get loginTelefonoAyuda =>
+      'Include your country code, e.g. +34612345678';
+
+  @override
+  String get loginBtnEnviarCodigo => 'Send code';
+
+  @override
+  String get otpTitulo => 'Verify your number';
+
+  @override
+  String otpDescripcion(String telefono) {
+    return 'We sent a 6-digit code by SMS to $telefono';
+  }
+
+  @override
+  String get otpFieldCodigo => '6-digit code';
+
+  @override
+  String get otpBtnConfirmar => 'Confirm';
+
+  @override
+  String get otpReenviarCodigo => 'Resend code';
+
+  @override
+  String get otpCodigoReenviado => 'Code resent';
+
+  @override
+  String get otpCambiarNumero => 'Change number';
+
+  @override
   String get errorConexion =>
       'Couldn\'t connect to the server. Check your connection.';
 
@@ -214,6 +253,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get perfilTerminos => 'Terms of service';
+
+  @override
+  String get perfilEmailSinVerificarTitulo => 'Verify your email';
+
+  @override
+  String get perfilEmailSinVerificarDescripcion =>
+      'We sent you a confirmation link. Check your inbox (and spam folder).';
+
+  @override
+  String get perfilEmailSinVerificarReenviar => 'Resend email';
+
+  @override
+  String get perfilEmailSinVerificarYaConfirme => 'I already confirmed it';
+
+  @override
+  String get perfilEmailVerificacionReenviada => 'Verification email resent';
+
+  @override
+  String get perfilEmailAunNoVerificado =>
+      'We still don\'t see it. If you just confirmed it, wait a few seconds and try again.';
+
+  @override
+  String get perfilEmailVerificadoExito => 'Email verified!';
 
   @override
   String get legalPrivacidadTitulo => 'Privacy policy';

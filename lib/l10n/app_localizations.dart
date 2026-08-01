@@ -236,6 +236,78 @@ abstract class AppLocalizations {
   /// **'Si existe una cuenta con ese email, te hemos enviado un enlace para restablecer la contraseña'**
   String get loginRecuperarExito;
 
+  /// No description provided for @loginModoEmail.
+  ///
+  /// In es, this message translates to:
+  /// **'Email'**
+  String get loginModoEmail;
+
+  /// No description provided for @loginModoTelefono.
+  ///
+  /// In es, this message translates to:
+  /// **'Teléfono'**
+  String get loginModoTelefono;
+
+  /// No description provided for @loginFieldTelefono.
+  ///
+  /// In es, this message translates to:
+  /// **'Teléfono'**
+  String get loginFieldTelefono;
+
+  /// No description provided for @loginTelefonoAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Incluye el prefijo de tu país, ej. +34612345678'**
+  String get loginTelefonoAyuda;
+
+  /// No description provided for @loginBtnEnviarCodigo.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar código'**
+  String get loginBtnEnviarCodigo;
+
+  /// No description provided for @otpTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Verifica tu número'**
+  String get otpTitulo;
+
+  /// No description provided for @otpDescripcion.
+  ///
+  /// In es, this message translates to:
+  /// **'Te hemos enviado un código de 6 dígitos por SMS a {telefono}'**
+  String otpDescripcion(String telefono);
+
+  /// No description provided for @otpFieldCodigo.
+  ///
+  /// In es, this message translates to:
+  /// **'Código de 6 dígitos'**
+  String get otpFieldCodigo;
+
+  /// No description provided for @otpBtnConfirmar.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar'**
+  String get otpBtnConfirmar;
+
+  /// No description provided for @otpReenviarCodigo.
+  ///
+  /// In es, this message translates to:
+  /// **'Reenviar código'**
+  String get otpReenviarCodigo;
+
+  /// No description provided for @otpCodigoReenviado.
+  ///
+  /// In es, this message translates to:
+  /// **'Código reenviado'**
+  String get otpCodigoReenviado;
+
+  /// No description provided for @otpCambiarNumero.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar de número'**
+  String get otpCambiarNumero;
+
   /// No description provided for @errorConexion.
   ///
   /// In es, this message translates to:
@@ -463,6 +535,48 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Términos de servicio'**
   String get perfilTerminos;
+
+  /// No description provided for @perfilEmailSinVerificarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Verifica tu email'**
+  String get perfilEmailSinVerificarTitulo;
+
+  /// No description provided for @perfilEmailSinVerificarDescripcion.
+  ///
+  /// In es, this message translates to:
+  /// **'Te hemos enviado un enlace de confirmación. Revisa tu bandeja de entrada (y la carpeta de spam).'**
+  String get perfilEmailSinVerificarDescripcion;
+
+  /// No description provided for @perfilEmailSinVerificarReenviar.
+  ///
+  /// In es, this message translates to:
+  /// **'Reenviar email'**
+  String get perfilEmailSinVerificarReenviar;
+
+  /// No description provided for @perfilEmailSinVerificarYaConfirme.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya lo confirmé'**
+  String get perfilEmailSinVerificarYaConfirme;
+
+  /// No description provided for @perfilEmailVerificacionReenviada.
+  ///
+  /// In es, this message translates to:
+  /// **'Email de verificación reenviado'**
+  String get perfilEmailVerificacionReenviada;
+
+  /// No description provided for @perfilEmailAunNoVerificado.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no lo detectamos. Si acabas de confirmarlo, espera unos segundos e inténtalo de nuevo.'**
+  String get perfilEmailAunNoVerificado;
+
+  /// No description provided for @perfilEmailVerificadoExito.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Email verificado!'**
+  String get perfilEmailVerificadoExito;
 
   /// No description provided for @legalPrivacidadTitulo.
   ///

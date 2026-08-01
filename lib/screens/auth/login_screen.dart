@@ -10,6 +10,7 @@ import '../cliente_shell_screen.dart';
 import '../legal/privacidad_screen.dart';
 import '../legal/terminos_screen.dart';
 import '../profesional_shell_screen.dart';
+import 'verificar_codigo_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -22,9 +23,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nombreController = TextEditingController();
+  // +34 precargado porque la mayoría de usuarios son de España — sigue
+  // siendo editable para el resto (ver el porqué de fondo en el comentario
+  // de _modoTelefono, más abajo).
+  final _telefonoController = TextEditingController(text: '+34 ');
   final _passwordFocusNode = FocusNode();
   UserRole _rolSeleccionado = UserRole.cliente;
   bool _modoRegistro = false;
+  // Alternativa al email+contraseña — el usuario elige uno de los dos,
+  // no se combinan. Ver AuthService.enviarCodigoTelefono/
+  // completarConCredencialTelefono para el porqué de por qué el
+  // teléfono no puede reutilizar el mismo _enviar() de email tal cual
+  // (Firebase avisa por callbacks, no con un simple await que falle si
+  // la cuenta no existe).
+  bool _modoTelefono = false;
+  bool _enviandoCodigo = false;
   bool _recordarSesion = true;
   bool _passwordVisible = false;
   String? _errorValidacion;
@@ -34,11 +47,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _nombreController.dispose();
+    _telefonoController.dispose();
     _passwordFocusNode.dispose();
     super.dispose();
   }
 
+  // Perfil es la primera pestaña del shell (índice 0 por defecto) —
+  // antes había que pasar pestanaInicial: 3 a mano solo para el caso de
+  // registro, para que un profesional recién creado viera primero su
+  // perfil y lo completara (foto, categorías...); ya no hace falta el
+  // caso especial, login normal y registro coinciden. Compartido entre
+  // el flujo de email (aquí mismo) y el de teléfono (tras autoverificar
+  // sin pasar por VerificarCodigoScreen).
+  Widget _destinoSegunRol(UserRole role) {
+    return switch (role) {
+      UserRole.profesional => const ProfesionalShellScreen(),
+      UserRole.admin => const AdminScreen(),
+      UserRole.cliente => const ClienteShellScreen(),
+    };
+  }
+
   Future<void> _enviar() async {
+    if (_modoTelefono) return _enviarPorTelefono();
+
     final t = AppLocalizations.of(context);
 
     // Sin esto, un email/contraseña vacíos llegaban tal cual a Firebase,
@@ -77,18 +108,79 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final usuario = ref.read(authProvider).usuario;
     if (usuario == null) return; // el error ya se muestra vía authProvider.error
 
-    final destino = switch (usuario.role) {
-      // Perfil es la primera pestaña del shell (índice 0 por defecto) —
-      // antes había que pasar pestanaInicial: 3 a mano solo para el
-      // caso de registro, para que un profesional recién creado viera
-      // primero su perfil y lo completara (foto, categorías...); ya no
-      // hace falta el caso especial, login normal y registro coinciden.
-      UserRole.profesional => const ProfesionalShellScreen(),
-      UserRole.admin => const AdminScreen(),
-      UserRole.cliente => const ClienteShellScreen(),
-    };
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => _destinoSegunRol(usuario.role)),
+    );
+  }
 
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => destino));
+  /// Pide el SMS y, según lo que responda Firebase, o pasa a
+  /// VerificarCodigoScreen (caso normal: hay que escribir el código) o
+  /// completa sesión directamente (Android detectó el SMS solo, sin
+  /// pantalla intermedia — ver AuthService.enviarCodigoTelefono).
+  Future<void> _enviarPorTelefono() async {
+    final t = AppLocalizations.of(context);
+    // replaceAll y no solo trim(): Firebase exige formato E.164 estricto
+    // (sin espacios internos), y el campo empieza precargado con "+34 "
+    // — un espacio decorativo entre prefijo y número que hay que quitar
+    // antes de mandarlo, no solo los de los extremos.
+    final telefono = _telefonoController.text.replaceAll(' ', '').trim();
+
+    if (telefono.isEmpty ||
+        telefono == '+34' ||
+        (_modoRegistro && _nombreController.text.trim().isEmpty)) {
+      setState(() => _errorValidacion = t.loginCamposObligatorios);
+      return;
+    }
+    setState(() {
+      _errorValidacion = null;
+      _enviandoCodigo = true;
+    });
+
+    final nombre = _nombreController.text.trim();
+
+    await ref.read(authServiceProvider).enviarCodigoTelefono(
+          numeroTelefono: telefono,
+          onCodigoEnviado: (verificationId) {
+            if (!mounted) return;
+            setState(() => _enviandoCodigo = false);
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => VerificarCodigoScreen(
+                  verificationId: verificationId,
+                  telefono: telefono,
+                  nombre: nombre,
+                  role: _rolSeleccionado,
+                  esRegistro: _modoRegistro,
+                  recordarSesion: _recordarSesion,
+                ),
+              ),
+            );
+          },
+          onAutoVerificado: (credential) async {
+            if (!mounted) return;
+            setState(() => _enviandoCodigo = false);
+            await ref.read(authProvider.notifier).completarConCredencialTelefono(
+                  credential,
+                  nombre: nombre,
+                  role: _rolSeleccionado,
+                  esRegistro: _modoRegistro,
+                  recordarSesion: _recordarSesion,
+                );
+            if (!mounted) return;
+            final usuario = ref.read(authProvider).usuario;
+            if (usuario == null) return;
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => _destinoSegunRol(usuario.role)),
+            );
+          },
+          onError: (mensaje) {
+            if (!mounted) return;
+            setState(() {
+              _errorValidacion = mensaje;
+              _enviandoCodigo = false;
+            });
+          },
+        );
   }
 
   Future<void> _recuperarPassword() async {
@@ -185,28 +277,56 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           const SizedBox(height: 12),
                         ],
-                        TextField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          onSubmitted: (_) => _passwordFocusNode.requestFocus(),
-                          decoration: InputDecoration(labelText: t.loginFieldEmail),
+                        SegmentedButton<bool>(
+                          segments: [
+                            ButtonSegment(value: false, label: Text(t.loginModoEmail)),
+                            ButtonSegment(value: true, label: Text(t.loginModoTelefono)),
+                          ],
+                          selected: {_modoTelefono},
+                          onSelectionChanged: (nuevo) {
+                            setState(() {
+                              _modoTelefono = nuevo.first;
+                              _errorValidacion = null;
+                            });
+                          },
                         ),
                         const SizedBox(height: 12),
-                        TextField(
-                          controller: _passwordController,
-                          focusNode: _passwordFocusNode,
-                          obscureText: !_passwordVisible,
-                          textInputAction: TextInputAction.done,
-                          onSubmitted: (_) => _enviar(),
-                          decoration: InputDecoration(
-                            labelText: t.loginFieldPassword,
-                            suffixIcon: IconButton(
-                              icon: Icon(_passwordVisible ? Icons.visibility_off : Icons.visibility),
-                              onPressed: () => setState(() => _passwordVisible = !_passwordVisible),
+                        if (_modoTelefono) ...[
+                          TextField(
+                            controller: _telefonoController,
+                            keyboardType: TextInputType.phone,
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (_) => _enviar(),
+                            decoration: InputDecoration(
+                              labelText: t.loginFieldTelefono,
+                              helperText: t.loginTelefonoAyuda,
+                              helperMaxLines: 2,
                             ),
                           ),
-                        ),
+                        ] else ...[
+                          TextField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            onSubmitted: (_) => _passwordFocusNode.requestFocus(),
+                            decoration: InputDecoration(labelText: t.loginFieldEmail),
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: _passwordController,
+                            focusNode: _passwordFocusNode,
+                            obscureText: !_passwordVisible,
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (_) => _enviar(),
+                            decoration: InputDecoration(
+                              labelText: t.loginFieldPassword,
+                              suffixIcon: IconButton(
+                                icon: Icon(_passwordVisible ? Icons.visibility_off : Icons.visibility),
+                                onPressed: () => setState(() => _passwordVisible = !_passwordVisible),
+                              ),
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 4),
                         // Material(type: transparency) a propósito: el
                         // CheckboxListTile pinta su fondo/ripple en el
@@ -241,14 +361,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                         FilledButton(
-                          onPressed: authState.cargando ? null : _enviar,
-                          child: authState.cargando
+                          onPressed: (authState.cargando || _enviandoCodigo) ? null : _enviar,
+                          child: (authState.cargando || _enviandoCodigo)
                               ? const SizedBox(
                                   height: 18,
                                   width: 18,
                                   child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                                 )
-                              : Text(_modoRegistro ? t.loginBtnCrearCuenta : t.loginBtnIniciarSesion),
+                              : Text(
+                                  _modoTelefono
+                                      ? t.loginBtnEnviarCodigo
+                                      : (_modoRegistro ? t.loginBtnCrearCuenta : t.loginBtnIniciarSesion),
+                                ),
                         ),
                       ],
                     ),
@@ -260,7 +384,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       _modoRegistro ? t.loginLinkYaTienesCuenta : t.loginLinkNoTienesCuenta,
                     ),
                   ),
-                  if (!_modoRegistro)
+                  if (!_modoRegistro && !_modoTelefono)
                     TextButton(
                       onPressed: _recuperarPassword,
                       child: Text(t.loginOlvidasteContrasena),

@@ -29,6 +29,115 @@ class AuthService {
     );
   }
 
+  /// Pide a Firebase que mande el SMS con el código a `numeroTelefono`
+  /// (formato E.164, ej. "+34612345678"). No hay una llamada "await
+  /// que devuelva el código" — Firebase avisa por callbacks porque en
+  /// Android puede autoverificar el SMS sola (sin que el usuario
+  /// escriba nada) antes incluso de que el código "llegue" de verdad.
+  ///
+  /// - `onCodigoEnviado`: el SMS ya salió — la UI debe pasar a la
+  ///   pantalla de introducir el código, guardando `verificationId`.
+  /// - `onAutoVerificado`: Android leyó el SMS solo — ya hay una
+  ///   credencial lista para completar sesión sin pedirle nada más al
+  ///   usuario (ver completarConCredencialTelefono).
+  /// - `onError`: número inválido, cuota de SMS agotada, etc.
+  Future<void> enviarCodigoTelefono({
+    required String numeroTelefono,
+    required void Function(String verificationId) onCodigoEnviado,
+    required void Function(fb.PhoneAuthCredential credential) onAutoVerificado,
+    required void Function(String mensaje) onError,
+  }) async {
+    await _firebaseAuth.verifyPhoneNumber(
+      phoneNumber: numeroTelefono,
+      verificationCompleted: onAutoVerificado,
+      verificationFailed: (e) {
+        debugPrint('[AuthService] verifyPhoneNumber falló: ${e.code} — ${e.message}');
+        onError(_mensajeFirebase(e));
+      },
+      codeSent: (verificationId, _) => onCodigoEnviado(verificationId),
+      // Firebase sigue aceptando el código bastante después de este
+      // timeout — esto solo controla cuánto tiempo intenta la
+      // autoverificación por SMS antes de rendirse y dejar que el
+      // usuario lo escriba a mano.
+      codeAutoRetrievalTimeout: (_) {},
+      timeout: const Duration(seconds: 60),
+    );
+  }
+
+  /// Construye la credencial a partir del código de 6 dígitos que
+  /// escribió el usuario, y completa sesión con ella — mismo camino
+  /// final que `onAutoVerificado` de arriba (ver
+  /// `completarConCredencialTelefono`).
+  Future<AuthResult> confirmarCodigoTelefono({
+    required String verificationId,
+    required String smsCode,
+    required String nombre,
+    required UserRole role,
+    required bool esRegistro,
+    bool recordarSesion = true,
+  }) {
+    final credential = fb.PhoneAuthProvider.credential(
+      verificationId: verificationId,
+      smsCode: smsCode,
+    );
+    return completarConCredencialTelefono(
+      credential,
+      nombre: nombre,
+      role: role,
+      esRegistro: esRegistro,
+      recordarSesion: recordarSesion,
+    );
+  }
+
+  /// Punto final común tanto para el código escrito a mano como para
+  /// la autoverificación de Android — `signInWithCredential` funciona
+  /// igual en los dos casos. A diferencia del email (donde
+  /// `createUserWithEmailAndPassword` y `signInWithEmailAndPassword`
+  /// son llamadas distintas que fallan solas si la cuenta no
+  /// corresponde), con teléfono Firebase SIEMPRE deja entrar con un
+  /// código válido — cree la cuenta de Firebase sola si hace falta,
+  /// sin distinguir "login" de "registro". Por eso aquí SIEMPRE se
+  /// revierte el usuario de Firebase si el backend falla, tanto en
+  /// registro como en login: un código de SMS válido sin fila
+  /// correspondiente en Postgres es el mismo estado huérfano en
+  /// cualquiera de los dos casos.
+  Future<AuthResult> completarConCredencialTelefono(
+    fb.PhoneAuthCredential credential, {
+    required String nombre,
+    required UserRole role,
+    required bool esRegistro,
+    bool recordarSesion = true,
+  }) async {
+    fb.UserCredential credencial;
+    try {
+      credencial = await _firebaseAuth.signInWithCredential(credential);
+    } on fb.FirebaseAuthException catch (e) {
+      debugPrint('[AuthService] signInWithCredential (teléfono) falló: ${e.code} — ${e.message}');
+      throw AuthException(_mensajeFirebase(e), causa: e);
+    }
+
+    try {
+      final firebaseIdToken = await credencial.user!.getIdToken();
+      final respuesta = esRegistro
+          ? await _api.post('/auth/register', data: {
+              'firebaseIdToken': firebaseIdToken,
+              'nombre': nombre,
+              'role': role.name,
+            })
+          : await _api.post('/auth/login', data: {'firebaseIdToken': firebaseIdToken});
+
+      return _guardarSesion(respuesta.data, recordarSesion: recordarSesion);
+    } on DioException catch (e) {
+      debugPrint('[AuthService] Fallo al completar con teléfono en el backend: ${e.type} — ${e.message}');
+      await _revertirUsuarioFirebase(credencial);
+      throw AuthException(_mensajeDio(e), causa: e);
+    } catch (e) {
+      debugPrint('[AuthService] Error inesperado al completar con teléfono: $e');
+      await _revertirUsuarioFirebase(credencial);
+      throw AuthException('Ocurrió un error inesperado al completar el registro.', causa: e);
+    }
+  }
+
   /// Registro/login con email y contraseña vía Firebase, seguido del
   /// intercambio por el JWT propio. Si Firebase crea el usuario pero
   /// el backend falla después, se revierte (borra) el usuario de
@@ -61,7 +170,19 @@ class AuthService {
         'role': role.name,
       });
 
-      return _guardarSesion(respuesta.data, recordarSesion: recordarSesion);
+      final resultado = await _guardarSesion(respuesta.data, recordarSesion: recordarSesion);
+
+      // Después de guardar la sesión, no antes: si el registro en el
+      // backend falla, revertimos el usuario de Firebase (más abajo) y
+      // no tiene sentido haber mandado ya un email de verificación para
+      // una cuenta que va a desaparecer. No se espera a que falle el
+      // envío del email — un problema aquí no debe bloquear el
+      // registro, que ya se completó correctamente.
+      credencial.user!.sendEmailVerification().catchError((e) {
+        debugPrint('[AuthService] No se pudo enviar el email de verificación: $e');
+      });
+
+      return resultado;
     } on DioException catch (e) {
       debugPrint('[AuthService] Fallo al registrar en el backend: ${e.type} — ${e.message}');
       await _revertirUsuarioFirebase(credencial);
@@ -179,6 +300,43 @@ class AuthService {
     return token != null;
   }
 
+  /// `true` si hay una cuenta de email/contraseña activa y su email ya
+  /// está verificado. Para cuentas de teléfono (sin email) o cuando no
+  /// hay sesión de Firebase, devuelve `true` (no aplica el aviso) — el
+  /// aviso de "verifica tu email" solo tiene sentido si de verdad hay
+  /// un email que verificar.
+  bool get emailVerificado {
+    final user = _firebaseAuth.currentUser;
+    if (user == null || user.email == null) return true;
+    return user.emailVerified;
+  }
+
+  /// Firebase no actualiza `emailVerified` en el objeto `User` en
+  /// memoria solo por haber pulsado el enlace del correo — hay que
+  /// pedirle explícitamente que recargue sus datos. Se llama al pulsar
+  /// "Ya verifiqué mi email" en el aviso de la UI.
+  Future<bool> recargarYComprobarEmailVerificado() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) return true;
+    try {
+      await user.reload();
+    } on fb.FirebaseAuthException catch (e) {
+      debugPrint('[AuthService] Error al recargar el usuario de Firebase: ${e.code}');
+    }
+    return emailVerificado;
+  }
+
+  Future<void> reenviarEmailVerificacion() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) return;
+    try {
+      await user.sendEmailVerification();
+    } on fb.FirebaseAuthException catch (e) {
+      debugPrint('[AuthService] Error al reenviar el email de verificación: ${e.code}');
+      throw AuthException(_mensajeFirebase(e), causa: e);
+    }
+  }
+
   String _mensajeFirebase(fb.FirebaseAuthException e) {
     switch (e.code) {
       case 'email-already-in-use':
@@ -196,6 +354,15 @@ class AuthService {
         return 'No hay conexión a internet.';
       case 'too-many-requests':
         return 'Demasiados intentos. Espera un momento antes de volver a intentarlo.';
+      case 'invalid-phone-number':
+        return 'El número de teléfono no es válido. Escríbelo con el prefijo del país (ej. +34).';
+      case 'invalid-verification-code':
+        return 'El código no es correcto. Revisa el SMS e inténtalo de nuevo.';
+      case 'session-expired':
+      case 'code-expired':
+        return 'El código ha caducado. Pide uno nuevo.';
+      case 'quota-exceeded':
+        return 'Se alcanzó el límite de códigos por SMS. Inténtalo más tarde.';
       default:
         return e.message ?? 'Error de autenticación (${e.code})';
     }

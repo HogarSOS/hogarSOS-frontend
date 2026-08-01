@@ -27,6 +27,23 @@
   "loginRecuperarEnviar": "Send link",
   "loginRecuperarExito": "If an account exists with that email, we've sent a password reset link",
 
+  "loginModoEmail": "Email",
+  "loginModoTelefono": "Phone",
+  "loginFieldTelefono": "Phone number",
+  "loginTelefonoAyuda": "Include your country code, e.g. +34612345678",
+  "loginBtnEnviarCodigo": "Send code",
+
+  "otpTitulo": "Verify your number",
+  "otpDescripcion": "We sent a 6-digit code by SMS to {telefono}",
+  "@otpDescripcion": {
+    "placeholders": { "telefono": { "type": "String" } }
+  },
+  "otpFieldCodigo": "6-digit code",
+  "otpBtnConfirmar": "Confirm",
+  "otpReenviarCodigo": "Resend code",
+  "otpCodigoReenviado": "Code resent",
+  "otpCambiarNumero": "Change number",
+
   "errorConexion": "Couldn't connect to the server. Check your connection.",
   "errorServidorLento": "The server took too long to respond.",
   "errorInesperado": "Something went wrong.",
@@ -85,6 +102,14 @@
   "perfilConfiguracion": "Settings",
   "perfilPrivacidad": "Privacy policy",
   "perfilTerminos": "Terms of service",
+
+  "perfilEmailSinVerificarTitulo": "Verify your email",
+  "perfilEmailSinVerificarDescripcion": "We sent you a confirmation link. Check your inbox (and spam folder).",
+  "perfilEmailSinVerificarReenviar": "Resend email",
+  "perfilEmailSinVerificarYaConfirme": "I already confirmed it",
+  "perfilEmailVerificacionReenviada": "Verification email resent",
+  "perfilEmailAunNoVerificado": "We still don't see it. If you just confirmed it, wait a few seconds and try again.",
+  "perfilEmailVerificadoExito": "Email verified!",
 
   "legalPrivacidadTitulo": "Privacy policy",
   "legalTerminosTitulo": "Terms of service",

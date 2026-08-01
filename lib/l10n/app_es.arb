@@ -27,6 +27,23 @@
   "loginRecuperarEnviar": "Enviar enlace",
   "loginRecuperarExito": "Si existe una cuenta con ese email, te hemos enviado un enlace para restablecer la contraseña",
 
+  "loginModoEmail": "Email",
+  "loginModoTelefono": "Teléfono",
+  "loginFieldTelefono": "Teléfono",
+  "loginTelefonoAyuda": "Incluye el prefijo de tu país, ej. +34612345678",
+  "loginBtnEnviarCodigo": "Enviar código",
+
+  "otpTitulo": "Verifica tu número",
+  "otpDescripcion": "Te hemos enviado un código de 6 dígitos por SMS a {telefono}",
+  "@otpDescripcion": {
+    "placeholders": { "telefono": { "type": "String" } }
+  },
+  "otpFieldCodigo": "Código de 6 dígitos",
+  "otpBtnConfirmar": "Confirmar",
+  "otpReenviarCodigo": "Reenviar código",
+  "otpCodigoReenviado": "Código reenviado",
+  "otpCambiarNumero": "Cambiar de número",
+
   "errorConexion": "No se pudo conectar con el servidor. Comprueba tu conexión.",
   "errorServidorLento": "El servidor tardó demasiado en responder.",
   "errorInesperado": "Ocurrió un error inesperado.",
@@ -85,6 +102,14 @@
   "perfilConfiguracion": "Configuración",
   "perfilPrivacidad": "Política de privacidad",
   "perfilTerminos": "Términos de servicio",
+
+  "perfilEmailSinVerificarTitulo": "Verifica tu email",
+  "perfilEmailSinVerificarDescripcion": "Te hemos enviado un enlace de confirmación. Revisa tu bandeja de entrada (y la carpeta de spam).",
+  "perfilEmailSinVerificarReenviar": "Reenviar email",
+  "perfilEmailSinVerificarYaConfirme": "Ya lo confirmé",
+  "perfilEmailVerificacionReenviada": "Email de verificación reenviado",
+  "perfilEmailAunNoVerificado": "Todavía no lo detectamos. Si acabas de confirmarlo, espera unos segundos e inténtalo de nuevo.",
+  "perfilEmailVerificadoExito": "¡Email verificado!",
 
   "legalPrivacidadTitulo": "Política de privacidad",
   "legalTerminosTitulo": "Términos de servicio",
