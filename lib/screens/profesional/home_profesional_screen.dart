@@ -8,6 +8,7 @@ import '../../models/service_request_model.dart';
 import '../../providers/service_request_provider.dart';
 import '../../theme/brand_mark.dart';
 import '../../utils/error_extraction.dart';
+import '../../widgets/animated_diff_list.dart';
 import '../../widgets/entrada_animada.dart';
 import 'trabajos_activos_profesional_screen.dart';
 
@@ -149,7 +150,7 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen> {
       body: RefreshIndicator(
         onRefresh: () async {
           await ref.read(nearbyRequestsProvider.notifier).cargar();
-          ref.invalidate(assignedRequestsProvider);
+          ref.read(assignedRequestsProvider.notifier).cargar();
         },
         child: CustomScrollView(
           slivers: [
@@ -182,27 +183,29 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen> {
                     child: _EstadoVacio(icono: Icons.inbox_outlined, titulo: t.profesionalSinSolicitudes),
                   );
                 }
-                return SliverPadding(
+                // AnimatedSliverList en vez de un SliverList normal: el
+                // provider ya no pasa por loading() en cada refresco
+                // silencioso (ver NearbyRequestsNotifier.cargar()), así
+                // que aquí solo hace falta traducir altas/bajas en
+                // transiciones suaves en vez de reconstruir todo de golpe.
+                return AnimatedSliverList<NearbyRequest>(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final solicitud = solicitudes[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: EntradaAnimada(
-                            retraso: Duration(milliseconds: 40 * index),
-                            child: _TarjetaSolicitudCercana(
-                              solicitud: solicitud,
-                              onIgnorar: () => ref.read(nearbyRequestsProvider.notifier).ocultar(solicitud.id),
-                              onPostularse: () => _postularse(context, ref, solicitud),
-                            ),
-                          ),
-                        );
-                      },
-                      childCount: solicitudes.length,
-                    ),
-                  ),
+                  items: solicitudes,
+                  idOf: (s) => s.id,
+                  itemBuilder: (context, solicitud, index) {
+                    return Padding(
+                      key: ValueKey(solicitud.id),
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: EntradaAnimada(
+                        retraso: Duration(milliseconds: 40 * index),
+                        child: _TarjetaSolicitudCercana(
+                          solicitud: solicitud,
+                          onIgnorar: () => ref.read(nearbyRequestsProvider.notifier).ocultar(solicitud.id),
+                          onPostularse: () => _postularse(context, ref, solicitud),
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
               loading: () => const SliverFillRemaining(

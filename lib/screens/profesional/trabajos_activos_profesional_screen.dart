@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -11,6 +12,7 @@ import '../../providers/service_request_provider.dart';
 import '../../services/payment_service.dart';
 import '../../services/service_request_service.dart';
 import '../../utils/error_extraction.dart';
+import '../../widgets/animated_diff_list.dart';
 import '../../widgets/entrada_animada.dart';
 import '../chat_screen.dart';
 import '../reportar_problema_screen.dart';
@@ -26,8 +28,35 @@ import '../cliente/valoracion_screen.dart';
 /// hueco real detrás de "revisa el chat" — el cliente sí podía abrir
 /// el chat desde "Mis solicitudes", pero el profesional nunca tenía un
 /// botón equivalente.
-class TrabajosActivosProfesionalScreen extends ConsumerWidget {
+class TrabajosActivosProfesionalScreen extends ConsumerStatefulWidget {
   const TrabajosActivosProfesionalScreen({super.key});
+
+  @override
+  ConsumerState<TrabajosActivosProfesionalScreen> createState() => _TrabajosActivosProfesionalScreenState();
+}
+
+class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActivosProfesionalScreen> {
+  Timer? _polling;
+
+  @override
+  void initState() {
+    super.initState();
+    // Mismo patrón de sondeo que home_profesional_screen.dart: un trabajo
+    // cancelado por el cliente ya no aparece en listMyAssignedRequests
+    // (filtro en el backend), pero sin refrescar esta lista periódicamente
+    // el profesional solo se enteraría con un pull-to-refresh manual —
+    // cada 10s se entera solo, sin spinner de por medio (el refresco es
+    // silencioso, ver AssignedRequestsNotifier.cargar()).
+    _polling = Timer.periodic(const Duration(seconds: 10), (_) {
+      ref.read(assignedRequestsProvider.notifier).cargar();
+    });
+  }
+
+  @override
+  void dispose() {
+    _polling?.cancel();
+    super.dispose();
+  }
 
   /// Completa el trabajo. El importe sale siempre del presupuesto ya
   /// aceptado (`trabajo.presupuesto`), nunca de un número escrito a
@@ -106,7 +135,7 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(esPorHoras ? t.trabajosActivosHorasEnviadasExito : t.trabajosActivosCompletadoExito)),
       );
-      ref.invalidate(assignedRequestsProvider);
+      ref.read(assignedRequestsProvider.notifier).cargar();
 
       // "Por horas" no completa aquí de verdad — queda pendiente de que
       // el cliente confirme las horas (ver responderCierreHoras), así
@@ -120,7 +149,7 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
       await Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => ValoracionScreen(serviceRequestId: trabajo.id)),
       );
-      ref.invalidate(assignedRequestsProvider);
+      ref.read(assignedRequestsProvider.notifier).cargar();
     } catch (e) {
       debugPrint('[TrabajosActivosProfesionalScreen] Error al completar: $e');
       if (!context.mounted) return;
@@ -204,7 +233,7 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
 
     if (pedido == true && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.trabajosActivosPedirAmpliacionExito)));
-      ref.invalidate(assignedRequestsProvider);
+      ref.read(assignedRequestsProvider.notifier).cargar();
     }
   }
 
@@ -319,7 +348,7 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
 
     if (enviado == true && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.presupuestoEnviadoExito)));
-      ref.invalidate(assignedRequestsProvider);
+      ref.read(assignedRequestsProvider.notifier).cargar();
     }
   }
 
@@ -327,7 +356,7 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
     final resultado = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => ValoracionScreen(serviceRequestId: trabajo.id)),
     );
-    if (resultado == true) ref.invalidate(assignedRequestsProvider);
+    if (resultado == true) ref.read(assignedRequestsProvider.notifier).cargar();
   }
 
   /// Solo aplica a trabajos ya completados — se oculta de esta lista sin
@@ -355,29 +384,39 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
 
   Future<void> _archivar(BuildContext context, WidgetRef ref, String id) async {
     final t = AppLocalizations.of(context);
+    // Quita el trabajo de los datos ANTES de esperar la respuesta del
+    // servidor: el swipe de Dismissible ya lo animó fuera de la vista, y
+    // como el refresco ahora es silencioso (ya no pasa por loading() en
+    // cada recarga, ver AssignedRequestsNotifier.cargar()), si los datos
+    // tardaran en reflejarlo el mismo Dismissible con la misma key podría
+    // volver a construirse ya "descartado" y Flutter lanzaría "A
+    // dismissed Dismissible widget is still part of the tree".
+    ref.read(assignedRequestsProvider.notifier).quitarLocal(id);
     try {
       await ServiceRequestService().archivar(id);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.trabajosActivosArchivarExito)));
-      ref.invalidate(assignedRequestsProvider);
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(mensajeDeError(e, contexto: t.trabajosActivosArchivarError, t: t))),
       );
-      ref.invalidate(assignedRequestsProvider); // por si el Dismissible ya lo quitó visualmente antes de fallar
+      // El archivado falló de verdad (a diferencia del quitarLocal de
+      // arriba, que es solo optimista) — recupera el estado real del
+      // servidor, por si el trabajo debe volver a aparecer.
+      ref.read(assignedRequestsProvider.notifier).cargar();
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final trabajosAsync = ref.watch(assignedRequestsProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(t.trabajosActivosTitulo)),
       body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(assignedRequestsProvider),
+        onRefresh: () async => ref.read(assignedRequestsProvider.notifier).cargar(),
         child: trabajosAsync.when(
           data: (trabajos) {
             if (trabajos.isEmpty) {
@@ -395,11 +434,17 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
                 ],
               );
             }
-            return ListView.builder(
+            // AnimatedFlatList en vez de un ListView.builder normal: el
+            // provider ya no pasa por loading() en cada refresco
+            // silencioso del polling de 10s (ver AssignedRequestsNotifier
+            // .cargar()), así que aquí solo hace falta traducir
+            // altas/bajas (ej. un trabajo cancelado por el cliente que
+            // deja de venir del backend) en transiciones suaves.
+            return AnimatedFlatList<AssignedRequest>(
               padding: const EdgeInsets.all(16),
-              itemCount: trabajos.length,
-              itemBuilder: (context, index) {
-                final trabajo = trabajos[index];
+              items: trabajos,
+              idOf: (t) => t.id,
+              itemBuilder: (context, trabajo, index) {
                 final tarjeta = EntradaAnimada(
                   retraso: Duration(milliseconds: 40 * index),
                   child: _TarjetaTrabajo(
@@ -426,13 +471,18 @@ class TrabajosActivosProfesionalScreen extends ConsumerWidget {
                 );
 
                 if (trabajo.estado != EstadoSolicitud.completada) {
-                  return Padding(padding: const EdgeInsets.only(bottom: 12), child: tarjeta);
+                  return Padding(
+                    key: ValueKey(trabajo.id),
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: tarjeta,
+                  );
                 }
 
                 return Padding(
+                  key: ValueKey(trabajo.id),
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Dismissible(
-                    key: ValueKey(trabajo.id),
+                    key: ValueKey('archivar-${trabajo.id}'),
                     direction: DismissDirection.endToStart,
                     background: Container(
                       alignment: Alignment.centerRight,
