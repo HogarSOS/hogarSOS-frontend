@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_stripe/flutter_stripe.dart' hide Card;
 import '../../l10n/app_localizations.dart';
 import '../../services/payment_service.dart';
+import '../../utils/error_extraction.dart';
 import '../../widgets/entrada_animada.dart';
 import '../legal/terminos_screen.dart';
 
@@ -54,7 +55,13 @@ class _PagoScreenState extends State<PagoScreen> {
       debugPrint('[PagoScreen] Error al procesar el pago: $e');
       if (!mounted) return;
       final t = AppLocalizations.of(context);
-      setState(() => _error = t.pagoErrorGenerico);
+      // Antes mostraba siempre el mismo texto genérico ("No se pudo
+      // procesar el pago"), incluso cuando el backend sí manda un motivo
+      // concreto (ej. 409 "No hay nada pendiente de autorizar para esta
+      // solicitud" cuando ya se había autorizado antes) — el cliente
+      // nunca se enteraba de que en realidad el pago YA estaba hecho, y
+      // reintentaba pensando que seguía fallando.
+      setState(() => _error = mensajeDeError(e, contexto: t.pagoErrorGenerico, t: t));
     } finally {
       if (mounted) setState(() => _procesando = false);
     }
