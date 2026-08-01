@@ -147,18 +147,9 @@ class PerfilScreen extends ConsumerWidget {
                       );
                     },
                   ),
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.favorite_border),
-                    title: Text(t.perfilFavoritos),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      // TODO (Fase 3): pantalla de favoritos
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(t.proximamenteTitulo)),
-                      );
-                    },
-                  ),
+                  // Favoritos oculto temporalmente (ver home_cliente_screen.dart)
+                  // — nunca se implementó de verdad, solo mostraba "Próximamente".
+                  // No se borra t.perfilFavoritos ni la lógica, solo este acceso.
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.receipt_long_outlined),

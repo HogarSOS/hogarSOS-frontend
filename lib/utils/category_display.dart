@@ -56,6 +56,8 @@ final Map<String, CategoriaEstilo> _estilos = {
   'veterinaria a domicilio': const CategoriaEstilo(Icons.pets_outlined, Color(0xFFEC4899)),
   'técnico de telefonía': const CategoriaEstilo(Icons.smartphone_outlined, Color(0xFF0EA5E9)),
   'tecnico de telefonia': const CategoriaEstilo(Icons.smartphone_outlined, Color(0xFF0EA5E9)),
+  'masajes a domicilio': const CategoriaEstilo(Icons.spa_outlined, Color(0xFF9C7BD9)),
+  'manicura y pedicura': const CategoriaEstilo(Icons.back_hand_outlined, Color(0xFFD6408C)),
   // Compatibilidad con nombres antiguos usados antes de la Fase 2:
   'limpieza del hogar': const CategoriaEstilo(Icons.auto_awesome_outlined, Color(0xFF12B3A8)),
   'otras': _estiloGenerico,
@@ -133,6 +135,10 @@ String nombreLocalizadoCategoria(BuildContext context, String nombreCanonico) {
     case 'técnico de telefonía':
     case 'tecnico de telefonia':
       return t.categoriaTecnicoTelefonia;
+    case 'masajes a domicilio':
+      return t.categoriaMasajes;
+    case 'manicura y pedicura':
+      return t.categoriaManicuraPedicura;
     default:
       return nombreCanonico; // categoría futura aún sin traducir — no rompe la UI
   }
@@ -203,6 +209,10 @@ String ejemploDescripcionParaCategoria(BuildContext context, String? nombreCanon
     case 'técnico de telefonía':
     case 'tecnico de telefonia':
       return t.wizardEjemploTecnicoTelefonia;
+    case 'masajes a domicilio':
+      return t.wizardEjemploMasajes;
+    case 'manicura y pedicura':
+      return t.wizardEjemploManicuraPedicura;
     default:
       return t.wizardEjemploGenerico;
   }

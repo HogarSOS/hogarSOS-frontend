@@ -8,7 +8,6 @@ import '../../providers/service_request_provider.dart';
 import '../../theme/brand_mark.dart';
 import '../../utils/category_display.dart';
 import '../../widgets/entrada_animada.dart';
-import 'buscar_screen.dart';
 import 'mis_solicitudes_screen.dart';
 import 'todas_categorias_screen.dart';
 import 'wizard/solicitar_wizard_screen.dart';
@@ -113,44 +112,23 @@ class HomeClienteScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+              // "Buscar" y "Favoritos" se ocultaron (no se borró su código:
+              // buscar_screen.dart sigue intacto, sin referenciar desde
+              // aquí) — el modelo actual de hogarSOS es publicar solicitud
+              // → recibir candidaturas, no contactar directo con un
+              // profesional ni guardar favoritos (esa función nunca se
+              // llegó a implementar). "Mis solicitudes" pasa a ocupar toda
+              // la fila, con más protagonismo ahora que no comparte sitio.
               SliverToBoxAdapter(
                 child: EntradaAnimada(
                   retraso: const Duration(milliseconds: 120),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _AccesoRapido(
-                            icono: Icons.search,
-                            etiqueta: t.homeAccesoBuscar,
-                            onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const BuscarScreen()),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _AccesoRapido(
-                            icono: Icons.receipt_long_outlined,
-                            etiqueta: t.homeAccesoMisSolicitudes,
-                            contador: activas,
-                            onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const MisSolicitudesScreen()),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _AccesoRapido(
-                            icono: Icons.favorite_border,
-                            etiqueta: t.homeAccesoFavoritos,
-                            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(t.proximamenteTitulo)),
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: _TarjetaMisSolicitudes(
+                      activas: activas,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const MisSolicitudesScreen()),
+                      ),
                     ),
                   ),
                 ),
@@ -169,15 +147,18 @@ class HomeClienteScreen extends ConsumerWidget {
               ),
               categoriasAsync.when(
                 data: (categorias) {
-                  // 9 categorías destacadas (3 filas de 3, antes 2) — al
-                  // quitar la tarjeta rosa de resumen quedó sitio de sobra
-                  // para que entren más sin tener que pulsar "Ver todas".
-                  // Orden: los oficios más solicitados primero, para que
-                  // tengan más protagonismo en la pantalla de Inicio. El
-                  // resto sigue accesible desde "Ver todas las categorías"
-                  // sin dejar de cargarse dinámicamente desde el backend.
-                  // Se admite con y sin tilde porque category_display.dart
-                  // ya contempla ambas variantes como sinónimos válidos.
+                  // 12 categorías destacadas (3 filas de 4, antes 9 en 3
+                  // filas de 3) — al quitar "Buscar" y "Favoritos" de la
+                  // fila de accesos rápidos quedó sitio de sobra para que
+                  // entren más sin tener que pulsar "Ver todas", y así
+                  // "Albañilería" queda garantizada en pantalla sin
+                  // depender del tamaño de dispositivo. Orden: los oficios
+                  // más solicitados primero, con las dos categorías nuevas
+                  // (masajes, manicura y pedicura) al final. El resto sigue
+                  // accesible desde "Ver todas las categorías" sin dejar de
+                  // cargarse dinámicamente desde el backend. Se admite con
+                  // y sin tilde porque category_display.dart ya contempla
+                  // ambas variantes como sinónimos válidos.
                   const gruposDestacados = [
                     ['electricista'],
                     ['fontanero'],
@@ -188,6 +169,9 @@ class HomeClienteScreen extends ConsumerWidget {
                     ['manitas'],
                     ['albañilería', 'albanileria', 'albañil'],
                     ['jardinería', 'jardineria'],
+                    ['reformas'],
+                    ['masajes a domicilio'],
+                    ['manicura y pedicura'],
                   ];
 
                   final destacadas = <ServiceCategory>[];
@@ -336,62 +320,61 @@ class _TarjetaSolicitar extends StatelessWidget {
   }
 }
 
-class _AccesoRapido extends StatelessWidget {
-  const _AccesoRapido({
-    required this.icono,
-    required this.etiqueta,
-    required this.onTap,
-    this.contador = 0,
-  });
+/// Tarjeta horizontal de "Mis solicitudes" — antes compartía fila con
+/// "Buscar" y "Favoritos" (retirados, ver comentario donde se usa esta
+/// tarjeta); ahora ocupa toda la fila con más protagonismo, mostrando el
+/// número de solicitudes activas como texto además del badge, no solo
+/// como un número pequeño encima del icono.
+class _TarjetaMisSolicitudes extends StatelessWidget {
+  const _TarjetaMisSolicitudes({required this.activas, required this.onTap});
 
-  final IconData icono;
-  final String etiqueta;
+  final int activas;
   final VoidCallback onTap;
-
-  /// >0 pinta un badge con el número encima del icono (p. ej. "Mis
-  /// solicitudes" con solicitudes activas) — 0 deja el icono normal,
-  /// sin contador, como pedía el diseño.
-  final int contador;
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final hayContador = contador > 0;
+    final hayActivas = activas > 0;
+
     return Material(
-      // Fondo ligeramente distinto (en vez del mismo neutro de
-      // siempre) cuando hay actividad pendiente — refuerzo sutil junto
-      // al badge, sin depender solo del número para llamar la atención.
-      color: hayContador ? colorScheme.tertiaryContainer.withOpacity(0.55) : colorScheme.surfaceContainerHighest,
+      color: hayActivas ? colorScheme.tertiaryContainer.withOpacity(0.55) : colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
-          child: Column(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+          child: Row(
             children: [
-              // Círculo tonal detrás del icono (patrón M3 de "tonal icon")
-              // en vez del icono suelto de antes — le da peso visual sin
-              // salirse del lenguaje ya usado en las tarjetas de categoría.
               Badge(
-                isLabelVisible: hayContador,
-                label: Text('$contador'),
+                isLabelVisible: hayActivas,
+                label: Text('$activas'),
                 backgroundColor: colorScheme.error,
                 child: Container(
-                  width: 36,
-                  height: 36,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(color: colorScheme.primaryContainer, shape: BoxShape.circle),
-                  child: Icon(icono, size: 19, color: colorScheme.onPrimaryContainer),
+                  child: Icon(Icons.receipt_long_outlined, size: 21, color: colorScheme.onPrimaryContainer),
                 ),
               ),
-              const SizedBox(height: 6),
-              Text(
-                etiqueta,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: colorScheme.onSurface),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t.homeAccesoMisSolicitudes,
+                      style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: colorScheme.onSurface),
+                    ),
+                    Text(
+                      hayActivas ? t.homeResumenActivas(activas) : t.homeMisSolicitudesSinActivas,
+                      style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant),
+                    ),
+                  ],
+                ),
               ),
+              Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
             ],
           ),
         ),

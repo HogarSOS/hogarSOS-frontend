@@ -55,6 +55,7 @@
   "@homeResumenActivas": {
     "placeholders": { "cantidad": { "type": "int" } }
   },
+  "homeMisSolicitudesSinActivas": "View history and ongoing requests",
   "homeSubtitulo": "What do you need fixed today?",
   "homeBuscarPlaceholder": "Search for a pro or service...",
   "homeCategoriasTitulo": "Categories",
@@ -160,6 +161,8 @@
   "categoriaControlPlagas": "Pest control",
   "categoriaVeterinaria": "Home veterinary services",
   "categoriaTecnicoTelefonia": "Phone technician",
+  "categoriaMasajes": "Home massage",
+  "categoriaManicuraPedicura": "Manicure and pedicure",
 
   "wizardEjemploGenerico": "E.g.: a pipe burst under the sink and it's leaking...",
   "wizardEjemploElectricista": "E.g.: the circuit breaker keeps tripping and won't reset...",
@@ -184,6 +187,8 @@
   "wizardEjemploControlPlagas": "E.g.: I have cockroaches in my kitchen...",
   "wizardEjemploVeterinaria": "E.g.: my dog needs a checkup at home...",
   "wizardEjemploTecnicoTelefonia": "E.g.: my phone screen is cracked...",
+  "wizardEjemploMasajes": "E.g.: I'd like a one-hour relaxing massage at home...",
+  "wizardEjemploManicuraPedicura": "E.g.: I'd like a full manicure and pedicure at home...",
 
   "profesionalTituloSolicitudes": "Requests near you",
   "salirPulsaOtraVez": "Press back again to exit",

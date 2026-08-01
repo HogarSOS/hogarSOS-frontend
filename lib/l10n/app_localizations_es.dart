@@ -132,6 +132,10 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get homeMisSolicitudesSinActivas =>
+      'Ver historial y solicitudes en curso';
+
+  @override
   String get homeSubtitulo => '¿Qué necesitas arreglar hoy?';
 
   @override
@@ -421,6 +425,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get categoriaTecnicoTelefonia => 'Técnico de telefonía';
 
   @override
+  String get categoriaMasajes => 'Masajes a domicilio';
+
+  @override
+  String get categoriaManicuraPedicura => 'Manicura y pedicura';
+
+  @override
   String get wizardEjemploGenerico =>
       'Ej: se ha roto una tubería bajo el fregadero y hay una fuga...';
 
@@ -506,6 +516,14 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get wizardEjemploTecnicoTelefonia =>
       'Ej: se me ha roto la pantalla del móvil...';
+
+  @override
+  String get wizardEjemploMasajes =>
+      'Ej: quiero un masaje relajante de una hora en casa...';
+
+  @override
+  String get wizardEjemploManicuraPedicura =>
+      'Ej: quiero una manicura y pedicura completa a domicilio...';
 
   @override
   String get profesionalTituloSolicitudes => 'Solicitudes cerca de ti';

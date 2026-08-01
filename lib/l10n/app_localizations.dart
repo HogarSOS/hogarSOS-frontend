@@ -308,6 +308,12 @@ abstract class AppLocalizations {
   /// **'Tienes {cantidad} {cantidad, plural, one{solicitud activa} other{solicitudes activas}}'**
   String homeResumenActivas(int cantidad);
 
+  /// No description provided for @homeMisSolicitudesSinActivas.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver historial y solicitudes en curso'**
+  String get homeMisSolicitudesSinActivas;
+
   /// No description provided for @homeSubtitulo.
   ///
   /// In es, this message translates to:
@@ -824,6 +830,18 @@ abstract class AppLocalizations {
   /// **'Técnico de telefonía'**
   String get categoriaTecnicoTelefonia;
 
+  /// No description provided for @categoriaMasajes.
+  ///
+  /// In es, this message translates to:
+  /// **'Masajes a domicilio'**
+  String get categoriaMasajes;
+
+  /// No description provided for @categoriaManicuraPedicura.
+  ///
+  /// In es, this message translates to:
+  /// **'Manicura y pedicura'**
+  String get categoriaManicuraPedicura;
+
   /// No description provided for @wizardEjemploGenerico.
   ///
   /// In es, this message translates to:
@@ -961,6 +979,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ej: se me ha roto la pantalla del móvil...'**
   String get wizardEjemploTecnicoTelefonia;
+
+  /// No description provided for @wizardEjemploMasajes.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: quiero un masaje relajante de una hora en casa...'**
+  String get wizardEjemploMasajes;
+
+  /// No description provided for @wizardEjemploManicuraPedicura.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: quiero una manicura y pedicura completa a domicilio...'**
+  String get wizardEjemploManicuraPedicura;
 
   /// No description provided for @profesionalTituloSolicitudes.
   ///

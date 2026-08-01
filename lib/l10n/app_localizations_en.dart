@@ -132,6 +132,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get homeMisSolicitudesSinActivas =>
+      'View history and ongoing requests';
+
+  @override
   String get homeSubtitulo => 'What do you need fixed today?';
 
   @override
@@ -420,6 +424,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoriaTecnicoTelefonia => 'Phone technician';
 
   @override
+  String get categoriaMasajes => 'Home massage';
+
+  @override
+  String get categoriaManicuraPedicura => 'Manicure and pedicure';
+
+  @override
   String get wizardEjemploGenerico =>
       'E.g.: a pipe burst under the sink and it\'s leaking...';
 
@@ -506,6 +516,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get wizardEjemploTecnicoTelefonia =>
       'E.g.: my phone screen is cracked...';
+
+  @override
+  String get wizardEjemploMasajes =>
+      'E.g.: I\'d like a one-hour relaxing massage at home...';
+
+  @override
+  String get wizardEjemploManicuraPedicura =>
+      'E.g.: I\'d like a full manicure and pedicure at home...';
 
   @override
   String get profesionalTituloSolicitudes => 'Requests near you';

@@ -55,6 +55,7 @@
   "@homeResumenActivas": {
     "placeholders": { "cantidad": { "type": "int" } }
   },
+  "homeMisSolicitudesSinActivas": "Ver historial y solicitudes en curso",
   "homeSubtitulo": "¿Qué necesitas arreglar hoy?",
   "homeBuscarPlaceholder": "Busca un profesional o servicio...",
   "homeCategoriasTitulo": "Categorías",
@@ -160,6 +161,8 @@
   "categoriaControlPlagas": "Control de plagas",
   "categoriaVeterinaria": "Veterinaria a domicilio",
   "categoriaTecnicoTelefonia": "Técnico de telefonía",
+  "categoriaMasajes": "Masajes a domicilio",
+  "categoriaManicuraPedicura": "Manicura y pedicura",
 
   "wizardEjemploGenerico": "Ej: se ha roto una tubería bajo el fregadero y hay una fuga...",
   "wizardEjemploElectricista": "Ej: ha saltado el diferencial y no puedo volver a subirlo...",
@@ -184,6 +187,8 @@
   "wizardEjemploControlPlagas": "Ej: tengo cucarachas en la cocina...",
   "wizardEjemploVeterinaria": "Ej: mi perro necesita una revisión a domicilio...",
   "wizardEjemploTecnicoTelefonia": "Ej: se me ha roto la pantalla del móvil...",
+  "wizardEjemploMasajes": "Ej: quiero un masaje relajante de una hora en casa...",
+  "wizardEjemploManicuraPedicura": "Ej: quiero una manicura y pedicura completa a domicilio...",
 
   "profesionalTituloSolicitudes": "Solicitudes cerca de ti",
   "salirPulsaOtraVez": "Pulsa atrás otra vez para salir",
