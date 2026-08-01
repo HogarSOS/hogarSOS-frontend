@@ -14,9 +14,18 @@ Future<void> main() async {
 
   // Clave PÚBLICA de Stripe (publishable key) — es seguro que viva en el
   // cliente, a diferencia de la clave secreta que solo usa el backend.
+  // Un valor por defecto vacío aquí es lo que causó que "pagar" fallara
+  // en silencio en builds donde alguien olvidó pasar el --dart-define
+  // (pasó de verdad: un build de esta misma sesión salió sin ella) — la
+  // hoja de pago de Stripe nunca llega a abrirse y el error cae en el
+  // catch genérico, no en StripeException, así que ni siquiera se ve
+  // como un error "de Stripe". Como esta clave NO es secreta (está
+  // pensada para vivir en clientes), el valor por defecto real es más
+  // seguro que uno vacío: sustituir con --dart-define solo hace falta
+  // si se usa una cuenta de Stripe distinta (ej. producción real).
   Stripe.publishableKey = const String.fromEnvironment(
     'STRIPE_PUBLISHABLE_KEY',
-    defaultValue: '', // TODO: pasar con --dart-define=STRIPE_PUBLISHABLE_KEY=pk_...
+    defaultValue: 'pk_test_51TyVJ9CmpBOiu5cTfWAUXrfQYbKtJbb9h9VNnertUMJ4QEXLlMXwe23w5xrZVoEcDHkJVYzISKufifoxRtK4s4ES00AZ8WHSgW',
   );
 
   runApp(const ProviderScope(child: HogarSOSApp()));
