@@ -34,21 +34,17 @@ class _PagoScreenState extends State<PagoScreen> {
       // cliente para que no espere un cargo inmediato en su resumen.
       // El desglose ya se mostró al aceptar el presupuesto; aquí es
       // solo un recibo de refuerzo con los importes ya fijados.
-      Navigator.of(context).pop(true);
-      final t = AppLocalizations.of(context);
-      final comision = resultado.montoTotal - resultado.montoBase;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${t.pagoExito}\n${t.seguimientoDesgloseComision(
-              resultado.montoBase.toStringAsFixed(2),
-              comision.toStringAsFixed(2),
-              resultado.montoTotal.toStringAsFixed(2),
-            )}',
-          ),
-          duration: const Duration(seconds: 5),
-        ),
-      );
+      //
+      // Devolvemos `resultado` al hacer pop en vez de mostrar aquí
+      // mismo el SnackBar de éxito: justo después de pop() este
+      // contexto pertenece a una pantalla que ya se está desmontando,
+      // así que ScaffoldMessenger.of(context) podía fallar (lookup
+      // sobre un widget desactivado) — un pago que SÍ se autorizó
+      // correctamente en Stripe/backend acababa mostrando el error
+      // genérico igualmente, porque ese fallo caía en el catch de más
+      // abajo. Quien empuja esta pantalla (seguimiento_solicitud_screen)
+      // muestra el SnackBar con su propio contexto, que sigue vivo.
+      Navigator.of(context).pop(resultado);
     } on StripeException catch (e) {
       // El usuario canceló la hoja de pago o la tarjeta fue rechazada.
       if (!mounted) return;

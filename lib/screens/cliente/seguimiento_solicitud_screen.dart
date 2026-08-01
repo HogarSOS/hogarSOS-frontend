@@ -262,10 +262,28 @@ class _Contenido extends ConsumerWidget {
               icon: const Icon(Icons.payment_outlined),
               label: Text(t.seguimientoAutorizarPago),
               onPressed: () async {
-                final resultado = await Navigator.of(context).push<bool>(
+                final resultado = await Navigator.of(context).push<PaymentIntentResult>(
                   MaterialPageRoute(builder: (_) => PagoScreen(serviceRequestId: solicitud.id)),
                 );
-                if (resultado == true) onRecargar();
+                if (resultado == null) return;
+                onRecargar();
+                // Se muestra aquí (no en PagoScreen) porque este
+                // contexto sigue vivo tras el pop — ver el comentario en
+                // pago_screen.dart._pagar().
+                if (!context.mounted) return;
+                final comision = resultado.montoTotal - resultado.montoBase;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      '${t.pagoExito}\n${t.seguimientoDesgloseComision(
+                        resultado.montoBase.toStringAsFixed(2),
+                        comision.toStringAsFixed(2),
+                        resultado.montoTotal.toStringAsFixed(2),
+                      )}',
+                    ),
+                    duration: const Duration(seconds: 5),
+                  ),
+                );
               },
             )
           else if (solicitud.payment != null)
