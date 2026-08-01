@@ -1,6 +1,6 @@
 # Capturas de pantalla — Google Play
 
-7 capturas reales, tomadas en el dispositivo de pruebas (Realme RMX3853) sobre una sesión end-to-end real: cliente Ana Sánchez publicando una solicitud de aire acondicionado, José Fernández (profesional verificado, Electricista + Aire acondicionado) postulándose, siendo elegido, enviando presupuesto y el cliente aceptándolo con el desglose de comisión visible.
+8 capturas reales, tomadas en el dispositivo de pruebas (Realme RMX3853) sobre una sesión end-to-end real: cliente Ana Sánchez publicando una solicitud de aire acondicionado, José Fernández (profesional verificado, Electricista + Aire acondicionado) postulándose, siendo elegido, enviando presupuesto y el cliente aceptándolo con el desglose de comisión visible.
 
 1. **01_cliente_inicio.jpg** — Inicio del cliente: categorías y "Mis solicitudes".
 2. **02_mapa_ubicacion.jpg** — Selector de ubicación con Google Maps renderizando correctamente.
@@ -9,6 +9,7 @@
 5. **05_elegir_profesional.jpg** — El cliente elige entre las candidaturas recibidas.
 6. **06_trabajos_activos_comision.jpg** — Trabajos activos con desglose de comisión y distintivo "Promoción de lanzamiento".
 7. **07_presupuesto_recibido.jpg** — El cliente recibe el presupuesto con el desglose completo antes de pagar.
+8. **08_login_email_telefono.jpg** — Pantalla de acceso con el nuevo toggle Email/Teléfono (registro/login alternativo por SMS).
 
 ## Nota de calidad
 
