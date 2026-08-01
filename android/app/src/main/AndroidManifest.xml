@@ -15,13 +15,13 @@
     android:usesCleartextTraffic="true"
     android:networkSecurityConfig="@xml/network_security_config">
         <!--
-          Clave de Google Maps: sustituye este valor por una clave real de
-          la Google Cloud Console con "Maps SDK for Android" activado, o el
-          mapa del selector de ubicación aparecerá en blanco.
+          Clave de Google Maps restringida en Google Cloud Console
+          (proyecto "hogarsos") a Maps SDK for Android + huellas SHA-1
+          release y debug del paquete com.example.hogarsos.
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="TU_CLAVE_DE_GOOGLE_MAPS_AQUI" />
+            android:value="AIzaSyDcipMwcfNXNh9k7FoIodM4aF0YJtcpJnI" />
         <!-- Canal de notificación por defecto para firebase_messaging en
              Android 8+ — sin esto, el sistema usa uno genérico sin icono
              ni nombre propios. -->
