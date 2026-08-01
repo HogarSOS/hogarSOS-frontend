@@ -293,6 +293,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         const SizedBox(height: 12),
                         if (_modoTelefono) ...[
                           TextField(
+                            // Clave explícita: sin ella, este TextField y el
+                            // de email de la rama de abajo ocupan la misma
+                            // posición del árbol al alternar el toggle, y
+                            // Flutter reutiliza el Element/State en vez de
+                            // crear uno nuevo — el teclado del sistema se
+                            // quedaba en modo numérico (heredado de este
+                            // campo) incluso después de volver a Email,
+                            // porque la conexión con el teclado no se
+                            // reabría con el keyboardType nuevo.
+                            key: const ValueKey('campo_telefono'),
                             controller: _telefonoController,
                             keyboardType: TextInputType.phone,
                             textInputAction: TextInputAction.done,
