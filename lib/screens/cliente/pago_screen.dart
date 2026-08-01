@@ -27,15 +27,27 @@ class _PagoScreenState extends State<PagoScreen> {
     });
 
     try {
-      await _paymentService.crearIntencionDePago(widget.serviceRequestId);
+      final resultado = await _paymentService.crearIntencionDePago(widget.serviceRequestId);
       if (!mounted) return;
 
       // El pago queda AUTORIZADO (no capturado) — se le explica al
       // cliente para que no espere un cargo inmediato en su resumen.
+      // El desglose ya se mostró al aceptar el presupuesto; aquí es
+      // solo un recibo de refuerzo con los importes ya fijados.
       Navigator.of(context).pop(true);
       final t = AppLocalizations.of(context);
+      final comision = resultado.montoTotal - resultado.montoBase;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.pagoExito)),
+        SnackBar(
+          content: Text(
+            '${t.pagoExito}\n${t.seguimientoDesgloseComision(
+              resultado.montoBase.toStringAsFixed(2),
+              comision.toStringAsFixed(2),
+              resultado.montoTotal.toStringAsFixed(2),
+            )}',
+          ),
+          duration: const Duration(seconds: 5),
+        ),
       );
     } on StripeException catch (e) {
       // El usuario canceló la hoja de pago o la tarjeta fue rechazada.

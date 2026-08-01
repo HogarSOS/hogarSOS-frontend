@@ -186,12 +186,12 @@ class ProfessionalService {
   /// categorías y creer que ya estaba listo, sin que se disparara
   /// nunca el envío real de documentación que un admin pudiera aprobar.
   Future<void> enviarVerificacion({
-    required String documentoIdentidadUrl,
+    String? documentoIdentidadUrl,
     required List<int> categoriaIds,
     required double tarifaBase,
   }) async {
     await _api.post('/professionals/me/verification', data: {
-      'documentoIdentidadUrl': documentoIdentidadUrl,
+      if (documentoIdentidadUrl != null) 'documentoIdentidadUrl': documentoIdentidadUrl,
       'categoriaIds': categoriaIds,
       'tarifaBase': tarifaBase,
     });

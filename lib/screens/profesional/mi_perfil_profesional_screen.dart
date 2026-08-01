@@ -357,13 +357,6 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
   Future<void> _enviarVerificacion() async {
     final t = AppLocalizations.of(context);
 
-    if (_documentoIdentidadUrlActual == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.miPerfilVerificacionErrorFaltaDocumento)),
-      );
-      return;
-    }
-
     final tarifa = double.tryParse(_tarifaController.text.trim().replaceAll(',', '.'));
     if (tarifa == null || tarifa <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -387,7 +380,7 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
     setState(() => _enviandoVerificacion = true);
     try {
       await _professionalService.enviarVerificacion(
-        documentoIdentidadUrl: _documentoIdentidadUrlActual!,
+        documentoIdentidadUrl: _documentoIdentidadUrlActual,
         categoriaIds: categoriaIds,
         tarifaBase: tarifa,
       );

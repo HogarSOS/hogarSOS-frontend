@@ -419,9 +419,9 @@ class _EstadoLista extends StatelessWidget {
 class _DocumentoIdentidadPreview extends StatelessWidget {
   const _DocumentoIdentidadPreview({required this.url});
 
-  final String url;
+  final String? url;
 
-  void _verEnGrande(BuildContext context) {
+  void _verEnGrande(BuildContext context, String url) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -455,7 +455,8 @@ class _DocumentoIdentidadPreview extends StatelessWidget {
     // el flujo) tienen documentoIdentidadUrl vacío — no hay nada que
     // previsualizar, así que se avisa en vez de intentar cargar una
     // imagen inexistente.
-    if (url.isEmpty) {
+    final docUrl = url;
+    if (docUrl == null || docUrl.isEmpty) {
       return Row(
         children: [
           Icon(Icons.warning_amber_rounded, size: 16, color: colorScheme.error),
@@ -470,13 +471,13 @@ class _DocumentoIdentidadPreview extends StatelessWidget {
 
     return InkWell(
       borderRadius: BorderRadius.circular(10),
-      onTap: () => _verEnGrande(context),
+      onTap: () => _verEnGrande(context, docUrl),
       child: Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.network(
-              url,
+              docUrl,
               width: 48,
               height: 48,
               fit: BoxFit.cover,

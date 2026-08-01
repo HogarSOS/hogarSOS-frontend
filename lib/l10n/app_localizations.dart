@@ -2565,6 +2565,19 @@ abstract class AppLocalizations {
   /// **'No se pudo responder al presupuesto'**
   String get seguimientoPresupuestoError;
 
+  /// No description provided for @seguimientoDesgloseComision.
+  ///
+  /// In es, this message translates to:
+  /// **'Presupuesto: {base} € + comisión de servicio: {comision} € = total a pagar: {total} €'**
+  String seguimientoDesgloseComision(
+      String base, String comision, String total);
+
+  /// No description provided for @seguimientoPromoLanzamiento.
+  ///
+  /// In es, this message translates to:
+  /// **'🎉 Promoción de lanzamiento'**
+  String get seguimientoPromoLanzamiento;
+
   /// No description provided for @trabajosActivosHorasEnviadasExito.
   ///
   /// In es, this message translates to:
@@ -2672,6 +2685,19 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Pago liberado'**
   String get trabajosActivosEstadoPagoLiberado;
+
+  /// No description provided for @trabajosActivosDesgloseComision.
+  ///
+  /// In es, this message translates to:
+  /// **'Importe del trabajo: {base} € · Comisión Hogar SOS: {comision} € · Recibirás: {recibiras} €'**
+  String trabajosActivosDesgloseComision(
+      String base, String comision, String recibiras);
+
+  /// No description provided for @trabajosActivosPromoLanzamiento.
+  ///
+  /// In es, this message translates to:
+  /// **'🎉 Promoción de lanzamiento'**
+  String get trabajosActivosPromoLanzamiento;
 
   /// No description provided for @seguimientoAmpliacionAceptadaExito.
   ///

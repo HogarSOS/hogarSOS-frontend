@@ -1414,6 +1414,15 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo responder al presupuesto';
 
   @override
+  String seguimientoDesgloseComision(
+      String base, String comision, String total) {
+    return 'Presupuesto: $base € + comisión de servicio: $comision € = total a pagar: $total €';
+  }
+
+  @override
+  String get seguimientoPromoLanzamiento => '🎉 Promoción de lanzamiento';
+
+  @override
   String get trabajosActivosHorasEnviadasExito =>
       'Horas enviadas — esperando que el cliente las confirme';
 
@@ -1471,6 +1480,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get trabajosActivosEstadoPagoLiberado => 'Pago liberado';
+
+  @override
+  String trabajosActivosDesgloseComision(
+      String base, String comision, String recibiras) {
+    return 'Importe del trabajo: $base € · Comisión Hogar SOS: $comision € · Recibirás: $recibiras €';
+  }
+
+  @override
+  String get trabajosActivosPromoLanzamiento => '🎉 Promoción de lanzamiento';
 
   @override
   String get seguimientoAmpliacionAceptadaExito => 'Ampliación aceptada';

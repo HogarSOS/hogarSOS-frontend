@@ -494,6 +494,15 @@
   "seguimientoPresupuestoRechazadoExito": "Quote declined",
   "seguimientoPresupuestoRechazadoInfo": "You declined the previous quote — waiting for a new one from the professional",
   "seguimientoPresupuestoError": "Couldn't respond to the quote",
+  "seguimientoDesgloseComision": "Quote: €{base} + service fee: €{comision} = total to pay: €{total}",
+  "@seguimientoDesgloseComision": {
+    "placeholders": {
+      "base": { "type": "String" },
+      "comision": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "seguimientoPromoLanzamiento": "🎉 Launch promotion",
 
   "trabajosActivosHorasEnviadasExito": "Hours sent — waiting for the client to confirm them",
   "trabajosActivosPedirAmpliacionTitulo": "Ask for more hours",
@@ -513,6 +522,15 @@
   "trabajosActivosEstadoAmpliacionPendiente": "Extension pending",
   "trabajosActivosEstadoCierrePendiente": "Confirmation pending",
   "trabajosActivosEstadoPagoLiberado": "Payment released",
+  "trabajosActivosDesgloseComision": "Job amount: €{base} · Hogar SOS fee: €{comision} · You'll receive: €{recibiras}",
+  "@trabajosActivosDesgloseComision": {
+    "placeholders": {
+      "base": { "type": "String" },
+      "comision": { "type": "String" },
+      "recibiras": { "type": "String" }
+    }
+  },
+  "trabajosActivosPromoLanzamiento": "🎉 Launch promotion",
 
   "seguimientoAmpliacionAceptadaExito": "Extension accepted",
   "seguimientoAmpliacionRechazadaExito": "Extension declined",

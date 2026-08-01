@@ -1399,6 +1399,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get seguimientoPresupuestoError => 'Couldn\'t respond to the quote';
 
   @override
+  String seguimientoDesgloseComision(
+      String base, String comision, String total) {
+    return 'Quote: €$base + service fee: €$comision = total to pay: €$total';
+  }
+
+  @override
+  String get seguimientoPromoLanzamiento => '🎉 Launch promotion';
+
+  @override
   String get trabajosActivosHorasEnviadasExito =>
       'Hours sent — waiting for the client to confirm them';
 
@@ -1456,6 +1465,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trabajosActivosEstadoPagoLiberado => 'Payment released';
+
+  @override
+  String trabajosActivosDesgloseComision(
+      String base, String comision, String recibiras) {
+    return 'Job amount: €$base · Hogar SOS fee: €$comision · You\'ll receive: €$recibiras';
+  }
+
+  @override
+  String get trabajosActivosPromoLanzamiento => '🎉 Launch promotion';
 
   @override
   String get seguimientoAmpliacionAceptadaExito => 'Extension accepted';

@@ -6,7 +6,9 @@ import '../../l10n/app_localizations.dart';
 import '../../models/presupuesto_model.dart';
 import '../../models/service_request_model.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/payment_provider.dart';
 import '../../providers/service_request_provider.dart';
+import '../../services/payment_service.dart';
 import '../../services/service_request_service.dart';
 import '../../utils/category_display.dart';
 import '../../utils/error_extraction.dart';
@@ -417,7 +419,57 @@ class _EsperandoPresupuesto extends StatelessWidget {
 /// Tarjeta con el presupuesto pendiente de respuesta — muestra el
 /// importe según el tipo (monto fijo, o tarifa × horas estimadas con
 /// el techo que se autorizará) y los botones aceptar/rechazar.
-class _PresupuestoPendienteCard extends StatelessWidget {
+/// Desglose "presupuesto + comisión = total" que ve el cliente antes de
+/// aceptar un presupuesto/ampliación/cierre de horas — transparencia
+/// total, nada de sorpresas al pagar. Si la comisión vigente es 0% para
+/// ambas partes, se muestra además el distintivo de promoción (derivado
+/// en tiempo real de los porcentajes, no de una fecha).
+class _DesgloseComision extends StatelessWidget {
+  const _DesgloseComision({required this.montoBase, required this.comisiones});
+
+  final double montoBase;
+  final ComisionesInfo comisiones;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final total = comisiones.totalCliente(montoBase);
+    final comision = total - montoBase;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (comisiones.esPromoLanzamiento)
+            Container(
+              margin: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: colorScheme.tertiaryContainer,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                t.seguimientoPromoLanzamiento,
+                style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: colorScheme.onTertiaryContainer),
+              ),
+            ),
+          Text(
+            t.seguimientoDesgloseComision(
+              montoBase.toStringAsFixed(2),
+              comision.toStringAsFixed(2),
+              total.toStringAsFixed(2),
+            ),
+            style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PresupuestoPendienteCard extends ConsumerWidget {
   const _PresupuestoPendienteCard({
     required this.serviceRequestId,
     required this.presupuesto,
@@ -471,10 +523,11 @@ class _PresupuestoPendienteCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final esPorHoras = presupuesto.tipo == TipoPresupuesto.porHoras;
+    final comisiones = ref.watch(comisionesProvider);
 
     return Container(
       width: double.infinity,
@@ -497,6 +550,11 @@ class _PresupuestoPendienteCard extends StatelessWidget {
                   )
                 : t.seguimientoPresupuestoCerradoDetalle(presupuesto.monto!.toStringAsFixed(2)),
             style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+          ),
+          comisiones.when(
+            data: (info) => _DesgloseComision(montoBase: presupuesto.importeTotal, comisiones: info),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
           ),
           if (presupuesto.mensaje != null && presupuesto.mensaje!.isNotEmpty) ...[
             const SizedBox(height: 6),
@@ -534,7 +592,7 @@ class _PresupuestoPendienteCard extends StatelessWidget {
 /// profesional pide más tiempo del estimado, el cliente acepta (se
 /// autorizará el importe adicional en un paso aparte, ver
 /// `pagoPendienteDeAutorizar`) o rechaza (el trabajo sigue igual).
-class _AmpliacionPendienteCard extends StatelessWidget {
+class _AmpliacionPendienteCard extends ConsumerWidget {
   const _AmpliacionPendienteCard({
     required this.serviceRequestId,
     required this.ampliacion,
@@ -567,10 +625,11 @@ class _AmpliacionPendienteCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final importeAdicional = ampliacion.importeAdicional(tarifaHora);
+    final comisiones = ref.watch(comisionesProvider);
 
     return Container(
       width: double.infinity,
@@ -595,6 +654,11 @@ class _AmpliacionPendienteCard extends StatelessWidget {
                   )
                 : t.seguimientoAmpliacionMontoDetalle(importeAdicional.toStringAsFixed(2)),
             style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+          ),
+          comisiones.when(
+            data: (info) => _DesgloseComision(montoBase: importeAdicional, comisiones: info),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
           ),
           if (ampliacion.mensaje != null && ampliacion.mensaje!.isNotEmpty) ...[
             const SizedBox(height: 6),
@@ -632,7 +696,7 @@ class _AmpliacionPendienteCard extends StatelessWidget {
 /// trabajo "por_horas" — el cliente las confirma (eso libera el pago)
 /// o, si no está de acuerdo, abre una reclamación (no hay
 /// renegociación automática, se resuelve por chat o soporte).
-class _CierreHorasPendienteCard extends StatelessWidget {
+class _CierreHorasPendienteCard extends ConsumerWidget {
   const _CierreHorasPendienteCard({
     required this.serviceRequestId,
     required this.cierreHoras,
@@ -663,10 +727,11 @@ class _CierreHorasPendienteCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final importeFinal = (tarifaHora ?? 0) * cierreHoras.horasReales;
+    final comisiones = ref.watch(comisionesProvider);
 
     return Container(
       width: double.infinity,
@@ -683,6 +748,11 @@ class _CierreHorasPendienteCard extends StatelessWidget {
           Text(
             t.seguimientoCierreHorasDetalle(cierreHoras.horasReales.toStringAsFixed(1), importeFinal.toStringAsFixed(2)),
             style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+          ),
+          comisiones.when(
+            data: (info) => _DesgloseComision(montoBase: importeFinal, comisiones: info),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
           ),
           const SizedBox(height: 14),
           Row(

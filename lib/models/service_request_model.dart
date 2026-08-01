@@ -34,12 +34,14 @@ UrgenciaSolicitud urgenciaFromString(String value) {
 
 class PaymentInfo {
   final String estado; // retenido | liberado | reembolsado | fallido
+  final double montoBase;
   final double montoTotal;
   final double comisionPlataforma;
   final double montoProfesional;
 
   PaymentInfo({
     required this.estado,
+    required this.montoBase,
     required this.montoTotal,
     required this.comisionPlataforma,
     required this.montoProfesional,
@@ -48,6 +50,7 @@ class PaymentInfo {
   factory PaymentInfo.fromJson(Map<String, dynamic> json) {
     return PaymentInfo(
       estado: json['estado'] as String,
+      montoBase: (json['montoBase'] as num).toDouble(),
       montoTotal: (json['montoTotal'] as num).toDouble(),
       comisionPlataforma: (json['comisionPlataforma'] as num).toDouble(),
       montoProfesional: (json['montoProfesional'] as num).toDouble(),

@@ -494,6 +494,15 @@
   "seguimientoPresupuestoRechazadoExito": "Presupuesto rechazado",
   "seguimientoPresupuestoRechazadoInfo": "Rechazaste el presupuesto anterior — esperando uno nuevo del profesional",
   "seguimientoPresupuestoError": "No se pudo responder al presupuesto",
+  "seguimientoDesgloseComision": "Presupuesto: {base} € + comisión de servicio: {comision} € = total a pagar: {total} €",
+  "@seguimientoDesgloseComision": {
+    "placeholders": {
+      "base": { "type": "String" },
+      "comision": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "seguimientoPromoLanzamiento": "🎉 Promoción de lanzamiento",
 
   "trabajosActivosHorasEnviadasExito": "Horas enviadas — esperando que el cliente las confirme",
   "trabajosActivosPedirAmpliacionTitulo": "Pedir más horas",
@@ -513,6 +522,15 @@
   "trabajosActivosEstadoAmpliacionPendiente": "Ampliación pendiente",
   "trabajosActivosEstadoCierrePendiente": "Confirmación pendiente",
   "trabajosActivosEstadoPagoLiberado": "Pago liberado",
+  "trabajosActivosDesgloseComision": "Importe del trabajo: {base} € · Comisión Hogar SOS: {comision} € · Recibirás: {recibiras} €",
+  "@trabajosActivosDesgloseComision": {
+    "placeholders": {
+      "base": { "type": "String" },
+      "comision": { "type": "String" },
+      "recibiras": { "type": "String" }
+    }
+  },
+  "trabajosActivosPromoLanzamiento": "🎉 Promoción de lanzamiento",
 
   "seguimientoAmpliacionAceptadaExito": "Ampliación aceptada",
   "seguimientoAmpliacionRechazadaExito": "Ampliación rechazada",

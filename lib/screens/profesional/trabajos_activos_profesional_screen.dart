@@ -6,7 +6,9 @@ import '../../l10n/app_localizations.dart';
 import '../../models/presupuesto_model.dart';
 import '../../models/service_request_model.dart';
 import '../../providers/chat_read_provider.dart';
+import '../../providers/payment_provider.dart';
 import '../../providers/service_request_provider.dart';
+import '../../services/payment_service.dart';
 import '../../services/service_request_service.dart';
 import '../../utils/error_extraction.dart';
 import '../../widgets/entrada_animada.dart';
@@ -476,7 +478,63 @@ class _EstadoVisual {
   final Color contenido;
 }
 
-class _TarjetaTrabajo extends StatelessWidget {
+/// Desglose "importe del trabajo · comisión · recibirás" que ve el
+/// profesional — mismo distintivo de promoción que el cliente. Recibe
+/// los importes ya calculados (no un `ComisionesInfo` en vivo) porque,
+/// una vez hay una autorización de pago, esos importes están FIJADOS en
+/// esa autorización y no deben recalcularse con el % vigente (puede
+/// haber cambiado entre la aceptación y ahora — ver `payment.service.ts`).
+class _DesgloseComisionProfesional extends StatelessWidget {
+  const _DesgloseComisionProfesional({
+    required this.montoBase,
+    required this.comision,
+    required this.recibiras,
+    required this.esPromo,
+  });
+
+  final double montoBase;
+  final double comision;
+  final double recibiras;
+  final bool esPromo;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (esPromo)
+            Container(
+              margin: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: colorScheme.tertiaryContainer,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                t.trabajosActivosPromoLanzamiento,
+                style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: colorScheme.onTertiaryContainer),
+              ),
+            ),
+          Text(
+            t.trabajosActivosDesgloseComision(
+              montoBase.toStringAsFixed(2),
+              comision.toStringAsFixed(2),
+              recibiras.toStringAsFixed(2),
+            ),
+            style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TarjetaTrabajo extends ConsumerWidget {
   const _TarjetaTrabajo({
     required this.trabajo,
     required this.noLeido,
@@ -531,11 +589,43 @@ class _TarjetaTrabajo extends StatelessWidget {
     return _EstadoVisual(t.trabajosActivosEstadoPresupuestoAceptado, Icons.task_alt, Colors.green.shade50, Colors.green.shade800);
   }
 
+  /// Construye el desglose a mostrar, si aplica: prioriza los importes ya
+  /// FIJADOS en el `Payment` (retenido o liberado — nunca se recalculan
+  /// con el % vigente, ver `_DesgloseComisionProfesional`); solo antes de
+  /// que exista una autorización usa los porcentajes en vivo sobre el
+  /// presupuesto/ampliación aceptado, vía [comisiones].
+  Widget? _desglose(AsyncValue<ComisionesInfo> comisiones) {
+    final payment = trabajo.payment;
+    if (payment != null) {
+      return _DesgloseComisionProfesional(
+        montoBase: payment.montoBase,
+        comision: payment.comisionPlataforma,
+        recibiras: payment.montoProfesional,
+        esPromo: payment.comisionPlataforma == 0,
+      );
+    }
+
+    final presupuesto = trabajo.presupuesto;
+    if (presupuesto == null || presupuesto.estado != EstadoPresupuesto.aceptado) return null;
+
+    return comisiones.when(
+      data: (info) => _DesgloseComisionProfesional(
+        montoBase: presupuesto.importeTotal,
+        comision: presupuesto.importeTotal - info.totalProfesional(presupuesto.importeTotal),
+        recibiras: info.totalProfesional(presupuesto.importeTotal),
+        esPromo: info.esPromoLanzamiento,
+      ),
+      loading: () => null,
+      error: (_, __) => null,
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final estado = _estadoVisual(context);
+    final desglose = _desglose(ref.watch(comisionesProvider));
 
     return Material(
       color: colorScheme.surfaceContainerHigh,
@@ -585,6 +675,7 @@ class _TarjetaTrabajo extends StatelessWidget {
                 _ChipEstado(estado: estado),
               ],
             ),
+            if (desglose != null) desglose,
             const SizedBox(height: 12),
             Text(trabajo.descripcion, style: const TextStyle(fontSize: 14, height: 1.35)),
             if (trabajo.direccionTexto != null) ...[
