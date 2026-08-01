@@ -380,6 +380,7 @@
   "misSolicitudesArchivarConfirmar": "Remove",
   "misSolicitudesArchivarExito": "Request removed from the list",
   "misSolicitudesArchivarError": "Couldn't remove the request",
+  "misSolicitudesAccionRequerida": "Needs your confirmation",
 
   "trabajosActivosArchivarTitulo": "Remove this job from the list?",
   "trabajosActivosArchivarMensaje": "It will be hidden from your history, but the payment, chat, and reviews are kept.",

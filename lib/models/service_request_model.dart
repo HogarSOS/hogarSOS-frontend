@@ -170,6 +170,10 @@ class MyServiceRequestSummary {
   final DateTime createdAt;
   final bool tienePago;
   final bool tieneValoracion;
+  // No trae el presupuesto/ampliación/cierreHoras completo (eso vive en
+  // el detalle) — solo si hay algo pendiente de que el cliente confirme,
+  // para poder destacarlo en la lista sin entrar a cada solicitud.
+  final bool requiereAccion;
 
   MyServiceRequestSummary({
     required this.id,
@@ -182,6 +186,7 @@ class MyServiceRequestSummary {
     required this.createdAt,
     required this.tienePago,
     required this.tieneValoracion,
+    this.requiereAccion = false,
   });
 
   factory MyServiceRequestSummary.fromJson(Map<String, dynamic> json) {
@@ -196,6 +201,7 @@ class MyServiceRequestSummary {
       createdAt: DateTime.parse(json['createdAt'] as String),
       tienePago: json['tienePago'] as bool,
       tieneValoracion: json['tieneValoracion'] as bool,
+      requiereAccion: json['requiereAccion'] as bool? ?? false,
     );
   }
 }

@@ -2048,6 +2048,12 @@ abstract class AppLocalizations {
   /// **'No se pudo quitar la solicitud'**
   String get misSolicitudesArchivarError;
 
+  /// No description provided for @misSolicitudesAccionRequerida.
+  ///
+  /// In es, this message translates to:
+  /// **'Necesita tu confirmación'**
+  String get misSolicitudesAccionRequerida;
+
   /// No description provided for @trabajosActivosArchivarTitulo.
   ///
   /// In es, this message translates to:

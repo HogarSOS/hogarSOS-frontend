@@ -211,7 +211,20 @@ class _SolicitudTile extends StatelessWidget {
       UrgenciaSolicitud.loAntesPosible => null, // es el caso por defecto, no aporta resaltarlo
     };
 
+    // Un presupuesto/ampliación/cierre de horas pendiente de que el
+    // cliente responda es la única situación de esta lista donde de
+    // verdad hace falta que el usuario entre — antes solo se distinguía
+    // por el texto de estado (p.ej. "Aceptada"), indistinguible a
+    // simple vista de una solicitud sin nada pendiente. El borde de
+    // color + la insignia son a propósito redundantes con el texto,
+    // para que se note incluso pasando el dedo rápido por la lista.
+    final destacar = solicitud.requiereAccion;
+
     return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: destacar ? BorderSide(color: colorScheme.tertiary, width: 1.5) : BorderSide.none,
+      ),
       child: ListTile(
         contentPadding: const EdgeInsets.all(12),
         leading: Container(
@@ -221,26 +234,56 @@ class _SolicitudTile extends StatelessWidget {
           child: Icon(iconoParaCategoria(solicitud.categoria), color: color, size: 22),
         ),
         title: Text(nombreLocalizadoCategoria(context, solicitud.categoria)),
-        subtitle: Row(
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Flexible(
-              child: Text(
-                textoEstado,
-                style: TextStyle(color: colorEstado, fontWeight: FontWeight.w600, fontSize: 12.5),
-                overflow: TextOverflow.ellipsis,
-              ),
+            Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    textoEstado,
+                    style: TextStyle(color: colorEstado, fontWeight: FontWeight.w600, fontSize: 12.5),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (textoUrgencia != null) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: colorScheme.errorContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      textoUrgencia,
+                      style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: colorScheme.onErrorContainer),
+                    ),
+                  ),
+                ],
+              ],
             ),
-            if (textoUrgencia != null) ...[
-              const SizedBox(width: 6),
+            if (destacar) ...[
+              const SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: colorScheme.errorContainer,
+                  color: colorScheme.tertiaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  textoUrgencia,
-                  style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: colorScheme.onErrorContainer),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.priority_high, size: 13, color: colorScheme.onTertiaryContainer),
+                    const SizedBox(width: 3),
+                    Text(
+                      t.misSolicitudesAccionRequerida,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: colorScheme.onTertiaryContainer,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

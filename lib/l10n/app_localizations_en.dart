@@ -1110,6 +1110,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get misSolicitudesArchivarError => 'Couldn\'t remove the request';
 
   @override
+  String get misSolicitudesAccionRequerida => 'Needs your confirmation';
+
+  @override
   String get trabajosActivosArchivarTitulo => 'Remove this job from the list?';
 
   @override

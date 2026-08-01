@@ -380,6 +380,7 @@
   "misSolicitudesArchivarConfirmar": "Quitar",
   "misSolicitudesArchivarExito": "Solicitud quitada de la lista",
   "misSolicitudesArchivarError": "No se pudo quitar la solicitud",
+  "misSolicitudesAccionRequerida": "Necesita tu confirmación",
 
   "trabajosActivosArchivarTitulo": "¿Quitar este trabajo de la lista?",
   "trabajosActivosArchivarMensaje": "Se ocultará de tu historial, pero el pago, el chat y las valoraciones se conservan.",
