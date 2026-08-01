@@ -6,19 +6,17 @@ import '../models/service_request_model.dart';
 import '../providers/chat_read_provider.dart';
 import '../providers/service_request_provider.dart';
 import 'cliente/home_cliente_screen.dart';
-import 'cliente/buscar_screen.dart';
 import 'cliente/mensajes_screen.dart';
 import 'cliente/perfil_screen.dart';
 
 /// Pestaña activa del shell del cliente — mismo patrón que
 /// profesionalTabIndexProvider en profesional_shell_screen.dart: en un
 /// provider (no estado local del shell) para que una pantalla dentro de
-/// una pestaña (p. ej. BuscarScreen) sepa si es la pestaña visible sin
-/// que el shell tenga que pasarle esa información a mano. Se usa para
-/// que "Buscar" no dispare su búsqueda inicial (y el permiso de
-/// ubicación) hasta que el usuario la visita de verdad — antes se
-/// disparaba en cuanto se iniciaba sesión, porque IndexedStack
-/// construye las 4 pestañas de golpe aunque solo una esté visible.
+/// una pestaña sepa si es la pestaña visible sin que el shell tenga que
+/// pasarle esa información a mano. Útil para pantallas que no deben
+/// disparar su carga inicial (p. ej. permisos, red) hasta que el
+/// usuario las visita de verdad — IndexedStack construye todas las
+/// pestañas de golpe aunque solo una esté visible.
 final clienteTabIndexProvider = StateProvider<int>((ref) => 0);
 
 /// Contenedor de navegación inferior del cliente. Usa [IndexedStack] en
@@ -35,9 +33,11 @@ class ClienteShellScreen extends ConsumerStatefulWidget {
 class _ClienteShellScreenState extends ConsumerState<ClienteShellScreen> {
   DateTime? _ultimaPulsacionAtras;
 
+  // "Buscar" se quitó de la navegación (ver home_cliente_screen.dart) —
+  // buscar_screen.dart sigue intacto, solo no está en esta lista ni en
+  // los destinos de la barra de abajo.
   static const _pantallas = [
     HomeClienteScreen(),
-    BuscarScreen(),
     MensajesScreen(),
     PerfilScreen(),
   ];
@@ -98,11 +98,6 @@ class _ClienteShellScreenState extends ConsumerState<ClienteShellScreen> {
             icon: const Icon(Icons.home_outlined),
             selectedIcon: const Icon(Icons.home),
             label: t.navInicio,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.search_outlined),
-            selectedIcon: const Icon(Icons.search),
-            label: t.navBuscar,
           ),
           NavigationDestination(
             icon: Badge(isLabelVisible: hayMensajesNoLeidos, child: const Icon(Icons.chat_bubble_outline)),
