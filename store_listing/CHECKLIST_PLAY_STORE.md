@@ -10,11 +10,9 @@
 - **Ficha de Play Store redactada**: descripción corta y larga, categoría recomendada, información de contacto, enlace de política de privacidad — todo en `store_listing/`.
 - **Imagen promocional 1024×500** generada con la identidad visual actual — `store_listing/feature_graphic_1024x500.png`.
 - **Icono 512×512** ya existía — `assets/branding/play-store-icon-512.png`.
-- **Datos de ejemplo limpios** insertados en la base de datos de producción para las capturas: una solicitud pendiente ("Se ha ido la luz...", categoría Electricista, cliente Ana Sánchez) y un trabajo ya aceptado con presupuesto cerrado de 85€ (categoría Aire acondicionado, profesional José Fernández) — listos para capturar en cuanto haya sesión en el móvil.
-
-## ⏳ Pendiente — necesita el móvil (retomamos cuando puedas)
-
-- **Capturas de pantalla reales** (mínimo 2, hasta 8) — necesito una sesión activa en el dispositivo para cliente y profesional. Con los datos de ejemplo ya listos, esto es rápido en cuanto reconectes el móvil.
+- **Datos de ejemplo limpios** insertados en la base de datos de producción para las capturas: una solicitud pendiente ("Se ha ido la luz...", categoría Electricista, cliente Ana Sánchez) y un trabajo ya aceptado con presupuesto cerrado de 85€ (categoría Aire acondicionado, profesional José Fernández).
+- **Capturas de pantalla reales**: 7 capturas de una sesión end-to-end real (publicar solicitud, candidatura, elegir profesional, presupuesto con desglose de comisión) — `store_listing/screenshots/`.
+- **Botón "Aceptar solicitud" corregido a "Enviar candidatura"**: encontrado al revisar las capturas — era un resto del flujo antiguo ("el primero que acepta gana") que hacía creer al profesional que ya tenía el trabajo asegurado con solo postularse.
 
 ## 🚫 Bloqueado en Google (nadie lo puede acelerar)
 
@@ -28,4 +26,4 @@
 
 ## Resumen
 
-Con la cuenta de Play Developer ya verificada, lo único que quedaría por hacer antes de subir la beta cerrada son las capturas de pantalla — todo lo demás (build, ficha, imagen promocional, textos) está listo.
+Con la cuenta de Play Developer ya verificada, todo lo técnico está listo para subir la beta cerrada: `.aab`, ficha, imagen promocional, capturas y textos revisados. Solo falta rellenar el cuestionario de clasificación de contenido y el formulario de seguridad de datos dentro de Play Console (las respuestas ya están anotadas), y crear la cuenta en cuanto Google complete la verificación.
