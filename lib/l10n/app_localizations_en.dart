@@ -589,7 +589,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'I can come by this afternoon';
 
   @override
-  String get profesionalDisponibilidadConfirmar => 'Accept request';
+  String get profesionalDisponibilidadConfirmar => 'Send application';
 
   @override
   String profesionalDistanciaKm(String km) {

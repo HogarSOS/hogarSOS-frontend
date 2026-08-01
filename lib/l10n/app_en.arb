@@ -208,7 +208,7 @@
   "profesionalDisponibilidadSugerencia1": "I can come tomorrow afternoon",
   "profesionalDisponibilidadSugerencia2": "I'm available Friday at 10:00",
   "profesionalDisponibilidadSugerencia3": "I can come by this afternoon",
-  "profesionalDisponibilidadConfirmar": "Accept request",
+  "profesionalDisponibilidadConfirmar": "Send application",
   "profesionalDistanciaKm": "{km} km away",
   "profesionalTrabajosActivos": "You have {n} active {n, plural, one{job} other{jobs}}",
   "@profesionalTrabajosActivos": {

@@ -1103,7 +1103,7 @@ abstract class AppLocalizations {
   /// No description provided for @profesionalDisponibilidadConfirmar.
   ///
   /// In es, this message translates to:
-  /// **'Aceptar solicitud'**
+  /// **'Enviar candidatura'**
   String get profesionalDisponibilidadConfirmar;
 
   /// No description provided for @profesionalDistanciaKm.

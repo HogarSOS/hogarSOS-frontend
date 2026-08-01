@@ -208,7 +208,7 @@
   "profesionalDisponibilidadSugerencia1": "Puedo ir mañana por la tarde",
   "profesionalDisponibilidadSugerencia2": "Estoy disponible el viernes a las 10:00",
   "profesionalDisponibilidadSugerencia3": "Puedo pasar esta misma tarde",
-  "profesionalDisponibilidadConfirmar": "Aceptar solicitud",
+  "profesionalDisponibilidadConfirmar": "Enviar candidatura",
   "profesionalDistanciaKm": "A {km} km",
   "profesionalTrabajosActivos": "Tienes {n} {n, plural, one{trabajo activo} other{trabajos activos}}",
   "@profesionalTrabajosActivos": {

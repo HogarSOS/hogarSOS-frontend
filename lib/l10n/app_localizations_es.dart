@@ -591,7 +591,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Puedo pasar esta misma tarde';
 
   @override
-  String get profesionalDisponibilidadConfirmar => 'Aceptar solicitud';
+  String get profesionalDisponibilidadConfirmar => 'Enviar candidatura';
 
   @override
   String profesionalDistanciaKm(String km) {
