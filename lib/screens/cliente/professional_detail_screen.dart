@@ -219,7 +219,14 @@ class _Contenido extends StatelessWidget {
                           children: [
                             Row(
                               children: [
-                                Text(review.autor, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5)),
+                                Expanded(
+                                  child: Text(
+                                    review.autor,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+                                  ),
+                                ),
                                 const SizedBox(width: 8),
                                 ...List.generate(
                                   5,

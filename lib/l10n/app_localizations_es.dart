@@ -128,6 +128,401 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errorInesperado => 'Ocurrió un error inesperado.';
 
   @override
+  String montoConSimbolo(String monto) {
+    return '$monto €';
+  }
+
+  @override
+  String get authErrorEmailEnUso =>
+      'Ya existe una cuenta con este email. Intenta iniciar sesión o usa \"¿Olvidaste tu contraseña?\" si no la recuerdas.';
+
+  @override
+  String get authErrorEmailInvalido => 'El email no tiene un formato válido.';
+
+  @override
+  String get authErrorPasswordDebil =>
+      'La contraseña es demasiado débil (mínimo 6 caracteres).';
+
+  @override
+  String get authErrorCredencialesIncorrectas =>
+      'Email o contraseña incorrectos.';
+
+  @override
+  String get authErrorDemasiadosIntentos =>
+      'Demasiados intentos. Espera un momento antes de volver a intentarlo.';
+
+  @override
+  String get authErrorTelefonoInvalido =>
+      'El número de teléfono no es válido. Escríbelo con el prefijo del país (ej. +34).';
+
+  @override
+  String get authErrorCodigoIncorrecto =>
+      'El código no es correcto. Revisa el SMS e inténtalo de nuevo.';
+
+  @override
+  String get authErrorCodigoCaducado =>
+      'El código ha caducado. Pide uno nuevo.';
+
+  @override
+  String get authErrorCuotaSms =>
+      'Se alcanzó el límite de códigos por SMS. Inténtalo más tarde.';
+
+  @override
+  String get apiErrDatosInvalidos => 'Datos inválidos';
+
+  @override
+  String get apiErrSinPermiso => 'No tienes permiso para esta acción';
+
+  @override
+  String get apiErrTokenInvalido =>
+      'Tu sesión ha caducado. Inicia sesión de nuevo.';
+
+  @override
+  String get apiErrMotivoRechazoRequerido =>
+      'Un rechazo requiere indicar un motivo';
+
+  @override
+  String get apiErrProfesionalNoEncontrado => 'Profesional no encontrado';
+
+  @override
+  String get apiErrVerificacionNoPendiente =>
+      'Este profesional no tiene una verificación pendiente';
+
+  @override
+  String get apiErrDisputaNoEncontrada => 'Reclamación no encontrada';
+
+  @override
+  String get apiErrDisputaResuelta => 'Esta reclamación ya fue resuelta';
+
+  @override
+  String get apiErrResolucionStripeFallida =>
+      'La resolución no pudo aplicarse en el pago. Inténtalo de nuevo o contacta con soporte.';
+
+  @override
+  String get apiErrAmpliacionDatosInvalidos => 'Datos de ampliación inválidos';
+
+  @override
+  String get apiErrDatosContactoBloqueados =>
+      'Por seguridad, los datos de contacto solo se pueden compartir cuando el trabajo haya sido aceptado';
+
+  @override
+  String get apiErrSolicitudNoEncontrada => 'Solicitud no encontrada';
+
+  @override
+  String get apiErrNoEresProfesionalAsignado =>
+      'No eres el profesional asignado a esta solicitud';
+
+  @override
+  String get apiErrEstadoInvalidoAmpliacion =>
+      'La solicitud no está en un estado válido para pedir una ampliación';
+
+  @override
+  String get apiErrSinPresupuestoAceptado =>
+      'No hay un presupuesto aceptado para esta solicitud';
+
+  @override
+  String get apiErrHorasAdicionalesRequeridas => 'Indica las horas adicionales';
+
+  @override
+  String get apiErrImporteAdicionalRequerido => 'Indica el importe adicional';
+
+  @override
+  String get apiErrAmpliacionYaPendiente =>
+      'Ya hay una ampliación pendiente de respuesta';
+
+  @override
+  String get apiErrDecisionAmpliacionRequerida =>
+      'Indica si aceptas o rechazas la ampliación';
+
+  @override
+  String get apiErrSinAccesoSolicitud => 'No tienes acceso a esta solicitud';
+
+  @override
+  String get apiErrAmpliacionNoEncontrada => 'Ampliación no encontrada';
+
+  @override
+  String get apiErrAmpliacionNoPendiente =>
+      'Esta ampliación ya no está pendiente de respuesta';
+
+  @override
+  String get apiErrUsuarioYaExiste =>
+      'Ya existe una cuenta con este email o teléfono';
+
+  @override
+  String get apiErrSinCuenta =>
+      'No existe una cuenta asociada. Regístrate primero.';
+
+  @override
+  String get apiErrCuentaDesactivada => 'Esta cuenta ha sido desactivada';
+
+  @override
+  String get apiErrReclamacionSoloTrabajoAceptado =>
+      'Solo se puede reportar un problema en un trabajo aceptado';
+
+  @override
+  String get apiErrReclamacionYaAbierta =>
+      'Ya existe una reclamación abierta para este trabajo';
+
+  @override
+  String get apiErrSolicitudNoAceptada =>
+      'La solicitud debe estar aceptada por un profesional antes de pagar';
+
+  @override
+  String get apiErrNadaPendienteAutorizar =>
+      'No hay nada pendiente de autorizar para esta solicitud';
+
+  @override
+  String get apiErrNoEresCliente => 'No eres el cliente de esta solicitud';
+
+  @override
+  String get apiErrNoAutorizadoPostular =>
+      'No estás autorizado para postularte a solicitudes';
+
+  @override
+  String get apiErrSolicitudNoDisponible =>
+      'Esta solicitud ya no está disponible';
+
+  @override
+  String get apiErrCandidaturaYaEnviada =>
+      'Ya te has postulado a esta solicitud';
+
+  @override
+  String get apiErrCandidaturaNoEncontrada => 'Candidatura no encontrada';
+
+  @override
+  String get apiErrPresupuestoDatosInvalidos =>
+      'Datos de presupuesto inválidos';
+
+  @override
+  String get apiErrEstadoInvalidoPresupuesto =>
+      'La solicitud no está en un estado válido para presupuestar';
+
+  @override
+  String get apiErrPresupuestoYaPendiente =>
+      'Ya hay un presupuesto pendiente de respuesta para esta solicitud';
+
+  @override
+  String get apiErrDecisionPresupuestoRequerida =>
+      'Indica si aceptas o rechazas el presupuesto';
+
+  @override
+  String get apiErrPresupuestoNoEncontrado => 'Presupuesto no encontrado';
+
+  @override
+  String get apiErrPresupuestoNoPendiente =>
+      'Este presupuesto ya no está pendiente de respuesta';
+
+  @override
+  String get apiErrPerfilProfesionalNoEncontrado =>
+      'Perfil de profesional no encontrado';
+
+  @override
+  String get apiErrProfesionalNoVerificado =>
+      'No puedes ponerte disponible hasta ser verificado';
+
+  @override
+  String get apiErrCategoriasInvalidas => 'Una o más categorías no son válidas';
+
+  @override
+  String get apiErrParametrosBusquedaInvalidos =>
+      'Parámetros de búsqueda inválidos';
+
+  @override
+  String get apiErrValorarSoloCompletado =>
+      'Solo se puede valorar un servicio ya completado';
+
+  @override
+  String get apiErrValoracionBloqueadaDisputa =>
+      'Existe una reclamación abierta — no se puede valorar hasta que se resuelva';
+
+  @override
+  String get apiErrSinProfesionalAsignado =>
+      'Esta solicitud no tiene profesional asignado';
+
+  @override
+  String get apiErrNoParticipaste =>
+      'No participaste en esta solicitud, no puedes valorarla';
+
+  @override
+  String get apiErrYaValoraste => 'Ya has valorado esta solicitud';
+
+  @override
+  String get apiErrFechaRequerida => 'Indica la fecha deseada';
+
+  @override
+  String get apiErrCategoriaInvalida => 'Categoría de servicio no válida';
+
+  @override
+  String get apiErrCuentaNoVerificada => 'Tu cuenta aún no ha sido verificada';
+
+  @override
+  String get apiErrSoloCreadorCancela =>
+      'Solo el cliente que creó esta solicitud puede cancelarla';
+
+  @override
+  String get apiErrNoSePuedeCancelar =>
+      'Esta solicitud ya no se puede cancelar — el profesional ya empezó o ya se resolvió';
+
+  @override
+  String get apiErrSoloCreadorBorra =>
+      'Solo el cliente que creó esta solicitud puede borrarla';
+
+  @override
+  String get apiErrNoSePuedeBorrar =>
+      'Solo se pueden borrar solicitudes que nadie ha aceptado todavía';
+
+  @override
+  String get apiErrNoSePuedeArchivar =>
+      'Solo se pueden archivar solicitudes completadas o canceladas';
+
+  @override
+  String get apiErrMensajeRequerido => 'Falta el texto del mensaje';
+
+  @override
+  String get apiErrEstadoInvalidoCompletar =>
+      'La solicitud no está en un estado válido para completarse';
+
+  @override
+  String get apiErrPagoNoAutorizado =>
+      'El cliente aún no ha autorizado el pago de este servicio';
+
+  @override
+  String get apiErrHorasRequeridas => 'Indica las horas reales trabajadas';
+
+  @override
+  String get apiErrCierreYaPendiente =>
+      'Ya hay un cierre pendiente de confirmación del cliente';
+
+  @override
+  String get apiErrDecisionHorasRequerida =>
+      'Indica si aceptas o rechazas las horas declaradas';
+
+  @override
+  String get apiErrCierreNoEncontrado => 'Cierre no encontrado';
+
+  @override
+  String get apiErrCierreNoPendiente =>
+      'Este cierre ya no está pendiente de respuesta';
+
+  @override
+  String get apiErrSinArchivo => 'No se ha recibido ningún archivo';
+
+  @override
+  String get apiErrUsuarioNoEncontrado => 'Usuario no encontrado';
+
+  @override
+  String get legalPrivSec1Titulo => '1. Quién trata tus datos';
+
+  @override
+  String get legalPrivSec1Texto =>
+      'hogarSOS es una app que conecta a clientes con profesionales de servicios a domicilio. Somos responsables del tratamiento de los datos personales que recoge la aplicación, descritos en esta política.';
+
+  @override
+  String get legalPrivSec2Titulo => '2. Qué datos recogemos';
+
+  @override
+  String get legalPrivSec2Texto =>
+      '• Datos de cuenta: nombre, email y teléfono al registrarte.\n• Ubicación: tu ubicación aproximada o precisa (con tu permiso) para mostrarte profesionales cercanos, o para que un profesional aparezca en las búsquedas de clientes cerca de él.\n• Fotos: las que adjuntes a una solicitud de servicio o a tu perfil.\n• Documentos de verificación (solo profesionales): documento de identidad, certificados y seguro de responsabilidad civil, usados exclusivamente para verificar tu identidad y aptitud antes de permitirte operar en la plataforma.\n• Datos de pago: gestionados directamente por Stripe, nuestro procesador de pagos — hogarSOS nunca almacena el número completo de tu tarjeta.\n• Mensajes de chat entre cliente y profesional de una misma solicitud.';
+
+  @override
+  String get legalPrivSec3Titulo => '3. Para qué usamos tus datos';
+
+  @override
+  String get legalPrivSec3Texto =>
+      'Para prestar el servicio (conectar clientes con profesionales, procesar pagos, gestionar solicitudes), para verificar la identidad de los profesionales, para enviarte notificaciones relacionadas con tus solicitudes, y para prevenir fraude y resolver disputas.';
+
+  @override
+  String get legalPrivSec4Titulo => '4. Con quién compartimos tus datos';
+
+  @override
+  String get legalPrivSec4Texto =>
+      'Con el otro participante de una solicitud (el cliente ve el nombre del profesional asignado y viceversa). Con proveedores que nos ayudan a operar la app: Firebase/Google (autenticación, notificaciones, chat) y Stripe (pagos). No vendemos tus datos a terceros ni los usamos con fines publicitarios ajenos a la app.';
+
+  @override
+  String get legalPrivSec5Titulo => '5. Cuánto tiempo conservamos tus datos';
+
+  @override
+  String get legalPrivSec5Texto =>
+      'Mientras tu cuenta esté activa. Si la eliminas, borramos o anonimizamos tus datos personales, salvo lo que debamos conservar por obligación legal (p. ej. registros de pagos).';
+
+  @override
+  String get legalPrivSec6Titulo => '6. Tus derechos';
+
+  @override
+  String get legalPrivSec6Texto =>
+      'Puedes acceder, rectificar o solicitar la eliminación de tus datos, y retirar los permisos de ubicación, cámara o galería en cualquier momento desde los ajustes de tu teléfono. Para ejercer estos derechos, contacta con nosotros desde la app.';
+
+  @override
+  String get legalPrivSec7Titulo => '7. Cambios en esta política';
+
+  @override
+  String get legalPrivSec7Texto =>
+      'Si actualizamos esta política de forma relevante, te lo notificaremos dentro de la app antes de que entre en vigor.';
+
+  @override
+  String get legalTerminosSec1Titulo => '1. Qué es hogarSOS';
+
+  @override
+  String get legalTerminosSec1Texto =>
+      'hogarSOS es una plataforma que conecta a clientes que necesitan un servicio a domicilio (electricidad, fontanería, limpieza, etc.) con profesionales independientes que los ofrecen. hogarSOS no presta los servicios directamente ni es empleador de los profesionales — actúa como intermediario entre ambas partes.';
+
+  @override
+  String get legalTerminosSec2Titulo => '2. Cuentas de usuario';
+
+  @override
+  String get legalTerminosSec2Texto =>
+      'Debes dar información veraz al registrarte. Eres responsable de mantener segura tu cuenta. Los profesionales deben superar un proceso de verificación (documento de identidad y, si aplica, certificados/seguro) antes de poder aceptar solicitudes.';
+
+  @override
+  String get legalTerminosSec3Titulo => '3. Pagos y comisión';
+
+  @override
+  String get legalTerminosSec3Texto =>
+      'El pago de un servicio se autoriza a través de Stripe al aceptar el trabajo, pero no se cobra hasta que el profesional marca el servicio como completado. hogarSOS retiene una comisión sobre el precio final del servicio; el resto se transfiere al profesional. Los precios los fija el profesional o se acuerdan entre ambas partes por chat.';
+
+  @override
+  String get legalTerminosSec4Titulo => '4. Cancelaciones y reembolsos';
+
+  @override
+  String get legalTerminosSec4Texto =>
+      'El cliente puede cancelar una solicitud sin coste mientras esté pendiente o recién aceptada y el trabajo todavía no haya empezado. Si ya se autorizó un pago, se reembolsa automáticamente al cancelar. Una vez el profesional marca el servicio como \"en curso\", ya no se puede cancelar desde la app — en ese caso, contacta con nosotros para resolverlo.';
+
+  @override
+  String get legalTerminosSec5Titulo => '5. Disputas';
+
+  @override
+  String get legalTerminosSec5Texto =>
+      'Si algo no fue como se esperaba, cliente o profesional pueden abrir una disputa. Un administrador revisa el caso y decide si el pago se libera al profesional o se reembolsa al cliente.';
+
+  @override
+  String get legalTerminosSec6Titulo => '6. Responsabilidad';
+
+  @override
+  String get legalTerminosSec6Texto =>
+      'hogarSOS facilita el contacto y el pago entre cliente y profesional, pero no supervisa ni garantiza la calidad del trabajo realizado — la relación de servicio es directamente entre ambas partes. Recomendamos revisar las valoraciones de un profesional antes de contratarlo.';
+
+  @override
+  String get legalTerminosSec7Titulo => '7. Conducta de los profesionales';
+
+  @override
+  String get legalTerminosSec7Texto =>
+      'Los profesionales verificados deben prestar el servicio con la diligencia y competencia propias de su oficio. hogarSOS puede suspender o revocar una cuenta que reciba valoraciones reiteradamente negativas, incumpla estos términos, o cuya verificación resulte fraudulenta.';
+
+  @override
+  String get legalTerminosSec8Titulo => '8. Cambios en estos términos';
+
+  @override
+  String get legalTerminosSec8Texto =>
+      'Podemos actualizar estos términos; los cambios relevantes se notificarán dentro de la app antes de entrar en vigor. Seguir usando hogarSOS después de un cambio implica aceptarlo.';
+
+  @override
+  String get legalTerminosSec9Titulo => '9. Ley aplicable';
+
+  @override
+  String get legalTerminosSec9Texto =>
+      'Estos términos se rigen por la legislación española.';
+
+  @override
   String homeSaludo(String nombre) {
     return 'Hola, $nombre 👋';
   }

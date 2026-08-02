@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/service_category_model.dart';
 import '../../../models/service_request_model.dart';
@@ -799,7 +800,11 @@ class _PasoUrgencia extends StatelessWidget {
               label: Text(
                 fechaDeseada == null
                     ? t.wizardSeleccionarFecha
-                    : '${fechaDeseada!.day}/${fechaDeseada!.month}/${fechaDeseada!.year}',
+                    // Formato de fecha corto pero inequívoco (p.ej. "Aug 2,
+                    // 2026" / "2 ago 2026") — antes era DD/MM/YYYY fijo,
+                    // ambiguo para un lector en inglés (¿"3/4" es el 3 de
+                    // abril o el 4 de marzo?).
+                    : DateFormat.yMMMd(t.localeName).format(fechaDeseada!),
               ),
               onPressed: () async {
                 final ahora = DateTime.now();
@@ -845,15 +850,26 @@ class _OpcionUrgencia extends StatelessWidget {
           children: [
             Icon(icono, color: seleccionada ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant),
             const SizedBox(width: 12),
-            Text(
-              etiqueta,
-              style: TextStyle(
-                fontWeight: seleccionada ? FontWeight.w600 : FontWeight.w400,
-                color: seleccionada ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
+            // Expanded + overflow: sin esto, un texto de urgencia más
+            // largo en inglés que en español ("As soon as possible" vs
+            // "Lo antes posible") puede desbordar la fila en pantallas
+            // estrechas, porque Spacer() solo reparte el espacio que
+            // sobra DESPUÉS de medir los hijos no flexibles.
+            Expanded(
+              child: Text(
+                etiqueta,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontWeight: seleccionada ? FontWeight.w600 : FontWeight.w400,
+                  color: seleccionada ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
+                ),
               ),
             ),
-            const Spacer(),
-            if (seleccionada) Icon(Icons.check_circle, color: colorScheme.primary, size: 20),
+            if (seleccionada) ...[
+              const SizedBox(width: 8),
+              Icon(Icons.check_circle, color: colorScheme.primary, size: 20),
+            ],
           ],
         ),
       ),
@@ -885,7 +901,7 @@ class _PasoRevision extends StatelessWidget {
         UrgenciaSolicitud.hoy => t.wizardUrgenciaHoy,
         UrgenciaSolicitud.manana => t.wizardUrgenciaManana,
         UrgenciaSolicitud.fechaEspecifica =>
-          fechaDeseada != null ? '${fechaDeseada!.day}/${fechaDeseada!.month}/${fechaDeseada!.year}' : t.wizardUrgenciaFecha,
+          fechaDeseada != null ? DateFormat.yMMMd(t.localeName).format(fechaDeseada!) : t.wizardUrgenciaFecha,
       };
 
   @override

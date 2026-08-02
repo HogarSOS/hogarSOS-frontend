@@ -119,14 +119,14 @@ class _HojaFiltrosState extends State<_HojaFiltros> {
                   min: 10,
                   max: _precioMaxTope,
                   divisions: 29,
-                  label: _precioMax >= _precioMaxTope ? t.filtroCualquiera : '${_precioMax.toStringAsFixed(0)} €',
+                  label: _precioMax >= _precioMaxTope ? t.filtroCualquiera : t.montoConSimbolo(_precioMax.toStringAsFixed(0)),
                   onChanged: (v) => setState(() => _precioMax = v),
                 ),
               ),
               SizedBox(
                 width: 56,
                 child: Text(
-                  _precioMax >= _precioMaxTope ? '–' : '${_precioMax.toStringAsFixed(0)} €',
+                  _precioMax >= _precioMaxTope ? '–' : t.montoConSimbolo(_precioMax.toStringAsFixed(0)),
                   textAlign: TextAlign.end,
                 ),
               ),

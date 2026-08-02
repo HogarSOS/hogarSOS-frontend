@@ -828,7 +828,7 @@ class _EstadoPagoChip extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(child: Text(texto)),
           Text(
-            '${payment.montoTotal.toStringAsFixed(2)} €',
+            t.montoConSimbolo(payment.montoTotal.toStringAsFixed(2)),
             style: const TextStyle(fontWeight: FontWeight.w700),
           ),
         ],
@@ -892,9 +892,17 @@ class _LineaProgreso extends StatelessWidget {
             const SizedBox(height: 6),
             SizedBox(
               width: 70,
+              // maxLines: 2 en vez de 1: a 70px/10.5px ya cabía en 1
+              // línea en español, pero etiquetas en inglés como
+              // "Confirmation pending" no caben — sin límite, Flutter
+              // ya envuelve solo, así que basta con acotarlo a 2 líneas
+              // y recortar con "…" si ni así cupiera, en vez de dejar
+              // que crezca sin control y desalinee las 3 columnas.
               child: Text(
                 etiquetas[indice],
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 10.5,
                   fontWeight: activo ? FontWeight.w600 : FontWeight.w400,

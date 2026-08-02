@@ -129,12 +129,18 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
       context: context,
       builder: (context) => AlertDialog(
         title: Text(titulo),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLines: maxLines,
-          maxLength: maxLength,
-          keyboardType: keyboardType,
+        // El uso con maxLines: 4 (descripción) es el que más riesgo
+        // tenía de desbordar con el teclado abierto — mismo fix que en
+        // home_profesional_screen.dart.
+        content: SingleChildScrollView(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: TextField(
+            controller: controller,
+            autofocus: true,
+            maxLines: maxLines,
+            maxLength: maxLength,
+            keyboardType: keyboardType,
+          ),
         ),
         actions: [
           TextButton(

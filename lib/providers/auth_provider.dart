@@ -12,16 +12,20 @@ class AuthState {
   final AppUser? usuario;
   final bool cargando;
   final bool restaurando;
-  final String? error;
+  // Código estable (Firebase o backend, ver AuthException en
+  // auth_service.dart), NO el texto a mostrar — la pantalla lo traduce
+  // con mensajeAuthError(errorCode, t) porque este provider no tiene
+  // acceso a AppLocalizations.
+  final String? errorCode;
 
-  const AuthState({this.usuario, this.cargando = false, this.restaurando = true, this.error});
+  const AuthState({this.usuario, this.cargando = false, this.restaurando = true, this.errorCode});
 
-  AuthState copyWith({AppUser? usuario, bool? cargando, bool? restaurando, String? error}) {
+  AuthState copyWith({AppUser? usuario, bool? cargando, bool? restaurando, String? errorCode}) {
     return AuthState(
       usuario: usuario ?? this.usuario,
       cargando: cargando ?? this.cargando,
       restaurando: restaurando ?? this.restaurando,
-      error: error,
+      errorCode: errorCode,
     );
   }
 }
@@ -49,7 +53,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> loginConEmail(String email, String password, {bool recordarSesion = true}) async {
-    state = state.copyWith(cargando: true, error: null);
+    state = state.copyWith(cargando: true, errorCode: null);
     try {
       final resultado = await _authService.loginConEmail(
         email: email,
@@ -60,8 +64,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       unawaited(NotificationService.instance.registrarToken());
     } catch (e) {
       debugPrint('[AuthNotifier] Error en login: $e');
-      final mensaje = e is AuthException ? e.mensaje : 'No se pudo iniciar sesión: $e';
-      state = AuthState(error: mensaje, restaurando: false);
+      final codigo = e is AuthException ? e.code : 'unexpected';
+      state = AuthState(errorCode: codigo, restaurando: false);
     }
   }
 
@@ -72,7 +76,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required UserRole role,
     bool recordarSesion = true,
   }) async {
-    state = state.copyWith(cargando: true, error: null);
+    state = state.copyWith(cargando: true, errorCode: null);
     try {
       final resultado = await _authService.registrarConEmail(
         email: email,
@@ -88,8 +92,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // excepción real — ahora se ve el motivo concreto (sin conexión,
       // email ya usado, error del servidor, etc.).
       debugPrint('[AuthNotifier] Error en registro: $e');
-      final mensaje = e is AuthException ? e.mensaje : 'No se pudo completar el registro: $e';
-      state = AuthState(error: mensaje, restaurando: false);
+      final codigo = e is AuthException ? e.code : 'unexpected';
+      state = AuthState(errorCode: codigo, restaurando: false);
     }
   }
 
@@ -105,7 +109,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required bool esRegistro,
     bool recordarSesion = true,
   }) async {
-    state = state.copyWith(cargando: true, error: null);
+    state = state.copyWith(cargando: true, errorCode: null);
     try {
       final resultado = await _authService.completarConCredencialTelefono(
         credential,
@@ -118,8 +122,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       unawaited(NotificationService.instance.registrarToken());
     } catch (e) {
       debugPrint('[AuthNotifier] Error al completar sesión por teléfono: $e');
-      final mensaje = e is AuthException ? e.mensaje : 'No se pudo completar: $e';
-      state = AuthState(error: mensaje, restaurando: false);
+      final codigo = e is AuthException ? e.code : 'unexpected';
+      state = AuthState(errorCode: codigo, restaurando: false);
     }
   }
 
@@ -133,7 +137,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required bool esRegistro,
     bool recordarSesion = true,
   }) async {
-    state = state.copyWith(cargando: true, error: null);
+    state = state.copyWith(cargando: true, errorCode: null);
     try {
       final resultado = await _authService.confirmarCodigoTelefono(
         verificationId: verificationId,
@@ -147,21 +151,23 @@ class AuthNotifier extends StateNotifier<AuthState> {
       unawaited(NotificationService.instance.registrarToken());
     } catch (e) {
       debugPrint('[AuthNotifier] Error al confirmar código SMS: $e');
-      final mensaje = e is AuthException ? e.mensaje : 'No se pudo confirmar el código: $e';
-      state = AuthState(error: mensaje, restaurando: false);
+      final codigo = e is AuthException ? e.code : 'unexpected';
+      state = AuthState(errorCode: codigo, restaurando: false);
     }
   }
 
-  /// Devuelve null si se envió correctamente, o un mensaje de error legible.
-  /// No toca el AuthState global a propósito — se usa desde un diálogo
-  /// puntual en login_screen.dart, no desde el flujo principal de sesión.
+  /// Devuelve null si se envió correctamente, o un código de error (ver
+  /// AuthException) para que la pantalla lo traduzca con
+  /// mensajeAuthError. No toca el AuthState global a propósito — se usa
+  /// desde un diálogo puntual en login_screen.dart, no desde el flujo
+  /// principal de sesión.
   Future<String?> enviarEmailRecuperacion(String email) async {
     try {
       await _authService.enviarEmailRecuperacion(email);
       return null;
     } catch (e) {
       debugPrint('[AuthNotifier] Error en recuperación de contraseña: $e');
-      return e is AuthException ? e.mensaje : 'No se pudo enviar el email: $e';
+      return e is AuthException ? e.code : 'unexpected';
     }
   }
 

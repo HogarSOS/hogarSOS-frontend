@@ -128,6 +128,400 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorInesperado => 'Something went wrong.';
 
   @override
+  String montoConSimbolo(String monto) {
+    return '€$monto';
+  }
+
+  @override
+  String get authErrorEmailEnUso =>
+      'An account with this email already exists. Try signing in, or use \"Forgot your password?\" if you don\'t remember it.';
+
+  @override
+  String get authErrorEmailInvalido => 'That email address isn\'t valid.';
+
+  @override
+  String get authErrorPasswordDebil =>
+      'Your password is too weak (minimum 6 characters).';
+
+  @override
+  String get authErrorCredencialesIncorrectas => 'Incorrect email or password.';
+
+  @override
+  String get authErrorDemasiadosIntentos =>
+      'Too many attempts. Please wait a moment before trying again.';
+
+  @override
+  String get authErrorTelefonoInvalido =>
+      'That phone number isn\'t valid. Include your country code (e.g. +1).';
+
+  @override
+  String get authErrorCodigoIncorrecto =>
+      'That code isn\'t correct. Check the SMS and try again.';
+
+  @override
+  String get authErrorCodigoCaducado =>
+      'That code has expired. Request a new one.';
+
+  @override
+  String get authErrorCuotaSms =>
+      'You\'ve reached the SMS code limit. Please try again later.';
+
+  @override
+  String get apiErrDatosInvalidos => 'Invalid data';
+
+  @override
+  String get apiErrSinPermiso => 'You don\'t have permission for this action';
+
+  @override
+  String get apiErrTokenInvalido =>
+      'Your session has expired. Please log in again.';
+
+  @override
+  String get apiErrMotivoRechazoRequerido => 'A rejection requires a reason';
+
+  @override
+  String get apiErrProfesionalNoEncontrado => 'Professional not found';
+
+  @override
+  String get apiErrVerificacionNoPendiente =>
+      'This professional doesn\'t have a pending verification';
+
+  @override
+  String get apiErrDisputaNoEncontrada => 'Dispute not found';
+
+  @override
+  String get apiErrDisputaResuelta => 'This dispute has already been resolved';
+
+  @override
+  String get apiErrResolucionStripeFallida =>
+      'The resolution couldn\'t be applied to the payment. Please try again or contact support.';
+
+  @override
+  String get apiErrAmpliacionDatosInvalidos => 'Invalid extension data';
+
+  @override
+  String get apiErrDatosContactoBloqueados =>
+      'For safety, contact details can only be shared once the job has been accepted';
+
+  @override
+  String get apiErrSolicitudNoEncontrada => 'Request not found';
+
+  @override
+  String get apiErrNoEresProfesionalAsignado =>
+      'You\'re not the professional assigned to this request';
+
+  @override
+  String get apiErrEstadoInvalidoAmpliacion =>
+      'This request isn\'t in a valid state to request an extension';
+
+  @override
+  String get apiErrSinPresupuestoAceptado =>
+      'There\'s no accepted budget for this request';
+
+  @override
+  String get apiErrHorasAdicionalesRequeridas => 'Enter the additional hours';
+
+  @override
+  String get apiErrImporteAdicionalRequerido => 'Enter the additional amount';
+
+  @override
+  String get apiErrAmpliacionYaPendiente =>
+      'There\'s already an extension awaiting a response';
+
+  @override
+  String get apiErrDecisionAmpliacionRequerida =>
+      'Please indicate whether you accept or reject the extension';
+
+  @override
+  String get apiErrSinAccesoSolicitud =>
+      'You don\'t have access to this request';
+
+  @override
+  String get apiErrAmpliacionNoEncontrada => 'Extension not found';
+
+  @override
+  String get apiErrAmpliacionNoPendiente =>
+      'This extension is no longer awaiting a response';
+
+  @override
+  String get apiErrUsuarioYaExiste =>
+      'An account with this email or phone number already exists';
+
+  @override
+  String get apiErrSinCuenta =>
+      'There\'s no account associated with this. Please sign up first.';
+
+  @override
+  String get apiErrCuentaDesactivada => 'This account has been disabled';
+
+  @override
+  String get apiErrReclamacionSoloTrabajoAceptado =>
+      'You can only report a problem on an accepted job';
+
+  @override
+  String get apiErrReclamacionYaAbierta =>
+      'There\'s already an open dispute for this job';
+
+  @override
+  String get apiErrSolicitudNoAceptada =>
+      'The request must be accepted by a professional before paying';
+
+  @override
+  String get apiErrNadaPendienteAutorizar =>
+      'There\'s nothing pending authorization for this request';
+
+  @override
+  String get apiErrNoEresCliente => 'You\'re not the customer for this request';
+
+  @override
+  String get apiErrNoAutorizadoPostular =>
+      'You\'re not authorized to apply to requests';
+
+  @override
+  String get apiErrSolicitudNoDisponible =>
+      'This request is no longer available';
+
+  @override
+  String get apiErrCandidaturaYaEnviada =>
+      'You\'ve already applied to this request';
+
+  @override
+  String get apiErrCandidaturaNoEncontrada => 'Application not found';
+
+  @override
+  String get apiErrPresupuestoDatosInvalidos => 'Invalid budget data';
+
+  @override
+  String get apiErrEstadoInvalidoPresupuesto =>
+      'This request isn\'t in a valid state to submit a budget';
+
+  @override
+  String get apiErrPresupuestoYaPendiente =>
+      'There\'s already a budget awaiting a response for this request';
+
+  @override
+  String get apiErrDecisionPresupuestoRequerida =>
+      'Please indicate whether you accept or reject the budget';
+
+  @override
+  String get apiErrPresupuestoNoEncontrado => 'Budget not found';
+
+  @override
+  String get apiErrPresupuestoNoPendiente =>
+      'This budget is no longer awaiting a response';
+
+  @override
+  String get apiErrPerfilProfesionalNoEncontrado =>
+      'Professional profile not found';
+
+  @override
+  String get apiErrProfesionalNoVerificado =>
+      'You can\'t set yourself as available until you\'re verified';
+
+  @override
+  String get apiErrCategoriasInvalidas =>
+      'One or more categories aren\'t valid';
+
+  @override
+  String get apiErrParametrosBusquedaInvalidos => 'Invalid search parameters';
+
+  @override
+  String get apiErrValorarSoloCompletado =>
+      'You can only rate a service that\'s already completed';
+
+  @override
+  String get apiErrValoracionBloqueadaDisputa =>
+      'There\'s an open dispute — you can\'t leave a rating until it\'s resolved';
+
+  @override
+  String get apiErrSinProfesionalAsignado =>
+      'This request doesn\'t have a professional assigned';
+
+  @override
+  String get apiErrNoParticipaste =>
+      'You didn\'t take part in this request, so you can\'t rate it';
+
+  @override
+  String get apiErrYaValoraste => 'You\'ve already rated this request';
+
+  @override
+  String get apiErrFechaRequerida => 'Enter the desired date';
+
+  @override
+  String get apiErrCategoriaInvalida => 'Invalid service category';
+
+  @override
+  String get apiErrCuentaNoVerificada =>
+      'Your account hasn\'t been verified yet';
+
+  @override
+  String get apiErrSoloCreadorCancela =>
+      'Only the customer who created this request can cancel it';
+
+  @override
+  String get apiErrNoSePuedeCancelar =>
+      'This request can no longer be canceled — the professional has already started, or it\'s already been resolved';
+
+  @override
+  String get apiErrSoloCreadorBorra =>
+      'Only the customer who created this request can delete it';
+
+  @override
+  String get apiErrNoSePuedeBorrar =>
+      'Only requests that no one has accepted yet can be deleted';
+
+  @override
+  String get apiErrNoSePuedeArchivar =>
+      'Only completed or canceled requests can be archived';
+
+  @override
+  String get apiErrMensajeRequerido => 'The message text is missing';
+
+  @override
+  String get apiErrEstadoInvalidoCompletar =>
+      'This request isn\'t in a valid state to be completed';
+
+  @override
+  String get apiErrPagoNoAutorizado =>
+      'The customer hasn\'t authorized payment for this service yet';
+
+  @override
+  String get apiErrHorasRequeridas => 'Enter the actual hours worked';
+
+  @override
+  String get apiErrCierreYaPendiente =>
+      'There\'s already a closing report awaiting the customer\'s confirmation';
+
+  @override
+  String get apiErrDecisionHorasRequerida =>
+      'Please indicate whether you accept or reject the reported hours';
+
+  @override
+  String get apiErrCierreNoEncontrado => 'Closing report not found';
+
+  @override
+  String get apiErrCierreNoPendiente =>
+      'This closing report is no longer awaiting a response';
+
+  @override
+  String get apiErrSinArchivo => 'No file was received';
+
+  @override
+  String get apiErrUsuarioNoEncontrado => 'User not found';
+
+  @override
+  String get legalPrivSec1Titulo => '1. Who processes your data';
+
+  @override
+  String get legalPrivSec1Texto =>
+      'hogarSOS is an app that connects customers with home-service professionals. We\'re the data controller for the personal data the app collects, as described in this policy.';
+
+  @override
+  String get legalPrivSec2Titulo => '2. What data we collect';
+
+  @override
+  String get legalPrivSec2Texto =>
+      '• Account data: name, email, and phone number when you sign up.\n• Location: your approximate or precise location (with your permission), to show you nearby professionals, or so a professional shows up in searches from customers near them.\n• Photos: any you attach to a service request or your profile.\n• Verification documents (professionals only): ID document, certifications, and liability insurance, used solely to verify your identity and suitability before you can operate on the platform.\n• Payment data: handled directly by Stripe, our payment processor — hogarSOS never stores your full card number.\n• Chat messages between the customer and professional on a given request.';
+
+  @override
+  String get legalPrivSec3Titulo => '3. What we use your data for';
+
+  @override
+  String get legalPrivSec3Texto =>
+      'To provide the service (connecting customers with professionals, processing payments, managing requests), to verify professionals\' identities, to send you notifications related to your requests, and to prevent fraud and resolve disputes.';
+
+  @override
+  String get legalPrivSec4Titulo => '4. Who we share your data with';
+
+  @override
+  String get legalPrivSec4Texto =>
+      'With the other party on a request (the customer sees the assigned professional\'s name, and vice versa). With providers that help us run the app: Firebase/Google (authentication, notifications, chat) and Stripe (payments). We don\'t sell your data to third parties or use it for advertising outside the app.';
+
+  @override
+  String get legalPrivSec5Titulo => '5. How long we keep your data';
+
+  @override
+  String get legalPrivSec5Texto =>
+      'For as long as your account is active. If you delete it, we erase or anonymize your personal data, except what we\'re legally required to retain (e.g. payment records).';
+
+  @override
+  String get legalPrivSec6Titulo => '6. Your rights';
+
+  @override
+  String get legalPrivSec6Texto =>
+      'You can access, correct, or request deletion of your data, and withdraw location, camera, or photo library permissions at any time from your phone\'s settings. To exercise these rights, contact us from within the app.';
+
+  @override
+  String get legalPrivSec7Titulo => '7. Changes to this policy';
+
+  @override
+  String get legalPrivSec7Texto =>
+      'If we make a material update to this policy, we\'ll notify you in the app before it takes effect.';
+
+  @override
+  String get legalTerminosSec1Titulo => '1. What hogarSOS is';
+
+  @override
+  String get legalTerminosSec1Texto =>
+      'hogarSOS is a platform that connects customers who need a home service (electrical, plumbing, cleaning, etc.) with independent professionals who provide them. hogarSOS doesn\'t perform the services itself and isn\'t the professionals\' employer — it acts as an intermediary between both parties.';
+
+  @override
+  String get legalTerminosSec2Titulo => '2. User accounts';
+
+  @override
+  String get legalTerminosSec2Texto =>
+      'You must provide accurate information when you sign up. You\'re responsible for keeping your account secure. Professionals must complete a verification process (ID document and, where applicable, certifications/insurance) before they can accept requests.';
+
+  @override
+  String get legalTerminosSec3Titulo => '3. Payments and fees';
+
+  @override
+  String get legalTerminosSec3Texto =>
+      'Payment for a service is authorized through Stripe when the job is accepted, but isn\'t charged until the professional marks the service as completed. hogarSOS retains a fee from the final price of the service; the rest is transferred to the professional. Prices are set by the professional or agreed between both parties over chat.';
+
+  @override
+  String get legalTerminosSec4Titulo => '4. Cancellations and refunds';
+
+  @override
+  String get legalTerminosSec4Texto =>
+      'The customer can cancel a request at no cost while it\'s still pending or was just accepted and work hasn\'t started yet. If a payment was already authorized, it\'s automatically refunded on cancellation. Once the professional marks the service as \"in progress\", it can no longer be canceled from the app — in that case, contact us to sort it out.';
+
+  @override
+  String get legalTerminosSec5Titulo => '5. Disputes';
+
+  @override
+  String get legalTerminosSec5Texto =>
+      'If something didn\'t go as expected, either the customer or the professional can open a dispute. An admin reviews the case and decides whether the payment is released to the professional or refunded to the customer.';
+
+  @override
+  String get legalTerminosSec6Titulo => '6. Liability';
+
+  @override
+  String get legalTerminosSec6Texto =>
+      'hogarSOS facilitates contact and payment between customer and professional, but doesn\'t oversee or guarantee the quality of the work performed — the service relationship is directly between both parties. We recommend checking a professional\'s ratings before hiring them.';
+
+  @override
+  String get legalTerminosSec7Titulo => '7. Professional conduct';
+
+  @override
+  String get legalTerminosSec7Texto =>
+      'Verified professionals must perform the service with the diligence and skill expected of their trade. hogarSOS may suspend or revoke an account that repeatedly receives negative ratings, breaches these terms, or whose verification turns out to be fraudulent.';
+
+  @override
+  String get legalTerminosSec8Titulo => '8. Changes to these terms';
+
+  @override
+  String get legalTerminosSec8Texto =>
+      'We may update these terms; material changes will be announced in the app before they take effect. Continuing to use hogarSOS after a change means you accept it.';
+
+  @override
+  String get legalTerminosSec9Titulo => '9. Governing law';
+
+  @override
+  String get legalTerminosSec9Texto =>
+      'These terms are governed by the laws of Spain.';
+
+  @override
   String homeSaludo(String nombre) {
     return 'Hi, $nombre 👋';
   }
@@ -178,7 +572,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeSubtitulo => 'What do you need fixed today?';
 
   @override
-  String get homeBuscarPlaceholder => 'Search for a pro or service...';
+  String get homeBuscarPlaceholder => 'Search for a professional or service...';
 
   @override
   String get homeCategoriasTitulo => 'Categories';
@@ -200,7 +594,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeErrorDescribe => 'Please describe the problem briefly';
 
   @override
-  String get homeErrorUbicacion => 'We need your location to find pros nearby';
+  String get homeErrorUbicacion =>
+      'We need your location to find professionals nearby';
 
   @override
   String get homeErrorCrearSolicitud =>
@@ -329,7 +724,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String buscarDesde(String precio) {
-    return 'From $precio €';
+    return 'From €$precio';
   }
 
   @override
@@ -417,7 +812,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get perfilProSolicitarInfo =>
-      'For now, requests go out to available professionals near you from Home, not to one specific pro yet';
+      'For now, new requests are sent to all available professionals near you, not to one specific professional';
 
   @override
   String get categoriaElectricista => 'Electrician';
@@ -489,7 +884,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoriaMasajes => 'Home massage';
 
   @override
-  String get categoriaManicuraPedicura => 'Manicure and pedicure';
+  String get categoriaManicuraPedicura => 'Manicure & pedicure';
 
   @override
   String get wizardEjemploGenerico =>
@@ -625,7 +1020,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profesionalPostulacionMensajeObligatorio =>
-      'Write when you can do the job before sending your application';
+      'Let the customer know when you\'re available before submitting your application';
 
   @override
   String get profesionalDisponibilidadTitulo => 'When can you do this job?';
@@ -791,7 +1186,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get seguimientoCompletada => 'Service completed';
 
   @override
-  String get seguimientoCancelada => 'Request cancelled';
+  String get seguimientoCancelada => 'Request canceled';
 
   @override
   String get seguimientoCancelarTitulo => 'Cancel request';
@@ -801,7 +1196,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Are you sure you want to cancel this request? This can\'t be undone.';
 
   @override
-  String get seguimientoCancelarExito => 'Request cancelled successfully';
+  String get seguimientoCancelarExito => 'Request canceled successfully';
 
   @override
   String get seguimientoCancelarError => 'Couldn\'t cancel the request';
@@ -829,7 +1224,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get miPerfilIncompletoAyuda =>
-      'You won\'t show up in client searches until you add:';
+      'You won\'t show up in customer searches until you add:';
 
   @override
   String get miPerfilFaltaFoto => 'a profile photo';
@@ -883,7 +1278,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get miPerfilVerificacionEstadoRechazado =>
-      'Verification rejected. Fix the document or rate and resubmit.';
+      'Verification rejected. Fix the document or your rate, then resubmit.';
 
   @override
   String get miPerfilVerificacionEstadoSinEnviar =>
@@ -1328,7 +1723,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'The customer wasn\'t at the address';
 
   @override
-  String get reportarProblemaMotivoTrabajoCancelado => 'The job was cancelled';
+  String get reportarProblemaMotivoTrabajoCancelado => 'The job was canceled';
 
   @override
   String get reportarProblemaMotivoProblemaPago => 'Payment issue';
@@ -1377,7 +1772,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String seleccionarProfesionalConfirmarTexto(String nombre) {
-    return '$nombre will be assigned to this job. The other candidates will be dismissed.';
+    return '$nombre will be assigned to this job. The other candidates will be declined.';
   }
 
   @override
@@ -1393,7 +1788,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trabajosActivosPresupuestoEsperando =>
-      'Waiting for the client\'s response';
+      'Waiting for the customer\'s response';
 
   @override
   String get trabajosActivosHorasRealesTitulo => 'Actual hours worked';
@@ -1408,7 +1803,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trabajosActivosCompletarCerradoConfirmar =>
-      'Confirm the job is complete? The agreed payment will be released.';
+      'Is the job complete? The agreed payment will be released.';
 
   @override
   String get presupuestoDialogoTitulo => 'Send quote';
@@ -1430,7 +1825,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get presupuestoDialogoMensajeHint =>
-      'Message for the client (optional)';
+      'Message for the customer (optional)';
 
   @override
   String get presupuestoEnviadoExito => 'Quote sent';
@@ -1492,7 +1887,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trabajosActivosHorasEnviadasExito =>
-      'Hours sent — waiting for the client to confirm them';
+      'Hours sent — waiting for the customer to confirm them';
 
   @override
   String get trabajosActivosPedirAmpliacionTitulo => 'Ask for more hours';
@@ -1516,7 +1911,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trabajosActivosCierreEsperando =>
-      'Waiting for the client to confirm the hours';
+      'Waiting for the customer to confirm the hours';
 
   @override
   String get trabajosActivosAmpliarPresupuesto => 'Extend budget';
@@ -1552,7 +1947,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String trabajosActivosDesgloseComision(
       String base, String comision, String recibiras) {
-    return 'Job amount: €$base · Hogar SOS fee: €$comision · You\'ll receive: €$recibiras';
+    return 'Job amount: €$base · hogarSOS fee: €$comision · You\'ll receive: €$recibiras';
   }
 
   @override
@@ -1577,7 +1972,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String seguimientoAmpliacionDetalle(String horas, String importe) {
-    return '$horas additional hours — additional amount: €$importe';
+    return '$horas more hours — additional amount: €$importe';
   }
 
   @override
@@ -1603,7 +1998,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get seguimientoCierreHorasReclamar => 'Report an issue';
+  String get seguimientoCierreHorasReclamar => 'Report a problem';
 
   @override
   String get seguimientoCierreHorasConfirmar => 'Confirm';

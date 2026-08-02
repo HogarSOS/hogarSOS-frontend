@@ -326,6 +326,660 @@ abstract class AppLocalizations {
   /// **'Ocurrió un error inesperado.'**
   String get errorInesperado;
 
+  /// No description provided for @montoConSimbolo.
+  ///
+  /// In es, this message translates to:
+  /// **'{monto} €'**
+  String montoConSimbolo(String monto);
+
+  /// No description provided for @authErrorEmailEnUso.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya existe una cuenta con este email. Intenta iniciar sesión o usa \"¿Olvidaste tu contraseña?\" si no la recuerdas.'**
+  String get authErrorEmailEnUso;
+
+  /// No description provided for @authErrorEmailInvalido.
+  ///
+  /// In es, this message translates to:
+  /// **'El email no tiene un formato válido.'**
+  String get authErrorEmailInvalido;
+
+  /// No description provided for @authErrorPasswordDebil.
+  ///
+  /// In es, this message translates to:
+  /// **'La contraseña es demasiado débil (mínimo 6 caracteres).'**
+  String get authErrorPasswordDebil;
+
+  /// No description provided for @authErrorCredencialesIncorrectas.
+  ///
+  /// In es, this message translates to:
+  /// **'Email o contraseña incorrectos.'**
+  String get authErrorCredencialesIncorrectas;
+
+  /// No description provided for @authErrorDemasiadosIntentos.
+  ///
+  /// In es, this message translates to:
+  /// **'Demasiados intentos. Espera un momento antes de volver a intentarlo.'**
+  String get authErrorDemasiadosIntentos;
+
+  /// No description provided for @authErrorTelefonoInvalido.
+  ///
+  /// In es, this message translates to:
+  /// **'El número de teléfono no es válido. Escríbelo con el prefijo del país (ej. +34).'**
+  String get authErrorTelefonoInvalido;
+
+  /// No description provided for @authErrorCodigoIncorrecto.
+  ///
+  /// In es, this message translates to:
+  /// **'El código no es correcto. Revisa el SMS e inténtalo de nuevo.'**
+  String get authErrorCodigoIncorrecto;
+
+  /// No description provided for @authErrorCodigoCaducado.
+  ///
+  /// In es, this message translates to:
+  /// **'El código ha caducado. Pide uno nuevo.'**
+  String get authErrorCodigoCaducado;
+
+  /// No description provided for @authErrorCuotaSms.
+  ///
+  /// In es, this message translates to:
+  /// **'Se alcanzó el límite de códigos por SMS. Inténtalo más tarde.'**
+  String get authErrorCuotaSms;
+
+  /// No description provided for @apiErrDatosInvalidos.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos inválidos'**
+  String get apiErrDatosInvalidos;
+
+  /// No description provided for @apiErrSinPermiso.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes permiso para esta acción'**
+  String get apiErrSinPermiso;
+
+  /// No description provided for @apiErrTokenInvalido.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu sesión ha caducado. Inicia sesión de nuevo.'**
+  String get apiErrTokenInvalido;
+
+  /// No description provided for @apiErrMotivoRechazoRequerido.
+  ///
+  /// In es, this message translates to:
+  /// **'Un rechazo requiere indicar un motivo'**
+  String get apiErrMotivoRechazoRequerido;
+
+  /// No description provided for @apiErrProfesionalNoEncontrado.
+  ///
+  /// In es, this message translates to:
+  /// **'Profesional no encontrado'**
+  String get apiErrProfesionalNoEncontrado;
+
+  /// No description provided for @apiErrVerificacionNoPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Este profesional no tiene una verificación pendiente'**
+  String get apiErrVerificacionNoPendiente;
+
+  /// No description provided for @apiErrDisputaNoEncontrada.
+  ///
+  /// In es, this message translates to:
+  /// **'Reclamación no encontrada'**
+  String get apiErrDisputaNoEncontrada;
+
+  /// No description provided for @apiErrDisputaResuelta.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta reclamación ya fue resuelta'**
+  String get apiErrDisputaResuelta;
+
+  /// No description provided for @apiErrResolucionStripeFallida.
+  ///
+  /// In es, this message translates to:
+  /// **'La resolución no pudo aplicarse en el pago. Inténtalo de nuevo o contacta con soporte.'**
+  String get apiErrResolucionStripeFallida;
+
+  /// No description provided for @apiErrAmpliacionDatosInvalidos.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos de ampliación inválidos'**
+  String get apiErrAmpliacionDatosInvalidos;
+
+  /// No description provided for @apiErrDatosContactoBloqueados.
+  ///
+  /// In es, this message translates to:
+  /// **'Por seguridad, los datos de contacto solo se pueden compartir cuando el trabajo haya sido aceptado'**
+  String get apiErrDatosContactoBloqueados;
+
+  /// No description provided for @apiErrSolicitudNoEncontrada.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud no encontrada'**
+  String get apiErrSolicitudNoEncontrada;
+
+  /// No description provided for @apiErrNoEresProfesionalAsignado.
+  ///
+  /// In es, this message translates to:
+  /// **'No eres el profesional asignado a esta solicitud'**
+  String get apiErrNoEresProfesionalAsignado;
+
+  /// No description provided for @apiErrEstadoInvalidoAmpliacion.
+  ///
+  /// In es, this message translates to:
+  /// **'La solicitud no está en un estado válido para pedir una ampliación'**
+  String get apiErrEstadoInvalidoAmpliacion;
+
+  /// No description provided for @apiErrSinPresupuestoAceptado.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay un presupuesto aceptado para esta solicitud'**
+  String get apiErrSinPresupuestoAceptado;
+
+  /// No description provided for @apiErrHorasAdicionalesRequeridas.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica las horas adicionales'**
+  String get apiErrHorasAdicionalesRequeridas;
+
+  /// No description provided for @apiErrImporteAdicionalRequerido.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica el importe adicional'**
+  String get apiErrImporteAdicionalRequerido;
+
+  /// No description provided for @apiErrAmpliacionYaPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya hay una ampliación pendiente de respuesta'**
+  String get apiErrAmpliacionYaPendiente;
+
+  /// No description provided for @apiErrDecisionAmpliacionRequerida.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica si aceptas o rechazas la ampliación'**
+  String get apiErrDecisionAmpliacionRequerida;
+
+  /// No description provided for @apiErrSinAccesoSolicitud.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes acceso a esta solicitud'**
+  String get apiErrSinAccesoSolicitud;
+
+  /// No description provided for @apiErrAmpliacionNoEncontrada.
+  ///
+  /// In es, this message translates to:
+  /// **'Ampliación no encontrada'**
+  String get apiErrAmpliacionNoEncontrada;
+
+  /// No description provided for @apiErrAmpliacionNoPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta ampliación ya no está pendiente de respuesta'**
+  String get apiErrAmpliacionNoPendiente;
+
+  /// No description provided for @apiErrUsuarioYaExiste.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya existe una cuenta con este email o teléfono'**
+  String get apiErrUsuarioYaExiste;
+
+  /// No description provided for @apiErrSinCuenta.
+  ///
+  /// In es, this message translates to:
+  /// **'No existe una cuenta asociada. Regístrate primero.'**
+  String get apiErrSinCuenta;
+
+  /// No description provided for @apiErrCuentaDesactivada.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta cuenta ha sido desactivada'**
+  String get apiErrCuentaDesactivada;
+
+  /// No description provided for @apiErrReclamacionSoloTrabajoAceptado.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo se puede reportar un problema en un trabajo aceptado'**
+  String get apiErrReclamacionSoloTrabajoAceptado;
+
+  /// No description provided for @apiErrReclamacionYaAbierta.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya existe una reclamación abierta para este trabajo'**
+  String get apiErrReclamacionYaAbierta;
+
+  /// No description provided for @apiErrSolicitudNoAceptada.
+  ///
+  /// In es, this message translates to:
+  /// **'La solicitud debe estar aceptada por un profesional antes de pagar'**
+  String get apiErrSolicitudNoAceptada;
+
+  /// No description provided for @apiErrNadaPendienteAutorizar.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay nada pendiente de autorizar para esta solicitud'**
+  String get apiErrNadaPendienteAutorizar;
+
+  /// No description provided for @apiErrNoEresCliente.
+  ///
+  /// In es, this message translates to:
+  /// **'No eres el cliente de esta solicitud'**
+  String get apiErrNoEresCliente;
+
+  /// No description provided for @apiErrNoAutorizadoPostular.
+  ///
+  /// In es, this message translates to:
+  /// **'No estás autorizado para postularte a solicitudes'**
+  String get apiErrNoAutorizadoPostular;
+
+  /// No description provided for @apiErrSolicitudNoDisponible.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta solicitud ya no está disponible'**
+  String get apiErrSolicitudNoDisponible;
+
+  /// No description provided for @apiErrCandidaturaYaEnviada.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya te has postulado a esta solicitud'**
+  String get apiErrCandidaturaYaEnviada;
+
+  /// No description provided for @apiErrCandidaturaNoEncontrada.
+  ///
+  /// In es, this message translates to:
+  /// **'Candidatura no encontrada'**
+  String get apiErrCandidaturaNoEncontrada;
+
+  /// No description provided for @apiErrPresupuestoDatosInvalidos.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos de presupuesto inválidos'**
+  String get apiErrPresupuestoDatosInvalidos;
+
+  /// No description provided for @apiErrEstadoInvalidoPresupuesto.
+  ///
+  /// In es, this message translates to:
+  /// **'La solicitud no está en un estado válido para presupuestar'**
+  String get apiErrEstadoInvalidoPresupuesto;
+
+  /// No description provided for @apiErrPresupuestoYaPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya hay un presupuesto pendiente de respuesta para esta solicitud'**
+  String get apiErrPresupuestoYaPendiente;
+
+  /// No description provided for @apiErrDecisionPresupuestoRequerida.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica si aceptas o rechazas el presupuesto'**
+  String get apiErrDecisionPresupuestoRequerida;
+
+  /// No description provided for @apiErrPresupuestoNoEncontrado.
+  ///
+  /// In es, this message translates to:
+  /// **'Presupuesto no encontrado'**
+  String get apiErrPresupuestoNoEncontrado;
+
+  /// No description provided for @apiErrPresupuestoNoPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Este presupuesto ya no está pendiente de respuesta'**
+  String get apiErrPresupuestoNoPendiente;
+
+  /// No description provided for @apiErrPerfilProfesionalNoEncontrado.
+  ///
+  /// In es, this message translates to:
+  /// **'Perfil de profesional no encontrado'**
+  String get apiErrPerfilProfesionalNoEncontrado;
+
+  /// No description provided for @apiErrProfesionalNoVerificado.
+  ///
+  /// In es, this message translates to:
+  /// **'No puedes ponerte disponible hasta ser verificado'**
+  String get apiErrProfesionalNoVerificado;
+
+  /// No description provided for @apiErrCategoriasInvalidas.
+  ///
+  /// In es, this message translates to:
+  /// **'Una o más categorías no son válidas'**
+  String get apiErrCategoriasInvalidas;
+
+  /// No description provided for @apiErrParametrosBusquedaInvalidos.
+  ///
+  /// In es, this message translates to:
+  /// **'Parámetros de búsqueda inválidos'**
+  String get apiErrParametrosBusquedaInvalidos;
+
+  /// No description provided for @apiErrValorarSoloCompletado.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo se puede valorar un servicio ya completado'**
+  String get apiErrValorarSoloCompletado;
+
+  /// No description provided for @apiErrValoracionBloqueadaDisputa.
+  ///
+  /// In es, this message translates to:
+  /// **'Existe una reclamación abierta — no se puede valorar hasta que se resuelva'**
+  String get apiErrValoracionBloqueadaDisputa;
+
+  /// No description provided for @apiErrSinProfesionalAsignado.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta solicitud no tiene profesional asignado'**
+  String get apiErrSinProfesionalAsignado;
+
+  /// No description provided for @apiErrNoParticipaste.
+  ///
+  /// In es, this message translates to:
+  /// **'No participaste en esta solicitud, no puedes valorarla'**
+  String get apiErrNoParticipaste;
+
+  /// No description provided for @apiErrYaValoraste.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya has valorado esta solicitud'**
+  String get apiErrYaValoraste;
+
+  /// No description provided for @apiErrFechaRequerida.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica la fecha deseada'**
+  String get apiErrFechaRequerida;
+
+  /// No description provided for @apiErrCategoriaInvalida.
+  ///
+  /// In es, this message translates to:
+  /// **'Categoría de servicio no válida'**
+  String get apiErrCategoriaInvalida;
+
+  /// No description provided for @apiErrCuentaNoVerificada.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu cuenta aún no ha sido verificada'**
+  String get apiErrCuentaNoVerificada;
+
+  /// No description provided for @apiErrSoloCreadorCancela.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo el cliente que creó esta solicitud puede cancelarla'**
+  String get apiErrSoloCreadorCancela;
+
+  /// No description provided for @apiErrNoSePuedeCancelar.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta solicitud ya no se puede cancelar — el profesional ya empezó o ya se resolvió'**
+  String get apiErrNoSePuedeCancelar;
+
+  /// No description provided for @apiErrSoloCreadorBorra.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo el cliente que creó esta solicitud puede borrarla'**
+  String get apiErrSoloCreadorBorra;
+
+  /// No description provided for @apiErrNoSePuedeBorrar.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo se pueden borrar solicitudes que nadie ha aceptado todavía'**
+  String get apiErrNoSePuedeBorrar;
+
+  /// No description provided for @apiErrNoSePuedeArchivar.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo se pueden archivar solicitudes completadas o canceladas'**
+  String get apiErrNoSePuedeArchivar;
+
+  /// No description provided for @apiErrMensajeRequerido.
+  ///
+  /// In es, this message translates to:
+  /// **'Falta el texto del mensaje'**
+  String get apiErrMensajeRequerido;
+
+  /// No description provided for @apiErrEstadoInvalidoCompletar.
+  ///
+  /// In es, this message translates to:
+  /// **'La solicitud no está en un estado válido para completarse'**
+  String get apiErrEstadoInvalidoCompletar;
+
+  /// No description provided for @apiErrPagoNoAutorizado.
+  ///
+  /// In es, this message translates to:
+  /// **'El cliente aún no ha autorizado el pago de este servicio'**
+  String get apiErrPagoNoAutorizado;
+
+  /// No description provided for @apiErrHorasRequeridas.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica las horas reales trabajadas'**
+  String get apiErrHorasRequeridas;
+
+  /// No description provided for @apiErrCierreYaPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya hay un cierre pendiente de confirmación del cliente'**
+  String get apiErrCierreYaPendiente;
+
+  /// No description provided for @apiErrDecisionHorasRequerida.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica si aceptas o rechazas las horas declaradas'**
+  String get apiErrDecisionHorasRequerida;
+
+  /// No description provided for @apiErrCierreNoEncontrado.
+  ///
+  /// In es, this message translates to:
+  /// **'Cierre no encontrado'**
+  String get apiErrCierreNoEncontrado;
+
+  /// No description provided for @apiErrCierreNoPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Este cierre ya no está pendiente de respuesta'**
+  String get apiErrCierreNoPendiente;
+
+  /// No description provided for @apiErrSinArchivo.
+  ///
+  /// In es, this message translates to:
+  /// **'No se ha recibido ningún archivo'**
+  String get apiErrSinArchivo;
+
+  /// No description provided for @apiErrUsuarioNoEncontrado.
+  ///
+  /// In es, this message translates to:
+  /// **'Usuario no encontrado'**
+  String get apiErrUsuarioNoEncontrado;
+
+  /// No description provided for @legalPrivSec1Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'1. Quién trata tus datos'**
+  String get legalPrivSec1Titulo;
+
+  /// No description provided for @legalPrivSec1Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'hogarSOS es una app que conecta a clientes con profesionales de servicios a domicilio. Somos responsables del tratamiento de los datos personales que recoge la aplicación, descritos en esta política.'**
+  String get legalPrivSec1Texto;
+
+  /// No description provided for @legalPrivSec2Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'2. Qué datos recogemos'**
+  String get legalPrivSec2Titulo;
+
+  /// No description provided for @legalPrivSec2Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'• Datos de cuenta: nombre, email y teléfono al registrarte.\n• Ubicación: tu ubicación aproximada o precisa (con tu permiso) para mostrarte profesionales cercanos, o para que un profesional aparezca en las búsquedas de clientes cerca de él.\n• Fotos: las que adjuntes a una solicitud de servicio o a tu perfil.\n• Documentos de verificación (solo profesionales): documento de identidad, certificados y seguro de responsabilidad civil, usados exclusivamente para verificar tu identidad y aptitud antes de permitirte operar en la plataforma.\n• Datos de pago: gestionados directamente por Stripe, nuestro procesador de pagos — hogarSOS nunca almacena el número completo de tu tarjeta.\n• Mensajes de chat entre cliente y profesional de una misma solicitud.'**
+  String get legalPrivSec2Texto;
+
+  /// No description provided for @legalPrivSec3Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'3. Para qué usamos tus datos'**
+  String get legalPrivSec3Titulo;
+
+  /// No description provided for @legalPrivSec3Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'Para prestar el servicio (conectar clientes con profesionales, procesar pagos, gestionar solicitudes), para verificar la identidad de los profesionales, para enviarte notificaciones relacionadas con tus solicitudes, y para prevenir fraude y resolver disputas.'**
+  String get legalPrivSec3Texto;
+
+  /// No description provided for @legalPrivSec4Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'4. Con quién compartimos tus datos'**
+  String get legalPrivSec4Titulo;
+
+  /// No description provided for @legalPrivSec4Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'Con el otro participante de una solicitud (el cliente ve el nombre del profesional asignado y viceversa). Con proveedores que nos ayudan a operar la app: Firebase/Google (autenticación, notificaciones, chat) y Stripe (pagos). No vendemos tus datos a terceros ni los usamos con fines publicitarios ajenos a la app.'**
+  String get legalPrivSec4Texto;
+
+  /// No description provided for @legalPrivSec5Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'5. Cuánto tiempo conservamos tus datos'**
+  String get legalPrivSec5Titulo;
+
+  /// No description provided for @legalPrivSec5Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'Mientras tu cuenta esté activa. Si la eliminas, borramos o anonimizamos tus datos personales, salvo lo que debamos conservar por obligación legal (p. ej. registros de pagos).'**
+  String get legalPrivSec5Texto;
+
+  /// No description provided for @legalPrivSec6Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'6. Tus derechos'**
+  String get legalPrivSec6Titulo;
+
+  /// No description provided for @legalPrivSec6Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'Puedes acceder, rectificar o solicitar la eliminación de tus datos, y retirar los permisos de ubicación, cámara o galería en cualquier momento desde los ajustes de tu teléfono. Para ejercer estos derechos, contacta con nosotros desde la app.'**
+  String get legalPrivSec6Texto;
+
+  /// No description provided for @legalPrivSec7Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'7. Cambios en esta política'**
+  String get legalPrivSec7Titulo;
+
+  /// No description provided for @legalPrivSec7Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'Si actualizamos esta política de forma relevante, te lo notificaremos dentro de la app antes de que entre en vigor.'**
+  String get legalPrivSec7Texto;
+
+  /// No description provided for @legalTerminosSec1Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'1. Qué es hogarSOS'**
+  String get legalTerminosSec1Titulo;
+
+  /// No description provided for @legalTerminosSec1Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'hogarSOS es una plataforma que conecta a clientes que necesitan un servicio a domicilio (electricidad, fontanería, limpieza, etc.) con profesionales independientes que los ofrecen. hogarSOS no presta los servicios directamente ni es empleador de los profesionales — actúa como intermediario entre ambas partes.'**
+  String get legalTerminosSec1Texto;
+
+  /// No description provided for @legalTerminosSec2Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'2. Cuentas de usuario'**
+  String get legalTerminosSec2Titulo;
+
+  /// No description provided for @legalTerminosSec2Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'Debes dar información veraz al registrarte. Eres responsable de mantener segura tu cuenta. Los profesionales deben superar un proceso de verificación (documento de identidad y, si aplica, certificados/seguro) antes de poder aceptar solicitudes.'**
+  String get legalTerminosSec2Texto;
+
+  /// No description provided for @legalTerminosSec3Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'3. Pagos y comisión'**
+  String get legalTerminosSec3Titulo;
+
+  /// No description provided for @legalTerminosSec3Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'El pago de un servicio se autoriza a través de Stripe al aceptar el trabajo, pero no se cobra hasta que el profesional marca el servicio como completado. hogarSOS retiene una comisión sobre el precio final del servicio; el resto se transfiere al profesional. Los precios los fija el profesional o se acuerdan entre ambas partes por chat.'**
+  String get legalTerminosSec3Texto;
+
+  /// No description provided for @legalTerminosSec4Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'4. Cancelaciones y reembolsos'**
+  String get legalTerminosSec4Titulo;
+
+  /// No description provided for @legalTerminosSec4Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'El cliente puede cancelar una solicitud sin coste mientras esté pendiente o recién aceptada y el trabajo todavía no haya empezado. Si ya se autorizó un pago, se reembolsa automáticamente al cancelar. Una vez el profesional marca el servicio como \"en curso\", ya no se puede cancelar desde la app — en ese caso, contacta con nosotros para resolverlo.'**
+  String get legalTerminosSec4Texto;
+
+  /// No description provided for @legalTerminosSec5Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'5. Disputas'**
+  String get legalTerminosSec5Titulo;
+
+  /// No description provided for @legalTerminosSec5Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'Si algo no fue como se esperaba, cliente o profesional pueden abrir una disputa. Un administrador revisa el caso y decide si el pago se libera al profesional o se reembolsa al cliente.'**
+  String get legalTerminosSec5Texto;
+
+  /// No description provided for @legalTerminosSec6Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'6. Responsabilidad'**
+  String get legalTerminosSec6Titulo;
+
+  /// No description provided for @legalTerminosSec6Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'hogarSOS facilita el contacto y el pago entre cliente y profesional, pero no supervisa ni garantiza la calidad del trabajo realizado — la relación de servicio es directamente entre ambas partes. Recomendamos revisar las valoraciones de un profesional antes de contratarlo.'**
+  String get legalTerminosSec6Texto;
+
+  /// No description provided for @legalTerminosSec7Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'7. Conducta de los profesionales'**
+  String get legalTerminosSec7Titulo;
+
+  /// No description provided for @legalTerminosSec7Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'Los profesionales verificados deben prestar el servicio con la diligencia y competencia propias de su oficio. hogarSOS puede suspender o revocar una cuenta que reciba valoraciones reiteradamente negativas, incumpla estos términos, o cuya verificación resulte fraudulenta.'**
+  String get legalTerminosSec7Texto;
+
+  /// No description provided for @legalTerminosSec8Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'8. Cambios en estos términos'**
+  String get legalTerminosSec8Titulo;
+
+  /// No description provided for @legalTerminosSec8Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'Podemos actualizar estos términos; los cambios relevantes se notificarán dentro de la app antes de entrar en vigor. Seguir usando hogarSOS después de un cambio implica aceptarlo.'**
+  String get legalTerminosSec8Texto;
+
+  /// No description provided for @legalTerminosSec9Titulo.
+  ///
+  /// In es, this message translates to:
+  /// **'9. Ley aplicable'**
+  String get legalTerminosSec9Titulo;
+
+  /// No description provided for @legalTerminosSec9Texto.
+  ///
+  /// In es, this message translates to:
+  /// **'Estos términos se rigen por la legislación española.'**
+  String get legalTerminosSec9Texto;
+
   /// No description provided for @homeSaludo.
   ///
   /// In es, this message translates to:

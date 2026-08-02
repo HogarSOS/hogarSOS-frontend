@@ -55,7 +55,18 @@ class ResumenYListaOpiniones extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text(review.autor, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5)),
+                        // Expanded: el nombre es texto libre del usuario
+                        // (sin límite de longitud conocido) — sin esto,
+                        // un nombre largo desborda la fila contra las 5
+                        // estrellas de al lado.
+                        Expanded(
+                          child: Text(
+                            review.autor,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+                          ),
+                        ),
                         const SizedBox(width: 8),
                         ...List.generate(
                           5,

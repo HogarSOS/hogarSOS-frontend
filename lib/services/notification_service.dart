@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:ui' as ui;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -37,6 +39,15 @@ class NotificationService {
   /// que conviene re-registrarlo en cada arranque con sesión activa,
   /// no solo la primera vez.
   Future<void> registrarToken() async {
+    // Independiente del permiso de notificaciones: aunque el usuario
+    // lo deniegue ahora, el idioma queda guardado para el día que lo
+    // active desde los ajustes del sistema. Mismo endpoint-por-arranque
+    // que el token FCM (ver PATCH /auth/me/fcm-token más abajo) — la
+    // app no tiene selector de idioma propio, sigue el locale resuelto
+    // por MaterialApp (ver main.dart), que a su vez sigue el idioma
+    // del sistema operativo.
+    unawaited(_registrarIdioma());
+
     try {
       final permiso = await _messaging.requestPermission(alert: true, badge: true, sound: true);
       if (permiso.authorizationStatus == AuthorizationStatus.denied) {
@@ -63,6 +74,20 @@ class NotificationService {
       });
     } catch (e) {
       debugPrint('[NotificationService] Error al registrar el token: $e');
+    }
+  }
+
+  /// Mismo idioma que resuelve MaterialApp en main.dart: de los dos
+  /// soportados (es/en), 'en' solo si el idioma del sistema es
+  /// inglés, 'es' en cualquier otro caso (incluido el propio 'es') —
+  /// replica la resolución por defecto de Flutter con
+  /// supportedLocales: [Locale('es'), Locale('en')].
+  Future<void> _registrarIdioma() async {
+    try {
+      final idioma = ui.PlatformDispatcher.instance.locale.languageCode == 'en' ? 'en' : 'es';
+      await ApiService.instance.client.patch('/auth/me/idioma', data: {'idioma': idioma});
+    } catch (e) {
+      debugPrint('[NotificationService] Error al registrar el idioma: $e');
     }
   }
 

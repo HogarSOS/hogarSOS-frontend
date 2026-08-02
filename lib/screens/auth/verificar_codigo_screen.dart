@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/error_extraction.dart';
 import '../admin/admin_screen.dart';
 import '../cliente_shell_screen.dart';
 import '../profesional_shell_screen.dart';
@@ -134,10 +135,10 @@ class _VerificarCodigoScreenState extends ConsumerState<VerificarCodigoScreen> {
               (route) => false,
             );
           },
-          onError: (mensaje) {
+          onError: (codigoError) {
             if (!mounted) return;
             setState(() {
-              _errorLocal = mensaje;
+              _errorLocal = mensajeAuthError(codigoError, t);
               _reenviando = false;
             });
           },
@@ -174,11 +175,11 @@ class _VerificarCodigoScreenState extends ConsumerState<VerificarCodigoScreen> {
                 decoration: InputDecoration(labelText: t.otpFieldCodigo, counterText: ''),
                 onSubmitted: (_) => _confirmar(),
               ),
-              if (_errorLocal != null || authState.error != null)
+              if (_errorLocal != null || authState.errorCode != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 4, bottom: 12),
                   child: Text(
-                    _errorLocal ?? authState.error!,
+                    _errorLocal ?? mensajeAuthError(authState.errorCode!, t),
                     style: TextStyle(color: colorScheme.error, fontWeight: FontWeight.w600),
                     textAlign: TextAlign.center,
                   ),

@@ -10,13 +10,25 @@ class AuthResult {
   AuthResult(this.usuario);
 }
 
+/// `code` es un identificador estable, NO un texto para mostrar — los
+/// códigos de Firebase (`FirebaseAuthException.code`, ej.
+/// 'wrong-password') se pasan tal cual, los de red/servidor son
+/// sintéticos ('connection', 'timeout', 'server', 'unexpected'), y los
+/// de negocio del backend vienen en `data['code']` de la respuesta
+/// (ver `res.status(...).json({ error: '...', code: '...' })` en cada
+/// controlador). Traducir el código a texto es responsabilidad de la
+/// pantalla que lo muestra (tiene el `BuildContext`/`AppLocalizations`
+/// que este servicio no tiene) — ver `mensajeAuthError` en
+/// `utils/error_extraction.dart`. Antes esta clase llevaba el mensaje
+/// ya construido en español fijo, así que cualquier error de login
+/// aparecía en español sin importar el idioma de la app.
 class AuthException implements Exception {
-  final String mensaje;
+  final String code;
   final Object? causa;
-  AuthException(this.mensaje, {this.causa});
+  AuthException(this.code, {this.causa});
 
   @override
-  String toString() => 'AuthException: $mensaje (causa: $causa)';
+  String toString() => 'AuthException: $code (causa: $causa)';
 }
 
 class AuthService {
@@ -45,14 +57,14 @@ class AuthService {
     required String numeroTelefono,
     required void Function(String verificationId) onCodigoEnviado,
     required void Function(fb.PhoneAuthCredential credential) onAutoVerificado,
-    required void Function(String mensaje) onError,
+    required void Function(String codigoError) onError,
   }) async {
     await _firebaseAuth.verifyPhoneNumber(
       phoneNumber: numeroTelefono,
       verificationCompleted: onAutoVerificado,
       verificationFailed: (e) {
         debugPrint('[AuthService] verifyPhoneNumber falló: ${e.code} — ${e.message}');
-        onError(_mensajeFirebase(e));
+        onError(e.code);
       },
       codeSent: (verificationId, _) => onCodigoEnviado(verificationId),
       // Firebase sigue aceptando el código bastante después de este
@@ -113,7 +125,7 @@ class AuthService {
       credencial = await _firebaseAuth.signInWithCredential(credential);
     } on fb.FirebaseAuthException catch (e) {
       debugPrint('[AuthService] signInWithCredential (teléfono) falló: ${e.code} — ${e.message}');
-      throw AuthException(_mensajeFirebase(e), causa: e);
+      throw AuthException(e.code, causa: e);
     }
 
     try {
@@ -130,11 +142,11 @@ class AuthService {
     } on DioException catch (e) {
       debugPrint('[AuthService] Fallo al completar con teléfono en el backend: ${e.type} — ${e.message}');
       await _revertirUsuarioFirebase(credencial);
-      throw AuthException(_mensajeDio(e), causa: e);
+      throw AuthException(_codigoDio(e), causa: e);
     } catch (e) {
       debugPrint('[AuthService] Error inesperado al completar con teléfono: $e');
       await _revertirUsuarioFirebase(credencial);
-      throw AuthException('Ocurrió un error inesperado al completar el registro.', causa: e);
+      throw AuthException('unexpected', causa: e);
     }
   }
 
@@ -158,7 +170,7 @@ class AuthService {
       );
     } on fb.FirebaseAuthException catch (e) {
       debugPrint('[AuthService] FirebaseAuthException en registro: ${e.code} — ${e.message}');
-      throw AuthException(_mensajeFirebase(e), causa: e);
+      throw AuthException(e.code, causa: e);
     }
 
     try {
@@ -186,11 +198,11 @@ class AuthService {
     } on DioException catch (e) {
       debugPrint('[AuthService] Fallo al registrar en el backend: ${e.type} — ${e.message}');
       await _revertirUsuarioFirebase(credencial);
-      throw AuthException(_mensajeDio(e), causa: e);
+      throw AuthException(_codigoDio(e), causa: e);
     } catch (e) {
       debugPrint('[AuthService] Error inesperado al registrar en el backend: $e');
       await _revertirUsuarioFirebase(credencial);
-      throw AuthException('Ocurrió un error inesperado al completar el registro.', causa: e);
+      throw AuthException('unexpected', causa: e);
     }
   }
 
@@ -215,7 +227,7 @@ class AuthService {
       );
     } on fb.FirebaseAuthException catch (e) {
       debugPrint('[AuthService] FirebaseAuthException en login: ${e.code} — ${e.message}');
-      throw AuthException(_mensajeFirebase(e), causa: e);
+      throw AuthException(e.code, causa: e);
     }
 
     try {
@@ -226,7 +238,7 @@ class AuthService {
       return _guardarSesion(respuesta.data, recordarSesion: recordarSesion);
     } on DioException catch (e) {
       debugPrint('[AuthService] Fallo al iniciar sesión en el backend: ${e.type} — ${e.message}');
-      throw AuthException(_mensajeDio(e), causa: e);
+      throw AuthException(_codigoDio(e), causa: e);
     }
   }
 
@@ -291,7 +303,7 @@ class AuthService {
       await _firebaseAuth.sendPasswordResetEmail(email: email);
     } on fb.FirebaseAuthException catch (e) {
       debugPrint('[AuthService] Error al enviar email de recuperación: ${e.code}');
-      throw AuthException(_mensajeFirebase(e), causa: e);
+      throw AuthException(e.code, causa: e);
     }
   }
 
@@ -333,55 +345,30 @@ class AuthService {
       await user.sendEmailVerification();
     } on fb.FirebaseAuthException catch (e) {
       debugPrint('[AuthService] Error al reenviar el email de verificación: ${e.code}');
-      throw AuthException(_mensajeFirebase(e), causa: e);
+      throw AuthException(e.code, causa: e);
     }
   }
 
-  String _mensajeFirebase(fb.FirebaseAuthException e) {
-    switch (e.code) {
-      case 'email-already-in-use':
-        return 'Ya existe una cuenta con este email. Intenta iniciar sesión o '
-            'usa "He olvidado mi contraseña" si no la recuerdas.';
-      case 'invalid-email':
-        return 'El email no tiene un formato válido.';
-      case 'weak-password':
-        return 'La contraseña es demasiado débil (mínimo 6 caracteres).';
-      case 'user-not-found':
-      case 'wrong-password':
-      case 'invalid-credential':
-        return 'Email o contraseña incorrectos.';
-      case 'network-request-failed':
-        return 'No hay conexión a internet.';
-      case 'too-many-requests':
-        return 'Demasiados intentos. Espera un momento antes de volver a intentarlo.';
-      case 'invalid-phone-number':
-        return 'El número de teléfono no es válido. Escríbelo con el prefijo del país (ej. +34).';
-      case 'invalid-verification-code':
-        return 'El código no es correcto. Revisa el SMS e inténtalo de nuevo.';
-      case 'session-expired':
-      case 'code-expired':
-        return 'El código ha caducado. Pide uno nuevo.';
-      case 'quota-exceeded':
-        return 'Se alcanzó el límite de códigos por SMS. Inténtalo más tarde.';
-      default:
-        return e.message ?? 'Error de autenticación (${e.code})';
-    }
-  }
-
-  String _mensajeDio(DioException e) {
+  /// Los códigos de `FirebaseAuthException.code` ('wrong-password',
+  /// 'invalid-email'...) ya son identificadores estables — no hace
+  /// falta traducirlos aquí, se pasan tal cual a `AuthException.code`
+  /// y la pantalla los traduce con `mensajeAuthError` (tiene el `t` que
+  /// este servicio no tiene). Para uno que Firebase no documenta, la
+  /// pantalla ya cae a un mensaje genérico localizado (ver el `default`
+  /// de `mensajeAuthError`), así que no hace falta un caso especial
+  /// aquí tampoco.
+  String _codigoDio(DioException e) {
     switch (e.type) {
       case DioExceptionType.connectionError:
       case DioExceptionType.connectionTimeout:
-        return 'No se pudo conectar con el servidor. Comprueba que el backend '
-            'esté corriendo y que API_BASE_URL apunte a la dirección correcta.';
+        return 'connection';
       case DioExceptionType.receiveTimeout:
       case DioExceptionType.sendTimeout:
-        return 'El servidor tardó demasiado en responder.';
+        return 'timeout';
       default:
-        final mensajeServidor = e.response?.data is Map
-            ? (e.response?.data as Map)['error']?.toString()
-            : null;
-        return mensajeServidor ?? 'Error del servidor (${e.response?.statusCode ?? "sin respuesta"})';
+        final data = e.response?.data;
+        final codigoServidor = data is Map ? data['code']?.toString() : null;
+        return codigoServidor ?? 'server';
     }
   }
 }

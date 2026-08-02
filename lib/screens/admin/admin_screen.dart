@@ -96,12 +96,19 @@ Future<String?> _pedirTextoObligatorio(
         final valido = controller.text.trim().length >= 5;
         return AlertDialog(
           title: Text(titulo),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            maxLines: 3,
-            decoration: InputDecoration(hintText: hint, helperText: ayuda),
-            onChanged: (_) => setState(() {}),
+          // SingleChildScrollView + viewInsets.bottom: mismo fix que en
+          // home_profesional_screen.dart — sin esto, con el teclado
+          // abierto en un móvil pequeño (maxLines: 3 más el helperText
+          // ocupan bastante alto) el diálogo puede desbordar por abajo.
+          content: SingleChildScrollView(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: TextField(
+              controller: controller,
+              autofocus: true,
+              maxLines: 3,
+              decoration: InputDecoration(hintText: hint, helperText: ayuda),
+              onChanged: (_) => setState(() {}),
+            ),
           ),
           actions: [
             TextButton(
@@ -351,14 +358,31 @@ class _DisputasTabState extends State<_DisputasTab> {
                               Expanded(
                                 child: OutlinedButton(
                                   onPressed: () => _resolver(d, false),
-                                  child: Text(t.adminFavorCliente),
+                                  // "In favor of the customer" es bastante
+                                  // más largo que "A favor del cliente" —
+                                  // sin esto, el botón en inglés envolvía
+                                  // a 2 líneas mientras el de al lado se
+                                  // quedaba en 1, descuadrando el par.
+                                  child: Text(
+                                    t.adminFavorCliente,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: FilledButton(
                                   onPressed: () => _resolver(d, true),
-                                  child: Text(t.adminFavorProfesional),
+                                  child: Text(
+                                    t.adminFavorProfesional,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
                                 ),
                               ),
                             ],

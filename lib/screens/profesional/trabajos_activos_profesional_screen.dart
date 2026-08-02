@@ -73,22 +73,25 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
         context: context,
         builder: (context) => AlertDialog(
           title: Text(t.trabajosActivosHorasRealesTitulo),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                t.trabajosActivosHorasRealesTarifa(presupuesto!.tarifaHora!.toStringAsFixed(2)),
-                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: controller,
-                autofocus: true,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(labelText: t.trabajosActivosHorasRealesHint),
-              ),
-            ],
+          content: SingleChildScrollView(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  t.trabajosActivosHorasRealesTarifa(presupuesto!.tarifaHora!.toStringAsFixed(2)),
+                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: controller,
+                  autofocus: true,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(labelText: t.trabajosActivosHorasRealesHint),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -176,28 +179,34 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
       context: context,
       builder: (context) => AlertDialog(
         title: Text(esCerrado ? t.trabajosActivosAmpliarPresupuestoTitulo : t.trabajosActivosPedirAmpliacionTitulo),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: valorController,
-              autofocus: true,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                labelText: esCerrado
-                    ? t.trabajosActivosAmpliarPresupuestoMontoHint
-                    : t.trabajosActivosPedirAmpliacionHorasHint,
+        // Dos TextField apilados sin scroll era el diálogo con más
+        // riesgo de overflow de teclado de toda la pantalla — mismo fix
+        // que en home_profesional_screen.dart.
+        content: SingleChildScrollView(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: valorController,
+                autofocus: true,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: esCerrado
+                      ? t.trabajosActivosAmpliarPresupuestoMontoHint
+                      : t.trabajosActivosPedirAmpliacionHorasHint,
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: mensajeController,
-              maxLines: 2,
-              minLines: 1,
-              decoration: InputDecoration(hintText: t.trabajosActivosAmpliacionMotivoHint),
-            ),
-          ],
+              const SizedBox(height: 10),
+              TextField(
+                controller: mensajeController,
+                maxLines: 2,
+                minLines: 1,
+                decoration: InputDecoration(hintText: t.trabajosActivosAmpliacionMotivoHint),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -971,7 +980,12 @@ class _ChipEstado extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(maxWidth: 130),
+      // 130 se quedaba corto para estados en inglés más largos que su
+      // versión en español (p.ej. "Confirmation pending" vs
+      // "Confirmación pendiente" truncaba de más pese al maxLines:1 +
+      // ellipsis de abajo, que ya evita el overflow pero no evita
+      // perder texto innecesariamente).
+      constraints: const BoxConstraints(maxWidth: 160),
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
         color: estado.fondo,

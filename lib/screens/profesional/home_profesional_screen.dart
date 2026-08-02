@@ -84,37 +84,48 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(t.profesionalDisponibilidadTitulo),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              t.profesionalDisponibilidadSubtitulo,
-              style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                t.profesionalDisponibilidadSugerencia1,
-                t.profesionalDisponibilidadSugerencia2,
-                t.profesionalDisponibilidadSugerencia3,
-              ]
-                  .map((sugerencia) => ActionChip(
-                        label: Text(sugerencia, style: const TextStyle(fontSize: 12.5)),
-                        onPressed: () => controller.text = sugerencia,
-                      ))
-                  .toList(),
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: controller,
-              maxLines: 2,
-              minLines: 1,
-              decoration: InputDecoration(hintText: t.profesionalDisponibilidadHint),
-            ),
-          ],
+        // El diálogo original ponía el TextField directo en un Column
+        // dentro de content: con el teclado abierto en un móvil pequeño,
+        // la altura disponible baja y el Column no cabe -> "BOTTOM
+        // OVERFLOWED BY XX PIXELS". Envolver en SingleChildScrollView
+        // hace que solo el contenido (no los botones de actions, que
+        // quedan fuera y siempre visibles) se desplace; el padding con
+        // viewInsets.bottom deja hueco extra para que el TextField no
+        // quede tapado por el teclado mientras se escribe.
+        content: SingleChildScrollView(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                t.profesionalDisponibilidadSubtitulo,
+                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  t.profesionalDisponibilidadSugerencia1,
+                  t.profesionalDisponibilidadSugerencia2,
+                  t.profesionalDisponibilidadSugerencia3,
+                ]
+                    .map((sugerencia) => ActionChip(
+                          label: Text(sugerencia, style: const TextStyle(fontSize: 12.5)),
+                          onPressed: () => controller.text = sugerencia,
+                        ))
+                    .toList(),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: controller,
+                maxLines: 2,
+                minLines: 1,
+                decoration: InputDecoration(hintText: t.profesionalDisponibilidadHint),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(

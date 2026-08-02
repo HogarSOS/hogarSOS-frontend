@@ -282,7 +282,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  DateFormat('HH:mm').format(mensaje.enviadoEn),
+                                  // Antes fijo a formato 24h independientemente
+                                  // del idioma — DateFormat.jm(locale) usa
+                                  // 12h con AM/PM para inglés y 24h para
+                                  // español, como espera cada lector.
+                                  DateFormat.jm(t.localeName).format(mensaje.enviadoEn),
                                   style: TextStyle(
                                     fontSize: 10.5,
                                     color: (esMio ? colorScheme.onPrimary : colorScheme.onSecondaryContainer)

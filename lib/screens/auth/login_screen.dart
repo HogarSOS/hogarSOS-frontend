@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/brand_mark.dart';
+import '../../utils/error_extraction.dart';
 import '../admin/admin_screen.dart';
 import '../cliente_shell_screen.dart';
 import '../legal/privacidad_screen.dart';
@@ -173,10 +174,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               MaterialPageRoute(builder: (_) => _destinoSegunRol(usuario.role)),
             );
           },
-          onError: (mensaje) {
+          onError: (codigoError) {
             if (!mounted) return;
             setState(() {
-              _errorValidacion = mensaje;
+              _errorValidacion = mensajeAuthError(codigoError, t);
               _enviandoCodigo = false;
             });
           },
@@ -212,11 +213,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     if (email == null || email.isEmpty || !mounted) return;
 
-    final error = await ref.read(authProvider.notifier).enviarEmailRecuperacion(email);
+    final errorCode = await ref.read(authProvider.notifier).enviarEmailRecuperacion(email);
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(error ?? t.loginRecuperarExito)),
+      SnackBar(content: Text(errorCode == null ? t.loginRecuperarExito : mensajeAuthError(errorCode, t))),
     );
   }
 
@@ -361,11 +362,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           const SizedBox(height: 12),
                         ],
                         const SizedBox(height: 8),
-                        if (_errorValidacion != null || authState.error != null)
+                        if (_errorValidacion != null || authState.errorCode != null)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 12),
                             child: Text(
-                              _errorValidacion ?? authState.error!,
+                              _errorValidacion ?? mensajeAuthError(authState.errorCode!, t),
                               style: TextStyle(color: colorScheme.error, fontWeight: FontWeight.w600),
                               textAlign: TextAlign.center,
                             ),
