@@ -100,6 +100,8 @@ String? _mensajePorCodigo(String? code, AppLocalizations t) {
       return t.apiErrPerfilProfesionalNoEncontrado;
     case 'PROFESSIONAL_NOT_VERIFIED':
       return t.apiErrProfesionalNoVerificado;
+    case 'PROFESSIONAL_STRIPE_NOT_CONFIGURED':
+      return t.apiErrCuentaStripeNoConfigurada;
     case 'CATEGORIES_INVALID':
       return t.apiErrCategoriasInvalidas;
     case 'SEARCH_PARAMS_INVALID':

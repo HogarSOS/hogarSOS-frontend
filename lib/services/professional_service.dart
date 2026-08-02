@@ -63,6 +63,64 @@ enum ModoDisponibilidad {
   String toJson() => this == ModoDisponibilidad.veinticuatroHoras ? 'veinticuatro_horas' : 'horario_laboral';
 }
 
+/// Estado real de la cuenta de cobro Stripe Connect del profesional —
+/// derivado en el backend a partir de charges_enabled/payouts_enabled/
+/// details_submitted, no solo de si existe un stripeAccountId (ver
+/// professional.service.ts, derivarEstadoCuentaStripe).
+enum EstadoCuentaStripe {
+  configurada,
+  pendiente,
+  requiereActualizacion;
+
+  static EstadoCuentaStripe fromJson(String valor) {
+    switch (valor) {
+      case 'configurada':
+        return EstadoCuentaStripe.configurada;
+      case 'requiere_actualizacion':
+        return EstadoCuentaStripe.requiereActualizacion;
+      default:
+        return EstadoCuentaStripe.pendiente;
+    }
+  }
+}
+
+/// Situación fiscal/legal que el propio profesional declara al enviar
+/// su verificación (roadmap económico, punto 4). HogarSOS no la valida
+/// ni la determina — solo la registra; ver texto legal en
+/// `t.tipoProfesionalTextoLegal`. Enum cerrado a las 3 opciones
+/// aprobadas para la versión inicial en España — ampliarlo a futuro
+/// solo añade un valor aquí y en el backend, sin tocar el resto del
+/// flujo de verificación.
+enum TipoProfesional {
+  autonomo,
+  empresa,
+  personaFisica;
+
+  static TipoProfesional? fromJson(String? valor) {
+    switch (valor) {
+      case 'autonomo':
+        return TipoProfesional.autonomo;
+      case 'empresa':
+        return TipoProfesional.empresa;
+      case 'persona_fisica':
+        return TipoProfesional.personaFisica;
+      default:
+        return null;
+    }
+  }
+
+  String toJson() {
+    switch (this) {
+      case TipoProfesional.autonomo:
+        return 'autonomo';
+      case TipoProfesional.empresa:
+        return 'empresa';
+      case TipoProfesional.personaFisica:
+        return 'persona_fisica';
+    }
+  }
+}
+
 class MiPerfilProfesional {
   final String nombre;
   final String? telefono;
@@ -76,7 +134,8 @@ class MiPerfilProfesional {
   final String? fotoPerfilUrl;
   final String? documentoIdentidadUrl;
   final List<String> categorias;
-  final bool cuentaStripeConfigurada;
+  final EstadoCuentaStripe estadoCuentaStripe;
+  final TipoProfesional? tipoProfesional;
   final List<ProfessionalReview> opiniones;
 
   MiPerfilProfesional({
@@ -92,7 +151,8 @@ class MiPerfilProfesional {
     this.fotoPerfilUrl,
     this.documentoIdentidadUrl,
     required this.categorias,
-    required this.cuentaStripeConfigurada,
+    required this.estadoCuentaStripe,
+    this.tipoProfesional,
     this.opiniones = const [],
   });
 
@@ -125,7 +185,8 @@ class MiPerfilProfesional {
       fotoPerfilUrl: json['fotoPerfilUrl'] as String?,
       documentoIdentidadUrl: json['documentoIdentidadUrl'] as String?,
       categorias: List<String>.from(json['categorias'] as List? ?? []),
-      cuentaStripeConfigurada: json['cuentaStripeConfigurada'] as bool,
+      estadoCuentaStripe: EstadoCuentaStripe.fromJson(json['estadoCuentaStripe'] as String? ?? 'pendiente'),
+      tipoProfesional: TipoProfesional.fromJson(json['tipoProfesional'] as String?),
       opiniones: (json['opiniones'] as List? ?? [])
           .map((r) => ProfessionalReview.fromJson(r as Map<String, dynamic>))
           .toList(),
@@ -189,12 +250,24 @@ class ProfessionalService {
     String? documentoIdentidadUrl,
     required List<int> categoriaIds,
     required double tarifaBase,
+    required TipoProfesional tipoProfesional,
   }) async {
     await _api.post('/professionals/me/verification', data: {
       if (documentoIdentidadUrl != null) 'documentoIdentidadUrl': documentoIdentidadUrl,
       'categoriaIds': categoriaIds,
       'tarifaBase': tarifaBase,
+      'tipoProfesional': tipoProfesional.toJson(),
     });
+  }
+
+  /// Inicia (o retoma, si ya existe una cuenta a medio configurar) el
+  /// onboarding de Stripe Connect. Devuelve la URL hospedada por Stripe
+  /// que hay que abrir en el navegador — no en un WebView, porque el
+  /// formulario de identidad de Stripe incluye subida de documentos y
+  /// redirecciones que un WebView embebido no soporta bien.
+  Future<String> iniciarOnboardingStripe() async {
+    final respuesta = await _api.post('/professionals/me/stripe-onboarding');
+    return respuesta.data['onboardingUrl'] as String;
   }
 
   Future<List<ProfessionalSummary>> buscar(

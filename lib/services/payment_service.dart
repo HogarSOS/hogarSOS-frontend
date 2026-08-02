@@ -1,5 +1,6 @@
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'api_service.dart';
+import 'professional_service.dart' show EstadoCuentaStripe;
 
 class PaymentIntentResult {
   final String paymentId;
@@ -41,8 +42,71 @@ class ComisionesInfo {
   double totalProfesional(double montoBase) => montoBase * (1 - comisionProfesionalPorcentaje / 100);
 }
 
+/// Una fila del historial de cobros del Centro de Pagos — un pago ya
+/// liberado y transferido al profesional (ver `Payment.estado == 'liberado'`
+/// en el backend).
+class CobroHistorial {
+  final String id;
+  final double monto;
+  final DateTime fecha;
+  final String categoria;
+  final String descripcion;
+
+  CobroHistorial({
+    required this.id,
+    required this.monto,
+    required this.fecha,
+    required this.categoria,
+    required this.descripcion,
+  });
+
+  factory CobroHistorial.fromJson(Map<String, dynamic> json) {
+    return CobroHistorial(
+      id: json['id'] as String,
+      monto: (json['monto'] as num).toDouble(),
+      fecha: DateTime.parse(json['fecha'] as String),
+      categoria: json['categoria'] as String,
+      descripcion: json['descripcion'] as String,
+    );
+  }
+}
+
+/// Centro de Pagos del profesional (`GET /payments/me/summary`).
+/// `pendiente`/`disponible` vienen del saldo REAL de Stripe, no de una
+/// suma local — pueden tardar en reflejar el último cobro si Stripe
+/// todavía no ha liquidado la transferencia.
+class PaymentsSummary {
+  final EstadoCuentaStripe estadoCuentaStripe;
+  final double pendiente;
+  final double disponible;
+  final List<CobroHistorial> historial;
+
+  PaymentsSummary({
+    required this.estadoCuentaStripe,
+    required this.pendiente,
+    required this.disponible,
+    required this.historial,
+  });
+
+  factory PaymentsSummary.fromJson(Map<String, dynamic> json) {
+    return PaymentsSummary(
+      estadoCuentaStripe: EstadoCuentaStripe.fromJson(json['estadoCuentaStripe'] as String? ?? 'pendiente'),
+      pendiente: (json['pendiente'] as num).toDouble(),
+      disponible: (json['disponible'] as num).toDouble(),
+      historial: (json['historial'] as List? ?? [])
+          .map((h) => CobroHistorial.fromJson(h as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
 class PaymentService {
   final _api = ApiService.instance.client;
+
+  Future<PaymentsSummary> obtenerResumenPagos() async {
+    final respuesta = await _api.get('/payments/me/summary');
+    return PaymentsSummary.fromJson(respuesta.data as Map<String, dynamic>);
+  }
 
   Future<ComisionesInfo> obtenerComisiones() async {
     final respuesta = await _api.get('/payments/comisiones');

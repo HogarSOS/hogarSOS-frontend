@@ -5,18 +5,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/service_request_model.dart';
+import '../../providers/disponibilidad_provider.dart';
 import '../../providers/service_request_provider.dart';
+import '../../services/professional_service.dart' show ModoDisponibilidad;
 import '../../theme/brand_mark.dart';
 import '../../utils/error_extraction.dart';
 import '../../widgets/animated_diff_list.dart';
 import '../../widgets/entrada_animada.dart';
 import 'trabajos_activos_profesional_screen.dart';
 
-/// Pestaña "Inicio" del Panel Profesional: solo la lista de solicitudes
-/// cercanas. El interruptor de disponibilidad y el acceso a "Mi perfil"
-/// ya no viven aquí — tienen sus propias pestañas en
-/// ProfesionalShellScreen, así no hay dos sitios distintos para lo
-/// mismo ni hace falta un botón extra en el AppBar para llegar a ellos.
+/// Pestaña "Inicio" del Panel Profesional: la lista de solicitudes
+/// cercanas, más un acceso rápido en el AppBar para ponerse "No
+/// disponible" sin salir de esta pantalla (roadmap económico, punto 2)
+/// — el control completo (horario laboral/24h) sigue viviendo en "Mi
+/// perfil", este botón solo cubre el caso rápido de "quiero dejar de
+/// recibir solicitudes ya mismo".
 class HomeProfesionalScreen extends ConsumerStatefulWidget {
   const HomeProfesionalScreen({super.key});
 
@@ -141,11 +144,29 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen> {
     );
   }
 
+  /// Apaga la disponibilidad al instante — sin pedir confirmación, a
+  /// diferencia de activarla (que si requiere perfil completo/verificado,
+  /// comprobado dentro del propio provider al activarla desde "Mi
+  /// perfil"). Desactivar nunca se bloquea.
+  Future<void> _ponerseNoDisponible(BuildContext context, WidgetRef ref, ModoDisponibilidad modoActual) async {
+    final t = AppLocalizations.of(context);
+    try {
+      await ref.read(disponibilidadProvider.notifier).actualizar(disponible: false, modo: modoActual);
+    } catch (e) {
+      debugPrint('[HomeProfesionalScreen] Error al ponerse no disponible: $e');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.profesionalErrorDisponibilidad, t: t))),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final solicitudesAsync = ref.watch(nearbyRequestsProvider);
     final trabajosActivosAsync = ref.watch(assignedRequestsProvider);
+    final disponibilidadAsync = ref.watch(disponibilidadProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -157,6 +178,19 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen> {
             Text(t.profesionalTituloSolicitudes),
           ],
         ),
+        actions: [
+          disponibilidadAsync.maybeWhen(
+            data: (estado) => estado.disponible
+                ? IconButton(
+                    icon: const Icon(Icons.bolt),
+                    color: Colors.amber.shade700,
+                    tooltip: t.disponibilidadOpcionNoDisponibleTitulo,
+                    onPressed: () => _ponerseNoDisponible(context, ref, estado.modo),
+                  )
+                : const SizedBox.shrink(),
+            orElse: () => const SizedBox.shrink(),
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {

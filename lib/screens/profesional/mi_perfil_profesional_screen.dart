@@ -3,9 +3,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/service_category_model.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/disponibilidad_provider.dart';
 import '../../services/professional_service.dart';
 import '../../services/service_request_service.dart';
 import '../../services/user_service.dart';
@@ -17,7 +19,6 @@ import '../legal/privacidad_screen.dart';
 import '../legal/terminos_screen.dart';
 import '../../widgets/verification_badge.dart';
 import '../auth/login_screen.dart';
-import 'disponibilidad_profesional_screen.dart';
 
 /// Perfil del profesional — rediseño "tarjetas independientes": cada
 /// dato editable (teléfono, descripción, categorías) tiene su propio
@@ -59,6 +60,9 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
   File? _documentoLocalSeleccionado;
   bool _subiendoDocumento = false;
   bool _enviandoVerificacion = false;
+  TipoProfesional? _tipoProfesionalSeleccionado;
+
+  bool _iniciandoOnboardingStripe = false;
 
   List<ServiceCategory> _todasCategorias = [];
   List<String> _categoriasActuales = [];
@@ -95,6 +99,7 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
         _perfil = perfil;
         _fotoPerfilUrlActual = perfil.fotoPerfilUrl;
         _documentoIdentidadUrlActual = perfil.documentoIdentidadUrl;
+        _tipoProfesionalSeleccionado = perfil.tipoProfesional;
         // tarifaBase empieza en 0 en el backend hasta el primer envío de
         // verificación — mostrarlo como "0.00" invitaría a enviarlo tal
         // cual, y el backend lo rechazaría (tarifaBase debe ser positiva).
@@ -378,6 +383,13 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
       return;
     }
 
+    if (_tipoProfesionalSeleccionado == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.tipoProfesionalErrorFaltaSeleccion)),
+      );
+      return;
+    }
+
     final categoriaIds = _todasCategorias
         .where((c) => _categoriasActuales.contains(c.nombre))
         .map((c) => c.id)
@@ -389,6 +401,7 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
         documentoIdentidadUrl: _documentoIdentidadUrlActual,
         categoriaIds: categoriaIds,
         tarifaBase: tarifa,
+        tipoProfesional: _tipoProfesionalSeleccionado!,
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -403,6 +416,30 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
       );
     } finally {
       if (mounted) setState(() => _enviandoVerificacion = false);
+    }
+  }
+
+  /// Abre el onboarding hospedado de Stripe Connect en el navegador
+  /// externo. No refresca el perfil al volver: Stripe redirige de vuelta
+  /// a una URL propia (no a la app), así que el estado real se
+  /// actualiza solo la próxima vez que se cargue este perfil (ver
+  /// comentario de refresco en caliente en professional.controller.ts).
+  Future<void> _configurarCuentaCobro() async {
+    setState(() => _iniciandoOnboardingStripe = true);
+    try {
+      final url = await _professionalService.iniciarOnboardingStripe();
+      final abierto = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      if (!abierto && mounted) {
+        final t = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.cuentaCobroErrorAbrir)));
+      }
+    } catch (e) {
+      debugPrint('[MiPerfilProfesionalScreen] Error al iniciar onboarding de Stripe: $e');
+      if (!mounted) return;
+      final t = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.cuentaCobroErrorAbrir)));
+    } finally {
+      if (mounted) setState(() => _iniciandoOnboardingStripe = false);
     }
   }
 
@@ -533,8 +570,21 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                             subiendoDocumento: _subiendoDocumento,
                             enviando: _enviandoVerificacion,
                             tarifaController: _tarifaController,
+                            tipoProfesionalSeleccionado: _tipoProfesionalSeleccionado,
+                            onElegirTipoProfesional: (tipo) => setState(() => _tipoProfesionalSeleccionado = tipo),
                             onElegirDocumento: _elegirDocumento,
                             onEnviar: _enviarVerificacion,
+                          ),
+                        ),
+                      ],
+                      if (_perfil?.estadoCuentaStripe != EstadoCuentaStripe.configurada) ...[
+                        const SizedBox(height: 16),
+                        EntradaAnimada(
+                          retraso: const Duration(milliseconds: 135),
+                          child: _TarjetaCuentaCobro(
+                            estado: _perfil?.estadoCuentaStripe ?? EstadoCuentaStripe.pendiente,
+                            cargando: _iniciandoOnboardingStripe,
+                            onConfigurar: _configurarCuentaCobro,
                           ),
                         ),
                       ],
@@ -551,25 +601,17 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                       const SizedBox(height: 16),
                       EntradaAnimada(
                         retraso: const Duration(milliseconds: 210),
-                        child: _TarjetaInfo(
-                          icono: Icons.bolt_outlined,
-                          titulo: t.disponibilidadTitulo,
-                          trailing: TextButton(
-                            // Antes cambiaba de pestaña (profesionalTabIndexProvider)
-                            // en vez de navegar — sin AppBar propio ni botón
-                            // "atrás" para volver a Perfil, el único camino
-                            // de vuelta era tocar la pestaña de nuevo a mano.
-                            // Empujar la pantalla como ruta normal le da el
-                            // back button automático de Flutter.
-                            onPressed: () async {
-                              await Navigator.of(context).push(
-                                MaterialPageRoute(builder: (_) => const DisponibilidadProfesionalScreen()),
-                              );
-                              _cargarPerfil();
-                            },
-                            child: Text(t.miPerfilCambiar),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: colorScheme.surface,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.3)),
+                            boxShadow: [
+                              BoxShadow(color: colorScheme.shadow.withOpacity(0.05), blurRadius: 18, offset: const Offset(0, 6)),
+                            ],
                           ),
-                          child: _EstadoDisponibilidad(perfil: _perfil),
+                          padding: const EdgeInsets.all(18),
+                          child: const _SelectorDisponibilidad(),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -995,39 +1037,205 @@ class _TarjetaContacto extends StatelessWidget {
   }
 }
 
-/// Resumen de disponibilidad dentro de su tarjeta — solo lectura; el
-/// cambio real (con geolocalización) vive en DisponibilidadProfesionalScreen,
-/// aquí solo se enlaza a esa pestaña para no duplicar esa lógica.
-class _EstadoDisponibilidad extends StatelessWidget {
-  const _EstadoDisponibilidad({required this.perfil});
+enum _OpcionDisponibilidad { noDisponible, horarioLaboral, veinticuatroHoras }
 
-  final MiPerfilProfesional? perfil;
+/// Selector de disponibilidad — antes era su propia pestaña
+/// (DisponibilidadProfesionalScreen), movida aquí dentro de "Mi perfil"
+/// por decisión del roadmap económico (punto 2: Registro → Verificación
+/// + Stripe en paralelo → Disponible, todo centrado en el perfil). Usa
+/// `disponibilidadProvider`, compartido con el acceso rápido de "No
+/// disponible" en la pestaña Solicitudes cercanas, para que ambos
+/// sitios reflejen siempre el mismo estado sin desincronizarse.
+class _SelectorDisponibilidad extends ConsumerWidget {
+  const _SelectorDisponibilidad();
+
+  Future<void> _elegir(BuildContext context, WidgetRef ref, DisponibilidadState actual, _OpcionDisponibilidad opcion) async {
+    final t = AppLocalizations.of(context);
+    final opcionActual = !actual.disponible
+        ? _OpcionDisponibilidad.noDisponible
+        : (actual.modo == ModoDisponibilidad.veinticuatroHoras ? _OpcionDisponibilidad.veinticuatroHoras : _OpcionDisponibilidad.horarioLaboral);
+    if (opcion == opcionActual) return;
+
+    // Sin categoría/foto no hay ninguna búsqueda en la que el
+    // profesional pueda aparecer — "No disponible" nunca se bloquea.
+    final requierePerfilCompleto = opcion != _OpcionDisponibilidad.noDisponible;
+    if (requierePerfilCompleto && !actual.perfilCompleto) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.disponibilidadPerfilIncompleto)));
+      return;
+    }
+
+    try {
+      await ref.read(disponibilidadProvider.notifier).actualizar(
+            disponible: opcion != _OpcionDisponibilidad.noDisponible,
+            modo: opcion == _OpcionDisponibilidad.veinticuatroHoras ? ModoDisponibilidad.veinticuatroHoras : ModoDisponibilidad.horarioLaboral,
+          );
+    } catch (e) {
+      debugPrint('[_SelectorDisponibilidad] Error al cambiar disponibilidad: $e');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.profesionalErrorDisponibilidad, t: t))),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final estadoAsync = ref.watch(disponibilidadProvider);
+
+    return estadoAsync.when(
+      loading: () => const Center(child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator(strokeWidth: 2))),
+      error: (_, __) => Text(t.disponibilidadTitulo, style: TextStyle(fontSize: 13, color: colorScheme.error)),
+      data: (estado) {
+        final opcionActual = !estado.disponible
+            ? _OpcionDisponibilidad.noDisponible
+            : (estado.modo == ModoDisponibilidad.veinticuatroHoras ? _OpcionDisponibilidad.veinticuatroHoras : _OpcionDisponibilidad.horarioLaboral);
+        final bloqueado = !estado.perfilCompleto || !estado.puedeActivarse;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.bolt_outlined, size: 18, color: colorScheme.onSurfaceVariant),
+                const SizedBox(width: 8),
+                Text(
+                  t.disponibilidadTitulo,
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: colorScheme.onSurfaceVariant),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              t.disponibilidadEstadoAyuda,
+              style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 12),
+            if (!estado.perfilCompleto)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Text(t.disponibilidadPerfilIncompleto, style: TextStyle(fontSize: 12.5, color: colorScheme.error)),
+              )
+            else if (!estado.estaVerificado)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Text(t.disponibilidadPendienteVerificacion, style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant)),
+              )
+            else if (estado.estadoCuentaStripe != EstadoCuentaStripe.configurada)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Text(t.disponibilidadPendienteStripe, style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant)),
+              ),
+            _TarjetaOpcionDisponibilidad(
+              icono: Icons.bolt_outlined,
+              color: Colors.red,
+              titulo: t.disponibilidadOpcionNoDisponibleTitulo,
+              ayuda: t.disponibilidadOpcionNoDisponibleAyuda,
+              seleccionada: opcionActual == _OpcionDisponibilidad.noDisponible,
+              deshabilitada: false,
+              onTap: () => _elegir(context, ref, estado, _OpcionDisponibilidad.noDisponible),
+            ),
+            const SizedBox(height: 8),
+            _TarjetaOpcionDisponibilidad(
+              icono: Icons.wb_sunny_outlined,
+              color: Colors.amber.shade700,
+              titulo: t.disponibilidadModoHorarioLaboral,
+              ayuda: t.disponibilidadModoHorarioLaboralAyuda,
+              seleccionada: opcionActual == _OpcionDisponibilidad.horarioLaboral,
+              deshabilitada: bloqueado,
+              onTap: () => _elegir(context, ref, estado, _OpcionDisponibilidad.horarioLaboral),
+            ),
+            const SizedBox(height: 8),
+            _TarjetaOpcionDisponibilidad(
+              icono: Icons.nightlight_round,
+              color: Colors.indigo,
+              titulo: t.disponibilidadModo24h,
+              ayuda: t.disponibilidadModo24hAyuda,
+              seleccionada: opcionActual == _OpcionDisponibilidad.veinticuatroHoras,
+              deshabilitada: bloqueado,
+              onTap: () => _elegir(context, ref, estado, _OpcionDisponibilidad.veinticuatroHoras),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _TarjetaOpcionDisponibilidad extends StatelessWidget {
+  const _TarjetaOpcionDisponibilidad({
+    required this.icono,
+    required this.color,
+    required this.titulo,
+    required this.ayuda,
+    required this.seleccionada,
+    required this.deshabilitada,
+    required this.onTap,
+  });
+
+  final IconData icono;
+  final Color color;
+  final String titulo;
+  final String ayuda;
+  final bool seleccionada;
+  final bool deshabilitada;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final disponible = perfil?.disponible ?? false;
 
-    final color = !disponible
-        ? Colors.red
-        : (perfil?.modoDisponibilidad == ModoDisponibilidad.veinticuatroHoras ? Colors.indigo : Colors.amber.shade700);
-    final titulo = !disponible
-        ? t.disponibilidadOpcionNoDisponibleTitulo
-        : (perfil?.modoDisponibilidad == ModoDisponibilidad.veinticuatroHoras
-            ? t.disponibilidadModo24h
-            : t.disponibilidadModoHorarioLaboral);
-
-    return Row(
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+    return Opacity(
+      opacity: deshabilitada && !seleccionada ? 0.45 : 1,
+      child: Material(
+        color: seleccionada ? color.withOpacity(0.14) : colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: deshabilitada ? null : onTap,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: seleccionada ? color : Colors.transparent, width: 1.5),
+            ),
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(color: color.withOpacity(0.16), borderRadius: BorderRadius.circular(11)),
+                  child: Icon(icono, color: color, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        titulo,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13.5,
+                          color: seleccionada ? color : colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(ayuda, style: TextStyle(fontSize: 11.5, color: colorScheme.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+                Icon(
+                  seleccionada ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                  color: seleccionada ? color : colorScheme.outline,
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
         ),
-        const SizedBox(width: 10),
-        Text(titulo, style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
-      ],
+      ),
     );
   }
 }
@@ -1043,6 +1251,8 @@ class _TarjetaVerificacion extends StatelessWidget {
     required this.subiendoDocumento,
     required this.enviando,
     required this.tarifaController,
+    required this.tipoProfesionalSeleccionado,
+    required this.onElegirTipoProfesional,
     required this.onElegirDocumento,
     required this.onEnviar,
   });
@@ -1052,6 +1262,8 @@ class _TarjetaVerificacion extends StatelessWidget {
   final bool subiendoDocumento;
   final bool enviando;
   final TextEditingController tarifaController;
+  final TipoProfesional? tipoProfesionalSeleccionado;
+  final ValueChanged<TipoProfesional> onElegirTipoProfesional;
   final VoidCallback onElegirDocumento;
   final VoidCallback onEnviar;
 
@@ -1104,6 +1316,33 @@ class _TarjetaVerificacion extends StatelessWidget {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(labelText: t.miPerfilPrecioLabel),
           ),
+          const SizedBox(height: 18),
+          Text(
+            t.tipoProfesionalTitulo,
+            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              (TipoProfesional.autonomo, t.tipoProfesionalAutonomo),
+              (TipoProfesional.empresa, t.tipoProfesionalEmpresa),
+              (TipoProfesional.personaFisica, t.tipoProfesionalPersonaFisica),
+            ].map((opcion) {
+              final (tipo, etiqueta) = opcion;
+              return ChoiceChip(
+                label: Text(etiqueta),
+                selected: tipoProfesionalSeleccionado == tipo,
+                onSelected: (_) => onElegirTipoProfesional(tipo),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            t.tipoProfesionalTextoLegal,
+            style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant, height: 1.35),
+          ),
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
@@ -1112,6 +1351,82 @@ class _TarjetaVerificacion extends StatelessWidget {
               child: enviando
                   ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
                   : Text(t.miPerfilEnviarVerificacion),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tarjeta de acción para configurar/actualizar la cuenta de cobro de
+/// Stripe Connect — visible mientras el estado no sea 'configurada'
+/// (ver EstadoCuentaStripe, derivado en el backend de charges_enabled/
+/// payouts_enabled/details_submitted reales, no solo de si existe un
+/// stripeAccountId). Roadmap económico: Registro → (Verificación +
+/// Stripe en paralelo) → Disponible para trabajar.
+class _TarjetaCuentaCobro extends StatelessWidget {
+  const _TarjetaCuentaCobro({
+    required this.estado,
+    required this.cargando,
+    required this.onConfigurar,
+  });
+
+  final EstadoCuentaStripe estado;
+  final bool cargando;
+  final VoidCallback onConfigurar;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final requiereActualizacion = estado == EstadoCuentaStripe.requiereActualizacion;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: requiereActualizacion
+              ? colorScheme.error.withOpacity(0.4)
+              : colorScheme.outlineVariant.withOpacity(0.3),
+        ),
+        boxShadow: [
+          BoxShadow(color: colorScheme.shadow.withOpacity(0.05), blurRadius: 18, offset: const Offset(0, 6)),
+        ],
+      ),
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.account_balance_wallet_outlined, size: 18, color: colorScheme.onSurfaceVariant),
+              const SizedBox(width: 8),
+              Text(
+                t.cuentaCobroTitulo,
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: colorScheme.onSurfaceVariant),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            requiereActualizacion ? t.cuentaCobroEstadoRequiereActualizacion : t.cuentaCobroEstadoPendiente,
+            style: TextStyle(
+              fontSize: 13,
+              color: requiereActualizacion ? colorScheme.error : colorScheme.onSurfaceVariant,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: cargando ? null : onConfigurar,
+              icon: cargando
+                  ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.open_in_new, size: 18),
+              label: Text(requiereActualizacion ? t.cuentaCobroBotonActualizar : t.cuentaCobroBotonConfigurar),
             ),
           ),
         ],

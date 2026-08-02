@@ -30,6 +30,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get navSolicitudesCercanas => 'Solicitudes';
 
   @override
+  String get navCentroPagos => 'Pagos';
+
+  @override
   String get loginTagline => 'Servicios a domicilio de confianza';
 
   @override
@@ -319,6 +322,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get apiErrProfesionalNoVerificado =>
       'No puedes ponerte disponible hasta ser verificado';
+
+  @override
+  String get apiErrCuentaStripeNoConfigurada =>
+      'No puedes ponerte disponible hasta configurar tu cuenta de cobro';
 
   @override
   String get apiErrCategoriasInvalidas => 'Una o más categorías no son válidas';
@@ -1156,6 +1163,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Tu cuenta está pendiente de revisión por un administrador. Podrás activarte en cuanto se apruebe.';
 
   @override
+  String get disponibilidadPendienteStripe =>
+      'Configura tu cuenta de cobro con Stripe para poder activarte — sin ella no podrías cobrar los trabajos que aceptes.';
+
+  @override
   String get disponibilidadCompletarPerfil => 'Completar perfil';
 
   @override
@@ -1315,6 +1326,84 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get miPerfilVerificacionErrorEnvio =>
       'No se pudo enviar la verificación';
+
+  @override
+  String get tipoProfesionalTitulo => 'Tipo de profesional';
+
+  @override
+  String get tipoProfesionalAutonomo => 'Autónomo';
+
+  @override
+  String get tipoProfesionalEmpresa => 'Empresa';
+
+  @override
+  String get tipoProfesionalPersonaFisica => 'Persona física';
+
+  @override
+  String get tipoProfesionalTextoLegal =>
+      'Selecciona la opción que mejor describa tu situación actual. Eres responsable de cumplir la legislación fiscal y laboral aplicable en tu país para prestar servicios y recibir pagos. HogarSOS actúa únicamente como plataforma de intermediación y no ofrece asesoramiento fiscal o legal.';
+
+  @override
+  String get tipoProfesionalErrorFaltaSeleccion =>
+      'Selecciona tu tipo de profesional';
+
+  @override
+  String get cuentaCobroTitulo => 'Cuenta de cobro';
+
+  @override
+  String get cuentaCobroEstadoConfigurada =>
+      'Configurada — ya puedes recibir pagos.';
+
+  @override
+  String get cuentaCobroEstadoPendiente =>
+      'Configura tu cuenta de cobro con Stripe para poder recibir pagos por tus trabajos.';
+
+  @override
+  String get cuentaCobroEstadoRequiereActualizacion =>
+      'Stripe necesita más información para poder pagarte. Complétala para seguir cobrando.';
+
+  @override
+  String get cuentaCobroBotonConfigurar => 'Configurar cuenta de cobro';
+
+  @override
+  String get cuentaCobroBotonActualizar => 'Actualizar en Stripe';
+
+  @override
+  String get cuentaCobroErrorAbrir =>
+      'No se pudo abrir Stripe. Inténtalo de nuevo.';
+
+  @override
+  String get centroPagosTitulo => 'Centro de Pagos';
+
+  @override
+  String get centroPagosErrorCargar =>
+      'No se pudo cargar tu información de pagos';
+
+  @override
+  String get centroPagosPendiente => 'Pendiente';
+
+  @override
+  String get centroPagosPendienteAyuda =>
+      'Cobros ya liberados que Stripe todavía está procesando antes de que estén disponibles.';
+
+  @override
+  String get centroPagosDisponible => 'Disponible';
+
+  @override
+  String get centroPagosDisponibleAyuda =>
+      'Saldo que Stripe ya puede transferir a tu cuenta bancaria.';
+
+  @override
+  String get centroPagosHistorialTitulo => 'Historial de cobros';
+
+  @override
+  String get centroPagosHistorialVacio =>
+      'Todavía no tienes ningún cobro liberado.';
+
+  @override
+  String centroPagosImporte(String monto) {
+    return '$monto €';
+  }
 
   @override
   String get miPerfilStatValoracion => 'Valoración';

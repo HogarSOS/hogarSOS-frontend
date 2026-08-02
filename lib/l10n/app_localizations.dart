@@ -140,6 +140,12 @@ abstract class AppLocalizations {
   /// **'Solicitudes'**
   String get navSolicitudesCercanas;
 
+  /// No description provided for @navCentroPagos.
+  ///
+  /// In es, this message translates to:
+  /// **'Pagos'**
+  String get navCentroPagos;
+
   /// No description provided for @loginTagline.
   ///
   /// In es, this message translates to:
@@ -637,6 +643,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No puedes ponerte disponible hasta ser verificado'**
   String get apiErrProfesionalNoVerificado;
+
+  /// No description provided for @apiErrCuentaStripeNoConfigurada.
+  ///
+  /// In es, this message translates to:
+  /// **'No puedes ponerte disponible hasta configurar tu cuenta de cobro'**
+  String get apiErrCuentaStripeNoConfigurada;
 
   /// No description provided for @apiErrCategoriasInvalidas.
   ///
@@ -2036,6 +2048,12 @@ abstract class AppLocalizations {
   /// **'Tu cuenta está pendiente de revisión por un administrador. Podrás activarte en cuanto se apruebe.'**
   String get disponibilidadPendienteVerificacion;
 
+  /// No description provided for @disponibilidadPendienteStripe.
+  ///
+  /// In es, this message translates to:
+  /// **'Configura tu cuenta de cobro con Stripe para poder activarte — sin ella no podrías cobrar los trabajos que aceptes.'**
+  String get disponibilidadPendienteStripe;
+
   /// No description provided for @disponibilidadCompletarPerfil.
   ///
   /// In es, this message translates to:
@@ -2329,6 +2347,138 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se pudo enviar la verificación'**
   String get miPerfilVerificacionErrorEnvio;
+
+  /// No description provided for @tipoProfesionalTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Tipo de profesional'**
+  String get tipoProfesionalTitulo;
+
+  /// No description provided for @tipoProfesionalAutonomo.
+  ///
+  /// In es, this message translates to:
+  /// **'Autónomo'**
+  String get tipoProfesionalAutonomo;
+
+  /// No description provided for @tipoProfesionalEmpresa.
+  ///
+  /// In es, this message translates to:
+  /// **'Empresa'**
+  String get tipoProfesionalEmpresa;
+
+  /// No description provided for @tipoProfesionalPersonaFisica.
+  ///
+  /// In es, this message translates to:
+  /// **'Persona física'**
+  String get tipoProfesionalPersonaFisica;
+
+  /// No description provided for @tipoProfesionalTextoLegal.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona la opción que mejor describa tu situación actual. Eres responsable de cumplir la legislación fiscal y laboral aplicable en tu país para prestar servicios y recibir pagos. HogarSOS actúa únicamente como plataforma de intermediación y no ofrece asesoramiento fiscal o legal.'**
+  String get tipoProfesionalTextoLegal;
+
+  /// No description provided for @tipoProfesionalErrorFaltaSeleccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona tu tipo de profesional'**
+  String get tipoProfesionalErrorFaltaSeleccion;
+
+  /// No description provided for @cuentaCobroTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuenta de cobro'**
+  String get cuentaCobroTitulo;
+
+  /// No description provided for @cuentaCobroEstadoConfigurada.
+  ///
+  /// In es, this message translates to:
+  /// **'Configurada — ya puedes recibir pagos.'**
+  String get cuentaCobroEstadoConfigurada;
+
+  /// No description provided for @cuentaCobroEstadoPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Configura tu cuenta de cobro con Stripe para poder recibir pagos por tus trabajos.'**
+  String get cuentaCobroEstadoPendiente;
+
+  /// No description provided for @cuentaCobroEstadoRequiereActualizacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Stripe necesita más información para poder pagarte. Complétala para seguir cobrando.'**
+  String get cuentaCobroEstadoRequiereActualizacion;
+
+  /// No description provided for @cuentaCobroBotonConfigurar.
+  ///
+  /// In es, this message translates to:
+  /// **'Configurar cuenta de cobro'**
+  String get cuentaCobroBotonConfigurar;
+
+  /// No description provided for @cuentaCobroBotonActualizar.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizar en Stripe'**
+  String get cuentaCobroBotonActualizar;
+
+  /// No description provided for @cuentaCobroErrorAbrir.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo abrir Stripe. Inténtalo de nuevo.'**
+  String get cuentaCobroErrorAbrir;
+
+  /// No description provided for @centroPagosTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Centro de Pagos'**
+  String get centroPagosTitulo;
+
+  /// No description provided for @centroPagosErrorCargar.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo cargar tu información de pagos'**
+  String get centroPagosErrorCargar;
+
+  /// No description provided for @centroPagosPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Pendiente'**
+  String get centroPagosPendiente;
+
+  /// No description provided for @centroPagosPendienteAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Cobros ya liberados que Stripe todavía está procesando antes de que estén disponibles.'**
+  String get centroPagosPendienteAyuda;
+
+  /// No description provided for @centroPagosDisponible.
+  ///
+  /// In es, this message translates to:
+  /// **'Disponible'**
+  String get centroPagosDisponible;
+
+  /// No description provided for @centroPagosDisponibleAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Saldo que Stripe ya puede transferir a tu cuenta bancaria.'**
+  String get centroPagosDisponibleAyuda;
+
+  /// No description provided for @centroPagosHistorialTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Historial de cobros'**
+  String get centroPagosHistorialTitulo;
+
+  /// No description provided for @centroPagosHistorialVacio.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no tienes ningún cobro liberado.'**
+  String get centroPagosHistorialVacio;
+
+  /// No description provided for @centroPagosImporte.
+  ///
+  /// In es, this message translates to:
+  /// **'{monto} €'**
+  String centroPagosImporte(String monto);
 
   /// No description provided for @miPerfilStatValoracion.
   ///

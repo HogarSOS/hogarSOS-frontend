@@ -43,6 +43,9 @@ dependencies:
   # Pagos
   flutter_stripe: ^10.1.1
 
+  # Abrir el onboarding hospedado de Stripe Connect en el navegador
+  url_launcher: ^6.3.1
+
   # UI y utilidades
   cupertino_icons: ^1.0.6
   intl: ^0.20.2

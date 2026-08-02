@@ -30,6 +30,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSolicitudesCercanas => 'Requests';
 
   @override
+  String get navCentroPagos => 'Payments';
+
+  @override
   String get loginTagline => 'Trusted home services';
 
   @override
@@ -317,6 +320,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get apiErrProfesionalNoVerificado =>
       'You can\'t set yourself as available until you\'re verified';
+
+  @override
+  String get apiErrCuentaStripeNoConfigurada =>
+      'You can\'t set yourself as available until you set up your payout account';
 
   @override
   String get apiErrCategoriasInvalidas =>
@@ -1150,6 +1157,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your account is pending review by an administrator. You\'ll be able to go online once it\'s approved.';
 
   @override
+  String get disponibilidadPendienteStripe =>
+      'Set up your payout account with Stripe to be able to go online — without it you wouldn\'t be able to get paid for jobs you accept.';
+
+  @override
   String get disponibilidadCompletarPerfil => 'Complete profile';
 
   @override
@@ -1306,6 +1317,84 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get miPerfilVerificacionErrorEnvio => 'Couldn\'t submit verification';
+
+  @override
+  String get tipoProfesionalTitulo => 'Professional type';
+
+  @override
+  String get tipoProfesionalAutonomo => 'Self-employed';
+
+  @override
+  String get tipoProfesionalEmpresa => 'Company';
+
+  @override
+  String get tipoProfesionalPersonaFisica => 'Private individual';
+
+  @override
+  String get tipoProfesionalTextoLegal =>
+      'Select the option that best describes your current situation. You are responsible for complying with the tax and labor laws applicable in your country in order to provide services and receive payments. HogarSOS acts solely as an intermediary platform and does not provide tax or legal advice.';
+
+  @override
+  String get tipoProfesionalErrorFaltaSeleccion =>
+      'Select your professional type';
+
+  @override
+  String get cuentaCobroTitulo => 'Payout account';
+
+  @override
+  String get cuentaCobroEstadoConfigurada =>
+      'Set up — you can now receive payments.';
+
+  @override
+  String get cuentaCobroEstadoPendiente =>
+      'Set up your payout account with Stripe to get paid for your jobs.';
+
+  @override
+  String get cuentaCobroEstadoRequiereActualizacion =>
+      'Stripe needs more information to be able to pay you. Complete it to keep getting paid.';
+
+  @override
+  String get cuentaCobroBotonConfigurar => 'Set up payout account';
+
+  @override
+  String get cuentaCobroBotonActualizar => 'Update on Stripe';
+
+  @override
+  String get cuentaCobroErrorAbrir =>
+      'Couldn\'t open Stripe. Please try again.';
+
+  @override
+  String get centroPagosTitulo => 'Payments Center';
+
+  @override
+  String get centroPagosErrorCargar =>
+      'Couldn\'t load your payments information';
+
+  @override
+  String get centroPagosPendiente => 'Pending';
+
+  @override
+  String get centroPagosPendienteAyuda =>
+      'Released payouts Stripe is still processing before they become available.';
+
+  @override
+  String get centroPagosDisponible => 'Available';
+
+  @override
+  String get centroPagosDisponibleAyuda =>
+      'Balance Stripe can already transfer to your bank account.';
+
+  @override
+  String get centroPagosHistorialTitulo => 'Payout history';
+
+  @override
+  String get centroPagosHistorialVacio =>
+      'You don\'t have any released payouts yet.';
+
+  @override
+  String centroPagosImporte(String monto) {
+    return '€$monto';
+  }
 
   @override
   String get miPerfilStatValoracion => 'Rating';

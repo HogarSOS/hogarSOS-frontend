@@ -5,9 +5,9 @@ import '../l10n/app_localizations.dart';
 import '../providers/chat_read_provider.dart';
 import '../providers/service_request_provider.dart';
 import 'profesional/home_profesional_screen.dart';
-import 'profesional/disponibilidad_profesional_screen.dart';
 import 'profesional/mi_perfil_profesional_screen.dart';
 import 'profesional/trabajos_activos_profesional_screen.dart';
+import 'profesional/centro_pagos_screen.dart';
 
 /// Pestaña activa del shell del profesional — en un provider (no
 /// estado local del shell) para que otras pantallas dentro de una
@@ -44,11 +44,15 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
   // la derecha), y "Inicio" renombrado a "Solicitudes" porque eso es
   // literalmente lo que muestra esa pantalla (solicitudes cercanas sin
   // aceptar) — "Inicio" no decía nada sobre su contenido real.
+  //
+  // Disponibilidad ya no es una pestaña propia (roadmap económico,
+  // punto 2): se movió dentro de "Mi perfil", con acceso rápido a "No
+  // disponible" desde Solicitudes cercanas — ver disponibilidad_provider.dart.
   static const _pantallas = [
     MiPerfilProfesionalScreen(),
     HomeProfesionalScreen(),
-    DisponibilidadProfesionalScreen(),
     TrabajosActivosProfesionalScreen(),
+    CentroPagosScreen(),
   ];
 
   @override
@@ -117,14 +121,14 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
               label: t.navSolicitudesCercanas,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.bolt_outlined),
-              selectedIcon: const Icon(Icons.bolt),
-              label: t.navDisponibilidad,
-            ),
-            NavigationDestination(
               icon: Badge(isLabelVisible: hayMensajesNoLeidos, child: const Icon(Icons.chat_bubble_outline)),
               selectedIcon: Badge(isLabelVisible: hayMensajesNoLeidos, child: const Icon(Icons.chat_bubble)),
               label: t.navMensajes,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.account_balance_wallet_outlined),
+              selectedIcon: const Icon(Icons.account_balance_wallet),
+              label: t.navCentroPagos,
             ),
           ],
         ),
