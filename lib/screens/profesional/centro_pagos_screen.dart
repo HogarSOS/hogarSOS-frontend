@@ -6,6 +6,7 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/stripe_return_provider.dart';
 import '../../services/payment_service.dart';
 import '../../services/professional_service.dart';
+import '../../utils/category_display.dart';
 import '../../widgets/entrada_animada.dart';
 
 /// Centro de Pagos del profesional (roadmap económico, puntos 1 y 6):
@@ -368,7 +369,11 @@ class _ItemHistorial extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${cobro.categoria} · ${DateFormat.yMMMd(t.localeName).format(cobro.fecha)}',
+                  // BUG 006 (QA, 2026-08-03): `cobro.categoria` es el
+                  // nombre canónico en español que vive en la base de
+                  // datos (ver seed.ts) — mostrarlo tal cual mezclaba
+                  // español con el resto de la pantalla en inglés.
+                  '${nombreLocalizadoCategoria(context, cobro.categoria)} · ${DateFormat.yMMMd(t.localeName).format(cobro.fecha)}',
                   style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                   overflow: TextOverflow.ellipsis,
                 ),

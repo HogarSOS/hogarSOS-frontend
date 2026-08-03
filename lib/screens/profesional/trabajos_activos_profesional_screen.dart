@@ -9,6 +9,7 @@ import '../../providers/payment_provider.dart';
 import '../../providers/service_request_provider.dart';
 import '../../services/payment_service.dart';
 import '../../services/service_request_service.dart';
+import '../../utils/category_display.dart';
 import '../../utils/error_extraction.dart';
 import '../../utils/polling_lifecycle_mixin.dart';
 import '../../widgets/animated_diff_list.dart';
@@ -721,7 +722,7 @@ class _TarjetaTrabajo extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        trabajo.categoria,
+                        nombreLocalizadoCategoria(context, trabajo.categoria),
                         style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
