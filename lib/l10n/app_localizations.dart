@@ -2444,6 +2444,12 @@ abstract class AppLocalizations {
   /// **'Actualizar en Stripe'**
   String get cuentaCobroBotonActualizar;
 
+  /// No description provided for @cuentaCobroBotonEditar.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar cuenta de cobro'**
+  String get cuentaCobroBotonEditar;
+
   /// No description provided for @cuentaCobroErrorAbrir.
   ///
   /// In es, this message translates to:

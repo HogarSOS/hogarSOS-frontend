@@ -453,6 +453,7 @@
   "cuentaCobroEstadoRequiereActualizacion": "Stripe necesita más información para poder pagarte. Complétala para seguir cobrando.",
   "cuentaCobroBotonConfigurar": "Configurar cuenta de cobro",
   "cuentaCobroBotonActualizar": "Actualizar en Stripe",
+  "cuentaCobroBotonEditar": "Editar cuenta de cobro",
   "cuentaCobroErrorAbrir": "No se pudo abrir Stripe. Inténtalo de nuevo.",
   "cuentaCobroStripeActualizando": "Actualizando el estado de tu cuenta de cobro…",
   "cuentaCobroStripeCaducado": "El enlace de Stripe caducó. Pulsa \"Configurar cuenta de cobro\" para volver a intentarlo.",

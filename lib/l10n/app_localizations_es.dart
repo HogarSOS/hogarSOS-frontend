@@ -1384,6 +1384,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cuentaCobroBotonActualizar => 'Actualizar en Stripe';
 
   @override
+  String get cuentaCobroBotonEditar => 'Editar cuenta de cobro';
+
+  @override
   String get cuentaCobroErrorAbrir =>
       'No se pudo abrir Stripe. Inténtalo de nuevo.';
 

@@ -453,6 +453,7 @@
   "cuentaCobroEstadoRequiereActualizacion": "Stripe needs more information to be able to pay you. Complete it to keep getting paid.",
   "cuentaCobroBotonConfigurar": "Set up payout account",
   "cuentaCobroBotonActualizar": "Update on Stripe",
+  "cuentaCobroBotonEditar": "Edit payout account",
   "cuentaCobroErrorAbrir": "Couldn't open Stripe. Please try again.",
   "cuentaCobroStripeActualizando": "Updating your payout account status…",
   "cuentaCobroStripeCaducado": "The Stripe link expired. Tap \"Set up payout account\" to try again.",

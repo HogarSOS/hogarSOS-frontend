@@ -594,17 +594,15 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                           ),
                         ),
                       ],
-                      if (_perfil?.estadoCuentaStripe != EstadoCuentaStripe.configurada) ...[
-                        const SizedBox(height: 16),
-                        EntradaAnimada(
-                          retraso: const Duration(milliseconds: 135),
-                          child: _TarjetaCuentaCobro(
-                            estado: _perfil?.estadoCuentaStripe ?? EstadoCuentaStripe.pendiente,
-                            cargando: _iniciandoOnboardingStripe,
-                            onConfigurar: _configurarCuentaCobro,
-                          ),
+                      const SizedBox(height: 16),
+                      EntradaAnimada(
+                        retraso: const Duration(milliseconds: 135),
+                        child: _TarjetaCuentaCobro(
+                          estado: _perfil?.estadoCuentaStripe ?? EstadoCuentaStripe.pendiente,
+                          cargando: _iniciandoOnboardingStripe,
+                          onConfigurar: _configurarCuentaCobro,
                         ),
-                      ],
+                      ),
                       const SizedBox(height: 16),
                       EntradaAnimada(
                         retraso: const Duration(milliseconds: 150),
@@ -1391,12 +1389,17 @@ class _TarjetaVerificacion extends StatelessWidget {
   }
 }
 
-/// Tarjeta de acción para configurar/actualizar la cuenta de cobro de
-/// Stripe Connect — visible mientras el estado no sea 'configurada'
-/// (ver EstadoCuentaStripe, derivado en el backend de charges_enabled/
-/// payouts_enabled/details_submitted reales, no solo de si existe un
-/// stripeAccountId). Roadmap económico: Registro → (Verificación +
-/// Stripe en paralelo) → Disponible para trabajar.
+/// Tarjeta de acción para configurar/actualizar/editar la cuenta de
+/// cobro de Stripe Connect — antes solo se mostraba mientras el estado
+/// no fuera 'configurada' (ver EstadoCuentaStripe, derivado en el
+/// backend de charges_enabled/payouts_enabled/details_submitted
+/// reales, no solo de si existe un stripeAccountId), así que una vez
+/// configurada no quedaba ningún sitio en la app desde el que
+/// modificarla (BUG 003 de QA: "no es una limitación de Stripe, era
+/// que esta tarjeta entera desaparecía). Ahora siempre es visible; ya
+/// configurada ofrece un botón "Editar" que abre el flujo de edición
+/// de Stripe (`account_update`, ver professional.controller.ts) en vez
+/// del de onboarding inicial.
 class _TarjetaCuentaCobro extends StatelessWidget {
   const _TarjetaCuentaCobro({
     required this.estado,
@@ -1413,6 +1416,7 @@ class _TarjetaCuentaCobro extends StatelessWidget {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final requiereActualizacion = estado == EstadoCuentaStripe.requiereActualizacion;
+    final configurada = estado == EstadoCuentaStripe.configurada;
 
     return Container(
       decoration: BoxDecoration(
@@ -1443,7 +1447,9 @@ class _TarjetaCuentaCobro extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            requiereActualizacion ? t.cuentaCobroEstadoRequiereActualizacion : t.cuentaCobroEstadoPendiente,
+            requiereActualizacion
+                ? t.cuentaCobroEstadoRequiereActualizacion
+                : (configurada ? t.cuentaCobroEstadoConfigurada : t.cuentaCobroEstadoPendiente),
             style: TextStyle(
               fontSize: 13,
               color: requiereActualizacion ? colorScheme.error : colorScheme.onSurfaceVariant,
@@ -1453,13 +1459,21 @@ class _TarjetaCuentaCobro extends StatelessWidget {
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: cargando ? null : onConfigurar,
-              icon: cargando
-                  ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.open_in_new, size: 18),
-              label: Text(requiereActualizacion ? t.cuentaCobroBotonActualizar : t.cuentaCobroBotonConfigurar),
-            ),
+            child: configurada
+                ? OutlinedButton.icon(
+                    onPressed: cargando ? null : onConfigurar,
+                    icon: cargando
+                        ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.edit_outlined, size: 18),
+                    label: Text(t.cuentaCobroBotonEditar),
+                  )
+                : FilledButton.icon(
+                    onPressed: cargando ? null : onConfigurar,
+                    icon: cargando
+                        ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.open_in_new, size: 18),
+                    label: Text(requiereActualizacion ? t.cuentaCobroBotonActualizar : t.cuentaCobroBotonConfigurar),
+                  ),
           ),
         ],
       ),
