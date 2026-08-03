@@ -294,16 +294,21 @@ class AuthService {
     await TokenStorage.instance.clear();
   }
 
-  /// Envía el email de restablecimiento de contraseña de Firebase.
-  /// No toca el backend en absoluto — Firebase gestiona el enlace de
-  /// reseteo y la propia pantalla de cambio de contraseña de forma
-  /// nativa, completamente al margen de la base de datos de hogarSOS.
+  /// Pide al backend que genere el enlace de restablecimiento (Admin
+  /// SDK de Firebase) y lo envíe por email con NUESTRA propia página de
+  /// destino (`/auth/reset-password`, con confirmación de contraseña).
+  /// Antes esto llamaba directamente a
+  /// `_firebaseAuth.sendPasswordResetEmail`, que usa la página nativa
+  /// de Firebase — con un solo campo de contraseña, sin confirmar, lo
+  /// que causaba el BUG 001 de QA (un error de tecleo pasaba
+  /// desapercibido). Ver `auth.controller.ts#forgotPassword`.
   Future<void> enviarEmailRecuperacion(String email) async {
     try {
-      await _firebaseAuth.sendPasswordResetEmail(email: email);
-    } on fb.FirebaseAuthException catch (e) {
-      debugPrint('[AuthService] Error al enviar email de recuperación: ${e.code}');
-      throw AuthException(e.code, causa: e);
+      await _api.post('/auth/forgot-password', data: {'email': email});
+    } on DioException catch (e) {
+      final codigo = e.response?.data is Map ? (e.response!.data['code']?.toString()) : null;
+      debugPrint('[AuthService] Error al enviar email de recuperación: ${codigo ?? e.type}');
+      throw AuthException(codigo ?? _codigoDio(e), causa: e);
     }
   }
 
