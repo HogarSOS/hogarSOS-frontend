@@ -460,7 +460,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get legalPrivSec6Texto =>
-      'You can access, correct, or request deletion of your data, and withdraw location, camera, or photo library permissions at any time from your phone\'s settings. To exercise these rights, contact us from within the app.';
+      'You can access, correct, or delete your account and personal data at any time from Profile → Delete account, or by visiting hogarsos.es/eliminar-cuenta if you don\'t have access to the app. You can also withdraw location, camera, or photo library permissions at any time from your phone\'s settings.';
 
   @override
   String get legalPrivSec7Titulo => '7. Changes to this policy';

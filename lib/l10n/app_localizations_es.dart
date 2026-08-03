@@ -461,7 +461,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get legalPrivSec6Texto =>
-      'Puedes acceder, rectificar o solicitar la eliminación de tus datos, y retirar los permisos de ubicación, cámara o galería en cualquier momento desde los ajustes de tu teléfono. Para ejercer estos derechos, contacta con nosotros desde la app.';
+      'Puedes acceder, rectificar o eliminar tu cuenta y tus datos personales en cualquier momento desde Perfil → Eliminar cuenta, o visitando hogarsos.es/eliminar-cuenta si no tienes acceso a la app. También puedes retirar los permisos de ubicación, cámara o galería en cualquier momento desde los ajustes de tu teléfono.';
 
   @override
   String get legalPrivSec7Titulo => '7. Cambios en esta política';
