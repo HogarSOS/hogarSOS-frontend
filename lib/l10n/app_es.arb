@@ -153,8 +153,8 @@
   "legalTerminosSec1Texto": "Hogar SOS es una plataforma que conecta a clientes que necesitan un servicio a domicilio (electricidad, fontanería, limpieza, etc.) con profesionales independientes que los ofrecen. Hogar SOS no presta los servicios directamente ni es empleador de los profesionales — actúa como intermediario entre ambas partes.",
   "legalTerminosSec2Titulo": "2. Cuentas de usuario",
   "legalTerminosSec2Texto": "Debes dar información veraz al registrarte. Eres responsable de mantener segura tu cuenta. Los profesionales deben superar un proceso de verificación (documento de identidad y, si aplica, certificados/seguro) antes de poder aceptar solicitudes.",
-  "legalTerminosSec3Titulo": "3. Pagos y comisión",
-  "legalTerminosSec3Texto": "El pago de un servicio se autoriza a través de Stripe al aceptar el trabajo, pero no se cobra hasta que el profesional marca el servicio como completado. Hogar SOS retiene una comisión sobre el precio final del servicio; el resto se transfiere al profesional. Los precios los fija el profesional o se acuerdan entre ambas partes por chat.",
+  "legalTerminosSec3Titulo": "3. Pagos y gastos de gestión",
+  "legalTerminosSec3Texto": "El pago de un servicio se autoriza a través de Stripe al aceptar el trabajo, pero no se cobra hasta que el profesional marca el servicio como completado. Hogar SOS aplica unos gastos de gestión sobre el precio del servicio, que incluyen la verificación de identidad del profesional, el pago protegido hasta la finalización del trabajo y el soporte de Hogar SOS en caso de incidencias; el resto se transfiere al profesional. Los precios los fija el profesional o se acuerdan entre ambas partes por chat.",
   "legalTerminosSec4Titulo": "4. Cancelaciones y reembolsos",
   "legalTerminosSec4Texto": "El cliente puede cancelar una solicitud sin coste mientras esté pendiente o recién aceptada y el trabajo todavía no haya empezado. Si ya se autorizó un pago, se reembolsa automáticamente al cancelar. Una vez el profesional marca el servicio como \"en curso\", ya no se puede cancelar desde la app — en ese caso, contacta con nosotros para resolverlo.",
   "legalTerminosSec5Titulo": "5. Disputas",
@@ -686,7 +686,7 @@
   "seguimientoPresupuestoRechazadoExito": "Presupuesto rechazado",
   "seguimientoPresupuestoRechazadoInfo": "Rechazaste el presupuesto anterior — esperando uno nuevo del profesional",
   "seguimientoPresupuestoError": "No se pudo responder al presupuesto",
-  "seguimientoDesgloseComision": "Presupuesto: {base} € + comisión de servicio: {comision} € = total a pagar: {total} €",
+  "seguimientoDesgloseComision": "Presupuesto: {base} € + gastos de gestión: {comision} € = total a pagar: {total} €",
   "@seguimientoDesgloseComision": {
     "placeholders": {
       "base": { "type": "String" },
@@ -695,6 +695,10 @@
     }
   },
   "seguimientoPromoLanzamiento": "🎉 Promoción de lanzamiento",
+  "desglosePagoPresupuestoLabel": "Presupuesto",
+  "desglosePagoGastosGestionLabel": "Gastos de gestión",
+  "desglosePagoGastosGestionInfo": "Los gastos de gestión incluyen la verificación de identidad del profesional, el pago protegido hasta la finalización del trabajo y el soporte de Hogar SOS en caso de incidencias.",
+  "desglosePagoTotalLabel": "Total",
 
   "trabajosActivosHorasEnviadasExito": "Horas enviadas — esperando que el cliente las confirme",
   "trabajosActivosPedirAmpliacionTitulo": "Pedir más horas",
@@ -714,7 +718,7 @@
   "trabajosActivosEstadoAmpliacionPendiente": "Ampliación pendiente",
   "trabajosActivosEstadoCierrePendiente": "Confirmación pendiente",
   "trabajosActivosEstadoPagoLiberado": "Pago liberado",
-  "trabajosActivosDesgloseComision": "Importe del trabajo: {base} € · Comisión Hogar SOS: {comision} € · Recibirás: {recibiras} €",
+  "trabajosActivosDesgloseComision": "Importe del trabajo: {base} € · Gastos de gestión: {comision} € · Recibirás: {recibiras} €",
   "@trabajosActivosDesgloseComision": {
     "placeholders": {
       "base": { "type": "String" },

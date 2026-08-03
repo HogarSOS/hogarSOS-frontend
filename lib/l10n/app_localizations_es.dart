@@ -485,11 +485,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'Debes dar información veraz al registrarte. Eres responsable de mantener segura tu cuenta. Los profesionales deben superar un proceso de verificación (documento de identidad y, si aplica, certificados/seguro) antes de poder aceptar solicitudes.';
 
   @override
-  String get legalTerminosSec3Titulo => '3. Pagos y comisión';
+  String get legalTerminosSec3Titulo => '3. Pagos y gastos de gestión';
 
   @override
   String get legalTerminosSec3Texto =>
-      'El pago de un servicio se autoriza a través de Stripe al aceptar el trabajo, pero no se cobra hasta que el profesional marca el servicio como completado. Hogar SOS retiene una comisión sobre el precio final del servicio; el resto se transfiere al profesional. Los precios los fija el profesional o se acuerdan entre ambas partes por chat.';
+      'El pago de un servicio se autoriza a través de Stripe al aceptar el trabajo, pero no se cobra hasta que el profesional marca el servicio como completado. Hogar SOS aplica unos gastos de gestión sobre el precio del servicio, que incluyen la verificación de identidad del profesional, el pago protegido hasta la finalización del trabajo y el soporte de Hogar SOS en caso de incidencias; el resto se transfiere al profesional. Los precios los fija el profesional o se acuerdan entre ambas partes por chat.';
 
   @override
   String get legalTerminosSec4Titulo => '4. Cancelaciones y reembolsos';
@@ -2032,11 +2032,24 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String seguimientoDesgloseComision(
       String base, String comision, String total) {
-    return 'Presupuesto: $base € + comisión de servicio: $comision € = total a pagar: $total €';
+    return 'Presupuesto: $base € + gastos de gestión: $comision € = total a pagar: $total €';
   }
 
   @override
   String get seguimientoPromoLanzamiento => '🎉 Promoción de lanzamiento';
+
+  @override
+  String get desglosePagoPresupuestoLabel => 'Presupuesto';
+
+  @override
+  String get desglosePagoGastosGestionLabel => 'Gastos de gestión';
+
+  @override
+  String get desglosePagoGastosGestionInfo =>
+      'Los gastos de gestión incluyen la verificación de identidad del profesional, el pago protegido hasta la finalización del trabajo y el soporte de Hogar SOS en caso de incidencias.';
+
+  @override
+  String get desglosePagoTotalLabel => 'Total';
 
   @override
   String get trabajosActivosHorasEnviadasExito =>
@@ -2100,7 +2113,7 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String trabajosActivosDesgloseComision(
       String base, String comision, String recibiras) {
-    return 'Importe del trabajo: $base € · Comisión Hogar SOS: $comision € · Recibirás: $recibiras €';
+    return 'Importe del trabajo: $base € · Gastos de gestión: $comision € · Recibirás: $recibiras €';
   }
 
   @override

@@ -437,16 +437,36 @@ class _EsperandoPresupuesto extends StatelessWidget {
 /// Tarjeta con el presupuesto pendiente de respuesta — muestra el
 /// importe según el tipo (monto fijo, o tarifa × horas estimadas con
 /// el techo que se autorizará) y los botones aceptar/rechazar.
-/// Desglose "presupuesto + comisión = total" que ve el cliente antes de
-/// aceptar un presupuesto/ampliación/cierre de horas — transparencia
-/// total, nada de sorpresas al pagar. Si la comisión vigente es 0% para
-/// ambas partes, se muestra además el distintivo de promoción (derivado
-/// en tiempo real de los porcentajes, no de una fecha).
+/// Desglose "Presupuesto / Gastos de gestión / Total" que ve el cliente
+/// antes de aceptar un presupuesto/ampliación/cierre de horas —
+/// transparencia total, nada de sorpresas al pagar. "Gastos de gestión"
+/// es el término oficial y único de Hogar SOS para esta comisión — no
+/// usar ningún otro nombre ("tarifa de servicio", "comisión de
+/// servicio"...) en ningún otro sitio de la app. Si la comisión vigente
+/// es 0% para ambas partes, se muestra además el distintivo de
+/// promoción (derivado en tiempo real de los porcentajes, no de una
+/// fecha).
 class _DesgloseComision extends StatelessWidget {
   const _DesgloseComision({required this.montoBase, required this.comisiones});
 
   final double montoBase;
   final ComisionesInfo comisiones;
+
+  void _mostrarInfoGastosGestion(BuildContext context, AppLocalizations t) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t.desglosePagoGastosGestionLabel),
+        content: Text(t.desglosePagoGastosGestionInfo),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(t.perfilCancelar),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -454,6 +474,31 @@ class _DesgloseComision extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final total = comisiones.totalCliente(montoBase);
     final comision = total - montoBase;
+
+    TextStyle estiloEtiqueta({bool destacado = false}) => TextStyle(
+          fontSize: destacado ? 13.5 : 12.5,
+          fontWeight: destacado ? FontWeight.w700 : FontWeight.w500,
+          color: destacado ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+        );
+
+    Widget filaImporte(String etiqueta, double importe, {bool destacado = false, Widget? extra}) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 3),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(etiqueta, style: estiloEtiqueta(destacado: destacado)),
+                if (extra != null) extra,
+              ],
+            ),
+            Text('${importe.toStringAsFixed(2)} €', style: estiloEtiqueta(destacado: destacado)),
+          ],
+        ),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.only(top: 8),
@@ -473,14 +518,20 @@ class _DesgloseComision extends StatelessWidget {
                 style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: colorScheme.onTertiaryContainer),
               ),
             ),
-          Text(
-            t.seguimientoDesgloseComision(
-              montoBase.toStringAsFixed(2),
-              comision.toStringAsFixed(2),
-              total.toStringAsFixed(2),
+          filaImporte(t.desglosePagoPresupuestoLabel, montoBase),
+          filaImporte(
+            t.desglosePagoGastosGestionLabel,
+            comision,
+            extra: GestureDetector(
+              onTap: () => _mostrarInfoGastosGestion(context, t),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Icon(Icons.info_outline, size: 14, color: colorScheme.onSurfaceVariant),
+              ),
             ),
-            style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant),
           ),
+          const Padding(padding: EdgeInsets.only(top: 4), child: Divider(height: 1)),
+          filaImporte(t.desglosePagoTotalLabel, total, destacado: true),
         ],
       ),
     );

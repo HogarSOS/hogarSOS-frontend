@@ -10,7 +10,7 @@ CÓMO FUNCIONA
 PARA CLIENTES
 - Publica solicitudes de servicio en segundos, con fotos y descripción.
 - Compara candidaturas y elige al profesional que más te convenza.
-- Ve siempre el desglose completo (importe + comisión = total) antes de pagar.
+- Ve siempre el desglose completo (presupuesto + gastos de gestión = total) antes de pagar.
 - Chatea directamente con el profesional dentro de la app.
 - Pide ampliaciones de presupuesto si el trabajo se complica, siempre con tu aprobación.
 - Tu pago queda retenido de forma segura hasta que confirmes que el trabajo está terminado.
@@ -25,7 +25,7 @@ PARA PROFESIONALES
 CATEGORÍAS DISPONIBLES
 Electricidad, fontanería, pintura, manitas, limpieza del hogar, jardinería, cerrajería, reformas, aire acondicionado, carpintería, albañilería, tejados y cubiertas, instalación de cristales, antenas y telecomunicaciones, sistemas de seguridad, mudanzas, piscinas, control de plagas, pet sitter, técnico de telefonía, masajes a domicilio, manicura y pedicura, y más.
 
-PROMOCIÓN DE LANZAMIENTO
-Durante el lanzamiento, Hogar SOS no cobra comisión: lo que acuerdas es lo que se paga.
+PARA PROFESIONALES, SIN GASTOS DE GESTIÓN
+Los profesionales no pagan gastos de gestión: te quedas con el 100% de lo acordado con el cliente.
 
 ¿Dudas o problemas? Escríbenos a soporte@hogarsos.es.

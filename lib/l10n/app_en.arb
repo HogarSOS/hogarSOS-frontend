@@ -153,8 +153,8 @@
   "legalTerminosSec1Texto": "Hogar SOS is a platform that connects customers who need a home service (electrical, plumbing, cleaning, etc.) with independent professionals who provide them. Hogar SOS doesn't perform the services itself and isn't the professionals' employer — it acts as an intermediary between both parties.",
   "legalTerminosSec2Titulo": "2. User accounts",
   "legalTerminosSec2Texto": "You must provide accurate information when you sign up. You're responsible for keeping your account secure. Professionals must complete a verification process (ID document and, where applicable, certifications/insurance) before they can accept requests.",
-  "legalTerminosSec3Titulo": "3. Payments and fees",
-  "legalTerminosSec3Texto": "Payment for a service is authorized through Stripe when the job is accepted, but isn't charged until the professional marks the service as completed. Hogar SOS retains a fee from the final price of the service; the rest is transferred to the professional. Prices are set by the professional or agreed between both parties over chat.",
+  "legalTerminosSec3Titulo": "3. Payments and management fee",
+  "legalTerminosSec3Texto": "Payment for a service is authorized through Stripe when the job is accepted, but isn't charged until the professional marks the service as completed. Hogar SOS applies a management fee on the price of the service, which covers verifying the professional's identity, protecting your payment until the job is finished, and Hogar SOS support if any issue comes up; the rest is transferred to the professional. Prices are set by the professional or agreed between both parties over chat.",
   "legalTerminosSec4Titulo": "4. Cancellations and refunds",
   "legalTerminosSec4Texto": "The customer can cancel a request at no cost while it's still pending or was just accepted and work hasn't started yet. If a payment was already authorized, it's automatically refunded on cancellation. Once the professional marks the service as \"in progress\", it can no longer be canceled from the app — in that case, contact us to sort it out.",
   "legalTerminosSec5Titulo": "5. Disputes",
@@ -686,7 +686,7 @@
   "seguimientoPresupuestoRechazadoExito": "Quote declined",
   "seguimientoPresupuestoRechazadoInfo": "You declined the previous quote — waiting for a new one from the professional",
   "seguimientoPresupuestoError": "Couldn't respond to the quote",
-  "seguimientoDesgloseComision": "Quote: €{base} + service fee: €{comision} = total to pay: €{total}",
+  "seguimientoDesgloseComision": "Quote: €{base} + management fee: €{comision} = total to pay: €{total}",
   "@seguimientoDesgloseComision": {
     "placeholders": {
       "base": { "type": "String" },
@@ -695,6 +695,10 @@
     }
   },
   "seguimientoPromoLanzamiento": "🎉 Launch promotion",
+  "desglosePagoPresupuestoLabel": "Quote",
+  "desglosePagoGastosGestionLabel": "Management fee",
+  "desglosePagoGastosGestionInfo": "The management fee covers verifying the professional's identity, protecting your payment until the job is finished, and Hogar SOS support if any issue comes up.",
+  "desglosePagoTotalLabel": "Total",
 
   "trabajosActivosHorasEnviadasExito": "Hours sent — waiting for the customer to confirm them",
   "trabajosActivosPedirAmpliacionTitulo": "Ask for more hours",
@@ -714,7 +718,7 @@
   "trabajosActivosEstadoAmpliacionPendiente": "Extension pending",
   "trabajosActivosEstadoCierrePendiente": "Confirmation pending",
   "trabajosActivosEstadoPagoLiberado": "Payment released",
-  "trabajosActivosDesgloseComision": "Job amount: €{base} · Hogar SOS fee: €{comision} · You'll receive: €{recibiras}",
+  "trabajosActivosDesgloseComision": "Job amount: €{base} · Management fee: €{comision} · You'll receive: €{recibiras}",
   "@trabajosActivosDesgloseComision": {
     "placeholders": {
       "base": { "type": "String" },

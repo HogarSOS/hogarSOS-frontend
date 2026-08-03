@@ -484,11 +484,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'You must provide accurate information when you sign up. You\'re responsible for keeping your account secure. Professionals must complete a verification process (ID document and, where applicable, certifications/insurance) before they can accept requests.';
 
   @override
-  String get legalTerminosSec3Titulo => '3. Payments and fees';
+  String get legalTerminosSec3Titulo => '3. Payments and management fee';
 
   @override
   String get legalTerminosSec3Texto =>
-      'Payment for a service is authorized through Stripe when the job is accepted, but isn\'t charged until the professional marks the service as completed. Hogar SOS retains a fee from the final price of the service; the rest is transferred to the professional. Prices are set by the professional or agreed between both parties over chat.';
+      'Payment for a service is authorized through Stripe when the job is accepted, but isn\'t charged until the professional marks the service as completed. Hogar SOS applies a management fee on the price of the service, which covers verifying the professional\'s identity, protecting your payment until the job is finished, and Hogar SOS support if any issue comes up; the rest is transferred to the professional. Prices are set by the professional or agreed between both parties over chat.';
 
   @override
   String get legalTerminosSec4Titulo => '4. Cancellations and refunds';
@@ -2017,11 +2017,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String seguimientoDesgloseComision(
       String base, String comision, String total) {
-    return 'Quote: €$base + service fee: €$comision = total to pay: €$total';
+    return 'Quote: €$base + management fee: €$comision = total to pay: €$total';
   }
 
   @override
   String get seguimientoPromoLanzamiento => '🎉 Launch promotion';
+
+  @override
+  String get desglosePagoPresupuestoLabel => 'Quote';
+
+  @override
+  String get desglosePagoGastosGestionLabel => 'Management fee';
+
+  @override
+  String get desglosePagoGastosGestionInfo =>
+      'The management fee covers verifying the professional\'s identity, protecting your payment until the job is finished, and Hogar SOS support if any issue comes up.';
+
+  @override
+  String get desglosePagoTotalLabel => 'Total';
 
   @override
   String get trabajosActivosHorasEnviadasExito =>
@@ -2085,7 +2098,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String trabajosActivosDesgloseComision(
       String base, String comision, String recibiras) {
-    return 'Job amount: €$base · Hogar SOS fee: €$comision · You\'ll receive: €$recibiras';
+    return 'Job amount: €$base · Management fee: €$comision · You\'ll receive: €$recibiras';
   }
 
   @override

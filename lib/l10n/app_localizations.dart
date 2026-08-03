@@ -917,13 +917,13 @@ abstract class AppLocalizations {
   /// No description provided for @legalTerminosSec3Titulo.
   ///
   /// In es, this message translates to:
-  /// **'3. Pagos y comisión'**
+  /// **'3. Pagos y gastos de gestión'**
   String get legalTerminosSec3Titulo;
 
   /// No description provided for @legalTerminosSec3Texto.
   ///
   /// In es, this message translates to:
-  /// **'El pago de un servicio se autoriza a través de Stripe al aceptar el trabajo, pero no se cobra hasta que el profesional marca el servicio como completado. Hogar SOS retiene una comisión sobre el precio final del servicio; el resto se transfiere al profesional. Los precios los fija el profesional o se acuerdan entre ambas partes por chat.'**
+  /// **'El pago de un servicio se autoriza a través de Stripe al aceptar el trabajo, pero no se cobra hasta que el profesional marca el servicio como completado. Hogar SOS aplica unos gastos de gestión sobre el precio del servicio, que incluyen la verificación de identidad del profesional, el pago protegido hasta la finalización del trabajo y el soporte de Hogar SOS en caso de incidencias; el resto se transfiere al profesional. Los precios los fija el profesional o se acuerdan entre ambas partes por chat.'**
   String get legalTerminosSec3Texto;
 
   /// No description provided for @legalTerminosSec4Titulo.
@@ -3600,7 +3600,7 @@ abstract class AppLocalizations {
   /// No description provided for @seguimientoDesgloseComision.
   ///
   /// In es, this message translates to:
-  /// **'Presupuesto: {base} € + comisión de servicio: {comision} € = total a pagar: {total} €'**
+  /// **'Presupuesto: {base} € + gastos de gestión: {comision} € = total a pagar: {total} €'**
   String seguimientoDesgloseComision(
       String base, String comision, String total);
 
@@ -3609,6 +3609,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'🎉 Promoción de lanzamiento'**
   String get seguimientoPromoLanzamiento;
+
+  /// No description provided for @desglosePagoPresupuestoLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Presupuesto'**
+  String get desglosePagoPresupuestoLabel;
+
+  /// No description provided for @desglosePagoGastosGestionLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Gastos de gestión'**
+  String get desglosePagoGastosGestionLabel;
+
+  /// No description provided for @desglosePagoGastosGestionInfo.
+  ///
+  /// In es, this message translates to:
+  /// **'Los gastos de gestión incluyen la verificación de identidad del profesional, el pago protegido hasta la finalización del trabajo y el soporte de Hogar SOS en caso de incidencias.'**
+  String get desglosePagoGastosGestionInfo;
+
+  /// No description provided for @desglosePagoTotalLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Total'**
+  String get desglosePagoTotalLabel;
 
   /// No description provided for @trabajosActivosHorasEnviadasExito.
   ///
@@ -3721,7 +3745,7 @@ abstract class AppLocalizations {
   /// No description provided for @trabajosActivosDesgloseComision.
   ///
   /// In es, this message translates to:
-  /// **'Importe del trabajo: {base} € · Comisión Hogar SOS: {comision} € · Recibirás: {recibiras} €'**
+  /// **'Importe del trabajo: {base} € · Gastos de gestión: {comision} € · Recibirás: {recibiras} €'**
   String trabajosActivosDesgloseComision(
       String base, String comision, String recibiras);
 
