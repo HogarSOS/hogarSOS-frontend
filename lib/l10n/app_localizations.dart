@@ -1604,11 +1604,11 @@ abstract class AppLocalizations {
   /// **'Control de plagas'**
   String get categoriaControlPlagas;
 
-  /// No description provided for @categoriaVeterinaria.
+  /// No description provided for @categoriaPetSitter.
   ///
   /// In es, this message translates to:
-  /// **'Veterinaria a domicilio'**
-  String get categoriaVeterinaria;
+  /// **'Pet sitter'**
+  String get categoriaPetSitter;
 
   /// No description provided for @categoriaTecnicoTelefonia.
   ///
@@ -1754,11 +1754,11 @@ abstract class AppLocalizations {
   /// **'Ej: tengo cucarachas en la cocina...'**
   String get wizardEjemploControlPlagas;
 
-  /// No description provided for @wizardEjemploVeterinaria.
+  /// No description provided for @wizardEjemploPetSitter.
   ///
   /// In es, this message translates to:
-  /// **'Ej: mi perro necesita una revisión a domicilio...'**
-  String get wizardEjemploVeterinaria;
+  /// **'Ej: necesito que alguien cuide de mi perro este fin de semana...'**
+  String get wizardEjemploPetSitter;
 
   /// No description provided for @wizardEjemploTecnicoTelefonia.
   ///

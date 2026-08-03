@@ -888,7 +888,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get categoriaControlPlagas => 'Control de plagas';
 
   @override
-  String get categoriaVeterinaria => 'Veterinaria a domicilio';
+  String get categoriaPetSitter => 'Pet sitter';
 
   @override
   String get categoriaTecnicoTelefonia => 'Técnico de telefonía';
@@ -979,8 +979,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ej: tengo cucarachas en la cocina...';
 
   @override
-  String get wizardEjemploVeterinaria =>
-      'Ej: mi perro necesita una revisión a domicilio...';
+  String get wizardEjemploPetSitter =>
+      'Ej: necesito que alguien cuide de mi perro este fin de semana...';
 
   @override
   String get wizardEjemploTecnicoTelefonia =>

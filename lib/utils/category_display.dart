@@ -53,6 +53,12 @@ final Map<String, CategoriaEstilo> _estilos = {
   'limpieza de cristales': const CategoriaEstilo(Icons.water_drop_outlined, Color(0xFF5AC8FA)),
   'piscinas': const CategoriaEstilo(Icons.pool_outlined, Color(0xFF17A2B8)),
   'control de plagas': const CategoriaEstilo(Icons.pest_control_outlined, Color(0xFF4C9A2A)),
+  'pet sitter': const CategoriaEstilo(Icons.pets_outlined, Color(0xFFEC4899)),
+  // Nombre anterior de esta categoría (antes de sustituirla por "Pet
+  // sitter" — más útil para quien busca cuidado de mascotas a domicilio
+  // que un servicio veterinario en sí): se conserva el estilo por si
+  // queda algún dato antiguo con el nombre viejo, mismo patrón que las
+  // demás compatibilidades de esta tabla.
   'veterinaria a domicilio': const CategoriaEstilo(Icons.pets_outlined, Color(0xFFEC4899)),
   'técnico de telefonía': const CategoriaEstilo(Icons.smartphone_outlined, Color(0xFF0EA5E9)),
   'tecnico de telefonia': const CategoriaEstilo(Icons.smartphone_outlined, Color(0xFF0EA5E9)),
@@ -130,8 +136,9 @@ String nombreLocalizadoCategoria(BuildContext context, String nombreCanonico) {
       return t.categoriaPiscinas;
     case 'control de plagas':
       return t.categoriaControlPlagas;
+    case 'pet sitter':
     case 'veterinaria a domicilio':
-      return t.categoriaVeterinaria;
+      return t.categoriaPetSitter;
     case 'técnico de telefonía':
     case 'tecnico de telefonia':
       return t.categoriaTecnicoTelefonia;
@@ -204,8 +211,9 @@ String ejemploDescripcionParaCategoria(BuildContext context, String? nombreCanon
       return t.wizardEjemploPiscinas;
     case 'control de plagas':
       return t.wizardEjemploControlPlagas;
+    case 'pet sitter':
     case 'veterinaria a domicilio':
-      return t.wizardEjemploVeterinaria;
+      return t.wizardEjemploPetSitter;
     case 'técnico de telefonía':
     case 'tecnico de telefonia':
       return t.wizardEjemploTecnicoTelefonia;
