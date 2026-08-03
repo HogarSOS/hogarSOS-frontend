@@ -469,6 +469,10 @@
   "@centroPagosImporte": {
     "placeholders": { "monto": { "type": "String" } }
   },
+  "centroPagosPagoDe": "Payment from {nombre}",
+  "@centroPagosPagoDe": {
+    "placeholders": { "nombre": { "type": "String" } }
+  },
   "miPerfilStatValoracion": "Rating",
   "miPerfilStatTrabajos": "Jobs",
   "miPerfilStatTarifa": "Rate",

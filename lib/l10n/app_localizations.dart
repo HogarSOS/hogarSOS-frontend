@@ -2522,6 +2522,12 @@ abstract class AppLocalizations {
   /// **'{monto} €'**
   String centroPagosImporte(String monto);
 
+  /// No description provided for @centroPagosPagoDe.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago de {nombre}'**
+  String centroPagosPagoDe(String nombre);
+
   /// No description provided for @miPerfilStatValoracion.
   ///
   /// In es, this message translates to:

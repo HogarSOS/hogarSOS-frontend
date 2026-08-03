@@ -362,13 +362,15 @@ class _ItemHistorial extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  cobro.categoria,
+                  t.centroPagosPagoDe(cobro.nombreCliente),
                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  DateFormat.yMMMd(t.localeName).format(cobro.fecha),
+                  '${cobro.categoria} · ${DateFormat.yMMMd(t.localeName).format(cobro.fecha)}',
                   style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

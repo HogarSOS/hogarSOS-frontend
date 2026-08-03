@@ -1432,6 +1432,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String centroPagosPagoDe(String nombre) {
+    return 'Pago de $nombre';
+  }
+
+  @override
   String get miPerfilStatValoracion => 'Valoración';
 
   @override

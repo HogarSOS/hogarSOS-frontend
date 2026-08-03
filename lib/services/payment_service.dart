@@ -52,6 +52,7 @@ class CobroHistorial {
   final DateTime fecha;
   final String categoria;
   final String descripcion;
+  final String nombreCliente;
 
   CobroHistorial({
     required this.id,
@@ -59,6 +60,7 @@ class CobroHistorial {
     required this.fecha,
     required this.categoria,
     required this.descripcion,
+    required this.nombreCliente,
   });
 
   factory CobroHistorial.fromJson(Map<String, dynamic> json) {
@@ -68,6 +70,7 @@ class CobroHistorial {
       fecha: DateTime.parse(json['fecha'] as String),
       categoria: json['categoria'] as String,
       descripcion: json['descripcion'] as String,
+      nombreCliente: json['nombreCliente'] as String,
     );
   }
 }

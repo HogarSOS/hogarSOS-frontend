@@ -1423,6 +1423,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String centroPagosPagoDe(String nombre) {
+    return 'Payment from $nombre';
+  }
+
+  @override
   String get miPerfilStatValoracion => 'Rating';
 
   @override
