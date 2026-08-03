@@ -129,6 +129,8 @@ class PaymentService {
     });
 
     final clientSecret = respuesta.data['clientSecret'] as String;
+    final customerId = respuesta.data['customerId'] as String;
+    final ephemeralKeySecret = respuesta.data['ephemeralKeySecret'] as String;
 
     // BUG 004 (QA, 2026-08-03): "el campo del número de tarjeta no coge
     // el foco al primer toque, hay que tocar varias veces o tocar otro
@@ -147,9 +149,15 @@ class PaymentService {
     await Future.delayed(const Duration(milliseconds: 100));
 
     // Presenta la hoja de pago nativa de Stripe (tarjeta, Apple Pay, Google Pay).
+    // customerId + customerEphemeralKeySecret son lo que permite a Payment
+    // Sheet mostrar las tarjetas ya guardadas del cliente (si tiene) y
+    // ofrecer guardar la nueva — no cambia el composable de introducir una
+    // tarjeta nueva, que es donde vive el BUG 004 ya documentado.
     await Stripe.instance.initPaymentSheet(
       paymentSheetParameters: SetupPaymentSheetParameters(
         paymentIntentClientSecret: clientSecret,
+        customerId: customerId,
+        customerEphemeralKeySecret: ephemeralKeySecret,
         merchantDisplayName: 'Hogar SOS',
       ),
     );

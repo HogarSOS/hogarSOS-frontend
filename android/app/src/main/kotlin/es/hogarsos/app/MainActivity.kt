@@ -1,4 +1,4 @@
-package com.example.hogarsos
+package es.hogarsos.app
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

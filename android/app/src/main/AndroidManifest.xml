@@ -15,7 +15,7 @@
         <!--
           Clave de Google Maps restringida en Google Cloud Console
           (proyecto "hogarsos") a Maps SDK for Android + huellas SHA-1
-          release y debug del paquete com.example.hogarsos.
+          release y debug del paquete es.hogarsos.app.
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
