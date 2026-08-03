@@ -177,7 +177,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                   radius: 44,
                   backgroundColor: colorScheme.primaryContainer,
                   backgroundImage: usuario?.fotoPerfilUrl != null
-                      ? CachedNetworkImageProvider(usuario!.fotoPerfilUrl!)
+                      ? CachedNetworkImageProvider(usuario!.fotoPerfilUrl!, maxWidth: 320, maxHeight: 320)
                       : null,
                   child: usuario?.fotoPerfilUrl == null
                       ? Text(

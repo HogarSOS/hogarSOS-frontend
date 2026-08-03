@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
@@ -453,7 +454,7 @@ class _DocumentoIdentidadPreview extends StatelessWidget {
         child: Stack(
           children: [
             InteractiveViewer(
-              child: Image.network(url, fit: BoxFit.contain),
+              child: CachedNetworkImage(imageUrl: url, fit: BoxFit.contain),
             ),
             Positioned(
               right: 4,
@@ -500,29 +501,29 @@ class _DocumentoIdentidadPreview extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              docUrl,
+            child: CachedNetworkImage(
+              imageUrl: docUrl,
               width: 48,
               height: 48,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
+              // memCacheWidth/Height: decodifica ya a tamaño de miniatura en
+              // vez de decodificar la imagen completa (hasta 1920px tras el
+              // redimensionado del servidor) solo para mostrarla a 48x48 —
+              // esta miniatura se repite por cada profesional pendiente de
+              // revisión en la cola del admin.
+              memCacheWidth: 96,
+              memCacheHeight: 96,
+              errorWidget: (context, url, error) => Container(
                 width: 48,
                 height: 48,
                 color: colorScheme.surfaceContainerHighest,
                 child: Icon(Icons.broken_image_outlined, size: 20, color: colorScheme.onSurfaceVariant),
               ),
-              loadingBuilder: (context, child, progress) {
-                if (progress == null) return child;
-                return SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: Center(
-                    child: CircularProgressIndicator(strokeWidth: 2, value: progress.expectedTotalBytes != null
-                        ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
-                        : null),
-                  ),
-                );
-              },
+              placeholder: (context, url) => SizedBox(
+                width: 48,
+                height: 48,
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              ),
             ),
           ),
           const SizedBox(width: 10),

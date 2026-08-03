@@ -135,7 +135,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                         backgroundImage: _fotoLocalSeleccionada != null
                             ? FileImage(_fotoLocalSeleccionada!)
                             : (_fotoPerfilUrlActual != null
-                                ? CachedNetworkImageProvider(_fotoPerfilUrlActual!)
+                                ? CachedNetworkImageProvider(_fotoPerfilUrlActual!, maxWidth: 320, maxHeight: 320)
                                 : null) as ImageProvider?,
                         child: (_fotoLocalSeleccionada == null && _fotoPerfilUrlActual == null)
                             ? Text(

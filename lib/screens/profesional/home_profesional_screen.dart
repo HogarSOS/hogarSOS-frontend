@@ -1,7 +1,5 @@
-import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/service_request_model.dart';
@@ -10,6 +8,7 @@ import '../../providers/service_request_provider.dart';
 import '../../services/professional_service.dart' show ModoDisponibilidad;
 import '../../theme/brand_mark.dart';
 import '../../utils/error_extraction.dart';
+import '../../utils/polling_lifecycle_mixin.dart';
 import '../../widgets/animated_diff_list.dart';
 import '../../widgets/entrada_animada.dart';
 import 'trabajos_activos_profesional_screen.dart';
@@ -27,9 +26,8 @@ class HomeProfesionalScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeProfesionalScreen> createState() => _HomeProfesionalScreenState();
 }
 
-class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen> {
-  Timer? _polling;
-
+class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
+    with WidgetsBindingObserver, PollingLifecycleMixin {
   @override
   void initState() {
     super.initState();
@@ -38,15 +36,19 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen> {
     // veía solicitudes nuevas sin deslizar. Mismo patrón de sondeo que
     // seguimiento_solicitud_screen.dart, pero cada 10s (no 5s): es una
     // lista, no un trabajo concreto ya aceptado, así que hay menos
-    // urgencia y así se reduce la carga de red.
-    _polling = Timer.periodic(const Duration(seconds: 10), (_) {
+    // urgencia y así se reduce la carga de red. Se pausa solo con la
+    // app en segundo plano (ver PollingLifecycleMixin) — esta pestaña
+    // sigue viva de fondo aunque no sea la visible (IndexedStack en
+    // profesional_shell_screen.dart), así que sin esto sondeaba sin
+    // parar incluso con el móvil bloqueado.
+    startPolling(const Duration(seconds: 10), () {
       ref.read(nearbyRequestsProvider.notifier).cargar();
     });
   }
 
   @override
   void dispose() {
-    _polling?.cancel();
+    stopPolling();
     super.dispose();
   }
 
@@ -405,7 +407,7 @@ class _TarjetaSolicitudCercana extends StatelessWidget {
                   radius: 18,
                   backgroundColor: colorScheme.primaryContainer,
                   backgroundImage: solicitud.clienteFotoUrl != null
-                      ? CachedNetworkImageProvider(solicitud.clienteFotoUrl!)
+                      ? CachedNetworkImageProvider(solicitud.clienteFotoUrl!, maxWidth: 120, maxHeight: 120)
                       : null,
                   child: solicitud.clienteFotoUrl == null
                       ? Text(

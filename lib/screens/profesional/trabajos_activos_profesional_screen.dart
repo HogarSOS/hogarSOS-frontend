@@ -1,7 +1,5 @@
-import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/presupuesto_model.dart';
@@ -12,6 +10,7 @@ import '../../providers/service_request_provider.dart';
 import '../../services/payment_service.dart';
 import '../../services/service_request_service.dart';
 import '../../utils/error_extraction.dart';
+import '../../utils/polling_lifecycle_mixin.dart';
 import '../../widgets/animated_diff_list.dart';
 import '../../widgets/entrada_animada.dart';
 import '../chat_screen.dart';
@@ -35,9 +34,8 @@ class TrabajosActivosProfesionalScreen extends ConsumerStatefulWidget {
   ConsumerState<TrabajosActivosProfesionalScreen> createState() => _TrabajosActivosProfesionalScreenState();
 }
 
-class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActivosProfesionalScreen> {
-  Timer? _polling;
-
+class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActivosProfesionalScreen>
+    with WidgetsBindingObserver, PollingLifecycleMixin {
   @override
   void initState() {
     super.initState();
@@ -46,15 +44,16 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
     // (filtro en el backend), pero sin refrescar esta lista periódicamente
     // el profesional solo se enteraría con un pull-to-refresh manual —
     // cada 10s se entera solo, sin spinner de por medio (el refresco es
-    // silencioso, ver AssignedRequestsNotifier.cargar()).
-    _polling = Timer.periodic(const Duration(seconds: 10), (_) {
+    // silencioso, ver AssignedRequestsNotifier.cargar()). Se pausa solo
+    // con la app en segundo plano (ver PollingLifecycleMixin).
+    startPolling(const Duration(seconds: 10), () {
       ref.read(assignedRequestsProvider.notifier).cargar();
     });
   }
 
   @override
   void dispose() {
-    _polling?.cancel();
+    stopPolling();
     super.dispose();
   }
 
@@ -701,7 +700,7 @@ class _TarjetaTrabajo extends ConsumerWidget {
                 CircleAvatar(
                   backgroundColor: colorScheme.primaryContainer,
                   backgroundImage: trabajo.clienteFotoUrl != null
-                      ? CachedNetworkImageProvider(trabajo.clienteFotoUrl!)
+                      ? CachedNetworkImageProvider(trabajo.clienteFotoUrl!, maxWidth: 120, maxHeight: 120)
                       : null,
                   child: trabajo.clienteFotoUrl == null
                       ? Text(

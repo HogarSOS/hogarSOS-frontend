@@ -745,7 +745,9 @@ class _Cabecera extends StatelessWidget {
                 backgroundColor: colorScheme.primaryContainer,
                 backgroundImage: fotoLocal != null
                     ? FileImage(fotoLocal!)
-                    : (fotoUrl != null ? CachedNetworkImageProvider(fotoUrl!) : null) as ImageProvider?,
+                    : (fotoUrl != null
+                        ? CachedNetworkImageProvider(fotoUrl!, maxWidth: 320, maxHeight: 320)
+                        : null) as ImageProvider?,
                 child: (fotoLocal == null && fotoUrl == null)
                     ? Text(
                         nombre.isNotEmpty ? nombre[0].toUpperCase() : '?',

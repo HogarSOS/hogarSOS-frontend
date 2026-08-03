@@ -32,7 +32,9 @@ class PostulacionCard extends StatelessWidget {
                 CircleAvatar(
                   radius: 26,
                   backgroundColor: colorScheme.primaryContainer,
-                  backgroundImage: c.fotoPerfilUrl != null ? CachedNetworkImageProvider(c.fotoPerfilUrl!) : null,
+                  backgroundImage: c.fotoPerfilUrl != null
+                      ? CachedNetworkImageProvider(c.fotoPerfilUrl!, maxWidth: 160, maxHeight: 160)
+                      : null,
                   child: c.fotoPerfilUrl == null
                       ? Text(
                           c.nombre.isNotEmpty ? c.nombre[0].toUpperCase() : '?',

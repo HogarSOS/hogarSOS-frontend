@@ -71,8 +71,9 @@ class _Contenido extends StatelessWidget {
                     child: CircleAvatar(
                       radius: 44,
                       backgroundColor: colorScheme.primary,
-                      backgroundImage:
-                          perfil.fotoPerfilUrl != null ? CachedNetworkImageProvider(perfil.fotoPerfilUrl!) : null,
+                      backgroundImage: perfil.fotoPerfilUrl != null
+                          ? CachedNetworkImageProvider(perfil.fotoPerfilUrl!, maxWidth: 320, maxHeight: 320)
+                          : null,
                       child: perfil.fotoPerfilUrl == null
                           ? Text(
                               perfil.nombre.isNotEmpty ? perfil.nombre[0].toUpperCase() : '?',

@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
@@ -12,6 +10,7 @@ import '../../services/payment_service.dart';
 import '../../services/service_request_service.dart';
 import '../../utils/category_display.dart';
 import '../../utils/error_extraction.dart';
+import '../../utils/polling_lifecycle_mixin.dart';
 import '../../widgets/entrada_animada.dart';
 import '../chat_screen.dart';
 import '../reportar_problema_screen.dart';
@@ -34,11 +33,11 @@ class SeguimientoSolicitudScreen extends ConsumerStatefulWidget {
   ConsumerState<SeguimientoSolicitudScreen> createState() => _SeguimientoSolicitudScreenState();
 }
 
-class _SeguimientoSolicitudScreenState extends ConsumerState<SeguimientoSolicitudScreen> {
+class _SeguimientoSolicitudScreenState extends ConsumerState<SeguimientoSolicitudScreen>
+    with WidgetsBindingObserver, PollingLifecycleMixin {
   final _servicio = ServiceRequestService();
   ServiceRequestModel? _solicitud;
   String? _error;
-  Timer? _polling;
 
   static const _estadosActivos = {EstadoSolicitud.pendiente, EstadoSolicitud.aceptada, EstadoSolicitud.en_progreso};
 
@@ -46,12 +45,13 @@ class _SeguimientoSolicitudScreenState extends ConsumerState<SeguimientoSolicitu
   void initState() {
     super.initState();
     _cargar();
-    _polling = Timer.periodic(const Duration(seconds: 5), (_) => _cargar(silencioso: true));
+    // Se pausa solo con la app en segundo plano (ver PollingLifecycleMixin).
+    startPolling(const Duration(seconds: 5), () => _cargar(silencioso: true));
   }
 
   @override
   void dispose() {
-    _polling?.cancel();
+    stopPolling();
     super.dispose();
   }
 
@@ -66,7 +66,7 @@ class _SeguimientoSolicitudScreenState extends ConsumerState<SeguimientoSolicitu
       // Ya no hace falta seguir sondeando si la solicitud llegó a un
       // estado final — ahorra peticiones de por vida de la pantalla.
       if (!_estadosActivos.contains(solicitud.estado)) {
-        _polling?.cancel();
+        stopPolling();
       }
     } catch (e) {
       if (!mounted || silencioso) return; // en el sondeo de fondo, un fallo puntual no debe mostrar error

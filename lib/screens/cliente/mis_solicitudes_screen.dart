@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
@@ -6,6 +5,7 @@ import '../../models/service_request_model.dart';
 import '../../providers/service_request_provider.dart';
 import '../../services/service_request_service.dart';
 import '../../utils/category_display.dart';
+import '../../utils/polling_lifecycle_mixin.dart';
 import '../../widgets/entrada_animada.dart';
 import 'seguimiento_solicitud_screen.dart';
 
@@ -16,11 +16,11 @@ class MisSolicitudesScreen extends ConsumerStatefulWidget {
   ConsumerState<MisSolicitudesScreen> createState() => _MisSolicitudesScreenState();
 }
 
-class _MisSolicitudesScreenState extends ConsumerState<MisSolicitudesScreen> {
+class _MisSolicitudesScreenState extends ConsumerState<MisSolicitudesScreen>
+    with WidgetsBindingObserver, PollingLifecycleMixin {
   final _servicio = ServiceRequestService();
   List<MyServiceRequestSummary>? _solicitudes;
   bool _error = false;
-  Timer? _polling;
 
   @override
   void initState() {
@@ -29,13 +29,14 @@ class _MisSolicitudesScreenState extends ConsumerState<MisSolicitudesScreen> {
     // Antes solo se cargaba una vez al entrar y con pull-to-refresh
     // manual — una solicitud nueva o un cambio de estado (candidato
     // nuevo, aceptada...) no se veía sin deslizar. Mismo patrón de
-    // sondeo silencioso que seguimiento_solicitud_screen.dart.
-    _polling = Timer.periodic(const Duration(seconds: 10), (_) => _cargar(silencioso: true));
+    // sondeo silencioso que seguimiento_solicitud_screen.dart. Se pausa
+    // solo con la app en segundo plano (ver PollingLifecycleMixin).
+    startPolling(const Duration(seconds: 10), () => _cargar(silencioso: true));
   }
 
   @override
   void dispose() {
-    _polling?.cancel();
+    stopPolling();
     super.dispose();
   }
 
