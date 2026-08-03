@@ -948,7 +948,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wizardEjemploTejados => 'E.g.: I have a leak in my roof...';
 
   @override
-  String get wizardEjemploInstalacionCristales => 'E.g.: a window pane is broken...';
+  String get wizardEjemploInstalacionCristales =>
+      'E.g.: a window pane is broken...';
 
   @override
   String get wizardEjemploCarpinteriaMetalica =>
