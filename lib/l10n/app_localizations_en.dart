@@ -646,6 +646,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get perfilCancelar => 'Cancel';
 
   @override
+  String get perfilEliminarCuenta => 'Delete account';
+
+  @override
+  String get perfilEliminarCuentaConfirmarTitulo => 'Delete your account?';
+
+  @override
+  String get perfilEliminarCuentaConfirmarTexto =>
+      'This can\'t be undone. You\'ll lose access immediately, and your name, email, phone, photo and, if you\'re a professional, your verification documents will be deleted.';
+
+  @override
+  String get perfilEliminarCuentaBotonConfirmar => 'Yes, delete my account';
+
+  @override
+  String get perfilEliminarCuentaError =>
+      'We couldn\'t delete your account. Please try again.';
+
+  @override
   String get perfilFavoritos => 'Favorites';
 
   @override

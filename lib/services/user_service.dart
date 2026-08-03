@@ -23,6 +23,16 @@ class UserService {
     return AppUser.fromJson(respuesta.data as Map<String, dynamic>);
   }
 
+  /// Elimina la cuenta del usuario autenticado (cualquier rol) — ver
+  /// user.controller.ts#deleteMe. Irreversible: borra el usuario de
+  /// Firebase Auth y anonimiza los datos personales en nuestra base de
+  /// datos. Quien llama a esto debe cerrar la sesión local justo
+  /// después (los tokens dejan de servir para nada, pero no hay razón
+  /// para conservarlos).
+  Future<void> eliminarCuenta() async {
+    await _api.delete('/users/me');
+  }
+
   /// Opiniones recibidas por el usuario autenticado (como cliente
   /// contratante, valorado por profesionales). Reutiliza el mismo
   /// modelo ProfessionalReview que ya existe para el perfil público de

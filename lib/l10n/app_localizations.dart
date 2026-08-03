@@ -1178,6 +1178,36 @@ abstract class AppLocalizations {
   /// **'Cancelar'**
   String get perfilCancelar;
 
+  /// No description provided for @perfilEliminarCuenta.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar cuenta'**
+  String get perfilEliminarCuenta;
+
+  /// No description provided for @perfilEliminarCuentaConfirmarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar tu cuenta?'**
+  String get perfilEliminarCuentaConfirmarTitulo;
+
+  /// No description provided for @perfilEliminarCuentaConfirmarTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta acción no se puede deshacer. Perderás el acceso de inmediato y se eliminarán tu nombre, email, teléfono, foto y, si eres profesional, tus documentos de verificación.'**
+  String get perfilEliminarCuentaConfirmarTexto;
+
+  /// No description provided for @perfilEliminarCuentaBotonConfirmar.
+  ///
+  /// In es, this message translates to:
+  /// **'Sí, eliminar mi cuenta'**
+  String get perfilEliminarCuentaBotonConfirmar;
+
+  /// No description provided for @perfilEliminarCuentaError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo eliminar tu cuenta. Inténtalo de nuevo.'**
+  String get perfilEliminarCuentaError;
+
   /// No description provided for @perfilFavoritos.
   ///
   /// In es, this message translates to:

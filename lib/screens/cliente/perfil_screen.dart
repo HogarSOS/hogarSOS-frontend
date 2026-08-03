@@ -6,6 +6,7 @@ import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
 import '../../widgets/entrada_animada.dart';
+import '../../widgets/eliminar_cuenta.dart';
 import 'editar_perfil_screen.dart';
 import 'mis_solicitudes_screen.dart';
 import 'mis_valoraciones_screen.dart';
@@ -299,6 +300,15 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
               icon: const Icon(Icons.logout),
               label: Text(t.perfilCerrarSesion),
               style: OutlinedButton.styleFrom(foregroundColor: colorScheme.error),
+            ),
+          ),
+          const SizedBox(height: 10),
+          EntradaAnimada(
+            retraso: const Duration(milliseconds: 180),
+            child: TextButton(
+              onPressed: () => confirmarYEliminarCuenta(context, ref),
+              style: TextButton.styleFrom(foregroundColor: colorScheme.error),
+              child: Text(t.perfilEliminarCuenta),
             ),
           ),
         ],

@@ -15,6 +15,7 @@ import '../../services/user_service.dart';
 import '../../utils/category_display.dart';
 import '../../utils/error_extraction.dart';
 import '../../utils/tipo_profesional_display.dart';
+import '../../widgets/eliminar_cuenta.dart';
 import '../../widgets/entrada_animada.dart';
 import '../../widgets/lista_opiniones.dart';
 import '../legal/privacidad_screen.dart';
@@ -674,6 +675,16 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                             onPressed: _confirmarCerrarSesion,
                             icon: Icon(Icons.logout, size: 18, color: colorScheme.error),
                             label: Text(t.perfilCerrarSesion, style: TextStyle(color: colorScheme.error)),
+                          ),
+                        ),
+                      ),
+                      EntradaAnimada(
+                        retraso: const Duration(milliseconds: 320),
+                        child: Center(
+                          child: TextButton(
+                            onPressed: () => confirmarYEliminarCuenta(context, ref),
+                            style: TextButton.styleFrom(foregroundColor: colorScheme.error),
+                            child: Text(t.perfilEliminarCuenta, style: const TextStyle(fontSize: 12.5)),
                           ),
                         ),
                       ),

@@ -647,6 +647,23 @@ class AppLocalizationsEs extends AppLocalizations {
   String get perfilCancelar => 'Cancelar';
 
   @override
+  String get perfilEliminarCuenta => 'Eliminar cuenta';
+
+  @override
+  String get perfilEliminarCuentaConfirmarTitulo => '¿Eliminar tu cuenta?';
+
+  @override
+  String get perfilEliminarCuentaConfirmarTexto =>
+      'Esta acción no se puede deshacer. Perderás el acceso de inmediato y se eliminarán tu nombre, email, teléfono, foto y, si eres profesional, tus documentos de verificación.';
+
+  @override
+  String get perfilEliminarCuentaBotonConfirmar => 'Sí, eliminar mi cuenta';
+
+  @override
+  String get perfilEliminarCuentaError =>
+      'No se pudo eliminar tu cuenta. Inténtalo de nuevo.';
+
+  @override
   String get perfilFavoritos => 'Favoritos';
 
   @override
