@@ -8,6 +8,7 @@ import '../../l10n/app_localizations.dart';
 import '../../models/service_category_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/disponibilidad_provider.dart';
+import '../../providers/stripe_return_provider.dart';
 import '../../services/professional_service.dart';
 import '../../services/service_request_service.dart';
 import '../../services/user_service.dart';
@@ -420,10 +421,12 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
   }
 
   /// Abre el onboarding hospedado de Stripe Connect en el navegador
-  /// externo. No refresca el perfil al volver: Stripe redirige de vuelta
-  /// a una URL propia (no a la app), así que el estado real se
-  /// actualiza solo la próxima vez que se cargue este perfil (ver
-  /// comentario de refresco en caliente en professional.controller.ts).
+  /// externo. Al terminar, Stripe redirige a una página propia del
+  /// backend (ver stripeOnboarding.routes.ts) que devuelve a la app vía
+  /// deep link (`hogarsos://stripe-return/...`) — DeepLinkListener
+  /// (services/deep_link_listener.dart) recibe ese link y dispara
+  /// stripeReturnEventProvider, que este mismo widget escucha más
+  /// arriba en build() para recargar el perfil automáticamente.
   Future<void> _configurarCuentaCobro() async {
     setState(() => _iniciandoOnboardingStripe = true);
     try {
@@ -480,6 +483,13 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+
+    // Igual que en CentroPagosScreen: este shell mantiene la pestaña
+    // montada de fondo (IndexedStack), así que hay que escuchar el
+    // retorno de Stripe explícitamente en vez de confiar en initState.
+    ref.listen<int>(stripeReturnEventProvider, (anterior, actual) {
+      if (anterior != null && anterior != actual) _cargarPerfil();
+    });
 
     return Scaffold(
       appBar: AppBar(title: Text(t.miPerfilTitulo)),

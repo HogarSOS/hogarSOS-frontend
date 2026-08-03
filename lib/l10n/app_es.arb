@@ -450,6 +450,8 @@
   "cuentaCobroBotonConfigurar": "Configurar cuenta de cobro",
   "cuentaCobroBotonActualizar": "Actualizar en Stripe",
   "cuentaCobroErrorAbrir": "No se pudo abrir Stripe. Inténtalo de nuevo.",
+  "cuentaCobroStripeActualizando": "Actualizando el estado de tu cuenta de cobro…",
+  "cuentaCobroStripeCaducado": "El enlace de Stripe caducó. Pulsa \"Configurar cuenta de cobro\" para volver a intentarlo.",
   "centroPagosTitulo": "Centro de Pagos",
   "centroPagosErrorCargar": "No se pudo cargar tu información de pagos",
   "centroPagosPendiente": "Pendiente",

@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 
+import 'app_keys.dart';
 import 'l10n/app_localizations.dart';
 import 'screens/auth_gate_screen.dart';
+import 'services/deep_link_listener.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -39,6 +41,8 @@ class HogarSOSApp extends StatelessWidget {
     return MaterialApp(
       title: 'hogarSOS',
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey,
+      scaffoldMessengerKey: scaffoldMessengerKey,
 
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
@@ -60,8 +64,11 @@ class HogarSOSApp extends StatelessWidget {
 
       // El enrutado real (según rol: cliente/profesional/admin) se
       // resuelve en AuthGateScreen: si ya hay sesión guardada, se
-      // restaura sola sin pasar por el login.
-      home: const AuthGateScreen(),
+      // restaura sola sin pasar por el login. DeepLinkListener envuelve
+      // el gate entero (no solo la pantalla profesional) porque el
+      // deep link puede llegar con la app recién arrancada, antes de
+      // que AuthGateScreen sepa todavía qué rol hay.
+      home: const DeepLinkListener(child: AuthGateScreen()),
     );
   }
 }

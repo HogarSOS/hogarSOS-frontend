@@ -2426,6 +2426,18 @@ abstract class AppLocalizations {
   /// **'No se pudo abrir Stripe. Inténtalo de nuevo.'**
   String get cuentaCobroErrorAbrir;
 
+  /// No description provided for @cuentaCobroStripeActualizando.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizando el estado de tu cuenta de cobro…'**
+  String get cuentaCobroStripeActualizando;
+
+  /// No description provided for @cuentaCobroStripeCaducado.
+  ///
+  /// In es, this message translates to:
+  /// **'El enlace de Stripe caducó. Pulsa \"Configurar cuenta de cobro\" para volver a intentarlo.'**
+  String get cuentaCobroStripeCaducado;
+
   /// No description provided for @centroPagosTitulo.
   ///
   /// In es, this message translates to:

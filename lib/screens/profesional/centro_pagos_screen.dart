@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/stripe_return_provider.dart';
 import '../../services/payment_service.dart';
 import '../../services/professional_service.dart';
 import '../../widgets/entrada_animada.dart';
@@ -78,6 +79,16 @@ class _CentroPagosScreenState extends ConsumerState<CentroPagosScreen> {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
+
+    // Esta pantalla vive dentro de un IndexedStack (ver
+    // profesional_shell_screen.dart) que la mantiene montada aunque no
+    // esté visible, así que su propio initState no se vuelve a llamar
+    // al volver de Stripe — sin esto, "Disponible"/"Pendiente" se
+    // quedaban con el saldo de antes de configurar la cuenta de cobro
+    // hasta el siguiente pull-to-refresh manual.
+    ref.listen<int>(stripeReturnEventProvider, (anterior, actual) {
+      if (anterior != null && anterior != actual) _cargar();
+    });
 
     return Scaffold(
       appBar: AppBar(title: Text(t.centroPagosTitulo)),

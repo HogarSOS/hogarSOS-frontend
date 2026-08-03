@@ -1364,6 +1364,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t open Stripe. Please try again.';
 
   @override
+  String get cuentaCobroStripeActualizando =>
+      'Updating your payout account status…';
+
+  @override
+  String get cuentaCobroStripeCaducado =>
+      'The Stripe link expired. Tap \"Set up payout account\" to try again.';
+
+  @override
   String get centroPagosTitulo => 'Payments Center';
 
   @override

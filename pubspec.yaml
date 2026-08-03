@@ -53,6 +53,7 @@ dependencies:
 
   # Tipografía de marca (Sprint 1 — identidad visual)
   google_fonts: ^6.2.1
+  app_links: ^7.2.1
 
 dev_dependencies:
   flutter_test:

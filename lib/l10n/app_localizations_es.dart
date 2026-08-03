@@ -1373,6 +1373,14 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo abrir Stripe. Inténtalo de nuevo.';
 
   @override
+  String get cuentaCobroStripeActualizando =>
+      'Actualizando el estado de tu cuenta de cobro…';
+
+  @override
+  String get cuentaCobroStripeCaducado =>
+      'El enlace de Stripe caducó. Pulsa \"Configurar cuenta de cobro\" para volver a intentarlo.';
+
+  @override
   String get centroPagosTitulo => 'Centro de Pagos';
 
   @override

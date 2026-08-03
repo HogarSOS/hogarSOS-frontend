@@ -36,6 +36,22 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<!-- Deep link propio para volver a la app tras el onboarding
+	     hospedado de Stripe Connect (ver AndroidManifest.xml, mismo
+	     esquema hogarsos:// para ambas plataformas). iOS no distingue
+	     host en el registro, solo el esquema; el host/path se lee en
+	     Dart al recibir el link. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>es.hogarsos.stripereturn</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>hogarsos</string>
+			</array>
+		</dict>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

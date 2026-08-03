@@ -450,6 +450,8 @@
   "cuentaCobroBotonConfigurar": "Set up payout account",
   "cuentaCobroBotonActualizar": "Update on Stripe",
   "cuentaCobroErrorAbrir": "Couldn't open Stripe. Please try again.",
+  "cuentaCobroStripeActualizando": "Updating your payout account status…",
+  "cuentaCobroStripeCaducado": "The Stripe link expired. Tap \"Set up payout account\" to try again.",
   "centroPagosTitulo": "Payments Center",
   "centroPagosErrorCargar": "Couldn't load your payments information",
   "centroPagosPendiente": "Pending",
