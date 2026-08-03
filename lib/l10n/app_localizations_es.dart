@@ -863,7 +863,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get categoriaTejados => 'Tejados y cubiertas';
 
   @override
-  String get categoriaCristaleria => 'Cristalería';
+  String get categoriaInstalacionCristales => 'Instalación de cristales';
 
   @override
   String get categoriaCarpinteriaMetalica =>
@@ -948,7 +948,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get wizardEjemploTejados => 'Ej: tengo una gotera en el tejado...';
 
   @override
-  String get wizardEjemploCristaleria =>
+  String get wizardEjemploInstalacionCristales =>
       'Ej: se ha roto el cristal de una ventana...';
 
   @override

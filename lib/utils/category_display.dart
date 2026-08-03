@@ -43,6 +43,10 @@ final Map<String, CategoriaEstilo> _estilos = {
   'albañilería': const CategoriaEstilo(Icons.foundation_outlined, Color(0xFF64748B)),
   'albanileria': const CategoriaEstilo(Icons.foundation_outlined, Color(0xFF64748B)),
   'tejados y cubiertas': const CategoriaEstilo(Icons.roofing_outlined, Color(0xFFE5484D)),
+  'instalación de cristales': const CategoriaEstilo(Icons.window_outlined, Color(0xFF22B8CF)),
+  'instalacion de cristales': const CategoriaEstilo(Icons.window_outlined, Color(0xFF22B8CF)),
+  // Nombre anterior de esta categoría — renombrada para no confundirse
+  // con "Limpieza de cristales" (instalar/reparar vidrio, no limpiarlo).
   'cristalería': const CategoriaEstilo(Icons.window_outlined, Color(0xFF22B8CF)),
   'cristaleria': const CategoriaEstilo(Icons.window_outlined, Color(0xFF22B8CF)),
   'carpintería metálica': const CategoriaEstilo(Icons.hardware_outlined, Color(0xFF8D8F99)),
@@ -118,9 +122,11 @@ String nombreLocalizadoCategoria(BuildContext context, String nombreCanonico) {
       return t.categoriaAlbanileria;
     case 'tejados y cubiertas':
       return t.categoriaTejados;
+    case 'instalación de cristales':
+    case 'instalacion de cristales':
     case 'cristalería':
     case 'cristaleria':
-      return t.categoriaCristaleria;
+      return t.categoriaInstalacionCristales;
     case 'carpintería metálica':
     case 'carpinteria metalica':
       return t.categoriaCarpinteriaMetalica;
@@ -193,9 +199,11 @@ String ejemploDescripcionParaCategoria(BuildContext context, String? nombreCanon
       return t.wizardEjemploAlbanileria;
     case 'tejados y cubiertas':
       return t.wizardEjemploTejados;
+    case 'instalación de cristales':
+    case 'instalacion de cristales':
     case 'cristalería':
     case 'cristaleria':
-      return t.wizardEjemploCristaleria;
+      return t.wizardEjemploInstalacionCristales;
     case 'carpintería metálica':
     case 'carpinteria metalica':
       return t.wizardEjemploCarpinteriaMetalica;

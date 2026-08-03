@@ -1556,11 +1556,11 @@ abstract class AppLocalizations {
   /// **'Tejados y cubiertas'**
   String get categoriaTejados;
 
-  /// No description provided for @categoriaCristaleria.
+  /// No description provided for @categoriaInstalacionCristales.
   ///
   /// In es, this message translates to:
-  /// **'Cristalería'**
-  String get categoriaCristaleria;
+  /// **'Instalación de cristales'**
+  String get categoriaInstalacionCristales;
 
   /// No description provided for @categoriaCarpinteriaMetalica.
   ///
@@ -1706,11 +1706,11 @@ abstract class AppLocalizations {
   /// **'Ej: tengo una gotera en el tejado...'**
   String get wizardEjemploTejados;
 
-  /// No description provided for @wizardEjemploCristaleria.
+  /// No description provided for @wizardEjemploInstalacionCristales.
   ///
   /// In es, this message translates to:
   /// **'Ej: se ha roto el cristal de una ventana...'**
-  String get wizardEjemploCristaleria;
+  String get wizardEjemploInstalacionCristales;
 
   /// No description provided for @wizardEjemploCarpinteriaMetalica.
   ///

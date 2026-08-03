@@ -862,7 +862,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoriaTejados => 'Roofing';
 
   @override
-  String get categoriaCristaleria => 'Glazing';
+  String get categoriaInstalacionCristales => 'Glass installation';
 
   @override
   String get categoriaCarpinteriaMetalica => 'Metalwork / Aluminum & PVC';
@@ -948,7 +948,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wizardEjemploTejados => 'E.g.: I have a leak in my roof...';
 
   @override
-  String get wizardEjemploCristaleria => 'E.g.: a window pane is broken...';
+  String get wizardEjemploInstalacionCristales => 'E.g.: a window pane is broken...';
 
   @override
   String get wizardEjemploCarpinteriaMetalica =>
