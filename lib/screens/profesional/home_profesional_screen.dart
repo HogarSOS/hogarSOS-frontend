@@ -5,7 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../../models/service_request_model.dart';
 import '../../providers/disponibilidad_provider.dart';
 import '../../providers/service_request_provider.dart';
-import '../../services/professional_service.dart' show ModoDisponibilidad;
+import '../../services/professional_service.dart' show EstadoCuentaStripe, ModoDisponibilidad;
 import '../../theme/brand_mark.dart';
 import '../../utils/error_extraction.dart';
 import '../../utils/polling_lifecycle_mixin.dart';
@@ -163,6 +163,43 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
     }
   }
 
+  /// BUG 002 (QA, 2026-08-03): la tarjeta de disponibilidad solo permitía
+  /// pausar — una vez en "No disponible" desaparecía del todo, sin dejar
+  /// rastro del estado ni forma de volver a activarse sin ir a "Mi
+  /// perfil". Ahora la tarjeta sigue visible en los dos estados (ver
+  /// _TarjetaDisponibilidad) y este método reactiva directamente desde
+  /// aquí, con los mismos requisitos que ya comprobaba
+  /// _SelectorDisponibilidad en Mi perfil (perfil completo, verificado,
+  /// Stripe configurado) — si falta algo, se explica con el mismo texto
+  /// en vez de intentarlo y fallar en el backend. Reutiliza el último
+  /// `modo` conocido (horario laboral / 24h) en vez de forzar uno fijo.
+  Future<void> _ponerseDisponible(BuildContext context, WidgetRef ref, DisponibilidadState estado) async {
+    final t = AppLocalizations.of(context);
+
+    if (!estado.perfilCompleto) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.disponibilidadPerfilIncompleto)));
+      return;
+    }
+    if (!estado.estaVerificado) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.disponibilidadPendienteVerificacion)));
+      return;
+    }
+    if (estado.estadoCuentaStripe != EstadoCuentaStripe.configurada) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.disponibilidadPendienteStripe)));
+      return;
+    }
+
+    try {
+      await ref.read(disponibilidadProvider.notifier).actualizar(disponible: true, modo: estado.modo);
+    } catch (e) {
+      debugPrint('[HomeProfesionalScreen] Error al ponerse disponible: $e');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.profesionalErrorDisponibilidad, t: t))),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
@@ -188,25 +225,28 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
         },
         child: CustomScrollView(
           slivers: [
-            // Acceso rápido a "No disponible" (roadmap económico, punto 2):
+            // Acceso rápido a disponibilidad (roadmap económico, punto 2):
             // antes era un icono de rayo suelto en el AppBar, sin texto — un
             // usuario nuevo no tenía forma de adivinar qué hacía sin
             // mantener pulsado para ver el tooltip, y un toque perdido ahí
             // apagaba la disponibilidad sin confirmación ni aviso previo.
-            // Ahora es una tarjeta con texto explícito, en el cuerpo (no
-            // compite por espacio con el título del AppBar) y visible solo
-            // mientras el profesional está disponible.
+            // BUG 002 (QA, 2026-08-03): la tarjeta solo se mostraba estando
+            // disponible — al pulsar "No disponible" desaparecía del todo,
+            // dejando el estado del profesional sin ningún indicio visible
+            // y sin forma de volver a activarse sin salir a "Mi perfil".
+            // Ahora la tarjeta es siempre visible (ver _TarjetaDisponibilidad),
+            // en los dos estados, con su propio botón para alternar.
             disponibilidadAsync.maybeWhen(
-              data: (estado) => estado.disponible
-                  ? SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                        child: _TarjetaDisponibleAhora(
-                          onPausar: () => _ponerseNoDisponible(context, ref, estado.modo),
-                        ),
-                      ),
-                    )
-                  : const SliverToBoxAdapter(child: SizedBox.shrink()),
+              data: (estado) => SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: _TarjetaDisponibilidad(
+                    estado: estado,
+                    onPausar: () => _ponerseNoDisponible(context, ref, estado.modo),
+                    onActivar: () => _ponerseDisponible(context, ref, estado),
+                  ),
+                ),
+              ),
               orElse: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
             ),
             // Solo se muestra si hay trabajos aceptados pendientes de
@@ -288,45 +328,95 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
   }
 }
 
-/// Tarjeta de "estás disponible ahora mismo" con acceso directo a
-/// pausar — sustituye al icono de rayo suelto que antes vivía en el
-/// AppBar (ver comentario en build()). El texto deja claro tanto el
-/// estado actual como la acción del botón, sin necesitar un tooltip.
-class _TarjetaDisponibleAhora extends StatelessWidget {
-  const _TarjetaDisponibleAhora({required this.onPausar});
+/// Tarjeta de disponibilidad, siempre visible — antes solo existía en
+/// el estado "disponible" (con un botón para pausar), y desaparecía
+/// del todo al pasar a "No disponible" (BUG 002 de QA: el estado
+/// quedaba sin ningún indicio visible y sin forma de volver a
+/// activarse sin salir a "Mi perfil"). Ahora cubre los dos estados con
+/// el mismo componente, dejando claro tanto la disponibilidad actual
+/// como la acción del botón, sin necesitar un tooltip.
+class _TarjetaDisponibilidad extends StatelessWidget {
+  const _TarjetaDisponibilidad({
+    required this.estado,
+    required this.onPausar,
+    required this.onActivar,
+  });
 
+  final DisponibilidadState estado;
   final VoidCallback onPausar;
+  final VoidCallback onActivar;
 
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
+    if (estado.disponible) {
+      return Container(
+        padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+        decoration: BoxDecoration(
+          color: Colors.amber.withOpacity(0.13),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.amber.withOpacity(0.35)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.bolt, color: Colors.amber.shade800, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                t.profesionalDisponibleAhoraAviso,
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: onPausar,
+              style: TextButton.styleFrom(foregroundColor: Colors.amber.shade900),
+              child: Text(t.disponibilidadOpcionNoDisponibleTitulo),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
       decoration: BoxDecoration(
-        color: Colors.amber.withOpacity(0.13),
+        color: colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.amber.withOpacity(0.35)),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Row(
         children: [
-          Icon(Icons.bolt, color: Colors.amber.shade800, size: 20),
+          Icon(Icons.bolt_outlined, color: colorScheme.onSurfaceVariant, size: 20),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              t.profesionalDisponibleAhoraAviso,
-              style: TextStyle(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  t.disponibilidadOpcionNoDisponibleTitulo,
+                  style: TextStyle(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+                Text(
+                  t.profesionalNoDisponibleAyuda,
+                  style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 11.5),
+                ),
+              ],
             ),
           ),
           TextButton(
-            onPressed: onPausar,
-            style: TextButton.styleFrom(foregroundColor: Colors.amber.shade900),
-            child: Text(t.disponibilidadOpcionNoDisponibleTitulo),
+            onPressed: onActivar,
+            child: Text(t.profesionalPonerseDisponibleBoton),
           ),
         ],
       ),

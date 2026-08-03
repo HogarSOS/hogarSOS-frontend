@@ -376,6 +376,7 @@
   "profesionalErrorDisponibilidad": "Couldn't update your availability",
   "profesionalDisponibleAyuda": "You'll receive requests near your location",
   "profesionalNoDisponibleAyuda": "Turn it on to start receiving jobs",
+  "profesionalPonerseDisponibleBoton": "Get available",
   "disponibilidadTitulo": "Availability",
   "disponibilidadEnLineaTitulo": "Current status",
   "disponibilidadModoTitulo": "Availability mode",

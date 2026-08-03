@@ -1127,6 +1127,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Actívalo para empezar a recibir trabajos';
 
   @override
+  String get profesionalPonerseDisponibleBoton => 'Ponerme disponible';
+
+  @override
   String get disponibilidadTitulo => 'Disponibilidad';
 
   @override

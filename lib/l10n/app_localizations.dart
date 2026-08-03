@@ -1988,6 +1988,12 @@ abstract class AppLocalizations {
   /// **'Actívalo para empezar a recibir trabajos'**
   String get profesionalNoDisponibleAyuda;
 
+  /// No description provided for @profesionalPonerseDisponibleBoton.
+  ///
+  /// In es, this message translates to:
+  /// **'Ponerme disponible'**
+  String get profesionalPonerseDisponibleBoton;
+
   /// No description provided for @disponibilidadTitulo.
   ///
   /// In es, this message translates to:
