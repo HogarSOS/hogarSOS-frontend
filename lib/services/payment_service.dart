@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'api_service.dart';
 import 'professional_service.dart' show EstadoCuentaStripe;
@@ -125,6 +126,22 @@ class PaymentService {
     });
 
     final clientSecret = respuesta.data['clientSecret'] as String;
+
+    // BUG 004 (QA, 2026-08-03): "el campo del número de tarjeta no coge
+    // el foco al primer toque, hay que tocar varias veces o tocar otro
+    // campo antes". No es un GestureDetector nuestro interceptando el
+    // toque —el Payment Sheet de Stripe es una vista NATIVA (fuera del
+    // árbol de widgets de Flutter), así que nuestros overlays no pueden
+    // ni podrían bloquearla. Es un problema conocido de flutter_stripe
+    // en Android (issues #14/#306/#361/#392 del repo): si Flutter se
+    // queda con el foco/conexión de teclado (IME) de CUALQUIER campo de
+    // texto de la app, el CardField nativo del Payment Sheet no consigue
+    // arrebatárselo limpiamente al primer toque. Quitar el foco de
+    // Flutter explícitamente (y dar un respiro a la animación de cierre
+    // del teclado) justo antes de abrir el Payment Sheet evita el
+    // conflicto — es la solución recomendada en esos issues.
+    FocusManager.instance.primaryFocus?.unfocus();
+    await Future.delayed(const Duration(milliseconds: 100));
 
     // Presenta la hoja de pago nativa de Stripe (tarjeta, Apple Pay, Google Pay).
     await Stripe.instance.initPaymentSheet(
