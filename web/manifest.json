@@ -1,11 +1,11 @@
 {
-    "name": "hogarSOS",
-    "short_name": "hogarSOS",
+    "name": "Hogar SOS",
+    "short_name": "Hogar SOS",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#1554F0",
-    "theme_color": "#1554F0",
-    "description": "hogarSOS — encuentra profesionales de confianza para el hogar, al instante.",
+    "background_color": "#1E8A5A",
+    "theme_color": "#1E8A5A",
+    "description": "Hogar SOS — encuentra profesionales de confianza para el hogar, al instante.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

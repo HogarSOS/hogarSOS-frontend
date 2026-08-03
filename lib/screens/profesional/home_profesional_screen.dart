@@ -178,19 +178,6 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen> {
             Text(t.profesionalTituloSolicitudes),
           ],
         ),
-        actions: [
-          disponibilidadAsync.maybeWhen(
-            data: (estado) => estado.disponible
-                ? IconButton(
-                    icon: const Icon(Icons.bolt),
-                    color: Colors.amber.shade700,
-                    tooltip: t.disponibilidadOpcionNoDisponibleTitulo,
-                    onPressed: () => _ponerseNoDisponible(context, ref, estado.modo),
-                  )
-                : const SizedBox.shrink(),
-            orElse: () => const SizedBox.shrink(),
-          ),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -199,6 +186,27 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen> {
         },
         child: CustomScrollView(
           slivers: [
+            // Acceso rápido a "No disponible" (roadmap económico, punto 2):
+            // antes era un icono de rayo suelto en el AppBar, sin texto — un
+            // usuario nuevo no tenía forma de adivinar qué hacía sin
+            // mantener pulsado para ver el tooltip, y un toque perdido ahí
+            // apagaba la disponibilidad sin confirmación ni aviso previo.
+            // Ahora es una tarjeta con texto explícito, en el cuerpo (no
+            // compite por espacio con el título del AppBar) y visible solo
+            // mientras el profesional está disponible.
+            disponibilidadAsync.maybeWhen(
+              data: (estado) => estado.disponible
+                  ? SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                        child: _TarjetaDisponibleAhora(
+                          onPausar: () => _ponerseNoDisponible(context, ref, estado.modo),
+                        ),
+                      ),
+                    )
+                  : const SliverToBoxAdapter(child: SizedBox.shrink()),
+              orElse: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
+            ),
             // Solo se muestra si hay trabajos aceptados pendientes de
             // completar — sin este acceso, aceptar una solicitud la
             // hacía desaparecer sin dejar ningún rastro ni forma de
@@ -273,6 +281,52 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Tarjeta de "estás disponible ahora mismo" con acceso directo a
+/// pausar — sustituye al icono de rayo suelto que antes vivía en el
+/// AppBar (ver comentario en build()). El texto deja claro tanto el
+/// estado actual como la acción del botón, sin necesitar un tooltip.
+class _TarjetaDisponibleAhora extends StatelessWidget {
+  const _TarjetaDisponibleAhora({required this.onPausar});
+
+  final VoidCallback onPausar;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+      decoration: BoxDecoration(
+        color: Colors.amber.withOpacity(0.13),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.amber.withOpacity(0.35)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.bolt, color: Colors.amber.shade800, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              t.profesionalDisponibleAhoraAviso,
+              style: TextStyle(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: onPausar,
+            style: TextButton.styleFrom(foregroundColor: Colors.amber.shade900),
+            child: Text(t.disponibilidadOpcionNoDisponibleTitulo),
+          ),
+        ],
       ),
     );
   }

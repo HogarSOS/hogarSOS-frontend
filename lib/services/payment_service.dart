@@ -130,7 +130,7 @@ class PaymentService {
     await Stripe.instance.initPaymentSheet(
       paymentSheetParameters: SetupPaymentSheetParameters(
         paymentIntentClientSecret: clientSecret,
-        merchantDisplayName: 'hogarSOS',
+        merchantDisplayName: 'Hogar SOS',
       ),
     );
     await Stripe.instance.presentPaymentSheet();

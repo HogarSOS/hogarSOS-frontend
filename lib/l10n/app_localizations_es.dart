@@ -9,7 +9,7 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get appTitle => 'hogarSOS';
+  String get appTitle => 'Hogar SOS';
 
   @override
   String get navInicio => 'Inicio';
@@ -80,6 +80,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get loginRecuperarExito =>
       'Si existe una cuenta con ese email, te hemos enviado un enlace para restablecer la contraseña';
+
+  @override
+  String get loginRecuperarEmailRequerido =>
+      'Indica tu email para poder enviarte el enlace';
 
   @override
   String get loginModoEmail => 'Email';
@@ -422,14 +426,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get legalPrivSec1Texto =>
-      'hogarSOS es una app que conecta a clientes con profesionales de servicios a domicilio. Somos responsables del tratamiento de los datos personales que recoge la aplicación, descritos en esta política.';
+      'Hogar SOS es una app que conecta a clientes con profesionales de servicios a domicilio. Somos responsables del tratamiento de los datos personales que recoge la aplicación, descritos en esta política.';
 
   @override
   String get legalPrivSec2Titulo => '2. Qué datos recogemos';
 
   @override
   String get legalPrivSec2Texto =>
-      '• Datos de cuenta: nombre, email y teléfono al registrarte.\n• Ubicación: tu ubicación aproximada o precisa (con tu permiso) para mostrarte profesionales cercanos, o para que un profesional aparezca en las búsquedas de clientes cerca de él.\n• Fotos: las que adjuntes a una solicitud de servicio o a tu perfil.\n• Documentos de verificación (solo profesionales): documento de identidad, certificados y seguro de responsabilidad civil, usados exclusivamente para verificar tu identidad y aptitud antes de permitirte operar en la plataforma.\n• Datos de pago: gestionados directamente por Stripe, nuestro procesador de pagos — hogarSOS nunca almacena el número completo de tu tarjeta.\n• Mensajes de chat entre cliente y profesional de una misma solicitud.';
+      '• Datos de cuenta: nombre, email y teléfono al registrarte.\n• Ubicación: tu ubicación aproximada o precisa (con tu permiso) para mostrarte profesionales cercanos, o para que un profesional aparezca en las búsquedas de clientes cerca de él.\n• Fotos: las que adjuntes a una solicitud de servicio o a tu perfil.\n• Documentos de verificación (solo profesionales): documento de identidad, certificados y seguro de responsabilidad civil, usados exclusivamente para verificar tu identidad y aptitud antes de permitirte operar en la plataforma.\n• Datos de pago: gestionados directamente por Stripe, nuestro procesador de pagos — Hogar SOS nunca almacena el número completo de tu tarjeta.\n• Mensajes de chat entre cliente y profesional de una misma solicitud.';
 
   @override
   String get legalPrivSec3Titulo => '3. Para qué usamos tus datos';
@@ -467,11 +471,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'Si actualizamos esta política de forma relevante, te lo notificaremos dentro de la app antes de que entre en vigor.';
 
   @override
-  String get legalTerminosSec1Titulo => '1. Qué es hogarSOS';
+  String get legalTerminosSec1Titulo => '1. Qué es Hogar SOS';
 
   @override
   String get legalTerminosSec1Texto =>
-      'hogarSOS es una plataforma que conecta a clientes que necesitan un servicio a domicilio (electricidad, fontanería, limpieza, etc.) con profesionales independientes que los ofrecen. hogarSOS no presta los servicios directamente ni es empleador de los profesionales — actúa como intermediario entre ambas partes.';
+      'Hogar SOS es una plataforma que conecta a clientes que necesitan un servicio a domicilio (electricidad, fontanería, limpieza, etc.) con profesionales independientes que los ofrecen. Hogar SOS no presta los servicios directamente ni es empleador de los profesionales — actúa como intermediario entre ambas partes.';
 
   @override
   String get legalTerminosSec2Titulo => '2. Cuentas de usuario';
@@ -485,7 +489,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get legalTerminosSec3Texto =>
-      'El pago de un servicio se autoriza a través de Stripe al aceptar el trabajo, pero no se cobra hasta que el profesional marca el servicio como completado. hogarSOS retiene una comisión sobre el precio final del servicio; el resto se transfiere al profesional. Los precios los fija el profesional o se acuerdan entre ambas partes por chat.';
+      'El pago de un servicio se autoriza a través de Stripe al aceptar el trabajo, pero no se cobra hasta que el profesional marca el servicio como completado. Hogar SOS retiene una comisión sobre el precio final del servicio; el resto se transfiere al profesional. Los precios los fija el profesional o se acuerdan entre ambas partes por chat.';
 
   @override
   String get legalTerminosSec4Titulo => '4. Cancelaciones y reembolsos';
@@ -506,21 +510,21 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get legalTerminosSec6Texto =>
-      'hogarSOS facilita el contacto y el pago entre cliente y profesional, pero no supervisa ni garantiza la calidad del trabajo realizado — la relación de servicio es directamente entre ambas partes. Recomendamos revisar las valoraciones de un profesional antes de contratarlo.';
+      'Hogar SOS facilita el contacto y el pago entre cliente y profesional, pero no supervisa ni garantiza la calidad del trabajo realizado — la relación de servicio es directamente entre ambas partes. Recomendamos revisar las valoraciones de un profesional antes de contratarlo.';
 
   @override
   String get legalTerminosSec7Titulo => '7. Conducta de los profesionales';
 
   @override
   String get legalTerminosSec7Texto =>
-      'Los profesionales verificados deben prestar el servicio con la diligencia y competencia propias de su oficio. hogarSOS puede suspender o revocar una cuenta que reciba valoraciones reiteradamente negativas, incumpla estos términos, o cuya verificación resulte fraudulenta.';
+      'Los profesionales verificados deben prestar el servicio con la diligencia y competencia propias de su oficio. Hogar SOS puede suspender o revocar una cuenta que reciba valoraciones reiteradamente negativas, incumpla estos términos, o cuya verificación resulte fraudulenta.';
 
   @override
   String get legalTerminosSec8Titulo => '8. Cambios en estos términos';
 
   @override
   String get legalTerminosSec8Texto =>
-      'Podemos actualizar estos términos; los cambios relevantes se notificarán dentro de la app antes de entrar en vigor. Seguir usando hogarSOS después de un cambio implica aceptarlo.';
+      'Podemos actualizar estos términos; los cambios relevantes se notificarán dentro de la app antes de entrar en vigor. Seguir usando Hogar SOS después de un cambio implica aceptarlo.';
 
   @override
   String get legalTerminosSec9Titulo => '9. Ley aplicable';
@@ -634,7 +638,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get perfilRolAdmin => 'Administrador';
 
   @override
-  String get perfilMiembroDesde => 'Miembro de hogarSOS';
+  String get perfilMiembroDesde => 'Miembro de Hogar SOS';
 
   @override
   String get perfilConfirmarSalir => '¿Seguro que quieres cerrar sesión?';
@@ -994,6 +998,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profesionalTituloSolicitudes => 'Solicitudes cerca de ti';
 
   @override
+  String get profesionalDisponibleAhoraAviso =>
+      'Estás disponible: te pueden llegar solicitudes nuevas';
+
+  @override
   String get salirPulsaOtraVez => 'Pulsa atrás otra vez para salir';
 
   @override
@@ -1266,7 +1274,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get miPerfilDescripcionAyuda => 'Máximo 250 caracteres';
 
   @override
-  String get miPerfilPrecioLabel => 'Precio por hora (€)';
+  String get miPerfilPrecioLabel => 'Precio por hora (€) — opcional';
+
+  @override
+  String get miPerfilPrecioAyuda =>
+      'El precio real de cada trabajo se acuerda por presupuesto. Esto solo se usa para el filtro de precio en la búsqueda del cliente.';
 
   @override
   String get miPerfilDisponible => 'Disponible';
@@ -1477,7 +1489,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudieron actualizar las categorías';
 
   @override
-  String get distintivoVerificado => 'Profesional verificado';
+  String get distintivoVerificado => 'Identidad verificada';
 
   @override
   String get homeVerTodasCategorias => 'Ver todas las categorías';

@@ -203,8 +203,10 @@ class _HogarSosMarkPainter extends CustomPainter {
       oldDelegate.variant != variant || oldDelegate.monoColor != monoColor;
 }
 
-/// Wordmark tipográfico "hogarSOS" — "hogar" en el tono de texto normal
-/// y "SOS" en coral de marca, misma familia y peso, solo un cambio de
+/// Wordmark tipográfico "Hogar SOS" (con espacio, mayúsculas de marca
+/// tras el rebrand — antes decía "hogarSOS" todo junto, un logo viejo
+/// que solo sobrevivía aquí) — "Hogar" en el tono de texto normal y
+/// "SOS" en coral de marca, misma familia y peso, solo un cambio de
 /// color: la parte que de verdad importa recordar (que esto es ayuda a
 /// domicilio) queda resaltada sin necesitar un icono aparte.
 class HogarSosWordmark extends StatelessWidget {
@@ -228,7 +230,7 @@ class HogarSosWordmark extends StatelessWidget {
       text: TextSpan(
         style: style.copyWith(color: baseColor),
         children: [
-          const TextSpan(text: 'hogar'),
+          const TextSpan(text: 'Hogar '),
           TextSpan(text: 'SOS', style: TextStyle(color: accentColor ?? HogarSosColors.accent)),
         ],
       ),

@@ -29,8 +29,8 @@ class NotificationService {
 
   static const _canal = AndroidNotificationChannel(
     'hogarsos_notifications',
-    'hogarSOS',
-    description: 'Solicitudes, mensajes y pagos de hogarSOS',
+    'Hogar SOS',
+    description: 'Solicitudes, mensajes y pagos de Hogar SOS',
     importance: Importance.high,
   );
 

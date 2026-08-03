@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 170">
-  <title>hogarSOS — logotipo vertical (fondo claro)</title>
+  <title>Hogar SOS — logotipo vertical (fondo claro)</title>
   <defs>
     <linearGradient id="hogarsos-bg" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#1E8A5A"/>
@@ -16,6 +16,6 @@
   </g>
 
   <text x="110" y="150" text-anchor="middle" font-family="'Plus Jakarta Sans','Segoe UI',sans-serif" font-size="34" font-weight="800" letter-spacing="-0.6">
-    <tspan fill="#101828">hogar</tspan><tspan fill="#FF6A4D">SOS</tspan>
+    <tspan fill="#101828">Hogar </tspan><tspan fill="#FF6A4D">SOS</tspan>
   </text>
 </svg>

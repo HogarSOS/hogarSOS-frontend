@@ -14,6 +14,7 @@ import '../../services/service_request_service.dart';
 import '../../services/user_service.dart';
 import '../../utils/category_display.dart';
 import '../../utils/error_extraction.dart';
+import '../../utils/tipo_profesional_display.dart';
 import '../../widgets/entrada_animada.dart';
 import '../../widgets/lista_opiniones.dart';
 import '../legal/privacidad_screen.dart';
@@ -369,8 +370,13 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
   Future<void> _enviarVerificacion() async {
     final t = AppLocalizations.of(context);
 
-    final tarifa = double.tryParse(_tarifaController.text.trim().replaceAll(',', '.'));
-    if (tarifa == null || tarifa <= 0) {
+    // Opcional (ver comentario en professional.controller.ts): el precio
+    // real de cada servicio ya se acuerda por presupuesto, no por esta
+    // tarifa. Si el campo está vacío o no es un número válido, sigue sin
+    // enviarse en vez de bloquear la verificación.
+    final tarifaTexto = _tarifaController.text.trim().replaceAll(',', '.');
+    final tarifa = tarifaTexto.isEmpty ? null : double.tryParse(tarifaTexto);
+    if (tarifaTexto.isNotEmpty && (tarifa == null || tarifa <= 0)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(t.miPerfilVerificacionErrorFaltaTarifa)),
       );
@@ -519,6 +525,7 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                               ? nombreLocalizadoCategoria(context, _perfil!.oficioPrincipal!)
                               : t.miPerfilOficioSinAsignar,
                           verificado: _perfil?.estaVerificado ?? false,
+                          tipoProfesional: _perfil?.tipoProfesional,
                           valoracionMedia: _perfil?.valoracionMedia ?? 0,
                           totalValoraciones: _perfil?.totalTrabajos ?? 0,
                           fotoLocal: _fotoLocalSeleccionada,
@@ -686,6 +693,7 @@ class _Cabecera extends StatelessWidget {
     required this.nombre,
     required this.oficio,
     required this.verificado,
+    this.tipoProfesional,
     required this.valoracionMedia,
     required this.totalValoraciones,
     required this.fotoLocal,
@@ -701,6 +709,7 @@ class _Cabecera extends StatelessWidget {
   final String nombre;
   final String oficio;
   final bool verificado;
+  final TipoProfesional? tipoProfesional;
   final double valoracionMedia;
   final int totalValoraciones;
   final File? fotoLocal;
@@ -835,6 +844,12 @@ class _Cabecera extends StatelessWidget {
           children: [
             _ChipResumen(icono: Icons.category_outlined, color: colorScheme.primary, texto: oficio),
             _ChipResumen(icono: estadoIcono, color: estadoColor, texto: estadoLabel),
+            if (tipoProfesional != null)
+              _ChipResumen(
+                icono: Icons.badge_outlined,
+                color: colorScheme.onSurfaceVariant,
+                texto: etiquetaTipoProfesional(t, tipoProfesional!),
+              ),
           ],
         ),
       ],
@@ -1325,6 +1340,11 @@ class _TarjetaVerificacion extends StatelessWidget {
             controller: tarifaController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(labelText: t.miPerfilPrecioLabel),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            t.miPerfilPrecioAyuda,
+            style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant, height: 1.35),
           ),
           const SizedBox(height: 18),
           Text(

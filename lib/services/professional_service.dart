@@ -1,5 +1,8 @@
 import '../models/professional_summary_model.dart';
+import '../models/tipo_profesional.dart';
 import 'api_service.dart';
+
+export '../models/tipo_profesional.dart';
 
 class SearchFilters {
   final int? categoryId;
@@ -80,43 +83,6 @@ enum EstadoCuentaStripe {
         return EstadoCuentaStripe.requiereActualizacion;
       default:
         return EstadoCuentaStripe.pendiente;
-    }
-  }
-}
-
-/// Situación fiscal/legal que el propio profesional declara al enviar
-/// su verificación (roadmap económico, punto 4). HogarSOS no la valida
-/// ni la determina — solo la registra; ver texto legal en
-/// `t.tipoProfesionalTextoLegal`. Enum cerrado a las 3 opciones
-/// aprobadas para la versión inicial en España — ampliarlo a futuro
-/// solo añade un valor aquí y en el backend, sin tocar el resto del
-/// flujo de verificación.
-enum TipoProfesional {
-  autonomo,
-  empresa,
-  personaFisica;
-
-  static TipoProfesional? fromJson(String? valor) {
-    switch (valor) {
-      case 'autonomo':
-        return TipoProfesional.autonomo;
-      case 'empresa':
-        return TipoProfesional.empresa;
-      case 'persona_fisica':
-        return TipoProfesional.personaFisica;
-      default:
-        return null;
-    }
-  }
-
-  String toJson() {
-    switch (this) {
-      case TipoProfesional.autonomo:
-        return 'autonomo';
-      case TipoProfesional.empresa:
-        return 'empresa';
-      case TipoProfesional.personaFisica:
-        return 'persona_fisica';
     }
   }
 }
@@ -249,13 +215,13 @@ class ProfessionalService {
   Future<void> enviarVerificacion({
     String? documentoIdentidadUrl,
     required List<int> categoriaIds,
-    required double tarifaBase,
+    double? tarifaBase,
     required TipoProfesional tipoProfesional,
   }) async {
     await _api.post('/professionals/me/verification', data: {
       if (documentoIdentidadUrl != null) 'documentoIdentidadUrl': documentoIdentidadUrl,
       'categoriaIds': categoriaIds,
-      'tarifaBase': tarifaBase,
+      if (tarifaBase != null) 'tarifaBase': tarifaBase,
       'tipoProfesional': tipoProfesional.toJson(),
     });
   }

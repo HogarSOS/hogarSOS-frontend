@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In es, this message translates to:
-  /// **'hogarSOS'**
+  /// **'Hogar SOS'**
   String get appTitle;
 
   /// No description provided for @navInicio.
@@ -241,6 +241,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Si existe una cuenta con ese email, te hemos enviado un enlace para restablecer la contraseña'**
   String get loginRecuperarExito;
+
+  /// No description provided for @loginRecuperarEmailRequerido.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica tu email para poder enviarte el enlace'**
+  String get loginRecuperarEmailRequerido;
 
   /// No description provided for @loginModoEmail.
   ///
@@ -809,7 +815,7 @@ abstract class AppLocalizations {
   /// No description provided for @legalPrivSec1Texto.
   ///
   /// In es, this message translates to:
-  /// **'hogarSOS es una app que conecta a clientes con profesionales de servicios a domicilio. Somos responsables del tratamiento de los datos personales que recoge la aplicación, descritos en esta política.'**
+  /// **'Hogar SOS es una app que conecta a clientes con profesionales de servicios a domicilio. Somos responsables del tratamiento de los datos personales que recoge la aplicación, descritos en esta política.'**
   String get legalPrivSec1Texto;
 
   /// No description provided for @legalPrivSec2Titulo.
@@ -821,7 +827,7 @@ abstract class AppLocalizations {
   /// No description provided for @legalPrivSec2Texto.
   ///
   /// In es, this message translates to:
-  /// **'• Datos de cuenta: nombre, email y teléfono al registrarte.\n• Ubicación: tu ubicación aproximada o precisa (con tu permiso) para mostrarte profesionales cercanos, o para que un profesional aparezca en las búsquedas de clientes cerca de él.\n• Fotos: las que adjuntes a una solicitud de servicio o a tu perfil.\n• Documentos de verificación (solo profesionales): documento de identidad, certificados y seguro de responsabilidad civil, usados exclusivamente para verificar tu identidad y aptitud antes de permitirte operar en la plataforma.\n• Datos de pago: gestionados directamente por Stripe, nuestro procesador de pagos — hogarSOS nunca almacena el número completo de tu tarjeta.\n• Mensajes de chat entre cliente y profesional de una misma solicitud.'**
+  /// **'• Datos de cuenta: nombre, email y teléfono al registrarte.\n• Ubicación: tu ubicación aproximada o precisa (con tu permiso) para mostrarte profesionales cercanos, o para que un profesional aparezca en las búsquedas de clientes cerca de él.\n• Fotos: las que adjuntes a una solicitud de servicio o a tu perfil.\n• Documentos de verificación (solo profesionales): documento de identidad, certificados y seguro de responsabilidad civil, usados exclusivamente para verificar tu identidad y aptitud antes de permitirte operar en la plataforma.\n• Datos de pago: gestionados directamente por Stripe, nuestro procesador de pagos — Hogar SOS nunca almacena el número completo de tu tarjeta.\n• Mensajes de chat entre cliente y profesional de una misma solicitud.'**
   String get legalPrivSec2Texto;
 
   /// No description provided for @legalPrivSec3Titulo.
@@ -887,13 +893,13 @@ abstract class AppLocalizations {
   /// No description provided for @legalTerminosSec1Titulo.
   ///
   /// In es, this message translates to:
-  /// **'1. Qué es hogarSOS'**
+  /// **'1. Qué es Hogar SOS'**
   String get legalTerminosSec1Titulo;
 
   /// No description provided for @legalTerminosSec1Texto.
   ///
   /// In es, this message translates to:
-  /// **'hogarSOS es una plataforma que conecta a clientes que necesitan un servicio a domicilio (electricidad, fontanería, limpieza, etc.) con profesionales independientes que los ofrecen. hogarSOS no presta los servicios directamente ni es empleador de los profesionales — actúa como intermediario entre ambas partes.'**
+  /// **'Hogar SOS es una plataforma que conecta a clientes que necesitan un servicio a domicilio (electricidad, fontanería, limpieza, etc.) con profesionales independientes que los ofrecen. Hogar SOS no presta los servicios directamente ni es empleador de los profesionales — actúa como intermediario entre ambas partes.'**
   String get legalTerminosSec1Texto;
 
   /// No description provided for @legalTerminosSec2Titulo.
@@ -917,7 +923,7 @@ abstract class AppLocalizations {
   /// No description provided for @legalTerminosSec3Texto.
   ///
   /// In es, this message translates to:
-  /// **'El pago de un servicio se autoriza a través de Stripe al aceptar el trabajo, pero no se cobra hasta que el profesional marca el servicio como completado. hogarSOS retiene una comisión sobre el precio final del servicio; el resto se transfiere al profesional. Los precios los fija el profesional o se acuerdan entre ambas partes por chat.'**
+  /// **'El pago de un servicio se autoriza a través de Stripe al aceptar el trabajo, pero no se cobra hasta que el profesional marca el servicio como completado. Hogar SOS retiene una comisión sobre el precio final del servicio; el resto se transfiere al profesional. Los precios los fija el profesional o se acuerdan entre ambas partes por chat.'**
   String get legalTerminosSec3Texto;
 
   /// No description provided for @legalTerminosSec4Titulo.
@@ -953,7 +959,7 @@ abstract class AppLocalizations {
   /// No description provided for @legalTerminosSec6Texto.
   ///
   /// In es, this message translates to:
-  /// **'hogarSOS facilita el contacto y el pago entre cliente y profesional, pero no supervisa ni garantiza la calidad del trabajo realizado — la relación de servicio es directamente entre ambas partes. Recomendamos revisar las valoraciones de un profesional antes de contratarlo.'**
+  /// **'Hogar SOS facilita el contacto y el pago entre cliente y profesional, pero no supervisa ni garantiza la calidad del trabajo realizado — la relación de servicio es directamente entre ambas partes. Recomendamos revisar las valoraciones de un profesional antes de contratarlo.'**
   String get legalTerminosSec6Texto;
 
   /// No description provided for @legalTerminosSec7Titulo.
@@ -965,7 +971,7 @@ abstract class AppLocalizations {
   /// No description provided for @legalTerminosSec7Texto.
   ///
   /// In es, this message translates to:
-  /// **'Los profesionales verificados deben prestar el servicio con la diligencia y competencia propias de su oficio. hogarSOS puede suspender o revocar una cuenta que reciba valoraciones reiteradamente negativas, incumpla estos términos, o cuya verificación resulte fraudulenta.'**
+  /// **'Los profesionales verificados deben prestar el servicio con la diligencia y competencia propias de su oficio. Hogar SOS puede suspender o revocar una cuenta que reciba valoraciones reiteradamente negativas, incumpla estos términos, o cuya verificación resulte fraudulenta.'**
   String get legalTerminosSec7Texto;
 
   /// No description provided for @legalTerminosSec8Titulo.
@@ -977,7 +983,7 @@ abstract class AppLocalizations {
   /// No description provided for @legalTerminosSec8Texto.
   ///
   /// In es, this message translates to:
-  /// **'Podemos actualizar estos términos; los cambios relevantes se notificarán dentro de la app antes de entrar en vigor. Seguir usando hogarSOS después de un cambio implica aceptarlo.'**
+  /// **'Podemos actualizar estos términos; los cambios relevantes se notificarán dentro de la app antes de entrar en vigor. Seguir usando Hogar SOS después de un cambio implica aceptarlo.'**
   String get legalTerminosSec8Texto;
 
   /// No description provided for @legalTerminosSec9Titulo.
@@ -1157,7 +1163,7 @@ abstract class AppLocalizations {
   /// No description provided for @perfilMiembroDesde.
   ///
   /// In es, this message translates to:
-  /// **'Miembro de hogarSOS'**
+  /// **'Miembro de Hogar SOS'**
   String get perfilMiembroDesde;
 
   /// No description provided for @perfilConfirmarSalir.
@@ -1778,6 +1784,12 @@ abstract class AppLocalizations {
   /// **'Solicitudes cerca de ti'**
   String get profesionalTituloSolicitudes;
 
+  /// No description provided for @profesionalDisponibleAhoraAviso.
+  ///
+  /// In es, this message translates to:
+  /// **'Estás disponible: te pueden llegar solicitudes nuevas'**
+  String get profesionalDisponibleAhoraAviso;
+
   /// No description provided for @salirPulsaOtraVez.
   ///
   /// In es, this message translates to:
@@ -2243,8 +2255,14 @@ abstract class AppLocalizations {
   /// No description provided for @miPerfilPrecioLabel.
   ///
   /// In es, this message translates to:
-  /// **'Precio por hora (€)'**
+  /// **'Precio por hora (€) — opcional'**
   String get miPerfilPrecioLabel;
+
+  /// No description provided for @miPerfilPrecioAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'El precio real de cada trabajo se acuerda por presupuesto. Esto solo se usa para el filtro de precio en la búsqueda del cliente.'**
+  String get miPerfilPrecioAyuda;
 
   /// No description provided for @miPerfilDisponible.
   ///
@@ -2615,7 +2633,7 @@ abstract class AppLocalizations {
   /// No description provided for @distintivoVerificado.
   ///
   /// In es, this message translates to:
-  /// **'Profesional verificado'**
+  /// **'Identidad verificada'**
   String get distintivoVerificado;
 
   /// No description provided for @homeVerTodasCategorias.

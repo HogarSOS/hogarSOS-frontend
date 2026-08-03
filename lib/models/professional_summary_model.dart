@@ -1,3 +1,5 @@
+import 'tipo_profesional.dart';
+
 class ProfessionalSummary {
   final String userId;
   final String nombre;
@@ -9,6 +11,7 @@ class ProfessionalSummary {
   final List<String> categorias;
   final double? distanciaMetros;
   final String? estadoVerificacion;
+  final TipoProfesional? tipoProfesional;
 
   ProfessionalSummary({
     required this.userId,
@@ -21,6 +24,7 @@ class ProfessionalSummary {
     required this.categorias,
     this.distanciaMetros,
     this.estadoVerificacion,
+    this.tipoProfesional,
   });
 
   /// El distintivo de verificación se basa en lo que confirma el backend,
@@ -40,6 +44,7 @@ class ProfessionalSummary {
       categorias: List<String>.from(json['categorias'] as List? ?? []),
       distanciaMetros: (json['distanciaMetros'] as num?)?.toDouble(),
       estadoVerificacion: json['estadoVerificacion'] as String?,
+      tipoProfesional: TipoProfesional.fromJson(json['tipoProfesional'] as String?),
     );
   }
 }
@@ -79,6 +84,7 @@ class ProfessionalPublicProfile {
   final List<String> categorias;
   final List<ProfessionalReview> reviews;
   final String? estadoVerificacion;
+  final TipoProfesional? tipoProfesional;
 
   ProfessionalPublicProfile({
     required this.userId,
@@ -92,6 +98,7 @@ class ProfessionalPublicProfile {
     required this.categorias,
     required this.reviews,
     this.estadoVerificacion,
+    this.tipoProfesional,
   });
 
   bool get estaVerificado => estadoVerificacion == 'aprobado';
@@ -111,6 +118,7 @@ class ProfessionalPublicProfile {
           .map((r) => ProfessionalReview.fromJson(r as Map<String, dynamic>))
           .toList(),
       estadoVerificacion: json['estadoVerificacion'] as String?,
+      tipoProfesional: TipoProfesional.fromJson(json['tipoProfesional'] as String?),
     );
   }
 }

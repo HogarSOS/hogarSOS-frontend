@@ -184,40 +184,72 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         );
   }
 
+  /// Antes: si se pulsaba "Enviar enlace" con el campo vacío, el diálogo
+  /// se cerraba sin más — ni error ni email enviado, sin ninguna pista de
+  /// que no había pasado nada. Ahora la validación y el envío ocurren
+  /// dentro del propio diálogo (StatefulBuilder), que se queda abierto
+  /// mostrando el error si el email está vacío, y un spinner mientras se
+  /// envía — antes tampoco había ninguna señal de carga.
   Future<void> _recuperarPassword() async {
     final t = AppLocalizations.of(context);
     final controller = TextEditingController(text: _emailController.text.trim());
+    String? error;
+    bool enviando = false;
 
-    final email = await showDialog<String>(
+    final resultado = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(t.loginRecuperarTitulo),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.emailAddress,
-          autofocus: true,
-          decoration: InputDecoration(labelText: t.loginFieldEmail),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: Text(t.loginRecuperarTitulo),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.emailAddress,
+            autofocus: true,
+            enabled: !enviando,
+            decoration: InputDecoration(labelText: t.loginFieldEmail, errorText: error),
+          ),
+          actions: [
+            TextButton(
+              onPressed: enviando ? null : () => Navigator.of(dialogContext).pop(),
+              child: Text(t.perfilCancelar),
+            ),
+            FilledButton(
+              onPressed: enviando
+                  ? null
+                  : () async {
+                      final email = controller.text.trim();
+                      if (email.isEmpty) {
+                        setDialogState(() => error = t.loginRecuperarEmailRequerido);
+                        return;
+                      }
+                      setDialogState(() {
+                        error = null;
+                        enviando = true;
+                      });
+                      final errorCode = await ref.read(authProvider.notifier).enviarEmailRecuperacion(email);
+                      if (!dialogContext.mounted) return;
+                      if (errorCode != null) {
+                        setDialogState(() {
+                          enviando = false;
+                          error = mensajeAuthError(errorCode, t);
+                        });
+                        return;
+                      }
+                      Navigator.of(dialogContext).pop(true);
+                    },
+              child: enviando
+                  ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                  : Text(t.loginRecuperarEnviar),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(t.perfilCancelar),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
-            child: Text(t.loginRecuperarEnviar),
-          ),
-        ],
       ),
     );
 
-    if (email == null || email.isEmpty || !mounted) return;
-
-    final errorCode = await ref.read(authProvider.notifier).enviarEmailRecuperacion(email);
-    if (!mounted) return;
+    if (resultado != true || !mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(errorCode == null ? t.loginRecuperarExito : mensajeAuthError(errorCode, t))),
+      SnackBar(content: Text(t.loginRecuperarExito)),
     );
   }
 

@@ -19,12 +19,13 @@
                             <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-Ey4">
                             </imageView>
                         </subviews>
-                        <!-- Azul de marca de hogarSOS (HogarSosColors.primary) en vez
-                             del blanco por defecto — mismo criterio que
-                             android/.../launch_background.xml. Actualizado al índigo
-                             del rebrand (0x3D4FE0) — antes tenía el azul viejo
-                             (0x1554F0, antes del cambio de marca). -->
-                        <color key="backgroundColor" red="0.23922" green="0.30980" blue="0.87843" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <!-- Verde de marca de Hogar SOS (HogarSosColors.primary,
+                             0x1E8A5A) en vez del blanco por defecto — mismo criterio
+                             que android/.../launch_background.xml. Antes tenía un
+                             índigo/azul (0x3D4FE0) que quedó del rebrand azul→verde
+                             sin actualizar aquí — Android sí se corrigió entonces,
+                             iOS no (la app no se distribuye en iOS todavía). -->
+                        <color key="backgroundColor" red="0.11765" green="0.54118" blue="0.35294" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="1a2-6s-vTC"/>
                             <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="4X2-HB-R7a"/>

@@ -4,6 +4,7 @@ import '../../l10n/app_localizations.dart';
 import '../../models/professional_summary_model.dart';
 import '../../services/professional_service.dart';
 import '../../utils/category_display.dart';
+import '../../utils/tipo_profesional_display.dart';
 import '../../widgets/verification_badge.dart';
 
 class ProfessionalDetailScreen extends StatefulWidget {
@@ -144,6 +145,16 @@ class _Contenido extends StatelessWidget {
                           '· ${t.buscarTrabajos(perfil.totalTrabajos)}',
                           style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
                         ),
+                        if (perfil.tipoProfesional != null) ...[
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              '· ${etiquetaTipoProfesional(t, perfil.tipoProfesional!)}',
+                              style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 24),
