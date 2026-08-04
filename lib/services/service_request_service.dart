@@ -20,9 +20,18 @@ class ServiceRequestService {
   /// crearSolicitud. Se hace en un paso separado (no dentro del propio
   /// POST de creación) porque el usuario puede añadir/quitar fotos
   /// mientras rellena el asistente, antes de publicar nada.
-  Future<String> subirFoto(File archivo) async {
+  /// Sube un archivo y lo CLASIFICA (auditoría B4). El `tipo` no es
+  /// informativo: decide quién podrá verlo después. Un documento de
+  /// identidad subido como `foto_perfil` quedaría visible para cualquier
+  /// usuario, así que hay que pasarlo bien en cada llamada.
+  ///
+  /// Valores válidos (deben coincidir con el enum TipoArchivo del
+  /// backend): foto_perfil, foto_solicitud, foto_disputa,
+  /// documento_identidad, certificado, seguro_rc.
+  Future<String> subirFoto(File archivo, {required String tipo}) async {
     final nombre = archivo.path.split('/').last;
     final formData = FormData.fromMap({
+      'tipo': tipo,
       'foto': await MultipartFile.fromFile(archivo.path, filename: nombre),
     });
     final respuesta = await _api.post('/uploads/photo', data: formData);

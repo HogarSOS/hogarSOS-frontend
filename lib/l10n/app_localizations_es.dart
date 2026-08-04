@@ -2117,7 +2117,8 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get trabajosActivosPromoLanzamiento => '🎉 Promoción de lanzamiento';
+  String get trabajosActivosPromoLanzamiento =>
+      '✅ Sin gastos de gestión para ti';
 
   @override
   String get seguimientoAmpliacionAceptadaExito => 'Ampliación aceptada';

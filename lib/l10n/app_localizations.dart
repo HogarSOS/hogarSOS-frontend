@@ -3752,7 +3752,7 @@ abstract class AppLocalizations {
   /// No description provided for @trabajosActivosPromoLanzamiento.
   ///
   /// In es, this message translates to:
-  /// **'🎉 Promoción de lanzamiento'**
+  /// **'✅ Sin gastos de gestión para ti'**
   String get trabajosActivosPromoLanzamiento;
 
   /// No description provided for @seguimientoAmpliacionAceptadaExito.

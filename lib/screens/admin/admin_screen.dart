@@ -9,6 +9,7 @@ import '../../theme/brand_mark.dart';
 import '../../utils/category_display.dart';
 import '../../widgets/entrada_animada.dart';
 import '../auth/login_screen.dart';
+import '../../utils/imagen_autenticada.dart';
 
 class AdminScreen extends ConsumerStatefulWidget {
   const AdminScreen({super.key});
@@ -454,7 +455,13 @@ class _DocumentoIdentidadPreview extends StatelessWidget {
         child: Stack(
           children: [
             InteractiveViewer(
-              child: CachedNetworkImage(imageUrl: url, fit: BoxFit.contain),
+              child: CachedNetworkImage(
+                imageUrl: url,
+                fit: BoxFit.contain,
+                // Desde B4 el documento solo se sirve con sesión válida
+                // y rol admin — sin esta cabecera, 404.
+                httpHeaders: cabecerasImagen(),
+              ),
             ),
             Positioned(
               right: 4,

@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
@@ -12,6 +11,7 @@ import '../../utils/polling_lifecycle_mixin.dart';
 import '../../widgets/animated_diff_list.dart';
 import '../../widgets/entrada_animada.dart';
 import 'trabajos_activos_profesional_screen.dart';
+import '../../utils/imagen_autenticada.dart';
 
 /// Pestaña "Inicio" del Panel Profesional: la lista de solicitudes
 /// cercanas, más un acceso rápido en el AppBar para ponerse "No
@@ -497,7 +497,7 @@ class _TarjetaSolicitudCercana extends StatelessWidget {
                   radius: 18,
                   backgroundColor: colorScheme.primaryContainer,
                   backgroundImage: solicitud.clienteFotoUrl != null
-                      ? CachedNetworkImageProvider(solicitud.clienteFotoUrl!, maxWidth: 120, maxHeight: 120)
+                      ? imagenDeRed(solicitud.clienteFotoUrl!, maxWidth: 120, maxHeight: 120)
                       : null,
                   child: solicitud.clienteFotoUrl == null
                       ? Text(

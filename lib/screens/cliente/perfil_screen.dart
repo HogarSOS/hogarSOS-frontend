@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
@@ -12,6 +11,7 @@ import 'mis_solicitudes_screen.dart';
 import 'mis_valoraciones_screen.dart';
 import '../legal/privacidad_screen.dart';
 import '../legal/terminos_screen.dart';
+import '../../utils/imagen_autenticada.dart';
 
 class PerfilScreen extends ConsumerStatefulWidget {
   const PerfilScreen({super.key});
@@ -178,7 +178,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                   radius: 44,
                   backgroundColor: colorScheme.primaryContainer,
                   backgroundImage: usuario?.fotoPerfilUrl != null
-                      ? CachedNetworkImageProvider(usuario!.fotoPerfilUrl!, maxWidth: 320, maxHeight: 320)
+                      ? imagenDeRed(usuario!.fotoPerfilUrl!, maxWidth: 320, maxHeight: 320)
                       : null,
                   child: usuario?.fotoPerfilUrl == null
                       ? Text(

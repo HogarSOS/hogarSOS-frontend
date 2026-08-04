@@ -726,7 +726,7 @@
       "recibiras": { "type": "String" }
     }
   },
-  "trabajosActivosPromoLanzamiento": "🎉 Launch promotion",
+  "trabajosActivosPromoLanzamiento": "✅ No management fee for you",
 
   "seguimientoAmpliacionAceptadaExito": "Extension accepted",
   "seguimientoAmpliacionRechazadaExito": "Extension declined",

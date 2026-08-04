@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/professional_summary_model.dart';
@@ -6,6 +5,7 @@ import '../../services/professional_service.dart';
 import '../../utils/category_display.dart';
 import '../../utils/tipo_profesional_display.dart';
 import '../../widgets/verification_badge.dart';
+import '../../utils/imagen_autenticada.dart';
 
 class ProfessionalDetailScreen extends StatefulWidget {
   const ProfessionalDetailScreen({super.key, required this.userId});
@@ -72,7 +72,7 @@ class _Contenido extends StatelessWidget {
                       radius: 44,
                       backgroundColor: colorScheme.primary,
                       backgroundImage: perfil.fotoPerfilUrl != null
-                          ? CachedNetworkImageProvider(perfil.fotoPerfilUrl!, maxWidth: 320, maxHeight: 320)
+                          ? imagenDeRed(perfil.fotoPerfilUrl!, maxWidth: 320, maxHeight: 320)
                           : null,
                       child: perfil.fotoPerfilUrl == null
                           ? Text(

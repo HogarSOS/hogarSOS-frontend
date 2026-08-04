@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,27 +11,92 @@ import 'screens/auth_gate_screen.dart';
 import 'services/deep_link_listener.dart';
 import 'theme/app_theme.dart';
 
+/// Clave PÚBLICA de Stripe (publishable key) — es seguro que viva en el
+/// cliente, a diferencia de la clave secreta que solo usa el backend.
+///
+/// Un valor por defecto VACÍO fue lo que causó que "pagar" fallara en
+/// silencio en builds donde alguien olvidó pasar el --dart-define (pasó
+/// de verdad): la hoja de pago de Stripe nunca llega a abrirse y el
+/// error cae en el catch genérico, no en StripeException, así que ni
+/// siquiera se ve como un error "de Stripe". Por eso hay un valor por
+/// defecto real, no vacío.
+///
+/// ⚠️ PARA PASAR A PRODUCCIÓN (auditoría B1): sustituye este
+/// `defaultValue` por la clave `pk_live_...` de la cuenta real. NO basta
+/// con pasar --dart-define en el build: ya se olvidó una vez, y una
+/// build de release con clave de test es una app que finge cobrar sin
+/// mover un euro. La comprobación de `claveStripeEsDeTest` de más abajo
+/// existe justo para que ese olvido no llegue nunca a Google Play.
+const String _clavePublicaStripe = String.fromEnvironment(
+  'STRIPE_PUBLISHABLE_KEY',
+  defaultValue: 'pk_test_51TyVJ9CmpBOiu5cTfWAUXrfQYbKtJbb9h9VNnertUMJ4QEXLlMXwe23w5xrZVoEcDHkJVYzISKufifoxRtK4s4ES00AZ8WHSgW',
+);
+
+/// `kReleaseMode` es una constante de compilación, así que en una build
+/// de debug esta rama se elimina entera del binario: durante el
+/// desarrollo se sigue trabajando con la clave de test sin molestias.
+bool get _claveDeTestEnRelease => kReleaseMode && _clavePublicaStripe.startsWith('pk_test');
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  // Clave PÚBLICA de Stripe (publishable key) — es seguro que viva en el
-  // cliente, a diferencia de la clave secreta que solo usa el backend.
-  // Un valor por defecto vacío aquí es lo que causó que "pagar" fallara
-  // en silencio en builds donde alguien olvidó pasar el --dart-define
-  // (pasó de verdad: un build de esta misma sesión salió sin ella) — la
-  // hoja de pago de Stripe nunca llega a abrirse y el error cae en el
-  // catch genérico, no en StripeException, así que ni siquiera se ve
-  // como un error "de Stripe". Como esta clave NO es secreta (está
-  // pensada para vivir en clientes), el valor por defecto real es más
-  // seguro que uno vacío: sustituir con --dart-define solo hace falta
-  // si se usa una cuenta de Stripe distinta (ej. producción real).
-  Stripe.publishableKey = const String.fromEnvironment(
-    'STRIPE_PUBLISHABLE_KEY',
-    defaultValue: 'pk_test_51TyVJ9CmpBOiu5cTfWAUXrfQYbKtJbb9h9VNnertUMJ4QEXLlMXwe23w5xrZVoEcDHkJVYzISKufifoxRtK4s4ES00AZ8WHSgW',
-  );
+  // Una build de release con clave de TEST no debe llegar a los usuarios:
+  // el Payment Sheet se abriría con normalidad, el cliente vería "pago
+  // correcto" y no se movería dinero real. Fallar de forma visible aquí
+  // es infinitamente preferible a descubrirlo cuando un profesional
+  // reclame su cobro. Ver validateEnv.ts para el equivalente del backend.
+  if (_claveDeTestEnRelease) {
+    runApp(const _PantallaClaveStripeInvalida());
+    return;
+  }
+
+  Stripe.publishableKey = _clavePublicaStripe;
 
   runApp(const ProviderScope(child: HogarSOSApp()));
+}
+
+/// Pantalla de bloqueo deliberadamente fea y en texto plano: no está
+/// pensada para un usuario final, sino para que quien compile la release
+/// se dé cuenta en el primer arranque. Si esto se ve en un móvil real,
+/// la build no debe publicarse.
+class _PantallaClaveStripeInvalida extends StatelessWidget {
+  const _PantallaClaveStripeInvalida();
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: Color(0xFF7F1D1D),
+        body: Center(
+          child: Padding(
+            padding: EdgeInsets.all(28),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('⚠️', style: TextStyle(fontSize: 56)),
+                SizedBox(height: 20),
+                Text(
+                  'Build de release con clave de Stripe de PRUEBAS',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 14),
+                Text(
+                  'Esta compilación no puede cobrar de verdad. Sustituye la clave por la pk_live en lib/main.dart '
+                  '(o pasa --dart-define=STRIPE_PUBLISHABLE_KEY=pk_live_...) y vuelve a compilar.\n\n'
+                  'NO publiques esta build.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.5),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class HogarSOSApp extends StatelessWidget {

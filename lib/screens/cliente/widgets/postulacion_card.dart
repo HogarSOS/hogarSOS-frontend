@@ -1,8 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/postulacion_model.dart';
 import '../../../widgets/verification_badge.dart';
+import '../../../utils/imagen_autenticada.dart';
 
 /// Tarjeta de un candidato en la pantalla "Elegir profesional" — mismo
 /// lenguaje visual que ProfessionalCard (búsqueda), pero con los datos
@@ -33,7 +33,7 @@ class PostulacionCard extends StatelessWidget {
                   radius: 26,
                   backgroundColor: colorScheme.primaryContainer,
                   backgroundImage: c.fotoPerfilUrl != null
-                      ? CachedNetworkImageProvider(c.fotoPerfilUrl!, maxWidth: 160, maxHeight: 160)
+                      ? imagenDeRed(c.fotoPerfilUrl!, maxWidth: 160, maxHeight: 160)
                       : null,
                   child: c.fotoPerfilUrl == null
                       ? Text(

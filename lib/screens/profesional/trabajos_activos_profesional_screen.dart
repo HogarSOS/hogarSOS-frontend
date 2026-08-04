@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
@@ -17,6 +16,7 @@ import '../../widgets/entrada_animada.dart';
 import '../chat_screen.dart';
 import '../reportar_problema_screen.dart';
 import '../cliente/valoracion_screen.dart';
+import '../../utils/imagen_autenticada.dart';
 
 /// Trabajos que el profesional aceptó — en curso o ya completados
 /// recientemente.
@@ -656,11 +656,22 @@ class _TarjetaTrabajo extends ConsumerWidget {
   Widget? _desglose(AsyncValue<ComisionesInfo> comisiones) {
     final payment = trabajo.payment;
     if (payment != null) {
+      // `comisionPlataforma` del Payment es lo que se queda la
+      // plataforma EN TOTAL, e incluye la parte que paga el CLIENTE por
+      // encima del presupuesto. Al profesional no se le puede enseñar
+      // esa cifra: él solo "paga" la diferencia entre lo que cotizó y lo
+      // que recibe. Con la comisión vigente (5% cliente / 0%
+      // profesional) mostrar comisionPlataforma daba un desglose
+      // absurdo — "Importe 100 € · Gastos de gestión 5 € · Recibirás
+      // 100 €" — cobrándole visualmente algo que no paga. Mientras
+      // ambos porcentajes fueron iguales (o ambos 0) el error no se
+      // notaba; aparece justo al aplicar 5%/0%.
+      final comisionDelProfesional = payment.montoBase - payment.montoProfesional;
       return _DesgloseComisionProfesional(
         montoBase: payment.montoBase,
-        comision: payment.comisionPlataforma,
+        comision: comisionDelProfesional,
         recibiras: payment.montoProfesional,
-        esPromo: payment.comisionPlataforma == 0,
+        esPromo: comisionDelProfesional == 0,
       );
     }
 
@@ -672,7 +683,11 @@ class _TarjetaTrabajo extends ConsumerWidget {
         montoBase: presupuesto.importeTotal,
         comision: presupuesto.importeTotal - info.totalProfesional(presupuesto.importeTotal),
         recibiras: info.totalProfesional(presupuesto.importeTotal),
-        esPromo: info.esPromoLanzamiento,
+        // Mismo criterio que arriba: al profesional le importa SU
+        // porcentaje, no que ambos sean 0. `esPromoLanzamiento` (los dos
+        // a cero) haría desaparecer el distintivo de "no pagas comisión"
+        // en cuanto el cliente pase a 5% aunque el profesional siga a 0%.
+        esPromo: info.comisionProfesionalPorcentaje == 0,
       ),
       loading: () => null,
       error: (_, __) => null,
@@ -701,7 +716,7 @@ class _TarjetaTrabajo extends ConsumerWidget {
                 CircleAvatar(
                   backgroundColor: colorScheme.primaryContainer,
                   backgroundImage: trabajo.clienteFotoUrl != null
-                      ? CachedNetworkImageProvider(trabajo.clienteFotoUrl!, maxWidth: 120, maxHeight: 120)
+                      ? imagenDeRed(trabajo.clienteFotoUrl!, maxWidth: 120, maxHeight: 120)
                       : null,
                   child: trabajo.clienteFotoUrl == null
                       ? Text(

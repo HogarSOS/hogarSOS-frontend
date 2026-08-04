@@ -74,7 +74,24 @@ class TokenStorage {
     return jsonDecode(raw) as Map<String, dynamic>;
   }
 
-  Future<String?> getAccessToken() async => _memAccessToken ?? await _storage.read(key: _accessKey);
+  /// Copia en memoria del access token, sin `await`.
+  ///
+  /// Necesaria para los widgets de imagen (ver utils/imagen_autenticada.dart):
+  /// desde B4, /uploads exige autenticación, y un `ImageProvider` se
+  /// construye de forma síncrona dentro de `build` — no puede esperar a
+  /// leer del almacenamiento seguro. `getAccessToken` de abajo rellena
+  /// esta copia en su primera lectura, y el interceptor de Dio la llama
+  /// en cada petición, así que para cuando se pinta una imagen ya está.
+  String? get accessTokenEnMemoria => _memAccessToken;
+
+  Future<String?> getAccessToken() async {
+    // Se cachea en memoria al leer de disco (arranque en frío con sesión
+    // persistente): sin esto, `accessTokenEnMemoria` seguiría a null
+    // hasta el primer login de esa ejecución y las imágenes saldrían sin
+    // cabecera.
+    _memAccessToken ??= await _storage.read(key: _accessKey);
+    return _memAccessToken;
+  }
   Future<String?> getRefreshToken() async => _memRefreshToken ?? await _storage.read(key: _refreshKey);
 
   Future<void> clear() async {

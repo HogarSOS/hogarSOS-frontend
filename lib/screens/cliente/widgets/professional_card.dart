@@ -1,10 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/professional_summary_model.dart';
 import '../../../utils/category_display.dart';
 import '../../../widgets/entrada_animada.dart';
 import '../../../widgets/verification_badge.dart';
+import '../../../utils/imagen_autenticada.dart';
 
 class ProfessionalCard extends StatelessWidget {
   const ProfessionalCard({
@@ -52,7 +52,7 @@ class ProfessionalCard extends StatelessWidget {
                     // vez que se reconstruye esta tarjeta.
                     image: p.fotoPerfilUrl != null
                         ? DecorationImage(
-                            image: CachedNetworkImageProvider(p.fotoPerfilUrl!, maxWidth: 160, maxHeight: 160),
+                            image: imagenDeRed(p.fotoPerfilUrl!, maxWidth: 160, maxHeight: 160),
                             fit: BoxFit.cover,
                           )
                         : null,

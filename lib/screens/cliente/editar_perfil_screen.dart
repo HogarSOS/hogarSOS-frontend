@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +8,7 @@ import '../../providers/auth_provider.dart';
 import '../../services/service_request_service.dart';
 import '../../services/user_service.dart';
 import '../../utils/error_extraction.dart';
+import '../../utils/imagen_autenticada.dart';
 
 /// Edición del perfil genérico (nombre, teléfono, foto) — antes solo
 /// existía para el profesional (mi_perfil_profesional_screen.dart); el
@@ -72,7 +72,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
     });
 
     try {
-      final url = await ServiceRequestService().subirFoto(_fotoLocalSeleccionada!);
+      final url = await ServiceRequestService().subirFoto(_fotoLocalSeleccionada!, tipo: 'foto_perfil');
       if (!mounted) return;
       setState(() => _fotoPerfilUrlActual = url);
     } catch (e) {
@@ -135,7 +135,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                         backgroundImage: _fotoLocalSeleccionada != null
                             ? FileImage(_fotoLocalSeleccionada!)
                             : (_fotoPerfilUrlActual != null
-                                ? CachedNetworkImageProvider(_fotoPerfilUrlActual!, maxWidth: 320, maxHeight: 320)
+                                ? imagenDeRed(_fotoPerfilUrlActual!, maxWidth: 320, maxHeight: 320)
                                 : null) as ImageProvider?,
                         child: (_fotoLocalSeleccionada == null && _fotoPerfilUrlActual == null)
                             ? Text(

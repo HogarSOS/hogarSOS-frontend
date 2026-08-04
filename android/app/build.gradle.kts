@@ -47,11 +47,25 @@ android {
 
     buildTypes {
         release {
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
+            // ANTES esto caía silenciosamente a la clave de DEBUG si
+            // faltaba key.properties: el build no fallaba, producía un
+            // .aab firmado con el certificado de depuración, y solo te
+            // enterabas al subirlo a Play Console ("You uploaded an APK
+            // signed with a debug certificate"). Es el fallo que
+            // descubres el día del lanzamiento.
+            //
+            // Ahora falla el build con un mensaje que dice exactamente
+            // qué hacer. Un build de release SIN firma de release no es
+            // un build de release.
+            if (!keystorePropertiesFile.exists()) {
+                throw GradleException(
+                    "Falta android/key.properties: no se puede firmar una build de RELEASE.\n" +
+                    "Sin él, Gradle caería a la clave de depuración y Google Play rechazaría el .aab.\n" +
+                    "Crea android/key.properties con storeFile, storePassword, keyAlias y keyPassword.\n" +
+                    "Para compilar sin firmar de verdad, usa --debug o --profile en su lugar."
+                )
             }
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

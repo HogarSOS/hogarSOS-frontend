@@ -7,7 +7,7 @@
 3. **03_perfil_profesional.jpg** — Perfil de un profesional verificado (5.0 ★, categorías).
 4. **04_panel_profesional_solicitudes.jpg** — Panel del profesional: solicitudes cercanas cerca + candidaturas.
 5. **05_elegir_profesional.jpg** — El cliente elige entre las candidaturas recibidas.
-6. **06_trabajos_activos_comision.jpg** — Trabajos activos con desglose de comisión y distintivo "Promoción de lanzamiento".
+6. **06_trabajos_activos_comision.jpg** — Trabajos activos con desglose de comisión. ⚠️ **DESACTUALIZADA — hay que volver a tomarla antes de publicar** (auditoría B3, 2026-08-04). No coincide con la app actual en dos cosas: (a) muestra el texto **"Comisión Hogar SOS: 0.00 €"**, pero el término único y oficial pasó a ser **"Gastos de gestión"**; (b) muestra el distintivo **"🎉 Promoción de lanzamiento"**, que ya no aparece: con la comisión definitiva (5% cliente / 0% profesional) el distintivo del profesional dice ahora **"✅ Sin gastos de gestión para ti"**. Publicar una ficha que anuncia una "promoción" inexistente es, además, una discrepancia con la app que Google Play puede considerar engañosa.
 7. **07_presupuesto_recibido.jpg** — El cliente recibe el presupuesto con el desglose completo antes de pagar.
 8. **08_login_email_telefono.jpg** — Pantalla de acceso con el nuevo toggle Email/Teléfono (registro/login alternativo por SMS).
 

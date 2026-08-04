@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -22,6 +21,7 @@ import '../legal/privacidad_screen.dart';
 import '../legal/terminos_screen.dart';
 import '../../widgets/verification_badge.dart';
 import '../auth/login_screen.dart';
+import '../../utils/imagen_autenticada.dart';
 
 /// Perfil del profesional — rediseño "tarjetas independientes": cada
 /// dato editable (teléfono, descripción, categorías) tiene su propio
@@ -317,7 +317,7 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
       // Reutiliza el mismo endpoint de subida ya construido para las
       // fotos de solicitudes — es un almacén de archivos genérico, no
       // hace falta un endpoint nuevo para fotos de perfil.
-      final url = await ServiceRequestService().subirFoto(_fotoLocalSeleccionada!);
+      final url = await ServiceRequestService().subirFoto(_fotoLocalSeleccionada!, tipo: 'foto_perfil');
       // Persistida ANTES de reflejarla en el estado local — si el PATCH
       // falla, no queremos que la UI muestre la foto como "guardada"
       // mientras el backend todavía tiene la anterior.
@@ -348,7 +348,7 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
     });
 
     try {
-      final url = await ServiceRequestService().subirFoto(_documentoLocalSeleccionado!);
+      final url = await ServiceRequestService().subirFoto(_documentoLocalSeleccionado!, tipo: 'documento_identidad');
       if (!mounted) return;
       setState(() => _documentoIdentidadUrlActual = url);
     } catch (e) {
@@ -755,7 +755,7 @@ class _Cabecera extends StatelessWidget {
                 backgroundImage: fotoLocal != null
                     ? FileImage(fotoLocal!)
                     : (fotoUrl != null
-                        ? CachedNetworkImageProvider(fotoUrl!, maxWidth: 320, maxHeight: 320)
+                        ? imagenDeRed(fotoUrl!, maxWidth: 320, maxHeight: 320)
                         : null) as ImageProvider?,
                 child: (fotoLocal == null && fotoUrl == null)
                     ? Text(

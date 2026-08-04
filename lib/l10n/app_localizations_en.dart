@@ -2102,7 +2102,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get trabajosActivosPromoLanzamiento => '🎉 Launch promotion';
+  String get trabajosActivosPromoLanzamiento => '✅ No management fee for you';
 
   @override
   String get seguimientoAmpliacionAceptadaExito => 'Extension accepted';

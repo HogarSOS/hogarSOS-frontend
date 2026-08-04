@@ -149,7 +149,7 @@ class _SolicitarWizardScreenState extends ConsumerState<SolicitarWizardScreen> {
 
     try {
       final servicio = ref.read(serviceRequestServiceProvider);
-      final url = await servicio.subirFoto(foto.archivo);
+      final url = await servicio.subirFoto(foto.archivo, tipo: 'foto_solicitud');
       if (!mounted) return;
       setState(() {
         foto.estado = _EstadoFoto.lista;
