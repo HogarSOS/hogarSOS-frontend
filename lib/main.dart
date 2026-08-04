@@ -21,15 +21,15 @@ import 'theme/app_theme.dart';
 /// siquiera se ve como un error "de Stripe". Por eso hay un valor por
 /// defecto real, no vacío.
 ///
-/// ⚠️ PARA PASAR A PRODUCCIÓN (auditoría B1): sustituye este
-/// `defaultValue` por la clave `pk_live_...` de la cuenta real. NO basta
-/// con pasar --dart-define en el build: ya se olvidó una vez, y una
-/// build de release con clave de test es una app que finge cobrar sin
-/// mover un euro. La comprobación de `claveStripeEsDeTest` de más abajo
-/// existe justo para que ese olvido no llegue nunca a Google Play.
+/// LANZAMIENTO (2026-08-04, auditoría B1): sustituida por la pk_live_...
+/// real de la cuenta hogarSOS (acct_1TyVJ9CmpBOiu5cT), ya activada en
+/// Stripe. La comprobación de `_claveDeTestEnRelease` de más abajo sigue
+/// intacta como red de seguridad para el futuro: si alguna vez se vuelve
+/// a poner aquí una pk_test por error, el build de release se niega a
+/// arrancar en vez de fingir que cobra.
 const String _clavePublicaStripe = String.fromEnvironment(
   'STRIPE_PUBLISHABLE_KEY',
-  defaultValue: 'pk_test_51TyVJ9CmpBOiu5cTfWAUXrfQYbKtJbb9h9VNnertUMJ4QEXLlMXwe23w5xrZVoEcDHkJVYzISKufifoxRtK4s4ES00AZ8WHSgW',
+  defaultValue: 'pk_live_51TyVJ9CmpBOiu5cTAMvO5TqICbrYVjLMAo6TNvc87oorXTfK4V61O9vBemaR0wphrwveALXS90Nz5Mwl7KmYYiEQ00OVDUyIth',
 );
 
 /// `kReleaseMode` es una constante de compilación, así que en una build
