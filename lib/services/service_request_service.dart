@@ -111,6 +111,7 @@ class ServiceRequestService {
     double? tarifaHora,
     double? horasEstimadas,
     String? mensaje,
+    bool incluyeIva = false,
   }) async {
     await _api.post('/service-requests/$id/presupuesto', data: {
       'tipo': tipoPresupuestoToApi(tipo),
@@ -118,6 +119,7 @@ class ServiceRequestService {
       if (tarifaHora != null) 'tarifaHora': tarifaHora,
       if (horasEstimadas != null) 'horasEstimadas': horasEstimadas,
       if (mensaje != null && mensaje.isNotEmpty) 'mensaje': mensaje,
+      'incluyeIva': incluyeIva,
     });
   }
 

@@ -28,6 +28,7 @@ class PresupuestoInfo {
   final double? tarifaHora;
   final double? horasEstimadas;
   final String? mensaje;
+  final bool incluyeIva;
   final EstadoPresupuesto estado;
   final DateTime createdAt;
 
@@ -38,6 +39,7 @@ class PresupuestoInfo {
     this.tarifaHora,
     this.horasEstimadas,
     this.mensaje,
+    this.incluyeIva = false,
     required this.estado,
     required this.createdAt,
   });
@@ -53,6 +55,7 @@ class PresupuestoInfo {
       tarifaHora: (json['tarifaHora'] as num?)?.toDouble(),
       horasEstimadas: (json['horasEstimadas'] as num?)?.toDouble(),
       mensaje: json['mensaje'] as String?,
+      incluyeIva: json['incluyeIva'] as bool? ?? false,
       estado: estadoPresupuestoFromString(json['estado'] as String),
       createdAt: DateTime.parse(json['createdAt'] as String),
     );

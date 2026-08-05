@@ -662,6 +662,7 @@
   "presupuestoDialogoTarifaHint": "Rate per hour (€)",
   "presupuestoDialogoHorasEstimadasHint": "Estimated hours",
   "presupuestoDialogoMensajeHint": "Message for the customer (optional)",
+  "presupuestoDialogoIncluyeIva": "This quote includes VAT",
   "presupuestoEnviadoExito": "Quote sent",
   "presupuestoEnviadoError": "Couldn't send the quote",
 
@@ -699,6 +700,8 @@
   "desglosePagoGastosGestionLabel": "Management fee",
   "desglosePagoGastosGestionInfo": "The management fee covers verifying the professional's identity, protecting your payment until the job is finished, and Hogar SOS support if any issue comes up.",
   "desglosePagoTotalLabel": "Total",
+  "desglosePagoIvaIncluido": "The professional states this amount includes VAT",
+  "desglosePagoIvaNoIncluido": "The professional states this amount does not include VAT",
 
   "trabajosActivosHorasEnviadasExito": "Hours sent — waiting for the customer to confirm them",
   "trabajosActivosPedirAmpliacionTitulo": "Ask for more hours",

@@ -447,10 +447,14 @@ class _EsperandoPresupuesto extends StatelessWidget {
 /// promoción (derivado en tiempo real de los porcentajes, no de una
 /// fecha).
 class _DesgloseComision extends StatelessWidget {
-  const _DesgloseComision({required this.montoBase, required this.comisiones});
+  const _DesgloseComision({required this.montoBase, required this.comisiones, this.incluyeIva});
 
   final double montoBase;
   final ComisionesInfo comisiones;
+  // null = no aplica a este importe (ampliación/cierre de horas, que no
+  // llevan su propia declaración de IVA); true/false = lo que declaró
+  // el profesional al enviar el presupuesto original.
+  final bool? incluyeIva;
 
   void _mostrarInfoGastosGestion(BuildContext context, AppLocalizations t) {
     showDialog<void>(
@@ -532,6 +536,14 @@ class _DesgloseComision extends StatelessWidget {
           ),
           const Padding(padding: EdgeInsets.only(top: 4), child: Divider(height: 1)),
           filaImporte(t.desglosePagoTotalLabel, total, destacado: true),
+          if (incluyeIva != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                incluyeIva! ? t.desglosePagoIvaIncluido : t.desglosePagoIvaNoIncluido,
+                style: TextStyle(fontSize: 11.5, color: colorScheme.onSurfaceVariant),
+              ),
+            ),
         ],
       ),
     );
@@ -621,7 +633,11 @@ class _PresupuestoPendienteCard extends ConsumerWidget {
             style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
           ),
           comisiones.when(
-            data: (info) => _DesgloseComision(montoBase: presupuesto.importeTotal, comisiones: info),
+            data: (info) => _DesgloseComision(
+              montoBase: presupuesto.importeTotal,
+              comisiones: info,
+              incluyeIva: presupuesto.incluyeIva,
+            ),
             loading: () => const SizedBox.shrink(),
             error: (_, __) => const SizedBox.shrink(),
           ),

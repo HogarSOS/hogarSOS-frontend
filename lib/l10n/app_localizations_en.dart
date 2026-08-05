@@ -1966,6 +1966,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Message for the customer (optional)';
 
   @override
+  String get presupuestoDialogoIncluyeIva => 'This quote includes VAT';
+
+  @override
   String get presupuestoEnviadoExito => 'Quote sent';
 
   @override
@@ -2035,6 +2038,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get desglosePagoTotalLabel => 'Total';
+
+  @override
+  String get desglosePagoIvaIncluido =>
+      'The professional states this amount includes VAT';
+
+  @override
+  String get desglosePagoIvaNoIncluido =>
+      'The professional states this amount does not include VAT';
 
   @override
   String get trabajosActivosHorasEnviadasExito =>

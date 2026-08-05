@@ -253,6 +253,7 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
   Future<void> _enviarPresupuesto(BuildContext context, WidgetRef ref, AssignedRequest trabajo) async {
     final t = AppLocalizations.of(context);
     var tipo = TipoPresupuesto.cerrado;
+    var incluyeIva = false;
     final montoController = TextEditingController();
     final tarifaController = TextEditingController();
     final horasController = TextEditingController();
@@ -305,6 +306,14 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
                   minLines: 1,
                   decoration: InputDecoration(hintText: t.presupuestoDialogoMensajeHint),
                 ),
+                CheckboxListTile(
+                  value: incluyeIva,
+                  onChanged: (valor) => setState(() => incluyeIva = valor ?? false),
+                  title: Text(t.presupuestoDialogoIncluyeIva, style: const TextStyle(fontSize: 13.5)),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                ),
               ],
             ),
           ),
@@ -325,6 +334,7 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
                       tipo: tipo,
                       monto: monto,
                       mensaje: mensaje,
+                      incluyeIva: incluyeIva,
                     );
                   } else {
                     final tarifa = double.tryParse(tarifaController.text.replaceAll(',', '.'));
@@ -336,6 +346,7 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
                       tarifaHora: tarifa,
                       horasEstimadas: horas,
                       mensaje: mensaje,
+                      incluyeIva: incluyeIva,
                     );
                   }
                   if (!context.mounted) return;

@@ -3518,6 +3518,12 @@ abstract class AppLocalizations {
   /// **'Mensaje para el cliente (opcional)'**
   String get presupuestoDialogoMensajeHint;
 
+  /// No description provided for @presupuestoDialogoIncluyeIva.
+  ///
+  /// In es, this message translates to:
+  /// **'Este presupuesto incluye IVA'**
+  String get presupuestoDialogoIncluyeIva;
+
   /// No description provided for @presupuestoEnviadoExito.
   ///
   /// In es, this message translates to:
@@ -3633,6 +3639,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Total'**
   String get desglosePagoTotalLabel;
+
+  /// No description provided for @desglosePagoIvaIncluido.
+  ///
+  /// In es, this message translates to:
+  /// **'El profesional declara que este importe incluye IVA'**
+  String get desglosePagoIvaIncluido;
+
+  /// No description provided for @desglosePagoIvaNoIncluido.
+  ///
+  /// In es, this message translates to:
+  /// **'El profesional declara que este importe no incluye IVA'**
+  String get desglosePagoIvaNoIncluido;
 
   /// No description provided for @trabajosActivosHorasEnviadasExito.
   ///

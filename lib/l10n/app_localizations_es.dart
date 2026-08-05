@@ -1980,6 +1980,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Mensaje para el cliente (opcional)';
 
   @override
+  String get presupuestoDialogoIncluyeIva => 'Este presupuesto incluye IVA';
+
+  @override
   String get presupuestoEnviadoExito => 'Presupuesto enviado';
 
   @override
@@ -2050,6 +2053,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get desglosePagoTotalLabel => 'Total';
+
+  @override
+  String get desglosePagoIvaIncluido =>
+      'El profesional declara que este importe incluye IVA';
+
+  @override
+  String get desglosePagoIvaNoIncluido =>
+      'El profesional declara que este importe no incluye IVA';
 
   @override
   String get trabajosActivosHorasEnviadasExito =>
