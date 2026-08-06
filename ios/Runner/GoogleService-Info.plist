@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyC9sNtUyUmy15SE9QygtNTBYJnPboKShoo</string>
+	<key>BUNDLE_ID</key>
+	<string>es.hogarsos.app</string>
+	<key>GCM_SENDER_ID</key>
+	<string>426602101481</string>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:426602101481:ios:cb35191208b15787274e78</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>PROJECT_ID</key>
+	<string>hogarsos</string>
+	<key>STORAGE_BUCKET</key>
+	<string>hogarsos.firebasestorage.app</string>
+</dict>
+</plist>
