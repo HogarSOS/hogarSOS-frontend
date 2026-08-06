@@ -48,10 +48,14 @@ class TokenStorage {
   }
 
   Future<void> saveAccessToken(String accessToken) async {
+    // Sin esto, un refresco de token en modo persistente actualizaba el
+    // disco pero no la copia en memoria — como getAccessToken() cachea
+    // con `??=`, la app seguía enviando el access token viejo (caducado)
+    // en cada petición hasta que se reiniciaba del todo, entrando en
+    // bucle de 401 cada ~15 min (ver auth.middleware.ts).
+    _memAccessToken = accessToken;
     if (_persistente) {
       await _storage.write(key: _accessKey, value: accessToken);
-    } else {
-      _memAccessToken = accessToken;
     }
   }
 
