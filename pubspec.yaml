@@ -41,7 +41,7 @@ dependencies:
   image_picker: ^1.1.2
 
   # Pagos
-  flutter_stripe: ^10.1.1
+  flutter_stripe: ^13.1.0
 
   # Abrir el onboarding hospedado de Stripe Connect en el navegador
   url_launcher: ^6.3.1
