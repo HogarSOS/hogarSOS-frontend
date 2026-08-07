@@ -520,6 +520,7 @@
   "pagoExito": "Payment authorized. It will be charged when the service is completed.",
   "pagoErrorGenerico": "Couldn't process the payment. Please try again.",
   "pagoErrorStripeDefault": "The payment wasn't completed",
+  "pagoCancelado": "You canceled the payment",
   "valoracionTitulo": "How was the service?",
   "valoracionErrorSeleccion": "Select a rating",
   "valoracionErrorEnviar": "Couldn't submit your rating. Please try again.",

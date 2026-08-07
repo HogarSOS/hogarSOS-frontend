@@ -48,9 +48,15 @@ class _PagoScreenState extends State<PagoScreen> {
       Navigator.of(context).pop(resultado);
     } on StripeException catch (e) {
       // El usuario canceló la hoja de pago o la tarjeta fue rechazada.
+      // FailureCode.Canceled aparte porque `localizedMessage` para ese
+      // caso concreto lo manda Stripe siempre en inglés ("The payment
+      // flow has been canceled"), sin traducir aunque el resto de la
+      // app esté en español — se detectó al probar en dispositivo real.
       if (!mounted) return;
       final t = AppLocalizations.of(context);
-      setState(() => _error = e.error.localizedMessage ?? t.pagoErrorStripeDefault);
+      setState(() => _error = e.error.code == FailureCode.Canceled
+          ? t.pagoCancelado
+          : e.error.localizedMessage ?? t.pagoErrorStripeDefault);
     } catch (e) {
       debugPrint('[PagoScreen] Error al procesar el pago: $e');
       if (!mounted) return;

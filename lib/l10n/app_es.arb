@@ -520,6 +520,7 @@
   "pagoExito": "Pago autorizado. Se cobrará cuando el servicio se complete.",
   "pagoErrorGenerico": "No se pudo procesar el pago. Inténtalo de nuevo.",
   "pagoErrorStripeDefault": "El pago no se completó",
+  "pagoCancelado": "Has cancelado el pago",
   "valoracionTitulo": "¿Cómo fue el servicio?",
   "valoracionErrorSeleccion": "Selecciona una puntuación",
   "valoracionErrorEnviar": "No se pudo enviar la valoración. Inténtalo de nuevo.",

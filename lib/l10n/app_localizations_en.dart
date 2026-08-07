@@ -1579,6 +1579,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pagoErrorStripeDefault => 'The payment wasn\'t completed';
 
   @override
+  String get pagoCancelado => 'You canceled the payment';
+
+  @override
   String get valoracionTitulo => 'How was the service?';
 
   @override

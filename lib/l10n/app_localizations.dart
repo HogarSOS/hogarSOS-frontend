@@ -2810,6 +2810,12 @@ abstract class AppLocalizations {
   /// **'El pago no se completó'**
   String get pagoErrorStripeDefault;
 
+  /// No description provided for @pagoCancelado.
+  ///
+  /// In es, this message translates to:
+  /// **'Has cancelado el pago'**
+  String get pagoCancelado;
+
   /// No description provided for @valoracionTitulo.
   ///
   /// In es, this message translates to:
