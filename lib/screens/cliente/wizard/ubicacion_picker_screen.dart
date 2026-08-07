@@ -111,45 +111,48 @@ class _UbicacionPickerScreenState extends State<UbicacionPickerScreen> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (!_cargandoUbicacionInicial && !_ubicacionRealObtenida)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(
-                      t.ubicacionAvisoNoDetectada,
-                      style: TextStyle(color: colorScheme.error, fontSize: 12.5, fontWeight: FontWeight.w600),
-                      textAlign: TextAlign.center,
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (!_cargandoUbicacionInicial && !_ubicacionRealObtenida)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        t.ubicacionAvisoNoDetectada,
+                        style: TextStyle(color: colorScheme.error, fontSize: 12.5, fontWeight: FontWeight.w600),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  TextField(
+                    controller: _direccionController,
+                    decoration: InputDecoration(
+                      labelText: t.ubicacionDireccionOpcional,
+                      prefixIcon: const Icon(Icons.edit_location_alt_outlined),
                     ),
                   ),
-                TextField(
-                  controller: _direccionController,
-                  decoration: InputDecoration(
-                    labelText: t.ubicacionDireccionOpcional,
-                    prefixIcon: const Icon(Icons.edit_location_alt_outlined),
+                  const SizedBox(height: 12),
+                  FilledButton(
+                    onPressed: _cargandoUbicacionInicial
+                        ? null
+                        : () {
+                            Navigator.of(context).pop(
+                              UbicacionSeleccionada(
+                                latitud: _centro.latitude,
+                                longitud: _centro.longitude,
+                                direccionTexto: _direccionController.text.trim().isEmpty
+                                    ? null
+                                    : _direccionController.text.trim(),
+                              ),
+                            );
+                          },
+                    child: Text(t.ubicacionConfirmar),
                   ),
-                ),
-                const SizedBox(height: 12),
-                FilledButton(
-                  onPressed: _cargandoUbicacionInicial
-                      ? null
-                      : () {
-                          Navigator.of(context).pop(
-                            UbicacionSeleccionada(
-                              latitud: _centro.latitude,
-                              longitud: _centro.longitude,
-                              direccionTexto: _direccionController.text.trim().isEmpty
-                                  ? null
-                                  : _direccionController.text.trim(),
-                            ),
-                          );
-                        },
-                  child: Text(t.ubicacionConfirmar),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
