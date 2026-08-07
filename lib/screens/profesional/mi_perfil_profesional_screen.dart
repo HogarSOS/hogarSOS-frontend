@@ -259,6 +259,11 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
           .toList();
       if (!mounted) return;
       setState(() => _categoriasActuales = nombresNuevos);
+      // El selector de disponibilidad lee `perfilCompleto` de su propio
+      // provider (disponibilidadProvider), no de este estado local —
+      // sin refrescarlo se queda con el valor viejo (perfil incompleto)
+      // aunque la categoría ya se haya guardado.
+      ref.read(disponibilidadProvider.notifier).cargar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(t.miPerfilCategoriasExito)),
       );
@@ -324,6 +329,10 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
       await _professionalService.actualizarPerfil(fotoPerfilUrl: url);
       if (!mounted) return;
       setState(() => _fotoPerfilUrlActual = url);
+      // Mismo motivo que en _editarCategorias: el selector de
+      // disponibilidad depende de disponibilidadProvider, no de este
+      // estado local.
+      ref.read(disponibilidadProvider.notifier).cargar();
     } catch (e) {
       debugPrint('[MiPerfilProfesionalScreen] Error al subir la foto: $e');
       if (!mounted) return;
