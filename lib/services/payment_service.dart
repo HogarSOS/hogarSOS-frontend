@@ -159,6 +159,20 @@ class PaymentService {
         customerId: customerId,
         customerEphemeralKeySecret: ephemeralKeySecret,
         merchantDisplayName: 'Hogar SOS',
+        // El backend ya restringe el PaymentIntent a payment_method_types:
+        // ['card'] (ver createEscrowPaymentIntent en payment.service.ts) —
+        // Google Pay no es un método de pago aparte a ojos de Stripe, es
+        // una forma de rellenar el formulario de tarjeta con un token que
+        // el propio dispositivo ya tiene guardado, así que es compatible
+        // con la captura manual del modelo escrow sin tocar nada del
+        // backend. `testEnv` sigue automáticamente a la clave pública
+        // activa (test vs live), igual que hace _claveDeTestEnRelease en
+        // main.dart para bloquear una release con clave de test.
+        googlePay: PaymentSheetGooglePay(
+          merchantCountryCode: 'ES',
+          currencyCode: 'EUR',
+          testEnv: Stripe.publishableKey.startsWith('pk_test'),
+        ),
       ),
     );
     await Stripe.instance.presentPaymentSheet();

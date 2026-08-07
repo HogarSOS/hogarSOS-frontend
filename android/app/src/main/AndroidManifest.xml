@@ -26,6 +26,13 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="hogarsos_notifications" />
+        <!-- Declaración requerida por la API de Google Pay para cualquier
+             app que la integre, aunque sea a través del Payment Sheet de
+             Stripe (no llamando a la API de Google Pay directamente) —
+             ver https://developers.google.com/pay/api/android/guides/setup. -->
+        <meta-data
+            android:name="com.google.android.gms.wallet.api.enabled"
+            android:value="true" />
         <!-- Impeller (el backend de render por defecto en Android desde
              Flutter 3.x) se queda colgado sin dibujar ni un frame en el
              Realme RMX3853 de pruebas (SurfaceView "didn't commit buffer"
