@@ -118,3 +118,55 @@ class StuckPaymentsSummary {
   }
 }
 
+/// Fila de `GET /admin/jobs` — ver `listJobs` en `admin.controller.ts`.
+/// `nombre` es el identificador estable (kebab-case, clave primaria en
+/// BD); `descripcion` es el texto legible que ya viene listo del backend
+/// para mostrar tal cual. `ultimoResultado`/`ultimoError` son texto
+/// libre (el resumen que devuelve `tarea.ejecutar()`, truncado a 500
+/// caracteres por el backend) — nunca los dos a la vez: si la última
+/// ejecución fue bien, `ultimoError` es null, y viceversa.
+class ScheduledJob {
+  final String nombre;
+  final String descripcion;
+  final int intervaloMinutos;
+  final DateTime? ultimaEjecucionAt;
+  final DateTime? proximaEjecucionAprox;
+  final bool enCurso;
+  final int ejecuciones;
+  final int fallosConsecutivos;
+  final String? ultimoResultado;
+  final String? ultimoError;
+
+  ScheduledJob({
+    required this.nombre,
+    required this.descripcion,
+    required this.intervaloMinutos,
+    required this.ultimaEjecucionAt,
+    required this.proximaEjecucionAprox,
+    required this.enCurso,
+    required this.ejecuciones,
+    required this.fallosConsecutivos,
+    required this.ultimoResultado,
+    required this.ultimoError,
+  });
+
+  factory ScheduledJob.fromJson(Map<String, dynamic> json) {
+    return ScheduledJob(
+      nombre: json['nombre'] as String,
+      descripcion: json['descripcion'] as String,
+      intervaloMinutos: json['intervaloMinutos'] as int,
+      ultimaEjecucionAt: json['ultimaEjecucionAt'] != null
+          ? DateTime.parse(json['ultimaEjecucionAt'] as String)
+          : null,
+      proximaEjecucionAprox: json['proximaEjecucionAprox'] != null
+          ? DateTime.parse(json['proximaEjecucionAprox'] as String)
+          : null,
+      enCurso: json['enCurso'] as bool,
+      ejecuciones: json['ejecuciones'] as int,
+      fallosConsecutivos: json['fallosConsecutivos'] as int,
+      ultimoResultado: json['ultimoResultado'] as String?,
+      ultimoError: json['ultimoError'] as String?,
+    );
+  }
+}
+

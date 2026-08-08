@@ -446,6 +446,17 @@ class AppLocalizationsEs extends AppLocalizations {
       'El reintento falló en Stripe. El pago sigue recuperable: vuelve a intentarlo.';
 
   @override
+  String get apiErrTareaNoEncontrada => 'Tarea no encontrada';
+
+  @override
+  String get apiErrTareaYaEnCurso =>
+      'Esta tarea ya se está ejecutando ahora mismo';
+
+  @override
+  String get apiErrTareaFallida =>
+      'La tarea falló. Revisa el detalle antes de reintentar.';
+
+  @override
   String get legalPrivSec1Titulo => '1. Quién trata tus datos';
 
   @override
@@ -1944,6 +1955,69 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get adminReintentarLiberacionExito =>
       'Liberación completada correctamente';
+
+  @override
+  String get adminTabTareas => 'Tareas programadas';
+
+  @override
+  String get adminTareasVacio => 'No hay tareas programadas';
+
+  @override
+  String get adminTareasError => 'No se pudieron cargar las tareas programadas';
+
+  @override
+  String get adminTareaEnCurso => 'En curso';
+
+  @override
+  String adminTareaCada(int n) {
+    return 'Cada $n min';
+  }
+
+  @override
+  String adminTareaUltimaEjecucion(String fecha) {
+    return 'Última ejecución: $fecha';
+  }
+
+  @override
+  String get adminTareaNuncaEjecutada => 'Todavía no se ha ejecutado nunca';
+
+  @override
+  String adminTareaProximaEjecucion(String fecha) {
+    return 'Próxima aprox.: $fecha';
+  }
+
+  @override
+  String adminTareaEjecuciones(int n) {
+    return 'Ejecuciones: $n';
+  }
+
+  @override
+  String adminTareaFallosConsecutivos(int n) {
+    return 'Fallos consecutivos: $n';
+  }
+
+  @override
+  String adminTareaUltimoResultado(String texto) {
+    return 'Último resultado: $texto';
+  }
+
+  @override
+  String adminTareaUltimoError(String texto) {
+    return 'Último error: $texto';
+  }
+
+  @override
+  String get adminEjecutarAhora => 'Ejecutar ahora';
+
+  @override
+  String get adminEjecutarAhoraConfirmarTitulo => '¿Ejecutar esta tarea ahora?';
+
+  @override
+  String get adminEjecutarAhoraConfirmarTexto =>
+      'Se forzará su ejecución sin esperar al siguiente ciclo. Si ya está en curso, no se duplicará.';
+
+  @override
+  String get adminEjecutarAhoraExito => 'Tarea ejecutada correctamente';
 
   @override
   String get reportarProblemaTitulo => 'Reportar un problema';

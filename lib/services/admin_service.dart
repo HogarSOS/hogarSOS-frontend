@@ -52,4 +52,20 @@ class AdminService {
   Future<void> reintentarLiberacion(String serviceRequestId) async {
     await _api.post('/admin/payments/$serviceRequestId/retry');
   }
+
+  Future<List<ScheduledJob>> listarTareas() async {
+    final respuesta = await _api.get('/admin/jobs');
+    return (respuesta.data['tareas'] as List)
+        .map((j) => ScheduledJob.fromJson(j as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Fuerza la ejecución de una tarea ya (sin esperar a su ciclo). El
+  /// lock en BD (`bloqueadoHasta`) lo sigue gestionando el backend — si
+  /// ya está en curso, `ejecutarTareaAhora` en `scheduler.ts` responde
+  /// 409 en vez de duplicarla.
+  Future<String> ejecutarTareaAhora(String nombre) async {
+    final respuesta = await _api.post('/admin/jobs/$nombre/run');
+    return respuesta.data['resultado'] as String;
+  }
 }

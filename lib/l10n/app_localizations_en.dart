@@ -445,6 +445,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'The retry failed on Stripe. The payment is still recoverable: try again.';
 
   @override
+  String get apiErrTareaNoEncontrada => 'Job not found';
+
+  @override
+  String get apiErrTareaYaEnCurso => 'This job is already running right now';
+
+  @override
+  String get apiErrTareaFallida =>
+      'The job failed. Check the details before retrying.';
+
+  @override
   String get legalPrivSec1Titulo => '1. Who processes your data';
 
   @override
@@ -1930,6 +1940,69 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminReintentarLiberacionExito => 'Release completed successfully';
+
+  @override
+  String get adminTabTareas => 'Scheduled jobs';
+
+  @override
+  String get adminTareasVacio => 'No scheduled jobs';
+
+  @override
+  String get adminTareasError => 'Couldn\'t load scheduled jobs';
+
+  @override
+  String get adminTareaEnCurso => 'Running';
+
+  @override
+  String adminTareaCada(int n) {
+    return 'Every $n min';
+  }
+
+  @override
+  String adminTareaUltimaEjecucion(String fecha) {
+    return 'Last run: $fecha';
+  }
+
+  @override
+  String get adminTareaNuncaEjecutada => 'Never run yet';
+
+  @override
+  String adminTareaProximaEjecucion(String fecha) {
+    return 'Next run (approx.): $fecha';
+  }
+
+  @override
+  String adminTareaEjecuciones(int n) {
+    return 'Runs: $n';
+  }
+
+  @override
+  String adminTareaFallosConsecutivos(int n) {
+    return 'Consecutive failures: $n';
+  }
+
+  @override
+  String adminTareaUltimoResultado(String texto) {
+    return 'Last result: $texto';
+  }
+
+  @override
+  String adminTareaUltimoError(String texto) {
+    return 'Last error: $texto';
+  }
+
+  @override
+  String get adminEjecutarAhora => 'Run now';
+
+  @override
+  String get adminEjecutarAhoraConfirmarTitulo => 'Run this job now?';
+
+  @override
+  String get adminEjecutarAhoraConfirmarTexto =>
+      'This will force it to run without waiting for its next cycle. If it\'s already running, it won\'t be duplicated.';
+
+  @override
+  String get adminEjecutarAhoraExito => 'Job ran successfully';
 
   @override
   String get reportarProblemaTitulo => 'Report a problem';

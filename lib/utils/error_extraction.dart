@@ -172,6 +172,14 @@ String? _mensajePorCodigo(String? code, AppLocalizations t) {
       return t.apiErrCuentaStripeNoOperativa;
     case 'PAYMENT_RETRY_STRIPE_FAILED':
       return t.apiErrReintentoStripeFallido;
+    // Códigos de `runJob` (panel admin, pestaña "Tareas programadas") —
+    // ver el switch de `admin.controller.ts`.
+    case 'JOB_NOT_FOUND':
+      return t.apiErrTareaNoEncontrada;
+    case 'JOB_ALREADY_RUNNING':
+      return t.apiErrTareaYaEnCurso;
+    case 'JOB_FAILED':
+      return t.apiErrTareaFallida;
     default:
       return null;
   }

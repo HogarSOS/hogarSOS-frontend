@@ -139,6 +139,9 @@
   "apiErrProfesionalSinCuentaStripe": "El profesional no ha completado el onboarding de Stripe Connect",
   "apiErrCuentaStripeNoOperativa": "Stripe todavía no habilita los pagos de este profesional (verificación pendiente)",
   "apiErrReintentoStripeFallido": "El reintento falló en Stripe. El pago sigue recuperable: vuelve a intentarlo.",
+  "apiErrTareaNoEncontrada": "Tarea no encontrada",
+  "apiErrTareaYaEnCurso": "Esta tarea ya se está ejecutando ahora mismo",
+  "apiErrTareaFallida": "La tarea falló. Revisa el detalle antes de reintentar.",
 
   "legalPrivSec1Titulo": "1. Quién trata tus datos",
   "legalPrivSec1Texto": "Hogar SOS es una app que conecta a clientes con profesionales de servicios a domicilio. Somos responsables del tratamiento de los datos personales que recoge la aplicación, descritos en esta política.",
@@ -654,6 +657,43 @@
   "adminReintentarLiberacionConfirmarTitulo": "¿Reintentar liberación?",
   "adminReintentarLiberacionConfirmarTexto": "Se intentará capturar y transferir este pago de nuevo. Es seguro repetir la operación aunque ya esté en curso o parcialmente hecha.",
   "adminReintentarLiberacionExito": "Liberación completada correctamente",
+  "adminTabTareas": "Tareas programadas",
+  "adminTareasVacio": "No hay tareas programadas",
+  "adminTareasError": "No se pudieron cargar las tareas programadas",
+  "adminTareaEnCurso": "En curso",
+  "adminTareaCada": "Cada {n} min",
+  "@adminTareaCada": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "adminTareaUltimaEjecucion": "Última ejecución: {fecha}",
+  "@adminTareaUltimaEjecucion": {
+    "placeholders": { "fecha": { "type": "String" } }
+  },
+  "adminTareaNuncaEjecutada": "Todavía no se ha ejecutado nunca",
+  "adminTareaProximaEjecucion": "Próxima aprox.: {fecha}",
+  "@adminTareaProximaEjecucion": {
+    "placeholders": { "fecha": { "type": "String" } }
+  },
+  "adminTareaEjecuciones": "Ejecuciones: {n}",
+  "@adminTareaEjecuciones": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "adminTareaFallosConsecutivos": "Fallos consecutivos: {n}",
+  "@adminTareaFallosConsecutivos": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "adminTareaUltimoResultado": "Último resultado: {texto}",
+  "@adminTareaUltimoResultado": {
+    "placeholders": { "texto": { "type": "String" } }
+  },
+  "adminTareaUltimoError": "Último error: {texto}",
+  "@adminTareaUltimoError": {
+    "placeholders": { "texto": { "type": "String" } }
+  },
+  "adminEjecutarAhora": "Ejecutar ahora",
+  "adminEjecutarAhoraConfirmarTitulo": "¿Ejecutar esta tarea ahora?",
+  "adminEjecutarAhoraConfirmarTexto": "Se forzará su ejecución sin esperar al siguiente ciclo. Si ya está en curso, no se duplicará.",
+  "adminEjecutarAhoraExito": "Tarea ejecutada correctamente",
 
   "reportarProblemaTitulo": "Reportar un problema",
   "reportarProblemaMotivoLabel": "¿Qué ha pasado?",

@@ -40,7 +40,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: Row(
@@ -59,10 +59,12 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
             ),
           ],
           bottom: TabBar(
+            isScrollable: true,
             tabs: [
               Tab(text: t.adminTabVerificaciones),
               Tab(text: t.adminTabDisputas),
               Tab(text: t.adminTabPagosAtascados),
+              Tab(text: t.adminTabTareas),
             ],
           ),
         ),
@@ -71,6 +73,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
             _VerificacionesTab(adminService: _adminService),
             _DisputasTab(adminService: _adminService),
             _PagosAtascadosTab(adminService: _adminService),
+            _TareasProgramadasTab(adminService: _adminService),
           ],
         ),
       ),
@@ -659,6 +662,224 @@ class _PagoAtascadoCard extends StatelessWidget {
                       )
                     : const Icon(Icons.replay, size: 18),
                 label: Text(t.adminReintentarLiberacion),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Tareas programadas (`GET /admin/jobs`, `POST /admin/jobs/:nombre/run`)
+/// — mismo patrón que `_PagosAtascadosTab`: el backend ya gestiona el
+/// lock y la idempotencia (`ejecutarTareaAhora` en `scheduler.ts`), esta
+/// pantalla solo pide confirmación y muestra el resultado.
+class _TareasProgramadasTab extends StatefulWidget {
+  const _TareasProgramadasTab({required this.adminService});
+  final AdminService adminService;
+
+  @override
+  State<_TareasProgramadasTab> createState() => _TareasProgramadasTabState();
+}
+
+class _TareasProgramadasTabState extends State<_TareasProgramadasTab> {
+  late Future<List<ScheduledJob>> _futuro;
+
+  // Igual que en pagos atascados: bloquea solo el botón de la tarea
+  // concreta en curso, no toda la pantalla.
+  final Set<String> _procesando = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _futuro = widget.adminService.listarTareas();
+  }
+
+  Future<void> _recargar() async {
+    setState(() => _futuro = widget.adminService.listarTareas());
+    await _futuro.catchError((_) => <ScheduledJob>[]);
+  }
+
+  Future<void> _ejecutar(ScheduledJob tarea) async {
+    final t = AppLocalizations.of(context);
+    final confirmado = await _confirmarAccion(
+      context,
+      titulo: t.adminEjecutarAhoraConfirmarTitulo,
+      texto: t.adminEjecutarAhoraConfirmarTexto,
+      confirmar: t.adminConfirmar,
+      cancelar: t.perfilCancelar,
+    );
+    if (!confirmado) return;
+    if (!mounted) return;
+
+    setState(() => _procesando.add(tarea.nombre));
+    try {
+      await widget.adminService.ejecutarTareaAhora(tarea.nombre);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.adminEjecutarAhoraExito)),
+      );
+      await _recargar();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.adminTareasError, t: t))),
+      );
+    } finally {
+      if (mounted) setState(() => _procesando.remove(tarea.nombre));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    return FutureBuilder<List<ScheduledJob>>(
+      future: _futuro,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData && !snapshot.hasError) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return _EstadoLista(
+            icono: Icons.error_outline,
+            mensaje: t.adminTareasError,
+            onRefresh: _recargar,
+          );
+        }
+        final tareas = snapshot.data!;
+        if (tareas.isEmpty) {
+          return _EstadoLista(
+            icono: Icons.schedule_outlined,
+            mensaje: t.adminTareasVacio,
+            onRefresh: _recargar,
+          );
+        }
+        return RefreshIndicator(
+          onRefresh: _recargar,
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: tareas.length,
+            itemBuilder: (context, index) {
+              final tarea = tareas[index];
+              return EntradaAnimada(
+                retraso: Duration(milliseconds: 30 * index),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _TareaCard(
+                    tarea: tarea,
+                    procesando: _procesando.contains(tarea.nombre),
+                    onEjecutar: () => _ejecutar(tarea),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _TareaCard extends StatelessWidget {
+  const _TareaCard({
+    required this.tarea,
+    required this.procesando,
+    required this.onEjecutar,
+  });
+
+  final ScheduledJob tarea;
+  final bool procesando;
+  final VoidCallback onEjecutar;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final formatoFecha = DateFormat.yMMMd(t.localeName).add_Hm();
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    tarea.descripcion,
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                  ),
+                ),
+                if (tarea.enCurso)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: colorScheme.tertiary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      t.adminTareaEnCurso,
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: colorScheme.tertiary),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '${tarea.nombre} · ${t.adminTareaCada(tarea.intervaloMinutos)}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              tarea.ultimaEjecucionAt != null
+                  ? t.adminTareaUltimaEjecucion(formatoFecha.format(tarea.ultimaEjecucionAt!))
+                  : t.adminTareaNuncaEjecutada,
+              style: const TextStyle(fontSize: 12.5),
+            ),
+            if (tarea.proximaEjecucionAprox != null)
+              Text(
+                t.adminTareaProximaEjecucion(formatoFecha.format(tarea.proximaEjecucionAprox!)),
+                style: const TextStyle(fontSize: 12.5),
+              ),
+            Text(
+              t.adminTareaEjecuciones(tarea.ejecuciones),
+              style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant),
+            ),
+            if (tarea.fallosConsecutivos > 0)
+              Text(
+                t.adminTareaFallosConsecutivos(tarea.fallosConsecutivos),
+                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: colorScheme.error),
+              ),
+            if (tarea.ultimoResultado != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                t.adminTareaUltimoResultado(tarea.ultimoResultado!),
+                style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant),
+              ),
+            ],
+            if (tarea.ultimoError != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                t.adminTareaUltimoError(tarea.ultimoError!),
+                style: TextStyle(fontSize: 12.5, color: colorScheme.error),
+              ),
+            ],
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: (procesando || tarea.enCurso) ? null : onEjecutar,
+                icon: procesando
+                    ? const SizedBox(
+                        height: 16,
+                        width: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.play_arrow_rounded, size: 18),
+                label: Text(t.adminEjecutarAhora),
               ),
             ),
           ],

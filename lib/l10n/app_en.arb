@@ -139,6 +139,9 @@
   "apiErrProfesionalSinCuentaStripe": "The professional hasn't completed Stripe Connect onboarding",
   "apiErrCuentaStripeNoOperativa": "Stripe doesn't enable payments for this professional yet (verification pending)",
   "apiErrReintentoStripeFallido": "The retry failed on Stripe. The payment is still recoverable: try again.",
+  "apiErrTareaNoEncontrada": "Job not found",
+  "apiErrTareaYaEnCurso": "This job is already running right now",
+  "apiErrTareaFallida": "The job failed. Check the details before retrying.",
 
   "legalPrivSec1Titulo": "1. Who processes your data",
   "legalPrivSec1Texto": "Hogar SOS is an app that connects customers with home-service professionals. We're the data controller for the personal data the app collects, as described in this policy.",
@@ -654,6 +657,43 @@
   "adminReintentarLiberacionConfirmarTitulo": "Retry release?",
   "adminReintentarLiberacionConfirmarTexto": "This will try to capture and transfer this payment again. It's safe to repeat even if it's already in progress or partially done.",
   "adminReintentarLiberacionExito": "Release completed successfully",
+  "adminTabTareas": "Scheduled jobs",
+  "adminTareasVacio": "No scheduled jobs",
+  "adminTareasError": "Couldn't load scheduled jobs",
+  "adminTareaEnCurso": "Running",
+  "adminTareaCada": "Every {n} min",
+  "@adminTareaCada": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "adminTareaUltimaEjecucion": "Last run: {fecha}",
+  "@adminTareaUltimaEjecucion": {
+    "placeholders": { "fecha": { "type": "String" } }
+  },
+  "adminTareaNuncaEjecutada": "Never run yet",
+  "adminTareaProximaEjecucion": "Next run (approx.): {fecha}",
+  "@adminTareaProximaEjecucion": {
+    "placeholders": { "fecha": { "type": "String" } }
+  },
+  "adminTareaEjecuciones": "Runs: {n}",
+  "@adminTareaEjecuciones": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "adminTareaFallosConsecutivos": "Consecutive failures: {n}",
+  "@adminTareaFallosConsecutivos": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "adminTareaUltimoResultado": "Last result: {texto}",
+  "@adminTareaUltimoResultado": {
+    "placeholders": { "texto": { "type": "String" } }
+  },
+  "adminTareaUltimoError": "Last error: {texto}",
+  "@adminTareaUltimoError": {
+    "placeholders": { "texto": { "type": "String" } }
+  },
+  "adminEjecutarAhora": "Run now",
+  "adminEjecutarAhoraConfirmarTitulo": "Run this job now?",
+  "adminEjecutarAhoraConfirmarTexto": "This will force it to run without waiting for its next cycle. If it's already running, it won't be duplicated.",
+  "adminEjecutarAhoraExito": "Job ran successfully",
 
   "reportarProblemaTitulo": "Report a problem",
   "reportarProblemaMotivoLabel": "What happened?",

@@ -842,6 +842,24 @@ abstract class AppLocalizations {
   /// **'El reintento falló en Stripe. El pago sigue recuperable: vuelve a intentarlo.'**
   String get apiErrReintentoStripeFallido;
 
+  /// No description provided for @apiErrTareaNoEncontrada.
+  ///
+  /// In es, this message translates to:
+  /// **'Tarea no encontrada'**
+  String get apiErrTareaNoEncontrada;
+
+  /// No description provided for @apiErrTareaYaEnCurso.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta tarea ya se está ejecutando ahora mismo'**
+  String get apiErrTareaYaEnCurso;
+
+  /// No description provided for @apiErrTareaFallida.
+  ///
+  /// In es, this message translates to:
+  /// **'La tarea falló. Revisa el detalle antes de reintentar.'**
+  String get apiErrTareaFallida;
+
   /// No description provided for @legalPrivSec1Titulo.
   ///
   /// In es, this message translates to:
@@ -3439,6 +3457,102 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Liberación completada correctamente'**
   String get adminReintentarLiberacionExito;
+
+  /// No description provided for @adminTabTareas.
+  ///
+  /// In es, this message translates to:
+  /// **'Tareas programadas'**
+  String get adminTabTareas;
+
+  /// No description provided for @adminTareasVacio.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay tareas programadas'**
+  String get adminTareasVacio;
+
+  /// No description provided for @adminTareasError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron cargar las tareas programadas'**
+  String get adminTareasError;
+
+  /// No description provided for @adminTareaEnCurso.
+  ///
+  /// In es, this message translates to:
+  /// **'En curso'**
+  String get adminTareaEnCurso;
+
+  /// No description provided for @adminTareaCada.
+  ///
+  /// In es, this message translates to:
+  /// **'Cada {n} min'**
+  String adminTareaCada(int n);
+
+  /// No description provided for @adminTareaUltimaEjecucion.
+  ///
+  /// In es, this message translates to:
+  /// **'Última ejecución: {fecha}'**
+  String adminTareaUltimaEjecucion(String fecha);
+
+  /// No description provided for @adminTareaNuncaEjecutada.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no se ha ejecutado nunca'**
+  String get adminTareaNuncaEjecutada;
+
+  /// No description provided for @adminTareaProximaEjecucion.
+  ///
+  /// In es, this message translates to:
+  /// **'Próxima aprox.: {fecha}'**
+  String adminTareaProximaEjecucion(String fecha);
+
+  /// No description provided for @adminTareaEjecuciones.
+  ///
+  /// In es, this message translates to:
+  /// **'Ejecuciones: {n}'**
+  String adminTareaEjecuciones(int n);
+
+  /// No description provided for @adminTareaFallosConsecutivos.
+  ///
+  /// In es, this message translates to:
+  /// **'Fallos consecutivos: {n}'**
+  String adminTareaFallosConsecutivos(int n);
+
+  /// No description provided for @adminTareaUltimoResultado.
+  ///
+  /// In es, this message translates to:
+  /// **'Último resultado: {texto}'**
+  String adminTareaUltimoResultado(String texto);
+
+  /// No description provided for @adminTareaUltimoError.
+  ///
+  /// In es, this message translates to:
+  /// **'Último error: {texto}'**
+  String adminTareaUltimoError(String texto);
+
+  /// No description provided for @adminEjecutarAhora.
+  ///
+  /// In es, this message translates to:
+  /// **'Ejecutar ahora'**
+  String get adminEjecutarAhora;
+
+  /// No description provided for @adminEjecutarAhoraConfirmarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Ejecutar esta tarea ahora?'**
+  String get adminEjecutarAhoraConfirmarTitulo;
+
+  /// No description provided for @adminEjecutarAhoraConfirmarTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'Se forzará su ejecución sin esperar al siguiente ciclo. Si ya está en curso, no se duplicará.'**
+  String get adminEjecutarAhoraConfirmarTexto;
+
+  /// No description provided for @adminEjecutarAhoraExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Tarea ejecutada correctamente'**
+  String get adminEjecutarAhoraExito;
 
   /// No description provided for @reportarProblemaTitulo.
   ///

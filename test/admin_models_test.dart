@@ -99,4 +99,71 @@ void main() {
       expect(resumen.pagos, isEmpty);
     });
   });
+
+  group('ScheduledJob.fromJson', () {
+    test('parsea una tarea que ya se ejecutó, con resultado', () {
+      final tarea = ScheduledJob.fromJson({
+        'nombre': 'reintentar-pagos-atascados',
+        'descripcion': 'Reintenta capturar/transferir pagos atascados',
+        'intervaloMinutos': 10,
+        'ultimaEjecucionAt': '2026-08-08T09:00:00.000Z',
+        'proximaEjecucionAprox': '2026-08-08T09:10:00.000Z',
+        'enCurso': false,
+        'ejecuciones': 42,
+        'fallosConsecutivos': 0,
+        'ultimoResultado': '0 pagos atascados encontrados',
+        'ultimoError': null,
+      });
+
+      expect(tarea.nombre, 'reintentar-pagos-atascados');
+      expect(tarea.intervaloMinutos, 10);
+      expect(tarea.ultimaEjecucionAt, DateTime.parse('2026-08-08T09:00:00.000Z'));
+      expect(tarea.enCurso, false);
+      expect(tarea.ejecuciones, 42);
+      expect(tarea.ultimoResultado, '0 pagos atascados encontrados');
+      expect(tarea.ultimoError, isNull);
+    });
+
+    // Una tarea que nunca se ejecutó (recién desplegada) no tiene
+    // ultimaEjecucionAt/proximaEjecucionAprox/ultimoResultado/ultimoError
+    // — ver listJobs en admin.controller.ts, todos nullable.
+    test('acepta una tarea que nunca se ha ejecutado, con campos nulos', () {
+      final tarea = ScheduledJob.fromJson({
+        'nombre': 'limpiar-archivos-huerfanos',
+        'descripcion': 'Borra archivos subidos que ya no están en uso',
+        'intervaloMinutos': 1440,
+        'ultimaEjecucionAt': null,
+        'proximaEjecucionAprox': null,
+        'enCurso': false,
+        'ejecuciones': 0,
+        'fallosConsecutivos': 0,
+        'ultimoResultado': null,
+        'ultimoError': null,
+      });
+
+      expect(tarea.ultimaEjecucionAt, isNull);
+      expect(tarea.proximaEjecucionAprox, isNull);
+      expect(tarea.ultimoResultado, isNull);
+      expect(tarea.ejecuciones, 0);
+    });
+
+    test('parsea una tarea en curso con fallos consecutivos y último error', () {
+      final tarea = ScheduledJob.fromJson({
+        'nombre': 'autorizaciones-por-caducar',
+        'descripcion': 'Avisa de autorizaciones cerca de caducar',
+        'intervaloMinutos': 360,
+        'ultimaEjecucionAt': '2026-08-08T08:00:00.000Z',
+        'proximaEjecucionAprox': '2026-08-08T14:00:00.000Z',
+        'enCurso': true,
+        'ejecuciones': 5,
+        'fallosConsecutivos': 3,
+        'ultimoResultado': null,
+        'ultimoError': 'Timeout consultando Stripe',
+      });
+
+      expect(tarea.enCurso, true);
+      expect(tarea.fallosConsecutivos, 3);
+      expect(tarea.ultimoError, 'Timeout consultando Stripe');
+    });
+  });
 }
