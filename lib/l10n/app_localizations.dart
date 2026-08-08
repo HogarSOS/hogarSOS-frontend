@@ -860,6 +860,24 @@ abstract class AppLocalizations {
   /// **'La tarea falló. Revisa el detalle antes de reintentar.'**
   String get apiErrTareaFallida;
 
+  /// No description provided for @apiErrAdminNoPuedeAutoBloquearse.
+  ///
+  /// In es, this message translates to:
+  /// **'No puedes cambiar el estado de tu propia cuenta'**
+  String get apiErrAdminNoPuedeAutoBloquearse;
+
+  /// No description provided for @apiErrUltimoAdminActivo.
+  ///
+  /// In es, this message translates to:
+  /// **'No puedes desactivar al único administrador activo'**
+  String get apiErrUltimoAdminActivo;
+
+  /// No description provided for @apiErrCuentaEliminadaNoReactivable.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta cuenta fue eliminada por el propio usuario y no se puede reactivar'**
+  String get apiErrCuentaEliminadaNoReactivable;
+
   /// No description provided for @legalPrivSec1Titulo.
   ///
   /// In es, this message translates to:
@@ -3553,6 +3571,96 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Tarea ejecutada correctamente'**
   String get adminEjecutarAhoraExito;
+
+  /// No description provided for @adminTabUsuarios.
+  ///
+  /// In es, this message translates to:
+  /// **'Usuarios'**
+  String get adminTabUsuarios;
+
+  /// No description provided for @adminUsuarioIdLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'ID del usuario'**
+  String get adminUsuarioIdLabel;
+
+  /// No description provided for @adminUsuarioIdHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Pega o escribe el ID (UUID)'**
+  String get adminUsuarioIdHint;
+
+  /// No description provided for @adminUsuarioBuscarBoton.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar'**
+  String get adminUsuarioBuscarBoton;
+
+  /// No description provided for @adminUsuarioBusquedaError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo encontrar el usuario'**
+  String get adminUsuarioBusquedaError;
+
+  /// No description provided for @adminUsuarioEstadoActivo.
+  ///
+  /// In es, this message translates to:
+  /// **'Activo'**
+  String get adminUsuarioEstadoActivo;
+
+  /// No description provided for @adminUsuarioEstadoBloqueado.
+  ///
+  /// In es, this message translates to:
+  /// **'Bloqueado'**
+  String get adminUsuarioEstadoBloqueado;
+
+  /// No description provided for @adminUsuarioCuentaEliminada.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta cuenta fue eliminada por el propio usuario (RGPD) — no se puede reactivar.'**
+  String get adminUsuarioCuentaEliminada;
+
+  /// No description provided for @adminUsuarioBloquear.
+  ///
+  /// In es, this message translates to:
+  /// **'Bloquear'**
+  String get adminUsuarioBloquear;
+
+  /// No description provided for @adminUsuarioActivar.
+  ///
+  /// In es, this message translates to:
+  /// **'Activar'**
+  String get adminUsuarioActivar;
+
+  /// No description provided for @adminUsuarioBloquearConfirmarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Bloquear a este usuario?'**
+  String get adminUsuarioBloquearConfirmarTitulo;
+
+  /// No description provided for @adminUsuarioBloquearConfirmarTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'No podrá iniciar sesión hasta que lo actives de nuevo.'**
+  String get adminUsuarioBloquearConfirmarTexto;
+
+  /// No description provided for @adminUsuarioActivarConfirmarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Activar a este usuario?'**
+  String get adminUsuarioActivarConfirmarTitulo;
+
+  /// No description provided for @adminUsuarioActivarConfirmarTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'Podrá volver a iniciar sesión con normalidad.'**
+  String get adminUsuarioActivarConfirmarTexto;
+
+  /// No description provided for @adminUsuarioCambioExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Estado actualizado correctamente'**
+  String get adminUsuarioCambioExito;
 
   /// No description provided for @reportarProblemaTitulo.
   ///

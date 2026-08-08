@@ -170,3 +170,40 @@ class ScheduledJob {
   }
 }
 
+/// Usuario localizado por ID desde el panel admin (`GET /admin/users/:id`,
+/// `PATCH /admin/users/:id/toggle-active`) — ver `serializarUsuarioAdmin`
+/// en `admin.controller.ts`. `cuentaEliminada` es `true` si el propio
+/// usuario borró su cuenta (RGPD): esa cuenta también tiene
+/// `activo:false`, pero no se puede volver a activar desde aquí.
+class AdminUserLookup {
+  final String id;
+  final String nombre;
+  final String? email;
+  final String? telefono;
+  final String role;
+  final bool activo;
+  final bool cuentaEliminada;
+
+  AdminUserLookup({
+    required this.id,
+    required this.nombre,
+    required this.email,
+    required this.telefono,
+    required this.role,
+    required this.activo,
+    required this.cuentaEliminada,
+  });
+
+  factory AdminUserLookup.fromJson(Map<String, dynamic> json) {
+    return AdminUserLookup(
+      id: json['id'] as String,
+      nombre: json['nombre'] as String,
+      email: json['email'] as String?,
+      telefono: json['telefono'] as String?,
+      role: json['role'] as String,
+      activo: json['activo'] as bool,
+      cuentaEliminada: json['cuentaEliminada'] as bool,
+    );
+  }
+}
+

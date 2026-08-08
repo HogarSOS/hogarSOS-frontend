@@ -40,7 +40,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         appBar: AppBar(
           title: Row(
@@ -65,6 +65,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
               Tab(text: t.adminTabDisputas),
               Tab(text: t.adminTabPagosAtascados),
               Tab(text: t.adminTabTareas),
+              Tab(text: t.adminTabUsuarios),
             ],
           ),
         ),
@@ -74,6 +75,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
             _DisputasTab(adminService: _adminService),
             _PagosAtascadosTab(adminService: _adminService),
             _TareasProgramadasTab(adminService: _adminService),
+            _UsuariosTab(adminService: _adminService),
           ],
         ),
       ),
@@ -881,6 +883,252 @@ class _TareaCard extends StatelessWidget {
                     : const Icon(Icons.play_arrow_rounded, size: 18),
                 label: Text(t.adminEjecutarAhora),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Bloquear/activar usuarios (`GET /admin/users/:id`,
+/// `PATCH /admin/users/:id/toggle-active`). Deliberadamente NO es un
+/// listado de usuarios — todavía no existe esa pantalla (fase 2 del
+/// roadmap) — solo localizar por ID y cambiar su estado. Todas las
+/// reglas de seguridad (auto-bloqueo, último admin, cuenta eliminada
+/// por RGPD) las decide el backend; esta pantalla solo pide
+/// confirmación y muestra lo que responda.
+class _UsuariosTab extends StatefulWidget {
+  const _UsuariosTab({required this.adminService});
+  final AdminService adminService;
+
+  @override
+  State<_UsuariosTab> createState() => _UsuariosTabState();
+}
+
+class _UsuariosTabState extends State<_UsuariosTab> {
+  final _idController = TextEditingController();
+  AdminUserLookup? _usuario;
+  bool _buscando = false;
+  bool _procesando = false;
+  String? _errorBusqueda;
+
+  @override
+  void dispose() {
+    _idController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _buscar() async {
+    final id = _idController.text.trim();
+    if (id.isEmpty) return;
+    final t = AppLocalizations.of(context);
+
+    setState(() {
+      _buscando = true;
+      _errorBusqueda = null;
+      _usuario = null;
+    });
+    try {
+      final usuario = await widget.adminService.buscarUsuario(id);
+      if (!mounted) return;
+      setState(() => _usuario = usuario);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _errorBusqueda = mensajeDeError(e, contexto: t.adminUsuarioBusquedaError, t: t));
+    } finally {
+      if (mounted) setState(() => _buscando = false);
+    }
+  }
+
+  Future<void> _alternar() async {
+    final usuario = _usuario;
+    if (usuario == null) return;
+    final t = AppLocalizations.of(context);
+    final vaABloquear = usuario.activo;
+
+    final confirmado = await _confirmarAccion(
+      context,
+      titulo: vaABloquear ? t.adminUsuarioBloquearConfirmarTitulo : t.adminUsuarioActivarConfirmarTitulo,
+      texto: vaABloquear ? t.adminUsuarioBloquearConfirmarTexto : t.adminUsuarioActivarConfirmarTexto,
+      confirmar: t.adminConfirmar,
+      cancelar: t.perfilCancelar,
+    );
+    if (!confirmado) return;
+    if (!mounted) return;
+
+    setState(() => _procesando = true);
+    try {
+      final actualizado = await widget.adminService.alternarActivoUsuario(usuario.id);
+      if (!mounted) return;
+      setState(() => _usuario = actualizado);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.adminUsuarioCambioExito)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.adminUsuarioBusquedaError, t: t))),
+      );
+    } finally {
+      if (mounted) setState(() => _procesando = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _idController,
+                decoration: InputDecoration(
+                  labelText: t.adminUsuarioIdLabel,
+                  hintText: t.adminUsuarioIdHint,
+                  border: const OutlineInputBorder(),
+                ),
+                textInputAction: TextInputAction.search,
+                onSubmitted: (_) => _buscar(),
+              ),
+            ),
+            const SizedBox(width: 10),
+            // El tema global fuerza minimumSize: Size.fromHeight(54) en
+            // todo FilledButton, es decir minWidth: double.infinity. En
+            // el resto de la app esto es inofensivo porque cada botón va
+            // dentro de un SizedBox(width: double.infinity, ...). Aquí el
+            // botón vive suelto en un Row: sin un width finito explícito,
+            // ese minWidth infinito choca con las constraints acotadas
+            // del Row y el subárbol entero deja de pintarse sin lanzar
+            // ninguna excepción visible.
+            SizedBox(
+              width: 110,
+              height: 56,
+              child: FilledButton(
+                onPressed: _buscando ? null : _buscar,
+                child: _buscando
+                    ? const SizedBox(
+                        height: 16,
+                        width: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : Text(t.adminUsuarioBuscarBoton),
+              ),
+            ),
+          ],
+        ),
+        if (_errorBusqueda != null) ...[
+          const SizedBox(height: 12),
+          Text(_errorBusqueda!, style: TextStyle(fontSize: 13, color: colorScheme.error)),
+        ],
+        if (_usuario != null) ...[
+          const SizedBox(height: 16),
+          _UsuarioCard(
+            usuario: _usuario!,
+            procesando: _procesando,
+            onAlternar: _alternar,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _UsuarioCard extends StatelessWidget {
+  const _UsuarioCard({
+    required this.usuario,
+    required this.procesando,
+    required this.onAlternar,
+  });
+
+  final AdminUserLookup usuario;
+  final bool procesando;
+  final VoidCallback onAlternar;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final colorEstado = usuario.activo ? colorScheme.tertiary : colorScheme.error;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    usuario.nombre,
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15.5),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: colorEstado.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    usuario.activo ? t.adminUsuarioEstadoActivo : t.adminUsuarioEstadoBloqueado,
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: colorEstado),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            if (usuario.email != null)
+              Text(usuario.email!, style: Theme.of(context).textTheme.bodySmall),
+            if (usuario.telefono != null)
+              Text(usuario.telefono!, style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 4),
+            Text(usuario.role, style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant)),
+            if (usuario.cuentaEliminada) ...[
+              const SizedBox(height: 8),
+              Text(
+                t.adminUsuarioCuentaEliminada,
+                style: TextStyle(fontSize: 12.5, color: colorScheme.error),
+              ),
+            ],
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: usuario.activo
+                  ? OutlinedButton.icon(
+                      onPressed: procesando ? null : onAlternar,
+                      icon: procesando
+                          ? const SizedBox(
+                              height: 16,
+                              width: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.block_outlined, size: 18),
+                      label: Text(t.adminUsuarioBloquear),
+                    )
+                  : FilledButton.icon(
+                      // Una cuenta autoeliminada nunca se puede reactivar
+                      // desde aquí (ver cuentaEliminada) — el botón se
+                      // deshabilita en vez de dejar que el backend lo
+                      // rechace siempre con el mismo error previsible.
+                      onPressed: (procesando || usuario.cuentaEliminada) ? null : onAlternar,
+                      icon: procesando
+                          ? const SizedBox(
+                              height: 16,
+                              width: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Icon(Icons.check_circle_outline, size: 18),
+                      label: Text(t.adminUsuarioActivar),
+                    ),
             ),
           ],
         ),

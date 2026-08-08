@@ -455,6 +455,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'The job failed. Check the details before retrying.';
 
   @override
+  String get apiErrAdminNoPuedeAutoBloquearse =>
+      'You can\'t change the status of your own account';
+
+  @override
+  String get apiErrUltimoAdminActivo =>
+      'You can\'t deactivate the only active administrator';
+
+  @override
+  String get apiErrCuentaEliminadaNoReactivable =>
+      'This account was deleted by the user and can\'t be reactivated';
+
+  @override
   String get legalPrivSec1Titulo => '1. Who processes your data';
 
   @override
@@ -2003,6 +2015,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminEjecutarAhoraExito => 'Job ran successfully';
+
+  @override
+  String get adminTabUsuarios => 'Users';
+
+  @override
+  String get adminUsuarioIdLabel => 'User ID';
+
+  @override
+  String get adminUsuarioIdHint => 'Paste or type the ID (UUID)';
+
+  @override
+  String get adminUsuarioBuscarBoton => 'Search';
+
+  @override
+  String get adminUsuarioBusquedaError => 'Couldn\'t find the user';
+
+  @override
+  String get adminUsuarioEstadoActivo => 'Active';
+
+  @override
+  String get adminUsuarioEstadoBloqueado => 'Blocked';
+
+  @override
+  String get adminUsuarioCuentaEliminada =>
+      'This account was deleted by the user themselves (GDPR) — it can\'t be reactivated.';
+
+  @override
+  String get adminUsuarioBloquear => 'Block';
+
+  @override
+  String get adminUsuarioActivar => 'Activate';
+
+  @override
+  String get adminUsuarioBloquearConfirmarTitulo => 'Block this user?';
+
+  @override
+  String get adminUsuarioBloquearConfirmarTexto =>
+      'They won\'t be able to sign in until you activate them again.';
+
+  @override
+  String get adminUsuarioActivarConfirmarTitulo => 'Activate this user?';
+
+  @override
+  String get adminUsuarioActivarConfirmarTexto =>
+      'They\'ll be able to sign in normally again.';
+
+  @override
+  String get adminUsuarioCambioExito => 'Status updated successfully';
 
   @override
   String get reportarProblemaTitulo => 'Report a problem';

@@ -457,6 +457,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'La tarea falló. Revisa el detalle antes de reintentar.';
 
   @override
+  String get apiErrAdminNoPuedeAutoBloquearse =>
+      'No puedes cambiar el estado de tu propia cuenta';
+
+  @override
+  String get apiErrUltimoAdminActivo =>
+      'No puedes desactivar al único administrador activo';
+
+  @override
+  String get apiErrCuentaEliminadaNoReactivable =>
+      'Esta cuenta fue eliminada por el propio usuario y no se puede reactivar';
+
+  @override
   String get legalPrivSec1Titulo => '1. Quién trata tus datos';
 
   @override
@@ -2018,6 +2030,54 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get adminEjecutarAhoraExito => 'Tarea ejecutada correctamente';
+
+  @override
+  String get adminTabUsuarios => 'Usuarios';
+
+  @override
+  String get adminUsuarioIdLabel => 'ID del usuario';
+
+  @override
+  String get adminUsuarioIdHint => 'Pega o escribe el ID (UUID)';
+
+  @override
+  String get adminUsuarioBuscarBoton => 'Buscar';
+
+  @override
+  String get adminUsuarioBusquedaError => 'No se pudo encontrar el usuario';
+
+  @override
+  String get adminUsuarioEstadoActivo => 'Activo';
+
+  @override
+  String get adminUsuarioEstadoBloqueado => 'Bloqueado';
+
+  @override
+  String get adminUsuarioCuentaEliminada =>
+      'Esta cuenta fue eliminada por el propio usuario (RGPD) — no se puede reactivar.';
+
+  @override
+  String get adminUsuarioBloquear => 'Bloquear';
+
+  @override
+  String get adminUsuarioActivar => 'Activar';
+
+  @override
+  String get adminUsuarioBloquearConfirmarTitulo => '¿Bloquear a este usuario?';
+
+  @override
+  String get adminUsuarioBloquearConfirmarTexto =>
+      'No podrá iniciar sesión hasta que lo actives de nuevo.';
+
+  @override
+  String get adminUsuarioActivarConfirmarTitulo => '¿Activar a este usuario?';
+
+  @override
+  String get adminUsuarioActivarConfirmarTexto =>
+      'Podrá volver a iniciar sesión con normalidad.';
+
+  @override
+  String get adminUsuarioCambioExito => 'Estado actualizado correctamente';
 
   @override
   String get reportarProblemaTitulo => 'Reportar un problema';

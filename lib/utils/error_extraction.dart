@@ -180,6 +180,15 @@ String? _mensajePorCodigo(String? code, AppLocalizations t) {
       return t.apiErrTareaYaEnCurso;
     case 'JOB_FAILED':
       return t.apiErrTareaFallida;
+    // Códigos de `toggleUserActive` (panel admin, pestaña "Usuarios") —
+    // ver el switch de `admin.controller.ts`. USER_NOT_FOUND ya está
+    // mapeado más arriba, se reutiliza tal cual.
+    case 'ADMIN_CANNOT_TOGGLE_SELF':
+      return t.apiErrAdminNoPuedeAutoBloquearse;
+    case 'ADMIN_CANNOT_BLOCK_LAST_ADMIN':
+      return t.apiErrUltimoAdminActivo;
+    case 'ADMIN_CANNOT_REACTIVATE_DELETED_ACCOUNT':
+      return t.apiErrCuentaEliminadaNoReactivable;
     default:
       return null;
   }

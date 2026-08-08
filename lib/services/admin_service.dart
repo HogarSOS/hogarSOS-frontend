@@ -68,4 +68,18 @@ class AdminService {
     final respuesta = await _api.post('/admin/jobs/$nombre/run');
     return respuesta.data['resultado'] as String;
   }
+
+  Future<AdminUserLookup> buscarUsuario(String id) async {
+    final respuesta = await _api.get('/admin/users/$id');
+    return AdminUserLookup.fromJson(respuesta.data as Map<String, dynamic>);
+  }
+
+  /// Bloquea o activa (invierte `activo`). El backend decide qué regla
+  /// de seguridad aplica (auto-bloqueo, último admin, cuenta eliminada
+  /// por RGPD) — esta pantalla solo pide confirmación y muestra lo que
+  /// el backend responda.
+  Future<AdminUserLookup> alternarActivoUsuario(String id) async {
+    final respuesta = await _api.patch('/admin/users/$id/toggle-active');
+    return AdminUserLookup.fromJson(respuesta.data as Map<String, dynamic>);
+  }
 }

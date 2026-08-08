@@ -166,4 +166,42 @@ void main() {
       expect(tarea.ultimoError, 'Timeout consultando Stripe');
     });
   });
+
+  group('AdminUserLookup.fromJson', () {
+    test('parsea un usuario activo normal', () {
+      final usuario = AdminUserLookup.fromJson({
+        'id': 'user-1',
+        'nombre': 'Ana Cliente',
+        'email': 'ana@example.com',
+        'telefono': null,
+        'role': 'cliente',
+        'activo': true,
+        'cuentaEliminada': false,
+      });
+
+      expect(usuario.id, 'user-1');
+      expect(usuario.activo, true);
+      expect(usuario.cuentaEliminada, false);
+      expect(usuario.telefono, isNull);
+    });
+
+    // Ver el comentario de cuentaEliminada en admin.controller.ts: una
+    // cuenta autoeliminada (RGPD) también tiene activo:false, pero el
+    // panel necesita distinguirla para no ofrecer "Activar" sobre ella.
+    test('parsea una cuenta eliminada por el propio usuario (RGPD)', () {
+      final usuario = AdminUserLookup.fromJson({
+        'id': 'user-2',
+        'nombre': 'Usuario eliminado',
+        'email': null,
+        'telefono': null,
+        'role': 'cliente',
+        'activo': false,
+        'cuentaEliminada': true,
+      });
+
+      expect(usuario.activo, false);
+      expect(usuario.cuentaEliminada, true);
+      expect(usuario.email, isNull);
+    });
+  });
 }
