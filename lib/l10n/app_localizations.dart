@@ -806,6 +806,42 @@ abstract class AppLocalizations {
   /// **'Usuario no encontrado'**
   String get apiErrUsuarioNoEncontrado;
 
+  /// No description provided for @apiErrPagoAtascadoNoEncontrado.
+  ///
+  /// In es, this message translates to:
+  /// **'No queda ninguna autorización pendiente de liberar en esta solicitud'**
+  String get apiErrPagoAtascadoNoEncontrado;
+
+  /// No description provided for @apiErrLiberacionEnCurso.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya hay una liberación en curso para esta solicitud. Espera unos segundos y vuelve a intentarlo.'**
+  String get apiErrLiberacionEnCurso;
+
+  /// No description provided for @apiErrPagoNoAutorizadoTodavia.
+  ///
+  /// In es, this message translates to:
+  /// **'El cliente nunca llegó a confirmar el pago. Esto no se arregla reintentando: tiene que volver a autorizarlo en la app.'**
+  String get apiErrPagoNoAutorizadoTodavia;
+
+  /// No description provided for @apiErrProfesionalSinCuentaStripe.
+  ///
+  /// In es, this message translates to:
+  /// **'El profesional no ha completado el onboarding de Stripe Connect'**
+  String get apiErrProfesionalSinCuentaStripe;
+
+  /// No description provided for @apiErrCuentaStripeNoOperativa.
+  ///
+  /// In es, this message translates to:
+  /// **'Stripe todavía no habilita los pagos de este profesional (verificación pendiente)'**
+  String get apiErrCuentaStripeNoOperativa;
+
+  /// No description provided for @apiErrReintentoStripeFallido.
+  ///
+  /// In es, this message translates to:
+  /// **'El reintento falló en Stripe. El pago sigue recuperable: vuelve a intentarlo.'**
+  String get apiErrReintentoStripeFallido;
+
   /// No description provided for @legalPrivSec1Titulo.
   ///
   /// In es, this message translates to:
@@ -3313,6 +3349,96 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se pudo registrar la resolución. Inténtalo de nuevo.'**
   String get adminResolucionError;
+
+  /// No description provided for @adminTabPagosAtascados.
+  ///
+  /// In es, this message translates to:
+  /// **'Pagos atascados'**
+  String get adminTabPagosAtascados;
+
+  /// No description provided for @adminPagosAtascadosVacio.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay pagos atascados'**
+  String get adminPagosAtascadosVacio;
+
+  /// No description provided for @adminPagosAtascadosError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron cargar los pagos atascados'**
+  String get adminPagosAtascadosError;
+
+  /// No description provided for @adminPagosAtascadosResumen.
+  ///
+  /// In es, this message translates to:
+  /// **'Total: {total} · Retenido en la plataforma: {importe} €'**
+  String adminPagosAtascadosResumen(int total, String importe);
+
+  /// No description provided for @adminPagoAtascadoCapturadoSinTransferir.
+  ///
+  /// In es, this message translates to:
+  /// **'Capturado, sin transferir al profesional'**
+  String get adminPagoAtascadoCapturadoSinTransferir;
+
+  /// No description provided for @adminPagoAtascadoCompletadoSinCapturar.
+  ///
+  /// In es, this message translates to:
+  /// **'Trabajo completado, autorización sin capturar'**
+  String get adminPagoAtascadoCompletadoSinCapturar;
+
+  /// No description provided for @adminPagoAtascadoAutorizadoEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Autorizado el {fecha}'**
+  String adminPagoAtascadoAutorizadoEl(String fecha);
+
+  /// No description provided for @adminPagoAtascadoCapturadoEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Capturado el {fecha}'**
+  String adminPagoAtascadoCapturadoEl(String fecha);
+
+  /// No description provided for @adminPagoAtascadoIntentos.
+  ///
+  /// In es, this message translates to:
+  /// **'Intentos de liberación: {n}'**
+  String adminPagoAtascadoIntentos(int n);
+
+  /// No description provided for @adminPagoAtascadoUltimoError.
+  ///
+  /// In es, this message translates to:
+  /// **'Último error: {error}'**
+  String adminPagoAtascadoUltimoError(String error);
+
+  /// No description provided for @adminPagoAtascadoSinProfesional.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin profesional asignado'**
+  String get adminPagoAtascadoSinProfesional;
+
+  /// No description provided for @adminReintentarLiberacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Reintentar liberación'**
+  String get adminReintentarLiberacion;
+
+  /// No description provided for @adminReintentarLiberacionConfirmarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Reintentar liberación?'**
+  String get adminReintentarLiberacionConfirmarTitulo;
+
+  /// No description provided for @adminReintentarLiberacionConfirmarTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'Se intentará capturar y transferir este pago de nuevo. Es seguro repetir la operación aunque ya esté en curso o parcialmente hecha.'**
+  String get adminReintentarLiberacionConfirmarTexto;
+
+  /// No description provided for @adminReintentarLiberacionExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Liberación completada correctamente'**
+  String get adminReintentarLiberacionExito;
 
   /// No description provided for @reportarProblemaTitulo.
   ///

@@ -133,6 +133,12 @@
   "apiErrCierreNoPendiente": "This closing report is no longer awaiting a response",
   "apiErrSinArchivo": "No file was received",
   "apiErrUsuarioNoEncontrado": "User not found",
+  "apiErrPagoAtascadoNoEncontrado": "There's no pending authorization to release for this request",
+  "apiErrLiberacionEnCurso": "A release is already in progress for this request. Wait a few seconds and try again.",
+  "apiErrPagoNoAutorizadoTodavia": "The customer never confirmed the payment. Retrying won't fix this: they need to authorize it again in the app.",
+  "apiErrProfesionalSinCuentaStripe": "The professional hasn't completed Stripe Connect onboarding",
+  "apiErrCuentaStripeNoOperativa": "Stripe doesn't enable payments for this professional yet (verification pending)",
+  "apiErrReintentoStripeFallido": "The retry failed on Stripe. The payment is still recoverable: try again.",
 
   "legalPrivSec1Titulo": "1. Who processes your data",
   "legalPrivSec1Texto": "Hogar SOS is an app that connects customers with home-service professionals. We're the data controller for the personal data the app collects, as described in this policy.",
@@ -615,6 +621,39 @@
   "adminConfirmar": "Confirm",
   "adminDecisionError": "Couldn't record the decision. Please try again.",
   "adminResolucionError": "Couldn't record the resolution. Please try again.",
+  "adminTabPagosAtascados": "Stuck payments",
+  "adminPagosAtascadosVacio": "No stuck payments",
+  "adminPagosAtascadosError": "Couldn't load stuck payments",
+  "adminPagosAtascadosResumen": "Total: {total} · Held on the platform: €{importe}",
+  "@adminPagosAtascadosResumen": {
+    "placeholders": {
+      "total": { "type": "int" },
+      "importe": { "type": "String" }
+    }
+  },
+  "adminPagoAtascadoCapturadoSinTransferir": "Captured, not yet transferred to the professional",
+  "adminPagoAtascadoCompletadoSinCapturar": "Job completed, authorization not captured",
+  "adminPagoAtascadoAutorizadoEl": "Authorized on {fecha}",
+  "@adminPagoAtascadoAutorizadoEl": {
+    "placeholders": { "fecha": { "type": "String" } }
+  },
+  "adminPagoAtascadoCapturadoEl": "Captured on {fecha}",
+  "@adminPagoAtascadoCapturadoEl": {
+    "placeholders": { "fecha": { "type": "String" } }
+  },
+  "adminPagoAtascadoIntentos": "Release attempts: {n}",
+  "@adminPagoAtascadoIntentos": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "adminPagoAtascadoUltimoError": "Last error: {error}",
+  "@adminPagoAtascadoUltimoError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "adminPagoAtascadoSinProfesional": "No professional assigned",
+  "adminReintentarLiberacion": "Retry release",
+  "adminReintentarLiberacionConfirmarTitulo": "Retry release?",
+  "adminReintentarLiberacionConfirmarTexto": "This will try to capture and transfer this payment again. It's safe to repeat even if it's already in progress or partially done.",
+  "adminReintentarLiberacionExito": "Release completed successfully",
 
   "reportarProblemaTitulo": "Report a problem",
   "reportarProblemaMotivoLabel": "What happened?",

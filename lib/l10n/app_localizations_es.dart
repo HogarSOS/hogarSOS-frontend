@@ -422,6 +422,30 @@ class AppLocalizationsEs extends AppLocalizations {
   String get apiErrUsuarioNoEncontrado => 'Usuario no encontrado';
 
   @override
+  String get apiErrPagoAtascadoNoEncontrado =>
+      'No queda ninguna autorización pendiente de liberar en esta solicitud';
+
+  @override
+  String get apiErrLiberacionEnCurso =>
+      'Ya hay una liberación en curso para esta solicitud. Espera unos segundos y vuelve a intentarlo.';
+
+  @override
+  String get apiErrPagoNoAutorizadoTodavia =>
+      'El cliente nunca llegó a confirmar el pago. Esto no se arregla reintentando: tiene que volver a autorizarlo en la app.';
+
+  @override
+  String get apiErrProfesionalSinCuentaStripe =>
+      'El profesional no ha completado el onboarding de Stripe Connect';
+
+  @override
+  String get apiErrCuentaStripeNoOperativa =>
+      'Stripe todavía no habilita los pagos de este profesional (verificación pendiente)';
+
+  @override
+  String get apiErrReintentoStripeFallido =>
+      'El reintento falló en Stripe. El pago sigue recuperable: vuelve a intentarlo.';
+
+  @override
   String get legalPrivSec1Titulo => '1. Quién trata tus datos';
 
   @override
@@ -1859,6 +1883,67 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get adminResolucionError =>
       'No se pudo registrar la resolución. Inténtalo de nuevo.';
+
+  @override
+  String get adminTabPagosAtascados => 'Pagos atascados';
+
+  @override
+  String get adminPagosAtascadosVacio => 'No hay pagos atascados';
+
+  @override
+  String get adminPagosAtascadosError =>
+      'No se pudieron cargar los pagos atascados';
+
+  @override
+  String adminPagosAtascadosResumen(int total, String importe) {
+    return 'Total: $total · Retenido en la plataforma: $importe €';
+  }
+
+  @override
+  String get adminPagoAtascadoCapturadoSinTransferir =>
+      'Capturado, sin transferir al profesional';
+
+  @override
+  String get adminPagoAtascadoCompletadoSinCapturar =>
+      'Trabajo completado, autorización sin capturar';
+
+  @override
+  String adminPagoAtascadoAutorizadoEl(String fecha) {
+    return 'Autorizado el $fecha';
+  }
+
+  @override
+  String adminPagoAtascadoCapturadoEl(String fecha) {
+    return 'Capturado el $fecha';
+  }
+
+  @override
+  String adminPagoAtascadoIntentos(int n) {
+    return 'Intentos de liberación: $n';
+  }
+
+  @override
+  String adminPagoAtascadoUltimoError(String error) {
+    return 'Último error: $error';
+  }
+
+  @override
+  String get adminPagoAtascadoSinProfesional => 'Sin profesional asignado';
+
+  @override
+  String get adminReintentarLiberacion => 'Reintentar liberación';
+
+  @override
+  String get adminReintentarLiberacionConfirmarTitulo =>
+      '¿Reintentar liberación?';
+
+  @override
+  String get adminReintentarLiberacionConfirmarTexto =>
+      'Se intentará capturar y transferir este pago de nuevo. Es seguro repetir la operación aunque ya esté en curso o parcialmente hecha.';
+
+  @override
+  String get adminReintentarLiberacionExito =>
+      'Liberación completada correctamente';
 
   @override
   String get reportarProblemaTitulo => 'Reportar un problema';

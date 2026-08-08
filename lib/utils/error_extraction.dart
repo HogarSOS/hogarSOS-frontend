@@ -152,6 +152,26 @@ String? _mensajePorCodigo(String? code, AppLocalizations t) {
       return t.apiErrSinArchivo;
     case 'USER_NOT_FOUND':
       return t.apiErrUsuarioNoEncontrado;
+    // Códigos de `retryPaymentRelease` (panel admin, cola de pagos
+    // atascados) — ver el mapa `respuestas` en `admin.controller.ts`.
+    // 'SOLICITUD_NO_ENCONTRADA' reutiliza el mismo texto que
+    // 'REQUEST_NOT_FOUND' de arriba (mismo significado, nombre de código
+    // distinto porque ese endpoint concreto no sigue la convención en
+    // inglés del resto del backend).
+    case 'SOLICITUD_NO_ENCONTRADA':
+      return t.apiErrSolicitudNoEncontrada;
+    case 'PAGO_NO_ENCONTRADO':
+      return t.apiErrPagoAtascadoNoEncontrado;
+    case 'LIBERACION_YA_EN_CURSO':
+      return t.apiErrLiberacionEnCurso;
+    case 'PAGO_NO_AUTORIZADO_TODAVIA':
+      return t.apiErrPagoNoAutorizadoTodavia;
+    case 'PROFESIONAL_SIN_CUENTA_STRIPE':
+      return t.apiErrProfesionalSinCuentaStripe;
+    case 'PROFESIONAL_CUENTA_STRIPE_NO_OPERATIVA':
+      return t.apiErrCuentaStripeNoOperativa;
+    case 'PAYMENT_RETRY_STRIPE_FAILED':
+      return t.apiErrReintentoStripeFallido;
     default:
       return null;
   }

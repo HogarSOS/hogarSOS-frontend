@@ -133,6 +133,12 @@
   "apiErrCierreNoPendiente": "Este cierre ya no está pendiente de respuesta",
   "apiErrSinArchivo": "No se ha recibido ningún archivo",
   "apiErrUsuarioNoEncontrado": "Usuario no encontrado",
+  "apiErrPagoAtascadoNoEncontrado": "No queda ninguna autorización pendiente de liberar en esta solicitud",
+  "apiErrLiberacionEnCurso": "Ya hay una liberación en curso para esta solicitud. Espera unos segundos y vuelve a intentarlo.",
+  "apiErrPagoNoAutorizadoTodavia": "El cliente nunca llegó a confirmar el pago. Esto no se arregla reintentando: tiene que volver a autorizarlo en la app.",
+  "apiErrProfesionalSinCuentaStripe": "El profesional no ha completado el onboarding de Stripe Connect",
+  "apiErrCuentaStripeNoOperativa": "Stripe todavía no habilita los pagos de este profesional (verificación pendiente)",
+  "apiErrReintentoStripeFallido": "El reintento falló en Stripe. El pago sigue recuperable: vuelve a intentarlo.",
 
   "legalPrivSec1Titulo": "1. Quién trata tus datos",
   "legalPrivSec1Texto": "Hogar SOS es una app que conecta a clientes con profesionales de servicios a domicilio. Somos responsables del tratamiento de los datos personales que recoge la aplicación, descritos en esta política.",
@@ -615,6 +621,39 @@
   "adminConfirmar": "Confirmar",
   "adminDecisionError": "No se pudo registrar la decisión. Inténtalo de nuevo.",
   "adminResolucionError": "No se pudo registrar la resolución. Inténtalo de nuevo.",
+  "adminTabPagosAtascados": "Pagos atascados",
+  "adminPagosAtascadosVacio": "No hay pagos atascados",
+  "adminPagosAtascadosError": "No se pudieron cargar los pagos atascados",
+  "adminPagosAtascadosResumen": "Total: {total} · Retenido en la plataforma: {importe} €",
+  "@adminPagosAtascadosResumen": {
+    "placeholders": {
+      "total": { "type": "int" },
+      "importe": { "type": "String" }
+    }
+  },
+  "adminPagoAtascadoCapturadoSinTransferir": "Capturado, sin transferir al profesional",
+  "adminPagoAtascadoCompletadoSinCapturar": "Trabajo completado, autorización sin capturar",
+  "adminPagoAtascadoAutorizadoEl": "Autorizado el {fecha}",
+  "@adminPagoAtascadoAutorizadoEl": {
+    "placeholders": { "fecha": { "type": "String" } }
+  },
+  "adminPagoAtascadoCapturadoEl": "Capturado el {fecha}",
+  "@adminPagoAtascadoCapturadoEl": {
+    "placeholders": { "fecha": { "type": "String" } }
+  },
+  "adminPagoAtascadoIntentos": "Intentos de liberación: {n}",
+  "@adminPagoAtascadoIntentos": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "adminPagoAtascadoUltimoError": "Último error: {error}",
+  "@adminPagoAtascadoUltimoError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "adminPagoAtascadoSinProfesional": "Sin profesional asignado",
+  "adminReintentarLiberacion": "Reintentar liberación",
+  "adminReintentarLiberacionConfirmarTitulo": "¿Reintentar liberación?",
+  "adminReintentarLiberacionConfirmarTexto": "Se intentará capturar y transferir este pago de nuevo. Es seguro repetir la operación aunque ya esté en curso o parcialmente hecha.",
+  "adminReintentarLiberacionExito": "Liberación completada correctamente",
 
   "reportarProblemaTitulo": "Reportar un problema",
   "reportarProblemaMotivoLabel": "¿Qué ha pasado?",

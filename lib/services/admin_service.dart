@@ -39,4 +39,17 @@ class AdminService {
       'notas': notas,
     });
   }
+
+  Future<StuckPaymentsSummary> listarPagosAtascados() async {
+    final respuesta = await _api.get('/admin/payments/stuck');
+    return StuckPaymentsSummary.fromJson(respuesta.data as Map<String, dynamic>);
+  }
+
+  /// Reintenta capturar/transferir un pago atascado. Usa exactamente el
+  /// mismo `releasePayments` idempotente y reanudable del flujo normal
+  /// (ver `reintentarLiberacion` en `payment.service.ts`) — un doble tap
+  /// no mueve dinero dos veces, el backend ya lo protege.
+  Future<void> reintentarLiberacion(String serviceRequestId) async {
+    await _api.post('/admin/payments/$serviceRequestId/retry');
+  }
 }

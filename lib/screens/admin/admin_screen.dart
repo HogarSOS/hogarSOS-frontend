@@ -1,12 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/admin_models.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/admin_service.dart';
 import '../../theme/brand_mark.dart';
 import '../../utils/category_display.dart';
+import '../../utils/error_extraction.dart';
 import '../../widgets/entrada_animada.dart';
 import '../auth/login_screen.dart';
 import '../../utils/imagen_autenticada.dart';
@@ -38,7 +40,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: Row(
@@ -60,6 +62,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
             tabs: [
               Tab(text: t.adminTabVerificaciones),
               Tab(text: t.adminTabDisputas),
+              Tab(text: t.adminTabPagosAtascados),
             ],
           ),
         ),
@@ -67,6 +70,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
           children: [
             _VerificacionesTab(adminService: _adminService),
             _DisputasTab(adminService: _adminService),
+            _PagosAtascadosTab(adminService: _adminService),
           ],
         ),
       ),
@@ -126,6 +130,37 @@ Future<String?> _pedirTextoObligatorio(
       },
     ),
   );
+}
+
+/// Diálogo de confirmación simple (sí/no), sin texto obligatorio — para
+/// acciones donde solo hace falta confirmar la intención, no explicar un
+/// motivo (a diferencia de `_pedirTextoObligatorio`, usado para rechazar
+/// una verificación o resolver una disputa).
+Future<bool> _confirmarAccion(
+  BuildContext context, {
+  required String titulo,
+  required String texto,
+  required String confirmar,
+  required String cancelar,
+}) async {
+  final resultado = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(titulo),
+      content: Text(texto),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(cancelar),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(confirmar),
+        ),
+      ],
+    ),
+  );
+  return resultado ?? false;
 }
 
 class _VerificacionesTab extends StatefulWidget {
@@ -399,6 +434,236 @@ class _DisputasTabState extends State<_DisputasTab> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Cola de pagos atascados (`GET /admin/payments/stuck`) — dinero
+/// capturado sin transferir al profesional, o trabajo completado cuya
+/// autorización nunca llegó a capturarse. Reutiliza exactamente el mismo
+/// `retryPaymentRelease`/`releasePayments` idempotente del flujo normal
+/// (ver `payment.service.ts`) — esta pantalla no mueve dinero por su
+/// cuenta, solo pide al backend que reintente.
+class _PagosAtascadosTab extends StatefulWidget {
+  const _PagosAtascadosTab({required this.adminService});
+  final AdminService adminService;
+
+  @override
+  State<_PagosAtascadosTab> createState() => _PagosAtascadosTabState();
+}
+
+class _PagosAtascadosTabState extends State<_PagosAtascadosTab> {
+  late Future<StuckPaymentsSummary> _futuro;
+
+  // Bloquea el botón del pago concreto que está en curso — no toda la
+  // pantalla — así un reintento en un pago no impide ver/actuar sobre
+  // el resto de la lista mientras tanto.
+  final Set<String> _procesando = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _futuro = widget.adminService.listarPagosAtascados();
+  }
+
+  Future<void> _recargar() async {
+    setState(() => _futuro = widget.adminService.listarPagosAtascados());
+    await _futuro.catchError(
+      (_) => StuckPaymentsSummary(total: 0, importeRetenidoEnPlataforma: 0, pagos: []),
+    );
+  }
+
+  Future<void> _reintentar(StuckPayment pago) async {
+    final t = AppLocalizations.of(context);
+    final confirmado = await _confirmarAccion(
+      context,
+      titulo: t.adminReintentarLiberacionConfirmarTitulo,
+      texto: t.adminReintentarLiberacionConfirmarTexto,
+      confirmar: t.adminConfirmar,
+      cancelar: t.perfilCancelar,
+    );
+    if (!confirmado) return;
+    if (!mounted) return;
+
+    setState(() => _procesando.add(pago.serviceRequestId));
+    try {
+      await widget.adminService.reintentarLiberacion(pago.serviceRequestId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.adminReintentarLiberacionExito)),
+      );
+      await _recargar();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.adminPagosAtascadosError, t: t))),
+      );
+    } finally {
+      if (mounted) setState(() => _procesando.remove(pago.serviceRequestId));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    return FutureBuilder<StuckPaymentsSummary>(
+      future: _futuro,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData && !snapshot.hasError) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return _EstadoLista(
+            icono: Icons.error_outline,
+            mensaje: t.adminPagosAtascadosError,
+            onRefresh: _recargar,
+          );
+        }
+        final resumen = snapshot.data!;
+        if (resumen.pagos.isEmpty) {
+          return _EstadoLista(
+            icono: Icons.task_alt_outlined,
+            mensaje: t.adminPagosAtascadosVacio,
+            onRefresh: _recargar,
+          );
+        }
+        return RefreshIndicator(
+          onRefresh: _recargar,
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: resumen.pagos.length + 1, // +1 = cabecera de resumen
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    t.adminPagosAtascadosResumen(
+                      resumen.total,
+                      resumen.importeRetenidoEnPlataforma.toStringAsFixed(2),
+                    ),
+                    style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700),
+                  ),
+                );
+              }
+              final pago = resumen.pagos[index - 1];
+              return EntradaAnimada(
+                retraso: Duration(milliseconds: 30 * (index - 1)),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _PagoAtascadoCard(
+                    pago: pago,
+                    procesando: _procesando.contains(pago.serviceRequestId),
+                    onReintentar: () => _reintentar(pago),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PagoAtascadoCard extends StatelessWidget {
+  const _PagoAtascadoCard({
+    required this.pago,
+    required this.procesando,
+    required this.onReintentar,
+  });
+
+  final StuckPayment pago;
+  final bool procesando;
+  final VoidCallback onReintentar;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final formatoFecha = DateFormat.yMMMd(t.localeName).add_Hm();
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  pago.dineroRetenidoEnPlataforma ? Icons.warning_amber_rounded : Icons.hourglass_bottom_rounded,
+                  size: 18,
+                  color: pago.dineroRetenidoEnPlataforma ? colorScheme.error : colorScheme.tertiary,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    pago.dineroRetenidoEnPlataforma
+                        ? t.adminPagoAtascadoCapturadoSinTransferir
+                        : t.adminPagoAtascadoCompletadoSinCapturar,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: pago.dineroRetenidoEnPlataforma ? colorScheme.error : colorScheme.tertiary,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${pago.montoProfesional.toStringAsFixed(2)} €',
+                  style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              nombreLocalizadoCategoria(context, pago.categoria),
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '${pago.clienteNombre} → ${pago.profesionalNombre ?? t.adminPagoAtascadoSinProfesional}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              t.adminPagoAtascadoAutorizadoEl(formatoFecha.format(pago.createdAt)),
+              style: const TextStyle(fontSize: 12.5),
+            ),
+            if (pago.capturadoAt != null)
+              Text(
+                t.adminPagoAtascadoCapturadoEl(formatoFecha.format(pago.capturadoAt!)),
+                style: const TextStyle(fontSize: 12.5),
+              ),
+            if (pago.intentosLiberacion > 0)
+              Text(
+                t.adminPagoAtascadoIntentos(pago.intentosLiberacion),
+                style: TextStyle(fontSize: 12.5, color: colorScheme.onSurfaceVariant),
+              ),
+            if (pago.ultimoError != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                t.adminPagoAtascadoUltimoError(pago.ultimoError!),
+                style: TextStyle(fontSize: 12.5, color: colorScheme.error),
+              ),
+            ],
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: procesando ? null : onReintentar,
+                icon: procesando
+                    ? const SizedBox(
+                        height: 16,
+                        width: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.replay, size: 18),
+                label: Text(t.adminReintentarLiberacion),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
