@@ -179,6 +179,14 @@ class _VerificacionesTab extends StatefulWidget {
 class _VerificacionesTabState extends State<_VerificacionesTab> {
   late Future<List<PendingVerification>> _futuro;
 
+  // Sin esto, la tarjeta seguía tocable mientras la petición anterior
+  // todavía estaba en vuelo (no desaparece de la lista hasta que termina
+  // el recargo) — un segundo toque sobre la misma verificación ya
+  // resuelta chocaba con VERIFICATION_NOT_PENDING (409) y mostraba "no se
+  // pudo registrar la decisión" aunque el primer intento sí se hubiera
+  // guardado bien. Mismo patrón que _PagosAtascadosTab/_TareasProgramadasTab.
+  final Set<String> _procesando = {};
+
   @override
   void initState() {
     super.initState();
@@ -191,6 +199,8 @@ class _VerificacionesTabState extends State<_VerificacionesTab> {
   }
 
   Future<void> _decidir(PendingVerification v, bool aprobar) async {
+    if (_procesando.contains(v.userId)) return;
+
     final t = AppLocalizations.of(context);
     String? motivo;
     if (!aprobar) {
@@ -205,6 +215,7 @@ class _VerificacionesTabState extends State<_VerificacionesTab> {
       if (motivo == null) return; // cancelado
     }
 
+    setState(() => _procesando.add(v.userId));
     try {
       await widget.adminService.decidirVerificacion(
         professionalId: v.userId,
@@ -216,6 +227,8 @@ class _VerificacionesTabState extends State<_VerificacionesTab> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.adminDecisionError)));
+    } finally {
+      if (mounted) setState(() => _procesando.remove(v.userId));
     }
   }
 
@@ -251,6 +264,7 @@ class _VerificacionesTabState extends State<_VerificacionesTab> {
             itemBuilder: (context, index) {
               final v = verificaciones[index];
               final categorias = v.categorias.map((c) => nombreLocalizadoCategoria(context, c)).join(', ');
+              final procesando = _procesando.contains(v.userId);
               return EntradaAnimada(
                 retraso: Duration(milliseconds: 30 * index),
                 child: Padding(
@@ -277,15 +291,21 @@ class _VerificacionesTabState extends State<_VerificacionesTab> {
                             children: [
                               Expanded(
                                 child: OutlinedButton(
-                                  onPressed: () => _decidir(v, false),
+                                  onPressed: procesando ? null : () => _decidir(v, false),
                                   child: Text(t.adminRechazar),
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: FilledButton(
-                                  onPressed: () => _decidir(v, true),
-                                  child: Text(t.adminAprobar),
+                                  onPressed: procesando ? null : () => _decidir(v, true),
+                                  child: procesando
+                                      ? const SizedBox(
+                                          height: 16,
+                                          width: 16,
+                                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                        )
+                                      : Text(t.adminAprobar),
                                 ),
                               ),
                             ],
@@ -315,6 +335,13 @@ class _DisputasTab extends StatefulWidget {
 class _DisputasTabState extends State<_DisputasTab> {
   late Future<List<DisputeSummary>> _futuro;
 
+  // Mismo fix que _VerificacionesTab: sin esto, la tarjeta seguía
+  // tocable mientras la resolución anterior todavía estaba en vuelo, y
+  // un segundo toque sobre la misma disputa ya resuelta chocaba con
+  // DISPUTE_ALREADY_RESOLVED (409) mostrando "no se pudo resolver"
+  // aunque el primer intento sí se hubiera guardado bien.
+  final Set<String> _procesando = {};
+
   @override
   void initState() {
     super.initState();
@@ -327,6 +354,8 @@ class _DisputasTabState extends State<_DisputasTab> {
   }
 
   Future<void> _resolver(DisputeSummary d, bool favorProfesional) async {
+    if (_procesando.contains(d.id)) return;
+
     final t = AppLocalizations.of(context);
     final notas = await _pedirTextoObligatorio(
       context,
@@ -338,6 +367,7 @@ class _DisputasTabState extends State<_DisputasTab> {
     );
     if (notas == null) return; // cancelado
 
+    setState(() => _procesando.add(d.id));
     try {
       await widget.adminService.resolverDisputa(
         disputeId: d.id,
@@ -349,6 +379,8 @@ class _DisputasTabState extends State<_DisputasTab> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.adminResolucionError)));
+    } finally {
+      if (mounted) setState(() => _procesando.remove(d.id));
     }
   }
 
@@ -383,6 +415,7 @@ class _DisputasTabState extends State<_DisputasTab> {
             itemCount: disputas.length,
             itemBuilder: (context, index) {
               final d = disputas[index];
+              final procesando = _procesando.contains(d.id);
               return EntradaAnimada(
                 retraso: Duration(milliseconds: 30 * index),
                 child: Padding(
@@ -399,7 +432,7 @@ class _DisputasTabState extends State<_DisputasTab> {
                             children: [
                               Expanded(
                                 child: OutlinedButton(
-                                  onPressed: () => _resolver(d, false),
+                                  onPressed: procesando ? null : () => _resolver(d, false),
                                   // "In favor of the customer" es bastante
                                   // más largo que "A favor del cliente" —
                                   // sin esto, el botón en inglés envolvía
@@ -417,14 +450,20 @@ class _DisputasTabState extends State<_DisputasTab> {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: FilledButton(
-                                  onPressed: () => _resolver(d, true),
-                                  child: Text(
-                                    t.adminFavorProfesional,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(fontSize: 13),
-                                  ),
+                                  onPressed: procesando ? null : () => _resolver(d, true),
+                                  child: procesando
+                                      ? const SizedBox(
+                                          height: 16,
+                                          width: 16,
+                                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                        )
+                                      : Text(
+                                          t.adminFavorProfesional,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(fontSize: 13),
+                                        ),
                                 ),
                               ),
                             ],
