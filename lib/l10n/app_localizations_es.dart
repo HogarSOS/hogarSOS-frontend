@@ -1150,6 +1150,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get trabajosActivosTitulo => 'Trabajos activos';
 
   @override
+  String trabajosActivosTeEligieron(String categoria) {
+    return '¡Te han elegido para $categoria! Ahora está en Trabajos activos.';
+  }
+
+  @override
+  String get trabajosActivosVerTrabajo => 'Ver trabajo';
+
+  @override
   String get trabajosActivosVacio => 'No tienes trabajos activos ahora mismo';
 
   @override

@@ -15,6 +15,7 @@ import '../../utils/polling_lifecycle_mixin.dart';
 import '../../widgets/animated_diff_list.dart';
 import '../../widgets/entrada_animada.dart';
 import '../chat_screen.dart';
+import '../profesional_shell_screen.dart' show profesionalTabIndexProvider;
 import '../reportar_problema_screen.dart';
 import '../cliente/valoracion_screen.dart';
 import '../../utils/imagen_autenticada.dart';
@@ -61,9 +62,41 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
     // (assignedRequestsProvider es compartido con el shell), no solo
     // los que lleguen después.
     void marcarVistosDe(List<AssignedRequest> trabajos) {
+      // El set ANTES de marcar es lo que distingue "ya lo había visto"
+      // de "me acabo de enterar" — sin esto, cada carga (incluida la
+      // primera al entrar) contaría como "nuevo".
+      final vistosAntes = ref.read(trabajosVistosProvider);
+      final trabajosNuevos =
+          trabajos.where((t) => t.estado == EstadoSolicitud.aceptada && !vistosAntes.contains(t.id)).toList();
+
       ref.read(trabajosVistosProvider.notifier).marcarVistos(
             trabajos.where((t) => t.estado == EstadoSolicitud.aceptada).map((t) => t.id),
           );
+
+      if (trabajosNuevos.isEmpty) return;
+      // Diferido al siguiente frame: en la primera llamada esto corre
+      // dentro de initState, donde el ScaffoldMessenger todavía no
+      // tiene garantizado un ancestro montado.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final t = AppLocalizations.of(context);
+        for (final trabajo in trabajosNuevos) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(t.trabajosActivosTeEligieron(nombreLocalizadoCategoria(context, trabajo.categoria))),
+              duration: const Duration(seconds: 6),
+              action: SnackBarAction(
+                label: t.trabajosActivosVerTrabajo,
+                // El propio shell mantiene todas las pestañas montadas
+                // (IndexedStack) — este aviso puede dispararse estando
+                // en otra pestaña, así que "ver trabajo" solo necesita
+                // cambiar el índice activo, no navegar de verdad.
+                onPressed: () => ref.read(profesionalTabIndexProvider.notifier).state = 2,
+              ),
+            ),
+          );
+        }
+      });
     }
 
     final actuales = ref.read(assignedRequestsProvider).valueOrNull;

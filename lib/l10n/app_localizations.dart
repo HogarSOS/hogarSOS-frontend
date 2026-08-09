@@ -2018,6 +2018,18 @@ abstract class AppLocalizations {
   /// **'Trabajos activos'**
   String get trabajosActivosTitulo;
 
+  /// No description provided for @trabajosActivosTeEligieron.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Te han elegido para {categoria}! Ahora está en Trabajos activos.'**
+  String trabajosActivosTeEligieron(String categoria);
+
+  /// No description provided for @trabajosActivosVerTrabajo.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver trabajo'**
+  String get trabajosActivosVerTrabajo;
+
   /// No description provided for @trabajosActivosVacio.
   ///
   /// In es, this message translates to:

@@ -378,6 +378,11 @@
     "placeholders": { "n": { "type": "int" } }
   },
   "trabajosActivosTitulo": "Trabajos activos",
+  "trabajosActivosTeEligieron": "¡Te han elegido para {categoria}! Ahora está en Trabajos activos.",
+  "@trabajosActivosTeEligieron": {
+    "placeholders": { "categoria": { "type": "String" } }
+  },
+  "trabajosActivosVerTrabajo": "Ver trabajo",
   "trabajosActivosVacio": "No tienes trabajos activos ahora mismo",
   "trabajosActivosErrorCargar": "No se pudieron cargar tus trabajos",
   "trabajosActivosChat": "Chat",

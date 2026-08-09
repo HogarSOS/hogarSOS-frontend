@@ -1147,6 +1147,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trabajosActivosTitulo => 'Active jobs';
 
   @override
+  String trabajosActivosTeEligieron(String categoria) {
+    return 'You\'ve been selected for $categoria! It\'s now in Active jobs.';
+  }
+
+  @override
+  String get trabajosActivosVerTrabajo => 'View job';
+
+  @override
   String get trabajosActivosVacio => 'You have no active jobs right now';
 
   @override
