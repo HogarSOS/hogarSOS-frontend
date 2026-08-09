@@ -6,6 +6,7 @@ import '../../models/service_request_model.dart';
 import '../../providers/chat_read_provider.dart';
 import '../../providers/payment_provider.dart';
 import '../../providers/service_request_provider.dart';
+import '../../providers/trabajos_vistos_provider.dart';
 import '../../services/payment_service.dart';
 import '../../services/service_request_service.dart';
 import '../../utils/category_display.dart';
@@ -50,6 +51,24 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
     startPolling(const Duration(seconds: 10), () {
       ref.read(assignedRequestsProvider.notifier).cargar();
     });
+
+    // Con solo entrar en esta pestaña se considera "visto" — no hace
+    // falta abrir cada tarjeta suelta. Quita el punto rojo del shell
+    // (ver profesional_shell_screen.dart y trabajos_vistos_provider.dart).
+    // `listenManual` (en vez de `ref.listen` en build) porque desde
+    // initState no hay build en curso al que enganchar el listener, y
+    // así también cubre los datos que YA estuvieran cargados al entrar
+    // (assignedRequestsProvider es compartido con el shell), no solo
+    // los que lleguen después.
+    void marcarVistosDe(List<AssignedRequest> trabajos) {
+      ref.read(trabajosVistosProvider.notifier).marcarVistos(
+            trabajos.where((t) => t.estado == EstadoSolicitud.aceptada).map((t) => t.id),
+          );
+    }
+
+    final actuales = ref.read(assignedRequestsProvider).valueOrNull;
+    if (actuales != null) marcarVistosDe(actuales);
+    ref.listenManual(assignedRequestsProvider, (_, next) => next.whenData(marcarVistosDe));
   }
 
   @override

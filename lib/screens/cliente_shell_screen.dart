@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../models/service_request_model.dart';
 import '../providers/chat_read_provider.dart';
 import '../providers/service_request_provider.dart';
+import '../services/app_badge_service.dart';
 import 'cliente/home_cliente_screen.dart';
 import 'cliente/mensajes_screen.dart';
 import 'cliente/perfil_screen.dart';
@@ -83,7 +84,16 @@ class _ClienteShellScreenState extends ConsumerState<ClienteShellScreen> {
           .map((s) => s.id),
       orElse: () => const Iterable<String>.empty(),
     );
-    final hayMensajesNoLeidos = idsActivos.any((id) => ref.watch(unreadChatProvider(id)));
+    final numConversacionesNoLeidas = idsActivos.where((id) => ref.watch(unreadChatProvider(id))).length;
+    final hayMensajesNoLeidos = numConversacionesNoLeidas > 0;
+
+    // Badge del icono de la app (UX#6) — booleano (0/1), no la cuenta
+    // exacta: ver el razonamiento completo en profesional_shell_screen.dart
+    // (mismo cambio, iOS no soporta un "punto sin número" a nivel de
+    // sistema).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppBadgeService.instance.actualizar(hayMensajesNoLeidos ? 1 : 0);
+    });
 
     return PopScope(
       canPop: false,

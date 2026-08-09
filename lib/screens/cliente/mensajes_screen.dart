@@ -117,13 +117,19 @@ class MensajesScreen extends ConsumerWidget {
                       ),
                       title: Text(
                         nombreLocalizadoCategoria(context, s.categoria),
-                        style: TextStyle(fontWeight: noLeido ? FontWeight.w800 : FontWeight.w400),
+                        style: TextStyle(
+                          fontWeight: noLeido ? FontWeight.w800 : FontWeight.w400,
+                          color: colorScheme.onSurface,
+                        ),
                       ),
                       subtitle: Text(
                         s.descripcion,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontWeight: noLeido ? FontWeight.w600 : FontWeight.normal),
+                        style: TextStyle(
+                          fontWeight: noLeido ? FontWeight.w600 : FontWeight.normal,
+                          color: noLeido ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+                        ),
                       ),
                       trailing: noLeido
                           ? Container(

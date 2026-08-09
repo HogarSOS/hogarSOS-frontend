@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
+import '../models/service_request_model.dart';
 import '../providers/chat_read_provider.dart';
 import '../providers/service_request_provider.dart';
+import '../providers/trabajos_vistos_provider.dart';
+import '../services/app_badge_service.dart';
 import 'profesional/home_profesional_screen.dart';
 import 'profesional/mi_perfil_profesional_screen.dart';
 import 'profesional/trabajos_activos_profesional_screen.dart';
@@ -93,13 +96,34 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
     final indiceActual = ref.watch(profesionalTabIndexProvider);
 
     // Punto rojo en la pestaña "Mensajes" (aquí es "Trabajos activos")
-    // si algún trabajo asignado tiene un mensaje nuevo sin abrir.
+    // si algún trabajo asignado tiene un mensaje nuevo sin abrir, O si
+    // hay un trabajo recién aceptado que el profesional todavía no ha
+    // abierto — antes, si se ignoraba el push "¡Te han elegido!", no
+    // quedaba ninguna señal dentro de la app y el trabajo podía pasar
+    // desapercibido indefinidamente.
     final trabajosAsync = ref.watch(assignedRequestsProvider);
-    final idsTrabajos = trabajosAsync.maybeWhen(
-      data: (lista) => lista.map((t) => t.id),
-      orElse: () => const Iterable<String>.empty(),
+    final trabajos = trabajosAsync.maybeWhen(
+      data: (lista) => lista,
+      orElse: () => const <AssignedRequest>[],
     );
-    final hayMensajesNoLeidos = idsTrabajos.any((id) => ref.watch(unreadChatProvider(id)));
+    final idsTrabajos = trabajos.map((t) => t.id);
+    final numConversacionesNoLeidas = idsTrabajos.where((id) => ref.watch(unreadChatProvider(id))).length;
+    final hayMensajesNoLeidos = numConversacionesNoLeidas > 0;
+    final trabajosVistos = ref.watch(trabajosVistosProvider);
+    final numTrabajosNuevosSinVer =
+        trabajos.where((t) => t.estado == EstadoSolicitud.aceptada && !trabajosVistos.contains(t.id)).length;
+    final hayTrabajoNuevoSinVer = numTrabajosNuevosSinVer > 0;
+
+    // Badge del icono de la app (UX#6) — booleano (0/1), no la cuenta
+    // exacta: iOS no tiene un "punto sin número" a nivel de sistema (su
+    // API nativa es siempre un entero), así que 1 es lo más parecido a
+    // un punto que permite la plataforma — y, a diferencia de un
+    // número real, no puede quedar "mintiendo" si el conteo exacto se
+    // desfasa por la limitación de que esto se calcula solo con la app
+    // en marcha (ver app_badge_service.dart).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppBadgeService.instance.actualizar((hayMensajesNoLeidos || hayTrabajoNuevoSinVer) ? 1 : 0);
+    });
 
     return PopScope(
       canPop: false,
@@ -121,8 +145,14 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
               label: t.navSolicitudesCercanas,
             ),
             NavigationDestination(
-              icon: Badge(isLabelVisible: hayMensajesNoLeidos, child: const Icon(Icons.chat_bubble_outline)),
-              selectedIcon: Badge(isLabelVisible: hayMensajesNoLeidos, child: const Icon(Icons.chat_bubble)),
+              icon: Badge(
+                isLabelVisible: hayMensajesNoLeidos || hayTrabajoNuevoSinVer,
+                child: const Icon(Icons.chat_bubble_outline),
+              ),
+              selectedIcon: Badge(
+                isLabelVisible: hayMensajesNoLeidos || hayTrabajoNuevoSinVer,
+                child: const Icon(Icons.chat_bubble),
+              ),
               label: t.navMensajes,
             ),
             NavigationDestination(

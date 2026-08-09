@@ -55,6 +55,11 @@ dependencies:
   google_fonts: ^6.2.1
   app_links: ^7.2.1
 
+  # Badge numérico en el icono de la app (UX#6) — no hace nada (sin
+  # excepción) en launchers Android que no lo soportan, ver
+  # app_badge_service.dart.
+  app_badge_plus: ^1.2.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
