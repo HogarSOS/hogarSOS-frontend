@@ -52,6 +52,11 @@ Future<void> main() async {
   }
 
   Stripe.publishableKey = _clavePublicaStripe;
+  // Merchant ID de Apple Pay (Apple Developer + Stripe, certificado
+  // "Apple Pay Payment Processing" registrado 2026-08-09). PassKit lo
+  // exige siempre, tanto en pruebas como en producción — no depende de
+  // pk_test/pk_live como el flag de Google Pay.
+  Stripe.merchantIdentifier = 'merchant.es.hogarsos.app';
 
   runApp(const ProviderScope(child: HogarSOSApp()));
 }

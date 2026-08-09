@@ -173,6 +173,13 @@ class PaymentService {
           currencyCode: 'EUR',
           testEnv: Stripe.publishableKey.startsWith('pk_test'),
         ),
+        // Mismo razonamiento que Google Pay arriba: Apple Pay tampoco es
+        // un payment_method_type aparte a ojos de Stripe/backend, es otra
+        // forma de rellenar el formulario de tarjeta — compatible con la
+        // captura manual del escrow sin tocar nada del backend.
+        applePay: const PaymentSheetApplePay(
+          merchantCountryCode: 'ES',
+        ),
       ),
     );
     await Stripe.instance.presentPaymentSheet();
