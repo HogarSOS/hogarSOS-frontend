@@ -20,15 +20,18 @@ import 'api_service.dart';
 ///
 /// iOS es un caso aparte: tras varios builds de diagnóstico (vibración
 /// y SnackBar en `FirebaseMessaging.onMessage`, ninguno llegó a
-/// dispararse nunca en dispositivo real) se confirmó que el listener
-/// de Firebase no se dispara en absoluto en iOS con la app en primer
-/// plano — no es un problema de que `.show()` falle, es que Dart nunca
-/// se entera. En vez de seguir dependiendo de esa cadena, `AppDelegate.swift`
-/// se declara `UNUserNotificationCenterDelegate` desde el arranque y
-/// presenta la notificación él mismo (banner+sonido+badge), el mismo
-/// mecanismo nativo que YA funciona de forma fiable en segundo
-/// plano/app cerrada — por eso `.show()` de flutter_local_notifications
-/// solo se usa para Android más abajo.
+/// dispararse nunca en dispositivo real) se rastreó la causa hasta el
+/// código fuente de `firebase_messaging` y de `FlutterAppDelegate`:
+/// iOS solo permite un `UNUserNotificationCenterDelegate` activo, y
+/// aunque Firebase sabe reenviar a otros plugins cuando coexiste con
+/// ellos, solo lo hace si *algo* asigna ese delegate explícitamente —
+/// si nadie lo hacía (nuestro caso), Firebase tomaba el delegate por
+/// su cuenta con un camino de arranque distinto al esperado. El fix
+/// real vive en `AppDelegate.swift` (una sola línea); aquí solo hace
+/// falta volver a dejar que Firebase presente la notificación nativa
+/// (`setForegroundNotificationPresentationOptions` más abajo, con todo
+/// en `true`). `.show()` de flutter_local_notifications se queda solo
+/// para Android (ver más abajo), que nunca tuvo este problema.
 class NotificationService {
   NotificationService._internal();
   static final NotificationService instance = NotificationService._internal();
@@ -106,13 +109,12 @@ class NotificationService {
       await ApiService.instance.client.patch('/auth/me/fcm-token', data: {'fcmToken': token});
       debugPrint('[NotificationService] Token FCM registrado');
 
-      // Deliberadamente todo en false salvo el badge: dejar que iOS
-      // presente la notificación nativa en primer plano resultó nada
-      // fiable en la práctica (confirmado en dispositivo real: solo se
-      // actualizaba el badge, sin alerta ni sonido) — en vez de eso,
-      // _configurarListeners() la muestra a mano con
-      // flutter_local_notifications, igual que ya hacía Android.
-      await _messaging.setForegroundNotificationPresentationOptions(alert: false, badge: true, sound: false);
+      // Antes estaba todo en false salvo el badge, porque sin la línea
+      // que falta en AppDelegate.swift (ver comentario de clase) esta
+      // opción nunca llegaba a aplicarse de forma fiable. Con el
+      // delegate nativo bien asignado, esto ya es lo que controla si
+      // iOS enseña la notificación con la app en primer plano.
+      await _messaging.setForegroundNotificationPresentationOptions(alert: true, badge: true, sound: true);
 
       // Si Firebase rota el token más adelante (la app sigue abierta),
       // se vuelve a mandar sin esperar al próximo arranque.
@@ -160,11 +162,12 @@ class NotificationService {
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(_canal);
 
-    // Mensaje recibido con la app en primer plano. En iOS este listener
-    // no se dispara nunca en la práctica (ver comentario de clase) — se
-    // deja registrado igualmente por si algún día se resuelve, y por
-    // los dos diagnósticos de abajo. En Android sí funciona y es
-    // necesario, porque tampoco enseña la notificación del sistema sola.
+    // Mensaje recibido con la app en primer plano. Con el fix de
+    // AppDelegate.swift, en iOS la presentación (banner+sonido+badge)
+    // ya la hace el propio Firebase de forma nativa vía
+    // setForegroundNotificationPresentationOptions — este listener ya
+    // no necesita mostrar nada él mismo ahí, solo en Android (ver el
+    // guard de plataforma más abajo), que nunca tuvo este problema.
     FirebaseMessaging.onMessage.listen((mensaje) {
       final notificacion = mensaje.notification;
       debugPrint('[NotificationService] Mensaje en primer plano: ${notificacion?.title}');
@@ -183,10 +186,9 @@ class NotificationService {
 
       if (notificacion == null) return;
 
-      // Solo Android: en iOS la presentación (banner+sonido+badge) ya
-      // la hace AppDelegate.swift a nivel nativo (ver comentario de
-      // clase). Llamar aquí también en iOS arriesgaría una notificación
-      // duplicada si `onMessage` alguna vez llega a dispararse.
+      // Solo Android: en iOS la presentación ya la hace Firebase de
+      // forma nativa (ver más arriba). Llamar aquí también en iOS
+      // duplicaría la notificación.
       if (defaultTargetPlatform != TargetPlatform.android) return;
 
       try {

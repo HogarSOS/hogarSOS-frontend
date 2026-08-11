@@ -4,7 +4,7 @@ import GoogleMaps
 import UserNotifications
 
 @main
-@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate, UNUserNotificationCenterDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -12,12 +12,18 @@ import UserNotifications
     GMSServices.provideAPIKey("AIzaSyArgdKzwZ1nRnqx9Ju8AiUyPpy-YwWXJMU")
 
     // Bug de meses: en iOS, con la app en primer plano, FirebaseMessaging.onMessage
-    // nunca llegaba a dispararse en Dart (ni siquiera con vibración/SnackBar puestos
-    // como diagnóstico en varios builds) — indistinguible desde fuera de si Firebase
-    // o flutter_local_notifications se quedaban con el rol de UNUserNotificationCenterDelegate.
-    // En vez de seguir dependiendo de esa cadena, el propio AppDelegate se declara
-    // delegado desde el arranque y presenta la notificación él mismo — el mismo
-    // mecanismo nativo que YA funciona de forma fiable en segundo plano/app cerrada.
+    // nunca llegaba a dispararse en Dart (confirmado con vibración/SnackBar en varios
+    // builds, ninguno se disparó nunca). Causa real, confirmada leyendo el código
+    // fuente de firebase_messaging y de FlutterAppDelegate (no adivinada): iOS solo
+    // permite UN UNUserNotificationCenterDelegate activo a la vez. FlutterAppDelegate
+    // ya trae la lógica para reenviar las notificaciones a cada plugin que la
+    // necesite (Firebase incluido, vía `addApplicationDelegate:` en su propio
+    // código) — pero SOLO si algo llega a asignarlo como delegate explícitamente; si
+    // nadie lo hace (nuestro caso hasta ahora), Firebase pasa a asumir que no hay
+    // nadie más y toma el delegate él solo, con un camino de arranque distinto al
+    // que espera cuando coexiste con otros plugins. Esta única línea activa el
+    // reenvío ya integrado en Flutter — no hace falta implementar
+    // `willPresent`/`didReceive` a mano.
     UNUserNotificationCenter.current().delegate = self
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
@@ -25,13 +31,5 @@ import UserNotifications
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
-  }
-
-  func userNotificationCenter(
-    _ center: UNUserNotificationCenter,
-    willPresent notification: UNNotification,
-    withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
-  ) {
-    completionHandler([.banner, .sound, .badge])
   }
 }
