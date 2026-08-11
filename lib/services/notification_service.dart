@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../app_keys.dart';
 import 'api_service.dart';
@@ -53,6 +54,15 @@ class NotificationService {
     // del sistema operativo.
     unawaited(_registrarIdioma());
 
+    // DIAGNÓSTICO TEMPORAL — se adelanta aquí, fuera del try/catch de
+    // permiso+token de abajo, para descartar que un fallo silencioso en
+    // algún paso anterior (denegación de permiso, timeout de getToken,
+    // fallo de red en el PATCH) esté impidiendo que este listener
+    // llegue a registrarse siquiera. Quitar junto con el resto del
+    // diagnóstico de _configurarListeners() en cuanto se confirme la
+    // causa real del bug de sonido en primer plano.
+    unawaited(_configurarListeners());
+
     try {
       final permiso = await _messaging.requestPermission(alert: true, badge: true, sound: true);
       if (permiso.authorizationStatus == AuthorizationStatus.denied) {
@@ -99,8 +109,6 @@ class NotificationService {
       // _configurarListeners() la muestra a mano con
       // flutter_local_notifications, igual que ya hacía Android.
       await _messaging.setForegroundNotificationPresentationOptions(alert: false, badge: true, sound: false);
-
-      await _configurarListeners();
 
       // Si Firebase rota el token más adelante (la app sigue abierta),
       // se vuelve a mandar sin esperar al próximo arranque.
@@ -155,10 +163,14 @@ class NotificationService {
       final notificacion = mensaje.notification;
       debugPrint('[NotificationService] Mensaje en primer plano: ${notificacion?.title}');
 
-      // DIAGNÓSTICO TEMPORAL — confirma si este listener llega a
-      // dispararse en iOS con la app en primer plano (sin necesitar
-      // consola de Xcode). Quitar en cuanto se confirme la causa real
-      // del bug de sonido en primer plano (ver memoria del proyecto).
+      // DIAGNÓSTICO TEMPORAL — dos señales independientes de si este
+      // listener llega a dispararse en iOS con la app en primer plano:
+      // la vibración no depende del árbol de widgets (a diferencia del
+      // SnackBar de abajo), así que si esta también falla en notarse,
+      // descarta que el problema sea solo de scaffoldMessengerKey.
+      // Quitar todo el bloque en cuanto se confirme la causa real del
+      // bug de sonido en primer plano (ver memoria del proyecto).
+      HapticFeedback.heavyImpact();
       scaffoldMessengerKey.currentState?.showSnackBar(
         SnackBar(content: Text('DEBUG onMessage: ${notificacion?.title ?? "sin notification"}')),
       );
