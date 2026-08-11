@@ -9,16 +9,19 @@ import 'api_service.dart';
 /// dispositivo en el backend y muestra la notificación cuando llega
 /// con la app en primer plano.
 ///
-/// Android ya enseña solo las notificaciones en segundo plano/app
-/// cerrada, vía el canal por defecto declarado en AndroidManifest.xml
-/// — pero NO en primer plano, ahí depende 100% de la app. Antes esto
-/// solo hacía un debugPrint en ese caso: el mensaje llegaba de verdad
-/// (el envío desde el backend funcionaba) pero era invisible para
-/// cualquiera que probara con la app abierta, que es el escenario más
-/// habitual al testear. flutter_local_notifications muestra la misma
-/// notificación de forma manual, en el mismo canal
-/// ("hogarsos_notifications") que ya usa el caso en segundo plano, para
-/// que se vea y suene igual en ambos casos.
+/// Ni Android ni iOS enseñan la notificación del sistema con la app en
+/// primer plano por defecto — en ambos casos depende 100% de la app.
+/// flutter_local_notifications la muestra de forma manual en los dos
+/// casos, en el mismo canal ("hogarsos_notifications") que ya usa el
+/// caso en segundo plano/app cerrada, para que se vea y suene igual
+/// siempre.
+///
+/// En iOS se probó primero `setForegroundNotificationPresentationOptions`
+/// (dejar que el propio sistema presente la notificación nativa) pero
+/// resultó nada fiable en la práctica: confirmado en dispositivo real
+/// que solo actualizaba el badge, sin alerta ni sonido. Se dejó
+/// desactivada (`alert: false, sound: false` en `registrarToken`) y se
+/// pasó al mismo patrón manual que ya usaba Android.
 class NotificationService {
   NotificationService._internal();
   static final NotificationService instance = NotificationService._internal();
@@ -55,11 +58,45 @@ class NotificationService {
         return;
       }
 
-      final token = await _messaging.getToken();
+      // Solo en iOS: pedir el token de FCM demasiado pronto falla en
+      // silencio (excepción "apns-token-not-set") — iOS tarda un
+      // momento en registrar el token nativo de APNs de forma asíncrona
+      // tras conceder el permiso, y FCM lo necesita antes de poder
+      // emitir el suyo. Android no tiene este paso intermedio.
+      //
+      // Esperar a getAPNSToken() por sí solo NO fue suficiente en la
+      // práctica (probado en dispositivo real, build 5: el token seguía
+      // sin registrarse pese al permiso concedido y la app reabierta) —
+      // getToken() en sí puede seguir fallando varias veces justo
+      // después de que getAPNSToken() ya devuelva algo, así que ahora
+      // se reintenta la llamada completa (no solo la espera previa),
+      // capturando cada fallo individual en vez de dejar que uno solo
+      // aborte todo el registro.
+      String? token;
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        for (var intento = 0; intento < 6 && token == null; intento++) {
+          if (intento > 0) await Future.delayed(const Duration(seconds: 2));
+          try {
+            token = await _messaging.getToken();
+          } catch (e) {
+            debugPrint('[NotificationService] getToken() falló en iOS (intento $intento): $e');
+          }
+        }
+      } else {
+        token = await _messaging.getToken();
+      }
       if (token == null) return;
 
       await ApiService.instance.client.patch('/auth/me/fcm-token', data: {'fcmToken': token});
       debugPrint('[NotificationService] Token FCM registrado');
+
+      // Deliberadamente todo en false salvo el badge: dejar que iOS
+      // presente la notificación nativa en primer plano resultó nada
+      // fiable en la práctica (confirmado en dispositivo real: solo se
+      // actualizaba el badge, sin alerta ni sonido) — en vez de eso,
+      // _configurarListeners() la muestra a mano con
+      // flutter_local_notifications, igual que ya hacía Android.
+      await _messaging.setForegroundNotificationPresentationOptions(alert: false, badge: true, sound: false);
 
       await _configurarListeners();
 
@@ -96,15 +133,22 @@ class NotificationService {
     _listenerConfigurado = true;
 
     await _notificacionesLocales.initialize(
-      const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher')),
+      const InitializationSettings(
+        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        iOS: DarwinInitializationSettings(
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+        ),
+      ),
     );
     await _notificacionesLocales
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(_canal);
 
-    // Mensaje recibido con la app en primer plano — FCM no lo enseña
-    // solo en este caso (comportamiento estándar de Android/iOS), hay
-    // que mostrarlo a mano.
+    // Mensaje recibido con la app en primer plano, en Android y en iOS
+    // por igual — ninguno de los dos la enseña solo, hay que mostrarla
+    // a mano en ambos casos (ver comentario de clase más arriba).
     FirebaseMessaging.onMessage.listen((mensaje) {
       final notificacion = mensaje.notification;
       debugPrint('[NotificationService] Mensaje en primer plano: ${notificacion?.title}');
@@ -122,6 +166,11 @@ class NotificationService {
             icon: '@mipmap/ic_launcher',
             importance: Importance.high,
             priority: Priority.high,
+          ),
+          iOS: const DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
           ),
         ),
       );
