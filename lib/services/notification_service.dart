@@ -12,19 +12,23 @@ import 'api_service.dart';
 /// dispositivo en el backend y muestra la notificación cuando llega
 /// con la app en primer plano.
 ///
-/// Ni Android ni iOS enseñan la notificación del sistema con la app en
-/// primer plano por defecto — en ambos casos depende 100% de la app.
-/// flutter_local_notifications la muestra de forma manual en los dos
-/// casos, en el mismo canal ("hogarsos_notifications") que ya usa el
+/// Android no enseña la notificación del sistema con la app en primer
+/// plano por defecto — flutter_local_notifications la muestra de forma
+/// manual, en el mismo canal ("hogarsos_notifications") que ya usa el
 /// caso en segundo plano/app cerrada, para que se vea y suene igual
 /// siempre.
 ///
-/// En iOS se probó primero `setForegroundNotificationPresentationOptions`
-/// (dejar que el propio sistema presente la notificación nativa) pero
-/// resultó nada fiable en la práctica: confirmado en dispositivo real
-/// que solo actualizaba el badge, sin alerta ni sonido. Se dejó
-/// desactivada (`alert: false, sound: false` en `registrarToken`) y se
-/// pasó al mismo patrón manual que ya usaba Android.
+/// iOS es un caso aparte: tras varios builds de diagnóstico (vibración
+/// y SnackBar en `FirebaseMessaging.onMessage`, ninguno llegó a
+/// dispararse nunca en dispositivo real) se confirmó que el listener
+/// de Firebase no se dispara en absoluto en iOS con la app en primer
+/// plano — no es un problema de que `.show()` falle, es que Dart nunca
+/// se entera. En vez de seguir dependiendo de esa cadena, `AppDelegate.swift`
+/// se declara `UNUserNotificationCenterDelegate` desde el arranque y
+/// presenta la notificación él mismo (banner+sonido+badge), el mismo
+/// mecanismo nativo que YA funciona de forma fiable en segundo
+/// plano/app cerrada — por eso `.show()` de flutter_local_notifications
+/// solo se usa para Android más abajo.
 class NotificationService {
   NotificationService._internal();
   static final NotificationService instance = NotificationService._internal();
@@ -142,23 +146,25 @@ class NotificationService {
     if (_listenerConfigurado) return;
     _listenerConfigurado = true;
 
+    // Sin `iOS:` a propósito — pasar DarwinInitializationSettings hace
+    // que este plugin se declare UNUserNotificationCenterDelegate, y
+    // solo puede haber uno activo a la vez. Ahora ese rol lo tiene
+    // AppDelegate.swift (ver comentario de clase más arriba), así que
+    // aquí solo se inicializa el lado Android.
     await _notificacionesLocales.initialize(
       const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-        iOS: DarwinInitializationSettings(
-          requestAlertPermission: false,
-          requestBadgePermission: false,
-          requestSoundPermission: false,
-        ),
       ),
     );
     await _notificacionesLocales
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(_canal);
 
-    // Mensaje recibido con la app en primer plano, en Android y en iOS
-    // por igual — ninguno de los dos la enseña solo, hay que mostrarla
-    // a mano en ambos casos (ver comentario de clase más arriba).
+    // Mensaje recibido con la app en primer plano. En iOS este listener
+    // no se dispara nunca en la práctica (ver comentario de clase) — se
+    // deja registrado igualmente por si algún día se resuelve, y por
+    // los dos diagnósticos de abajo. En Android sí funciona y es
+    // necesario, porque tampoco enseña la notificación del sistema sola.
     FirebaseMessaging.onMessage.listen((mensaje) {
       final notificacion = mensaje.notification;
       debugPrint('[NotificationService] Mensaje en primer plano: ${notificacion?.title}');
@@ -177,6 +183,12 @@ class NotificationService {
 
       if (notificacion == null) return;
 
+      // Solo Android: en iOS la presentación (banner+sonido+badge) ya
+      // la hace AppDelegate.swift a nivel nativo (ver comentario de
+      // clase). Llamar aquí también en iOS arriesgaría una notificación
+      // duplicada si `onMessage` alguna vez llega a dispararse.
+      if (defaultTargetPlatform != TargetPlatform.android) return;
+
       try {
         _notificacionesLocales.show(
           mensaje.hashCode,
@@ -191,18 +203,10 @@ class NotificationService {
               importance: Importance.high,
               priority: Priority.high,
             ),
-            iOS: const DarwinNotificationDetails(
-              presentAlert: true,
-              presentBadge: true,
-              presentSound: true,
-            ),
           ),
         );
       } catch (e) {
         debugPrint('[NotificationService] Error al mostrar notificación local: $e');
-        scaffoldMessengerKey.currentState?.showSnackBar(
-          SnackBar(content: Text('DEBUG error .show(): $e')),
-        );
       }
     });
   }
