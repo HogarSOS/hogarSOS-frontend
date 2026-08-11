@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../app_keys.dart';
 import 'api_service.dart';
 
 /// Notificaciones push (FCM). Pide permiso, registra el token del
@@ -152,28 +154,44 @@ class NotificationService {
     FirebaseMessaging.onMessage.listen((mensaje) {
       final notificacion = mensaje.notification;
       debugPrint('[NotificationService] Mensaje en primer plano: ${notificacion?.title}');
+
+      // DIAGNÓSTICO TEMPORAL — confirma si este listener llega a
+      // dispararse en iOS con la app en primer plano (sin necesitar
+      // consola de Xcode). Quitar en cuanto se confirme la causa real
+      // del bug de sonido en primer plano (ver memoria del proyecto).
+      scaffoldMessengerKey.currentState?.showSnackBar(
+        SnackBar(content: Text('DEBUG onMessage: ${notificacion?.title ?? "sin notification"}')),
+      );
+
       if (notificacion == null) return;
 
-      _notificacionesLocales.show(
-        mensaje.hashCode,
-        notificacion.title,
-        notificacion.body,
-        NotificationDetails(
-          android: AndroidNotificationDetails(
-            _canal.id,
-            _canal.name,
-            channelDescription: _canal.description,
-            icon: '@mipmap/ic_launcher',
-            importance: Importance.high,
-            priority: Priority.high,
+      try {
+        _notificacionesLocales.show(
+          mensaje.hashCode,
+          notificacion.title,
+          notificacion.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              _canal.id,
+              _canal.name,
+              channelDescription: _canal.description,
+              icon: '@mipmap/ic_launcher',
+              importance: Importance.high,
+              priority: Priority.high,
+            ),
+            iOS: const DarwinNotificationDetails(
+              presentAlert: true,
+              presentBadge: true,
+              presentSound: true,
+            ),
           ),
-          iOS: const DarwinNotificationDetails(
-            presentAlert: true,
-            presentBadge: true,
-            presentSound: true,
-          ),
-        ),
-      );
+        );
+      } catch (e) {
+        debugPrint('[NotificationService] Error al mostrar notificación local: $e');
+        scaffoldMessengerKey.currentState?.showSnackBar(
+          SnackBar(content: Text('DEBUG error .show(): $e')),
+        );
+      }
     });
   }
 }
