@@ -37,6 +37,16 @@ class NotificationService {
   final _messaging = FirebaseMessaging.instance;
   final _notificacionesLocales = FlutterLocalNotificationsPlugin();
   bool _listenerConfigurado = false;
+  StreamSubscription<String>? _tokenRefreshSub;
+
+  // Un mensaje que el usuario pulsó para abrir la app (segundo plano) o
+  // con el que la abrió desde cerrada — quien escuche este stream (ver
+  // DeepLinkListener) decide a qué pantalla navegar según `data['tipo']`.
+  // Broadcast porque puede no haber ningún listener todavía cuando
+  // llega el primero (getInitialMessage se comprueba antes de que
+  // DeepLinkListener termine de suscribirse).
+  final _aperturasController = StreamController<RemoteMessage>.broadcast();
+  Stream<RemoteMessage> get aperturasPorNotificacion => _aperturasController.stream;
 
   static const _canal = AndroidNotificationChannel(
     'hogarsos_notifications',
@@ -113,8 +123,13 @@ class NotificationService {
       }
 
       // Si Firebase rota el token más adelante (la app sigue abierta),
-      // se vuelve a mandar sin esperar al próximo arranque.
-      _messaging.onTokenRefresh.listen((nuevoToken) async {
+      // se vuelve a mandar sin esperar al próximo arranque. registrarToken()
+      // se llama en cada login/registro/restauración de sesión — sin
+      // cancelar la suscripción anterior, cada ciclo de sesión dentro del
+      // mismo proceso (logout + login de nuevo) apilaba un listener más,
+      // duplicando el PATCH en la siguiente rotación de token.
+      await _tokenRefreshSub?.cancel();
+      _tokenRefreshSub = _messaging.onTokenRefresh.listen((nuevoToken) async {
         try {
           await ApiService.instance.client.patch('/auth/me/fcm-token', data: {'fcmToken': nuevoToken});
         } catch (e) {
@@ -195,5 +210,25 @@ class NotificationService {
         debugPrint('[NotificationService] Error al mostrar notificación local: $e');
       }
     });
+
+    // Notificación pulsada con la app en segundo plano (no cerrada del
+    // todo) — vuelca al mismo stream que getInitialMessage() más abajo,
+    // para que DeepLinkListener tenga un único sitio donde enrutar.
+    FirebaseMessaging.onMessageOpenedApp.listen(_aperturasController.add);
+  }
+
+  /// Comprueba si la app se abrió desde cero (proceso nuevo) pulsando una
+  /// notificación — a diferencia de onMessageOpenedApp de arriba, esto NO
+  /// es un stream: FCM solo devuelve un resultado no nulo la primera vez
+  /// que se pregunta tras ese arranque concreto. Llamar una sola vez al
+  /// arrancar (ver DeepLinkListener._iniciar), igual que ya se hace con
+  /// AppLinks.getInitialLink() para el deep link de Stripe.
+  Future<void> comprobarMensajeInicial() async {
+    try {
+      final mensaje = await _messaging.getInitialMessage();
+      if (mensaje != null) _aperturasController.add(mensaje);
+    } catch (e) {
+      debugPrint('[NotificationService] Error leyendo el mensaje inicial: $e');
+    }
   }
 }

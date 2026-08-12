@@ -114,6 +114,7 @@ class HogarSOSApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
       scaffoldMessengerKey: scaffoldMessengerKey,
+      navigatorObservers: [routeObserver],
 
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
