@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import UserNotifications
 import GoogleMaps
 
 @main
@@ -10,17 +11,73 @@ import GoogleMaps
   // republicar la notificación con su userInfo original (ver más abajo).
   private var launchOptionsOriginal: [UIApplication.LaunchOptionsKey: Any]?
 
+  // Notificación (userInfo) que el usuario tocó para abrir la app desde cerrada,
+  // capturada en userNotificationCenter(_:didReceive:) más abajo. Estática porque
+  // didInitializeImplicitFlutterEngine necesita leerla después, y ese método no
+  // tiene acceso directo a la instancia que recibió el toque real.
+  static var notificacionInicialCapturada: [AnyHashable: Any]?
+
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // Primerísima línea, antes que GMSServices o cualquier otra cosa: es la única
+    // forma de capturar el toque de una notificación que abre la app desde cerrada
+    // ANTES de que exista ninguna carrera con el registro tardío de firebase_messaging
+    // como delegate (ver comentario largo en didInitializeImplicitFlutterEngine sobre
+    // ese mismo problema, aplicado aquí a una segunda condición interna de Firebase
+    // que el fix de esa función no llega a cubrir). No sustituye ni reemplaza a
+    // firebase_messaging: FlutterAppDelegate (nuestra superclase) ya reenvía estas
+    // llamadas a self.lifeCycleDelegate, que es como el plugin de Firebase sigue
+    // recibiéndolas normalmente una vez registrado — ver userNotificationCenter(_:didReceive:)
+    // más abajo, que reenvía con super en vez de sustituir ese camino.
+    UNUserNotificationCenter.current().delegate = self
     GMSServices.provideAPIKey("AIzaSyArgdKzwZ1nRnqx9Ju8AiUyPpy-YwWXJMU")
     launchOptionsOriginal = launchOptions
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
+  // Se ejecuta tanto si el usuario tocó la notificación con la app cerrada (arranque
+  // en frío) como en segundo plano — en ambos casos guardamos el userInfo (solo lo
+  // consume el canal nativo de más abajo si de verdad hubo un arranque en frío, ver
+  // deep_link_listener.dart). Reenviar con super (en vez de llamar completionHandler
+  // nosotros mismos) es lo que preserva intacto el camino ya existente hacia
+  // firebase_messaging (FlutterAppDelegate → lifeCycleDelegate → FLTFirebaseMessagingPlugin,
+  // que es quien de verdad debe llamar completionHandler): verificado leyendo el
+  // código fuente real de FlutterAppDelegate.mm y FLTFirebaseMessagingPlugin.m que
+  // ese es el único camino por el que hoy funciona onMessageOpenedApp en segundo
+  // plano — llamar completionHandler aquí también lo habría roto para siempre.
+  override func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    didReceive response: UNNotificationResponse,
+    withCompletionHandler completionHandler: @escaping () -> Void
+  ) {
+    AppDelegate.notificacionInicialCapturada = response.notification.request.content.userInfo
+    super.userNotificationCenter(center, didReceive: response, withCompletionHandler: completionHandler)
+  }
+
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+
+    // Único consumidor de notificacionInicialCapturada: deep_link_listener.dart la
+    // pide una sola vez al arrancar, además de (no en vez de) getInitialMessage() de
+    // firebase_messaging — ver comentario largo de userNotificationCenter(_:didReceive:)
+    // arriba sobre por qué ese camino puede no ver el toque de arranque en frío.
+    // Se limpia tras leerla para no reexponerla en un hot restart dentro del mismo
+    // proceso (no aplicable a un toque de segundo plano real: ese siempre llega
+    // después de que Dart ya haya preguntado una vez, así que no se pierde nada).
+    let canalNotificacionInicial = FlutterMethodChannel(
+      name: "es.hogarsos.app/initial_notification",
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
+    )
+    canalNotificacionInicial.setMethodCallHandler { call, result in
+      guard call.method == "getInitialNotification" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      result(AppDelegate.notificacionInicialCapturada)
+      AppDelegate.notificacionInicialCapturada = nil
+    }
 
     // Bug de meses: en iOS, con la app en primer plano, FirebaseMessaging.onMessage
     // nunca llegaba a dispararse en Dart. Causa real, confirmada con diagnóstico real
@@ -42,10 +99,15 @@ import GoogleMaps
     // más de una vez SÍ es peligroso (el propio código de Firebase advierte de un
     // bucle de reenvío infinito si su lógica de delegate se ejecuta dos veces), así
     // que esto debe ocurrir EXACTAMENTE UNA VEZ — este método solo se llama una vez
-    // por proceso, y ya no hay ninguna asignación manual de
-    // UNUserNotificationCenter.current().delegate en este archivo: con el timing
-    // corregido, Firebase se autoasigna el delegate directamente con su propio
-    // código ya probado, sin depender de que FlutterAppDelegate reenvíe llamadas.
+    // por proceso. Desde que UNUserNotificationCenter.current().delegate = self se
+    // asigna arriba (ver application(_:didFinishLaunchingWithOptions:)), Firebase
+    // (FLTFirebaseMessagingPlugin) ya no se autoasigna ese delegate — en vez de eso
+    // se registra como application delegate (addApplicationDelegate:) y recibe los
+    // toques de notificación reenviados por FlutterAppDelegate/lifeCycleDelegate,
+    // igual que cualquier otro plugin. Verificado leyendo su código fuente real
+    // (application_onDidFinishLaunchingNotification:): no altera nada de lo que
+    // arregla este repost, que sigue haciendo falta igual para el registro a tiempo
+    // de plugins y el primer plano.
     //
     // userInfo: launchOptionsOriginal — sin esto, getInitialMessage() en Dart
     // devolvía siempre null cuando la app se abría en frío tocando una

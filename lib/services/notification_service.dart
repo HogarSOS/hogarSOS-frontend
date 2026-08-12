@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'api_service.dart';
 
@@ -47,6 +48,15 @@ class NotificationService {
   // DeepLinkListener termine de suscribirse).
   final _aperturasController = StreamController<RemoteMessage>.broadcast();
   Stream<RemoteMessage> get aperturasPorNotificacion => _aperturasController.stream;
+
+  // Solo iOS: canal propio a AppDelegate.swift (ver userNotificationCenter(_:didReceive:)
+  // allí) para el toque de notificación que abrió la app desde cerrada. Necesario
+  // porque getInitialMessage() de firebase_messaging puede devolver null en ese
+  // caso concreto — el plugin nativo se registra como UNUserNotificationCenterDelegate
+  // demasiado tarde para ver el toque de arranque en frío (carrera confirmada
+  // leyendo su código fuente real, ver memoria del proyecto). Complementa a
+  // comprobarMensajeInicial(), no lo sustituye.
+  static const _canalNotificacionInicial = MethodChannel('es.hogarsos.app/initial_notification');
 
   static const _canal = AndroidNotificationChannel(
     'hogarsos_notifications',
@@ -229,6 +239,29 @@ class NotificationService {
       if (mensaje != null) _aperturasController.add(mensaje);
     } catch (e) {
       debugPrint('[NotificationService] Error leyendo el mensaje inicial: $e');
+    }
+  }
+
+  /// Complementa a comprobarMensajeInicial() en iOS: pregunta al canal nativo
+  /// propio (ver _canalNotificacionInicial) por el toque de notificación
+  /// capturado directamente en AppDelegate.swift, para el caso de arranque en
+  /// frío que getInitialMessage() puede no ver. El `data` que llega aquí es el
+  /// userInfo crudo de APNs (incluye claves como "aps" además de los campos
+  /// propios del backend) — DeepLinkListener solo lee 'solicitudId' y 'tipo',
+  /// así que las claves de más no afectan.
+  Future<void> comprobarNotificacionInicialNativa() async {
+    if (defaultTargetPlatform != TargetPlatform.iOS) return;
+    try {
+      final userInfo = await _canalNotificacionInicial.invokeMapMethod<Object?, Object?>(
+        'getInitialNotification',
+      );
+      if (userInfo == null) return;
+
+      final data = userInfo.map((clave, valor) => MapEntry(clave.toString(), valor));
+      final messageId = data['gcm.message_id'] as String?;
+      _aperturasController.add(RemoteMessage(data: data, messageId: messageId));
+    } catch (e) {
+      debugPrint('[NotificationService] Error leyendo la notificación inicial nativa (iOS): $e');
     }
   }
 }

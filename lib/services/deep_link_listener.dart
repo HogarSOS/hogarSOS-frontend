@@ -74,6 +74,7 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
     );
 
     unawaited(NotificationService.instance.comprobarMensajeInicial());
+    unawaited(NotificationService.instance.comprobarNotificacionInicialNativa());
     _aperturasSub = NotificationService.instance.aperturasPorNotificacion.listen(_recibirNotificacion);
   }
 
