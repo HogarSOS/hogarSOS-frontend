@@ -4,11 +4,18 @@ import GoogleMaps
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
+  // Guardado aquí porque solo existe como parámetro local dentro de
+  // application(_:didFinishLaunchingWithOptions:) — didInitializeImplicitFlutterEngine
+  // se ejecuta después, como método distinto, y necesita este mismo diccionario para
+  // republicar la notificación con su userInfo original (ver más abajo).
+  private var launchOptionsOriginal: [UIApplication.LaunchOptionsKey: Any]?
+
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     GMSServices.provideAPIKey("AIzaSyArgdKzwZ1nRnqx9Ju8AiUyPpy-YwWXJMU")
+    launchOptionsOriginal = launchOptions
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
@@ -39,6 +46,26 @@ import GoogleMaps
     // UNUserNotificationCenter.current().delegate en este archivo: con el timing
     // corregido, Firebase se autoasigna el delegate directamente con su propio
     // código ya probado, sin depender de que FlutterAppDelegate reenvíe llamadas.
-    NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: UIApplication.shared)
+    //
+    // userInfo: launchOptionsOriginal — sin esto, getInitialMessage() en Dart
+    // devolvía siempre null cuando la app se abría en frío tocando una
+    // notificación push. Motivo confirmado leyendo el código fuente real de
+    // firebase_messaging (FLTFirebaseMessagingPlugin.m,
+    // application_onDidFinishLaunchingNotification:): su observador de ESTA
+    // misma notificación lee notification.userInfo[UIApplicationLaunchOptionsRemoteNotificationKey]
+    // para reconstruir el mensaje inicial — es la misma clave que ya trae el
+    // launchOptions real de arriba cuando el lanzamiento fue por una
+    // notificación. Sin pasar userInfo aquí (como antes), esa clave nunca
+    // estaba disponible cuando el observador por fin llegaba a verla (tarde,
+    // que es exactamente el problema que este método ya arregla para el resto
+    // del arranque). No afecta al caso de notificación en primer plano/app ya
+    // abierta: ese camino no pasa por getInitialMessage() ni por esta rama de
+    // application_onDidFinishLaunchingNotification:, solo por la asignación de
+    // delegate que ya ocurre igual, sea cual sea el userInfo.
+    NotificationCenter.default.post(
+      name: UIApplication.didFinishLaunchingNotification,
+      object: UIApplication.shared,
+      userInfo: launchOptionsOriginal
+    )
   }
 }
