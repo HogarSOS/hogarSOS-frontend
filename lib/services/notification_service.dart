@@ -224,7 +224,10 @@ class NotificationService {
     // Notificación pulsada con la app en segundo plano (no cerrada del
     // todo) — vuelca al mismo stream que getInitialMessage() más abajo,
     // para que DeepLinkListener tenga un único sitio donde enrutar.
-    FirebaseMessaging.onMessageOpenedApp.listen(_aperturasController.add);
+    FirebaseMessaging.onMessageOpenedApp.listen((mensaje) {
+      debugPrint('[DIAG] onMessageOpenedApp: messageId=${mensaje.messageId} data=${mensaje.data}');
+      _aperturasController.add(mensaje);
+    });
   }
 
   /// Comprueba si la app se abrió desde cero (proceso nuevo) pulsando una
