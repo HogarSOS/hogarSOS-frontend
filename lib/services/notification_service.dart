@@ -114,12 +114,25 @@ class NotificationService {
       // opción nunca llegaba a aplicarse de forma fiable. Con el
       // delegate nativo bien asignado, esto ya es lo que controla si
       // iOS enseña la notificación con la app en primer plano.
-      await _messaging.setForegroundNotificationPresentationOptions(alert: true, badge: true, sound: true);
-      // DIAGNÓSTICO TEMPORAL — vibración distinta a la del listener onMessage,
-      // para confirmar que esta llamada termina sin lanzar una excepción que el
-      // catch general de más abajo esté tragando en silencio. Quitar junto con
-      // el resto del diagnóstico en cuanto se confirme la causa real.
-      HapticFeedback.mediumImpact();
+      //
+      // DIAGNÓSTICO TEMPORAL — el build 22 (vibración justo después de esta
+      // llamada, dentro del catch general de la función) no vibró en el
+      // dispositivo real, pese a que el PATCH de arriba sí llega al backend.
+      // Esto separa la llamada en su propio try/catch con tres señales
+      // distintas para saber exactamente qué pasa: (1) se llega a esta línea,
+      // (2) la llamada termina bien, (3) la llamada lanza una excepción que el
+      // catch general de más abajo tragaría en silencio. Quitar todo el
+      // bloque de diagnóstico en cuanto se confirme la causa real.
+      HapticFeedback.lightImpact();
+      try {
+        await _messaging.setForegroundNotificationPresentationOptions(alert: true, badge: true, sound: true);
+        HapticFeedback.mediumImpact();
+      } catch (e) {
+        debugPrint('[NotificationService] setForegroundNotificationPresentationOptions falló: $e');
+        HapticFeedback.heavyImpact();
+        await Future.delayed(const Duration(milliseconds: 300));
+        HapticFeedback.heavyImpact();
+      }
 
       // Si Firebase rota el token más adelante (la app sigue abierta),
       // se vuelve a mandar sin esperar al próximo arranque.
