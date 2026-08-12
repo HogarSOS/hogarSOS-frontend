@@ -26,10 +26,57 @@ import UserNotifications
     // `willPresent`/`didReceive` a mano.
     UNUserNotificationCenter.current().delegate = self
 
+    // DIAGNÓSTICO TEMPORAL — experimento único para averiguar si
+    // firebase_messaging llega a tiempo de ver esta notificación. Ese
+    // plugin registra su propio observador de
+    // UIApplicationDidFinishLaunchingNotification dentro de su
+    // registerWithRegistrar: (confirmado leyendo su código fuente), que
+    // solo se ejecuta cuando GeneratedPluginRegistrant.register corre en
+    // didInitializeImplicitFlutterEngine más abajo. Con el ciclo de vida
+    // Scene que usa esta app (ver SceneDelegate.swift), el engine
+    // implícito se crea en scene(_:willConnectTo:options:), que Apple
+    // documenta que ocurre DESPUÉS de que esta notificación se dispare.
+    // Si diag_notif_fired_at < diag_engine_init_at, firebase_messaging
+    // nunca ve la notificación y por tanto nunca ejecuta su lógica de
+    // delegate ni se añade al fan-out de Flutter — explicaría por qué el
+    // fix del delegate de la línea de arriba no ha cambiado nada en 3
+    // builds. Quitar todo el bloque de diagnóstico (aquí y en
+    // didInitializeImplicitFlutterEngine) en cuanto se confirme o
+    // descarte esta hipótesis.
+    let diagDefaults = UserDefaults.standard
+    diagDefaults.removeObject(forKey: "diag_notif_fired_at")
+    diagDefaults.removeObject(forKey: "diag_engine_init_at")
+    NotificationCenter.default.addObserver(
+      forName: UIApplication.didFinishLaunchingNotification,
+      object: nil,
+      queue: nil
+    ) { _ in
+      UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "diag_notif_fired_at")
+    }
+
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    // DIAGNÓSTICO TEMPORAL — ver comentario en didFinishLaunchingWithOptions.
+    UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "diag_engine_init_at")
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "DiagnosticoArranque") {
+      let canal = FlutterMethodChannel(
+        name: "hogarsos/diagnostico_arranque",
+        binaryMessenger: registrar.messenger()
+      )
+      canal.setMethodCallHandler { _, result in
+        let defaults = UserDefaults.standard
+        let delegateActual = UNUserNotificationCenter.current().delegate
+        let delegateDesc = delegateActual != nil ? String(describing: type(of: delegateActual!)) : "nil"
+        result([
+          "notifFiredAt": defaults.double(forKey: "diag_notif_fired_at"),
+          "engineInitAt": defaults.double(forKey: "diag_engine_init_at"),
+          "delegateClass": delegateDesc,
+        ] as [String: Any])
+      }
+    }
+
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
   }
 }

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -59,6 +62,59 @@ Future<void> main() async {
   Stripe.merchantIdentifier = 'merchant.es.hogarsos.app';
 
   runApp(const ProviderScope(child: HogarSOSApp()));
+  unawaited(_mostrarDiagnosticoArranque());
+}
+
+/// DIAGNÓSTICO TEMPORAL — experimento único para el bug de sonido en
+/// primer plano en iOS (ver memoria del proyecto). Pregunta a
+/// AppDelegate.swift, vía el canal nativo que registra en
+/// didInitializeImplicitFlutterEngine, en qué orden llegaron
+/// UIApplicationDidFinishLaunchingNotification y la inicialización del
+/// engine implícito, más la clase real del delegate de
+/// UNUserNotificationCenter en ese momento. Si la notificación se disparó
+/// ANTES de que el engine (y por tanto firebase_messaging) existiera,
+/// Firebase nunca pudo enterarse de que la app terminó de arrancar. Se
+/// reintenta unas cuantas veces porque el árbol de widgets (y por tanto
+/// `navigatorKey`) puede tardar un instante en montarse la primera vez.
+/// Quitar esta función y su llamada en cuanto se confirme o descarte la
+/// hipótesis.
+Future<void> _mostrarDiagnosticoArranque() async {
+  BuildContext? context;
+  for (var intento = 0; intento < 20 && context == null; intento++) {
+    await Future.delayed(const Duration(milliseconds: 300));
+    context = navigatorKey.currentState?.overlay?.context;
+  }
+  if (context == null) return;
+
+  try {
+    const canal = MethodChannel('hogarsos/diagnostico_arranque');
+    final resultado = await canal.invokeMethod('obtener') as Map?;
+    final notifFiredAt = (resultado?['notifFiredAt'] as num?) ?? 0;
+    final engineInitAt = (resultado?['engineInitAt'] as num?) ?? 0;
+    final delegateClass = resultado?['delegateClass'] as String? ?? 'desconocido';
+    final notifAntesQueEngine = notifFiredAt > 0 && engineInitAt > 0 && notifFiredAt < engineInitAt;
+    final mensaje = 'notifFiredAt: $notifFiredAt\n'
+        'engineInitAt: $engineInitAt\n'
+        'diferencia (s): ${(engineInitAt - notifFiredAt).toStringAsFixed(3)}\n'
+        'delegateClass: $delegateClass\n\n'
+        'notif ANTES que engine: $notifAntesQueEngine';
+    if (!context.mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('DIAGNÓSTICO arranque iOS'),
+        content: SelectableText(mensaje),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cerrar'),
+          ),
+        ],
+      ),
+    );
+  } catch (e) {
+    debugPrint('[DiagnosticoArranque] Error: $e');
+  }
 }
 
 /// Pantalla de bloqueo deliberadamente fea y en texto plano: no está
