@@ -2,10 +2,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import '../app_keys.dart';
 import 'api_service.dart';
 
 /// Notificaciones push (FCM). Pide permiso, registra el token del
@@ -18,20 +15,21 @@ import 'api_service.dart';
 /// caso en segundo plano/app cerrada, para que se vea y suene igual
 /// siempre.
 ///
-/// iOS es un caso aparte: tras varios builds de diagnóstico (vibración
-/// y SnackBar en `FirebaseMessaging.onMessage`, ninguno llegó a
-/// dispararse nunca en dispositivo real) se rastreó la causa hasta el
-/// código fuente de `firebase_messaging` y de `FlutterAppDelegate`:
-/// iOS solo permite un `UNUserNotificationCenterDelegate` activo, y
-/// aunque Firebase sabe reenviar a otros plugins cuando coexiste con
-/// ellos, solo lo hace si *algo* asigna ese delegate explícitamente —
-/// si nadie lo hacía (nuestro caso), Firebase tomaba el delegate por
-/// su cuenta con un camino de arranque distinto al esperado. El fix
-/// real vive en `AppDelegate.swift` (una sola línea); aquí solo hace
-/// falta volver a dejar que Firebase presente la notificación nativa
-/// (`setForegroundNotificationPresentationOptions` más abajo, con todo
-/// en `true`). `.show()` de flutter_local_notifications se queda solo
-/// para Android (ver más abajo), que nunca tuvo este problema.
+/// iOS es un caso aparte: durante meses `FirebaseMessaging.onMessage`
+/// nunca se disparaba con la app en primer plano. La causa real,
+/// rastreada con un diagnóstico de timestamps en dispositivo real: con
+/// el ciclo de vida Scene + engine implícito de esta app, el registro
+/// de plugins (`GeneratedPluginRegistrant.register`) se ejecuta
+/// DESPUÉS de que `UIApplicationDidFinishLaunchingNotification` ya se
+/// disparó, así que `firebase_messaging` nunca llegaba a tiempo para
+/// verla — y sin verla, nunca se autoasignaba como
+/// `UNUserNotificationCenterDelegate` ni se unía al fan-out de plugins
+/// de Flutter. El fix vive en `AppDelegate.swift`: se vuelve a publicar
+/// esa misma notificación justo después de registrar los plugins, una
+/// única vez. Con eso, Firebase ya presenta la notificación nativa por
+/// su cuenta (`setForegroundNotificationPresentationOptions` más abajo,
+/// con todo en `true`). `.show()` de flutter_local_notifications se
+/// queda solo para Android (ver más abajo), que nunca tuvo este problema.
 class NotificationService {
   NotificationService._internal();
   static final NotificationService instance = NotificationService._internal();
@@ -61,13 +59,9 @@ class NotificationService {
     // del sistema operativo.
     unawaited(_registrarIdioma());
 
-    // DIAGNÓSTICO TEMPORAL — se adelanta aquí, fuera del try/catch de
-    // permiso+token de abajo, para descartar que un fallo silencioso en
-    // algún paso anterior (denegación de permiso, timeout de getToken,
-    // fallo de red en el PATCH) esté impidiendo que este listener
-    // llegue a registrarse siquiera. Quitar junto con el resto del
-    // diagnóstico de _configurarListeners() en cuanto se confirme la
-    // causa real del bug de sonido en primer plano.
+    // Independiente del permiso que se pida más abajo: Android necesita
+    // el canal de notificaciones creado desde el primer arranque, tenga
+    // o no permiso concedido todavía.
     unawaited(_configurarListeners());
 
     try {
@@ -109,29 +103,13 @@ class NotificationService {
       await ApiService.instance.client.patch('/auth/me/fcm-token', data: {'fcmToken': token});
       debugPrint('[NotificationService] Token FCM registrado');
 
-      // Antes estaba todo en false salvo el badge, porque sin la línea
-      // que falta en AppDelegate.swift (ver comentario de clase) esta
-      // opción nunca llegaba a aplicarse de forma fiable. Con el
-      // delegate nativo bien asignado, esto ya es lo que controla si
-      // iOS enseña la notificación con la app en primer plano.
-      //
-      // DIAGNÓSTICO TEMPORAL — el build 22 (vibración justo después de esta
-      // llamada, dentro del catch general de la función) no vibró en el
-      // dispositivo real, pese a que el PATCH de arriba sí llega al backend.
-      // Esto separa la llamada en su propio try/catch con tres señales
-      // distintas para saber exactamente qué pasa: (1) se llega a esta línea,
-      // (2) la llamada termina bien, (3) la llamada lanza una excepción que el
-      // catch general de más abajo tragaría en silencio. Quitar todo el
-      // bloque de diagnóstico en cuanto se confirme la causa real.
-      HapticFeedback.lightImpact();
+      // Con el timing de registro de plugins corregido en AppDelegate.swift
+      // (ver comentario de clase), esto ya es lo que controla si iOS enseña
+      // la notificación nativa con la app en primer plano.
       try {
         await _messaging.setForegroundNotificationPresentationOptions(alert: true, badge: true, sound: true);
-        HapticFeedback.mediumImpact();
       } catch (e) {
         debugPrint('[NotificationService] setForegroundNotificationPresentationOptions falló: $e');
-        HapticFeedback.heavyImpact();
-        await Future.delayed(const Duration(milliseconds: 300));
-        HapticFeedback.heavyImpact();
       }
 
       // Si Firebase rota el token más adelante (la app sigue abierta),
@@ -189,18 +167,6 @@ class NotificationService {
     FirebaseMessaging.onMessage.listen((mensaje) {
       final notificacion = mensaje.notification;
       debugPrint('[NotificationService] Mensaje en primer plano: ${notificacion?.title}');
-
-      // DIAGNÓSTICO TEMPORAL — dos señales independientes de si este
-      // listener llega a dispararse en iOS con la app en primer plano:
-      // la vibración no depende del árbol de widgets (a diferencia del
-      // SnackBar de abajo), así que si esta también falla en notarse,
-      // descarta que el problema sea solo de scaffoldMessengerKey.
-      // Quitar todo el bloque en cuanto se confirme la causa real del
-      // bug de sonido en primer plano (ver memoria del proyecto).
-      HapticFeedback.heavyImpact();
-      scaffoldMessengerKey.currentState?.showSnackBar(
-        SnackBar(content: Text('DEBUG onMessage: ${notificacion?.title ?? "sin notification"}')),
-      );
 
       if (notificacion == null) return;
 
