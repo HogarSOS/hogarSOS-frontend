@@ -22,12 +22,12 @@ fontanero, electricista, limpieza del hogar, manitas, reformas, jardinería, cer
 
 ## Información de contacto
 - **Correo de soporte:** soporte@hogarsos.es
-- **Sitio web:** https://hogarsos.web.app
+- **Sitio web:** https://hogarsos.es
 - **Teléfono:** no configurado — campo opcional en Play Console, se puede dejar en blanco.
 
 ## Política de privacidad
-URL pública ya desplegada: https://hogarsos.web.app/privacidad/
-(mismo texto que la pantalla in-app `lib/screens/legal/privacidad_screen.dart`)
+URL pública ya desplegada: https://hogarsos.es/privacidad
+(servida directamente por el backend — `backend_wizard/src/routes/legal.routes.ts` —, mismo contenido que la pantalla in-app `lib/screens/legal/privacidad_screen.dart`)
 
 ## Clasificación de contenido y formulario de seguridad de datos
 **Pendiente** — estos dos se rellenan como cuestionario dentro de Play Console (no son archivos que yo pueda preparar de antemano), pero puedo adelantar las respuestas previstas cuando llegue el momento:
