@@ -115,6 +115,11 @@ class NotificationService {
       // delegate nativo bien asignado, esto ya es lo que controla si
       // iOS enseña la notificación con la app en primer plano.
       await _messaging.setForegroundNotificationPresentationOptions(alert: true, badge: true, sound: true);
+      // DIAGNÓSTICO TEMPORAL — vibración distinta a la del listener onMessage,
+      // para confirmar que esta llamada termina sin lanzar una excepción que el
+      // catch general de más abajo esté tragando en silencio. Quitar junto con
+      // el resto del diagnóstico en cuanto se confirme la causa real.
+      HapticFeedback.mediumImpact();
 
       // Si Firebase rota el token más adelante (la app sigue abierta),
       // se vuelve a mandar sin esperar al próximo arranque.
