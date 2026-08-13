@@ -106,11 +106,7 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
   // por mensaje, así que basta con recordar el último ya procesado.
   void _recibirNotificacion(RemoteMessage mensaje) {
     final id = mensaje.messageId;
-    debugPrint('[DIAG] _recibirNotificacion id=$id ultimaProcesada=$_ultimaNotificacionProcesadaId data=${mensaje.data}');
-    if (id != null && id == _ultimaNotificacionProcesadaId) {
-      debugPrint('[DIAG] _recibirNotificacion: DEDUP, descartada');
-      return;
-    }
+    if (id != null && id == _ultimaNotificacionProcesadaId) return;
     _notificacionPendiente = mensaje;
     _intentarProcesarNotificacionPendiente();
   }
@@ -120,7 +116,6 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
     if (mensaje == null) return;
 
     final authState = ref.read(authProvider);
-    debugPrint('[DIAG] _intentarProcesarNotificacionPendiente: restaurando=${authState.restaurando} usuario=${authState.usuario?.role}');
     if (authState.restaurando) return; // build() reintenta cuando termine
 
     _notificacionPendiente = null;
@@ -142,7 +137,6 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
 
   Future<void> _navegarPorNotificacionAsync(RemoteMessage mensaje, UserRole role) async {
     final solicitudId = mensaje.data['solicitudId'] as String?;
-    debugPrint('[DIAG] _navegarPorNotificacionAsync: solicitudId=$solicitudId tipo=${mensaje.data['tipo']} role=$role rutaActual=$rutaActual navigatorNull=${navigatorKey.currentState == null}');
     if (solicitudId == null) return;
 
     final navigator = navigatorKey.currentState;
@@ -151,13 +145,11 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
     final tipo = mensaje.data['tipo'] as String?;
     if (tipo == 'chat_mensaje') {
       final ruta = 'chat/$solicitudId';
-      debugPrint('[DIAG] rama chat_mensaje: ruta=$ruta rutaActual=$rutaActual iguales=${rutaActual == ruta}');
       if (rutaActual == ruta) return; // ya está viendo ese chat
       navigator.push(MaterialPageRoute(
         settings: RouteSettings(name: ruta),
         builder: (_) => ChatScreen(serviceRequestId: solicitudId),
       ));
-      debugPrint('[DIAG] rama chat_mensaje: push ejecutado');
       return;
     }
 
@@ -169,13 +161,11 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
     // preciso que se puede hacer hoy sin construir una pantalla nueva.
     if (role == UserRole.cliente) {
       final ruta = 'solicitud/$solicitudId';
-      debugPrint('[DIAG] rama cliente: ruta=$ruta rutaActual=$rutaActual iguales=${rutaActual == ruta}');
       if (rutaActual == ruta) return;
       navigator.push(MaterialPageRoute(
         settings: RouteSettings(name: ruta),
         builder: (_) => SeguimientoSolicitudScreen(solicitudId: solicitudId),
       ));
-      debugPrint('[DIAG] rama cliente: push ejecutado');
     } else if (role == UserRole.profesional) {
       // A diferencia de los dos casos de arriba (que empujan una pantalla
       // nueva, visible pase lo que pase), este solo cambia un provider que

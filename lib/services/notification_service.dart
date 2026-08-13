@@ -242,7 +242,6 @@ class NotificationService {
     // todo) — vuelca al mismo stream que getInitialMessage() más abajo,
     // para que DeepLinkListener tenga un único sitio donde enrutar.
     FirebaseMessaging.onMessageOpenedApp.listen((mensaje) {
-      debugPrint('[DIAG] onMessageOpenedApp: messageId=${mensaje.messageId} data=${mensaje.data}');
       _aperturasController.add(mensaje);
     });
   }
