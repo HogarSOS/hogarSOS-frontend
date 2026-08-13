@@ -191,6 +191,12 @@ String? _mensajePorCodigo(String? code, AppLocalizations t) {
       return t.apiErrUltimoAdminActivo;
     case 'ADMIN_CANNOT_REACTIVATE_DELETED_ACCOUNT':
       return t.apiErrCuentaEliminadaNoReactivable;
+    // Límite de intentos en login/register/forgot-password (auditoría de
+    // cierre). Reutiliza el mismo texto que ya existe para el
+    // 'too-many-requests' de Firebase — el significado para el usuario
+    // es idéntico independientemente de qué lado puso el límite.
+    case 'RATE_LIMITED':
+      return t.authErrorDemasiadosIntentos;
     default:
       return null;
   }
