@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -174,10 +175,22 @@ class NotificationService {
     // solo puede haber uno activo a la vez. Ahora ese rol lo tiene
     // AppDelegate.swift (ver comentario de clase más arriba), así que
     // aquí solo se inicializa el lado Android.
+    // onDidReceiveNotificationResponse: sin esto, tocar una notificación
+    // mostrada por este plugin (solo pasa en Android con la app en
+    // primer plano, ver el guard de plataforma más abajo) no hacía
+    // absolutamente nada — ni ejecutaba código Dart ni navegaba a
+    // ningún sitio, porque este plugin es independiente de FCM y
+    // onMessageOpenedApp (más abajo) solo se dispara para
+    // notificaciones que el propio sistema operativo entrega y
+    // presenta, no para estas mostradas "a mano". Confirmado en real:
+    // profesional con la app abierta, notificación de "te han
+    // elegido" mostrada encima, tocarla no navegaba ni cambiaba de
+    // pestaña.
     await _notificacionesLocales.initialize(
       const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       ),
+      onDidReceiveNotificationResponse: _alTocarNotificacionLocal,
     );
     await _notificacionesLocales
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
@@ -215,6 +228,10 @@ class NotificationService {
               priority: Priority.high,
             ),
           ),
+          // El payload es lo único que _alTocarNotificacionLocal tiene
+          // para reconstruir el RemoteMessage al tocarla — sin esto no
+          // habría forma de saber a qué solicitud/tipo navegar.
+          payload: jsonEncode(mensaje.data),
         );
       } catch (e) {
         debugPrint('[NotificationService] Error al mostrar notificación local: $e');
@@ -228,6 +245,23 @@ class NotificationService {
       debugPrint('[DIAG] onMessageOpenedApp: messageId=${mensaje.messageId} data=${mensaje.data}');
       _aperturasController.add(mensaje);
     });
+  }
+
+  // Solo se dispara para notificaciones mostradas por este plugin (ver
+  // guard de Android en el listener de onMessage más arriba) — vuelca
+  // al mismo stream que el resto de vías de apertura para que
+  // DeepLinkListener siga siendo el único sitio que decide a dónde
+  // navegar.
+  void _alTocarNotificacionLocal(NotificationResponse respuesta) {
+    final payload = respuesta.payload;
+    debugPrint('[NotificationService] Notificación local tocada, payload=$payload');
+    if (payload == null) return;
+    try {
+      final data = (jsonDecode(payload) as Map).map((clave, valor) => MapEntry(clave.toString(), valor.toString()));
+      _aperturasController.add(RemoteMessage(data: data));
+    } catch (e) {
+      debugPrint('[NotificationService] Error al parsear el payload de la notificación local: $e');
+    }
   }
 
   /// Comprueba si la app se abrió desde cero (proceso nuevo) pulsando una
