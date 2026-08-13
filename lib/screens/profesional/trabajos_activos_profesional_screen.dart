@@ -214,6 +214,68 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
     }
   }
 
+  /// "Iniciar trabajo" — protección opcional del profesional frente a
+  /// una cancelación instantánea del cliente (ver "Deshacer inicio" más
+  /// abajo para el error). El diálogo de confirmación existe porque esto
+  /// SÍ tiene una consecuencia real inmediata (el cliente deja de poder
+  /// cancelar solo) — no es una acción neutra como abrir el chat.
+  Future<void> _iniciar(BuildContext context, WidgetRef ref, AssignedRequest trabajo) async {
+    final t = AppLocalizations.of(context);
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t.trabajosActivosIniciarTrabajoConfirmarTitulo),
+        content: Text(t.trabajosActivosIniciarTrabajoConfirmarTexto),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(t.perfilCancelar),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(t.trabajosActivosIniciarTrabajo),
+          ),
+        ],
+      ),
+    );
+    if (confirmado != true || !context.mounted) return;
+
+    try {
+      await ServiceRequestService().iniciarTrabajo(trabajo.id);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.trabajosActivosIniciarTrabajoExito)));
+      ref.read(assignedRequestsProvider.notifier).cargar();
+    } catch (e) {
+      debugPrint('[TrabajosActivosProfesionalScreen] Error al iniciar trabajo: $e');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.trabajosActivosIniciarTrabajoError, t: t))),
+      );
+      ref.read(assignedRequestsProvider.notifier).cargar();
+    }
+  }
+
+  /// Deshace un "Iniciar trabajo" pulsado por error — nunca toca dinero,
+  /// así que no hace falta ningún diálogo de confirmación (a diferencia
+  /// de _iniciar arriba, esto solo le devuelve al cliente su cancelación
+  /// instantánea, nunca perjudica a nadie).
+  Future<void> _deshacerInicio(BuildContext context, WidgetRef ref, AssignedRequest trabajo) async {
+    final t = AppLocalizations.of(context);
+    try {
+      await ServiceRequestService().deshacerInicioTrabajo(trabajo.id);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.trabajosActivosDeshacerInicioExito)));
+      ref.read(assignedRequestsProvider.notifier).cargar();
+    } catch (e) {
+      debugPrint('[TrabajosActivosProfesionalScreen] Error al deshacer inicio: $e');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.trabajosActivosDeshacerInicioError, t: t))),
+      );
+      ref.read(assignedRequestsProvider.notifier).cargar();
+    }
+  }
+
   /// Diálogo para pedir más margen cuando el trabajo se complica más de
   /// lo previsto — nunca se cobra el exceso fuera de la app, hay que
   /// pasar por aquí y que el cliente lo acepte. Mismo patrón para las
@@ -531,6 +593,8 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
                       ),
                     ),
                     onCompletar: () => _completar(context, ref, trabajo),
+                    onIniciar: () => _iniciar(context, ref, trabajo),
+                    onDeshacerInicio: () => _deshacerInicio(context, ref, trabajo),
                     onEnviarPresupuesto: () => _enviarPresupuesto(context, ref, trabajo),
                     onPedirAmpliacion: () => _pedirAmpliacion(context, ref, trabajo),
                     onValorar: () => _valorar(context, ref, trabajo),
@@ -662,6 +726,8 @@ class _TarjetaTrabajo extends ConsumerWidget {
     required this.noLeido,
     required this.onChat,
     required this.onCompletar,
+    required this.onIniciar,
+    required this.onDeshacerInicio,
     required this.onEnviarPresupuesto,
     required this.onPedirAmpliacion,
     required this.onValorar,
@@ -672,6 +738,8 @@ class _TarjetaTrabajo extends ConsumerWidget {
   final bool noLeido;
   final VoidCallback onChat;
   final VoidCallback onCompletar;
+  final VoidCallback onIniciar;
+  final VoidCallback onDeshacerInicio;
   final VoidCallback onEnviarPresupuesto;
   final VoidCallback onPedirAmpliacion;
   final VoidCallback onValorar;
@@ -707,6 +775,13 @@ class _TarjetaTrabajo extends ConsumerWidget {
     }
     if (presupuesto.estado == EstadoPresupuesto.pendiente) {
       return _EstadoVisual(t.trabajosActivosEstadoPresupuestoPendiente, Icons.hourglass_top, Colors.amber.shade50, Colors.amber.shade900);
+    }
+    // Mismo color (tertiary) que usa _EstadoBanner en la pantalla del
+    // cliente para este mismo estado — mismo lenguaje visual en las dos
+    // apps para "en curso".
+    if (trabajo.estado == EstadoSolicitud.en_progreso) {
+      final colorScheme = Theme.of(context).colorScheme;
+      return _EstadoVisual(t.trabajosActivosEstadoEnCurso, Icons.construction_outlined, colorScheme.tertiaryContainer, colorScheme.onTertiaryContainer);
     }
     return _EstadoVisual(t.trabajosActivosEstadoPresupuestoAceptado, Icons.task_alt, Colors.green.shade50, Colors.green.shade800);
   }
@@ -877,6 +952,35 @@ class _TarjetaTrabajo extends ConsumerWidget {
                   Expanded(child: _botonSegunPresupuesto(t, colorScheme)),
                 ],
               ),
+              // "Iniciar trabajo" / "Deshacer inicio": protección opcional
+              // frente a la cancelación instantánea del cliente — nunca
+              // sustituye a "Marcar como completado" de arriba, que sigue
+              // funcionando igual con o sin pasar por aquí primero.
+              if (trabajo.estado == EstadoSolicitud.aceptada &&
+                  trabajo.presupuesto?.estado == EstadoPresupuesto.aceptado) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: _botonAccion(
+                    icon: Icons.play_circle_outline,
+                    label: t.trabajosActivosIniciarTrabajo,
+                    onPressed: onIniciar,
+                    relleno: false,
+                  ),
+                ),
+              ] else if (trabajo.estado == EstadoSolicitud.en_progreso) ...[
+                const SizedBox(height: 6),
+                Center(
+                  child: TextButton.icon(
+                    icon: Icon(Icons.undo, size: 16, color: colorScheme.onSurfaceVariant),
+                    label: Text(
+                      t.trabajosActivosDeshacerInicio,
+                      style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12.5),
+                    ),
+                    onPressed: onDeshacerInicio,
+                  ),
+                ),
+              ],
               if (_mostrarBotonAmpliacion) ...[
                 const SizedBox(height: 8),
                 SizedBox(

@@ -171,6 +171,21 @@ class ServiceRequestService {
     await _api.patch('/service-requests/$id/cancel');
   }
 
+  /// El profesional marca que ha empezado a trabajar de verdad
+  /// ("aceptada" -> "en_progreso") — protege su cobro frente a una
+  /// cancelación instantánea del cliente. Opcional, no obligatorio para
+  /// poder completar el trabajo después.
+  Future<void> iniciarTrabajo(String id) async {
+    await _api.patch('/service-requests/$id/start');
+  }
+
+  /// Deshace un "Iniciar trabajo" pulsado por error ("en_progreso" ->
+  /// "aceptada"). No mueve ni un céntimo — la autorización de Stripe
+  /// sigue retenida igual en ambos estados.
+  Future<void> deshacerInicioTrabajo(String id) async {
+    await _api.patch('/service-requests/$id/undo-start');
+  }
+
   /// Borra del historial una solicitud que nadie llegó a aceptar
   /// (pendiente o cancelada, sin profesional asignado) — el backend
   /// rechaza el borrado si ya hubo un profesional de por medio.

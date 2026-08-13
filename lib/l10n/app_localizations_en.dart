@@ -374,6 +374,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This request can no longer be canceled — the professional has already started, or it\'s already been resolved';
 
   @override
+  String get apiErrTrabajoEnCursoUsaDisputa =>
+      'The professional has already marked this job as in progress — to cancel it now, open a dispute';
+
+  @override
   String get apiErrSoloCreadorBorra =>
       'Only the customer who created this request can delete it';
 
@@ -1182,6 +1186,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trabajosActivosCompletadoError => 'Couldn\'t complete the service';
 
   @override
+  String get trabajosActivosIniciarTrabajo => 'Start job';
+
+  @override
+  String get trabajosActivosIniciarTrabajoConfirmarTitulo => 'Start this job?';
+
+  @override
+  String get trabajosActivosIniciarTrabajoConfirmarTexto =>
+      'From now on the client won\'t be able to cancel it directly — if needed, they\'ll have to open a dispute.';
+
+  @override
+  String get trabajosActivosIniciarTrabajoExito => 'Job started';
+
+  @override
+  String get trabajosActivosIniciarTrabajoError => 'Couldn\'t start the job';
+
+  @override
+  String get trabajosActivosDeshacerInicio => 'Undo start';
+
+  @override
+  String get trabajosActivosDeshacerInicioExito => 'Start undone';
+
+  @override
+  String get trabajosActivosDeshacerInicioError => 'Couldn\'t undo the start';
+
+  @override
   String get profesionalErrorDisponibilidad =>
       'Couldn\'t update your availability';
 
@@ -1273,8 +1302,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get seguimientoAceptada => 'A professional has accepted your request!';
 
   @override
-  String get seguimientoEnProgreso =>
-      'The professional is working on your request';
+  String get seguimientoEnProgreso => 'In progress';
 
   @override
   String get seguimientoCompletada => 'Service completed';
@@ -2322,6 +2350,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trabajosActivosEstadoPresupuestoAceptado => 'Accepted';
+
+  @override
+  String get trabajosActivosEstadoEnCurso => 'In progress';
 
   @override
   String get trabajosActivosEstadoAmpliacionPendiente => 'Extension pending';

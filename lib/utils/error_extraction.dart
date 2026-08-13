@@ -126,6 +126,8 @@ String? _mensajePorCodigo(String? code, AppLocalizations t) {
       return t.apiErrSoloCreadorCancela;
     case 'REQUEST_CANNOT_CANCEL':
       return t.apiErrNoSePuedeCancelar;
+    case 'REQUEST_IN_PROGRESS_USE_DISPUTE':
+      return t.apiErrTrabajoEnCursoUsaDisputa;
     case 'REQUEST_ONLY_CREATOR_DELETE':
       return t.apiErrSoloCreadorBorra;
     case 'REQUEST_CANNOT_DELETE_ACCEPTED':

@@ -375,6 +375,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Esta solicitud ya no se puede cancelar — el profesional ya empezó o ya se resolvió';
 
   @override
+  String get apiErrTrabajoEnCursoUsaDisputa =>
+      'El profesional ya ha marcado este trabajo como en curso — para cancelarlo ahora, abre una reclamación';
+
+  @override
   String get apiErrSoloCreadorBorra =>
       'Solo el cliente que creó esta solicitud puede borrarla';
 
@@ -1187,6 +1191,34 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo completar el servicio';
 
   @override
+  String get trabajosActivosIniciarTrabajo => 'Iniciar trabajo';
+
+  @override
+  String get trabajosActivosIniciarTrabajoConfirmarTitulo =>
+      '¿Iniciar este trabajo?';
+
+  @override
+  String get trabajosActivosIniciarTrabajoConfirmarTexto =>
+      'A partir de ahora el cliente ya no podrá cancelarlo directamente — si hace falta, tendrá que abrir una reclamación.';
+
+  @override
+  String get trabajosActivosIniciarTrabajoExito => 'Trabajo iniciado';
+
+  @override
+  String get trabajosActivosIniciarTrabajoError =>
+      'No se pudo iniciar el trabajo';
+
+  @override
+  String get trabajosActivosDeshacerInicio => 'Deshacer inicio';
+
+  @override
+  String get trabajosActivosDeshacerInicioExito => 'Inicio deshecho';
+
+  @override
+  String get trabajosActivosDeshacerInicioError =>
+      'No se pudo deshacer el inicio';
+
+  @override
   String get profesionalErrorDisponibilidad =>
       'No se pudo actualizar tu disponibilidad';
 
@@ -1279,8 +1311,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get seguimientoAceptada => '¡Un profesional ha aceptado tu solicitud!';
 
   @override
-  String get seguimientoEnProgreso =>
-      'El profesional está trabajando en tu solicitud';
+  String get seguimientoEnProgreso => 'En curso';
 
   @override
   String get seguimientoCompletada => 'Servicio completado';
@@ -2341,6 +2372,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get trabajosActivosEstadoPresupuestoAceptado => 'Aceptado';
+
+  @override
+  String get trabajosActivosEstadoEnCurso => 'En curso';
 
   @override
   String get trabajosActivosEstadoAmpliacionPendiente => 'Ampliación pendiente';

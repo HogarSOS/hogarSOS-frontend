@@ -728,6 +728,12 @@ abstract class AppLocalizations {
   /// **'Esta solicitud ya no se puede cancelar — el profesional ya empezó o ya se resolvió'**
   String get apiErrNoSePuedeCancelar;
 
+  /// No description provided for @apiErrTrabajoEnCursoUsaDisputa.
+  ///
+  /// In es, this message translates to:
+  /// **'El profesional ya ha marcado este trabajo como en curso — para cancelarlo ahora, abre una reclamación'**
+  String get apiErrTrabajoEnCursoUsaDisputa;
+
   /// No description provided for @apiErrSoloCreadorBorra.
   ///
   /// In es, this message translates to:
@@ -2084,6 +2090,54 @@ abstract class AppLocalizations {
   /// **'No se pudo completar el servicio'**
   String get trabajosActivosCompletadoError;
 
+  /// No description provided for @trabajosActivosIniciarTrabajo.
+  ///
+  /// In es, this message translates to:
+  /// **'Iniciar trabajo'**
+  String get trabajosActivosIniciarTrabajo;
+
+  /// No description provided for @trabajosActivosIniciarTrabajoConfirmarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Iniciar este trabajo?'**
+  String get trabajosActivosIniciarTrabajoConfirmarTitulo;
+
+  /// No description provided for @trabajosActivosIniciarTrabajoConfirmarTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'A partir de ahora el cliente ya no podrá cancelarlo directamente — si hace falta, tendrá que abrir una reclamación.'**
+  String get trabajosActivosIniciarTrabajoConfirmarTexto;
+
+  /// No description provided for @trabajosActivosIniciarTrabajoExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Trabajo iniciado'**
+  String get trabajosActivosIniciarTrabajoExito;
+
+  /// No description provided for @trabajosActivosIniciarTrabajoError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo iniciar el trabajo'**
+  String get trabajosActivosIniciarTrabajoError;
+
+  /// No description provided for @trabajosActivosDeshacerInicio.
+  ///
+  /// In es, this message translates to:
+  /// **'Deshacer inicio'**
+  String get trabajosActivosDeshacerInicio;
+
+  /// No description provided for @trabajosActivosDeshacerInicioExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio deshecho'**
+  String get trabajosActivosDeshacerInicioExito;
+
+  /// No description provided for @trabajosActivosDeshacerInicioError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo deshacer el inicio'**
+  String get trabajosActivosDeshacerInicioError;
+
   /// No description provided for @profesionalErrorDisponibilidad.
   ///
   /// In es, this message translates to:
@@ -2243,7 +2297,7 @@ abstract class AppLocalizations {
   /// No description provided for @seguimientoEnProgreso.
   ///
   /// In es, this message translates to:
-  /// **'El profesional está trabajando en tu solicitud'**
+  /// **'En curso'**
   String get seguimientoEnProgreso;
 
   /// No description provided for @seguimientoCompletada.
@@ -4107,6 +4161,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Aceptado'**
   String get trabajosActivosEstadoPresupuestoAceptado;
+
+  /// No description provided for @trabajosActivosEstadoEnCurso.
+  ///
+  /// In es, this message translates to:
+  /// **'En curso'**
+  String get trabajosActivosEstadoEnCurso;
 
   /// No description provided for @trabajosActivosEstadoAmpliacionPendiente.
   ///
