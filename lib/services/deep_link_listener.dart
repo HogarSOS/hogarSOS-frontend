@@ -279,6 +279,14 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
     ref.listen(authProvider, (previo, actual) {
       if (!actual.restaurando) _intentarProcesarNotificacionPendiente();
     });
-    return widget.child;
+    // Build 34 — mecanismo de recuperación, no solución definitiva: ver
+    // comprobarToquePendienteTrasInteraccion en NotificationService. Solo
+    // observa (no intercepta) el primer toque en pantalla tras un mensaje
+    // en primer plano; no hace nada si no hay ningún mensaje pendiente por
+    // messageId.
+    return Listener(
+      onPointerDown: (_) => unawaited(NotificationService.instance.comprobarToquePendienteTrasInteraccion()),
+      child: widget.child,
+    );
   }
 }

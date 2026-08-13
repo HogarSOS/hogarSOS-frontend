@@ -42,6 +42,14 @@ class NotificationService with WidgetsBindingObserver {
   bool _listenerConfigurado = false;
   StreamSubscription<String>? _tokenRefreshSub;
 
+  // Build 34 — mecanismo de recuperación, NO la solución definitiva: solo
+  // iOS. messageId del último mensaje recibido en primer plano que todavía
+  // no se ha confirmado como navegado (ver comprobarToquePendienteTrasInteraccion
+  // más abajo). Va por messageId, no por un booleano global, para que un
+  // toque pendiente de una notificación no pueda "recuperarse" con el
+  // messageId de una notificación distinta y posterior.
+  String? _mensajePendienteId;
+
   // Un mensaje que el usuario pulsó para abrir la app (segundo plano) o
   // con el que la abrió desde cerrada — quien escuche este stream (ver
   // DeepLinkListener) decide a qué pantalla navegar según `data['tipo']`.
@@ -224,6 +232,14 @@ class NotificationService with WidgetsBindingObserver {
 
       if (notificacion == null) return;
 
+      // Build 34 — solo iOS: marca que ESTE messageId podría quedar con un
+      // toque pendiente sin entregar (ver comprobarToquePendienteTrasInteraccion
+      // y el comentario de _mensajePendienteId arriba). Se pisa con cada
+      // mensaje nuevo, así que nunca queda apuntando a un mensaje anterior.
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        _mensajePendienteId = mensaje.messageId;
+      }
+
       // Solo Android: en iOS la presentación ya la hace Firebase de
       // forma nativa (ver más arriba). Llamar aquí también en iOS
       // duplicaría la notificación.
@@ -349,6 +365,40 @@ class NotificationService with WidgetsBindingObserver {
       _aperturasController.add(RemoteMessage(data: data, messageId: messageId));
     } catch (e) {
       debugPrint('[NotificationService] Error leyendo el último toque en vivo (iOS): $e');
+    }
+  }
+
+  /// Build 34 — mecanismo de recuperación, no la solución definitiva (ver
+  /// _mensajePendienteId): a diferencia de didChangeAppLifecycleState de
+  /// arriba (que solo se dispara si hay una transición real de ciclo de
+  /// vida — no ocurre con un toque puro en primer plano sin más
+  /// interacción), esto se engancha a cualquier toque del usuario en la
+  /// pantalla después de un mensaje en primer plano. No navega por un
+  /// toque normal: se consume _mensajePendienteId de inmediato (una sola
+  /// vez por mensaje) y solo añade al stream si nativo confirma que ese
+  /// mismo messageId es el que de verdad quedó pendiente — si el usuario
+  /// tocó otra cosa sin relación, getUltimoToqueEnVivo no tiene nada que
+  /// devolver (o devuelve null) y aquí no pasa nada.
+  Future<void> comprobarToquePendienteTrasInteraccion() async {
+    if (defaultTargetPlatform != TargetPlatform.iOS) return;
+    final pendiente = _mensajePendienteId;
+    if (pendiente == null) return;
+    _mensajePendienteId = null;
+    try {
+      final userInfo = await _canalNotificacionInicial.invokeMapMethod<Object?, Object?>(
+        'getUltimoToqueEnVivo',
+      );
+      if (userInfo == null) return;
+      final data = userInfo.map((clave, valor) => MapEntry(clave.toString(), valor));
+      final messageId = data['gcm.message_id'] as String?;
+      if (messageId != pendiente) return;
+      debugPrint(
+        '[DIAG-NOTIF-IOS] getUltimoToqueEnVivo recuperado tras interacción en pantalla '
+        'ts=${DateTime.now().toIso8601String()} messageId=$messageId',
+      );
+      _aperturasController.add(RemoteMessage(data: data, messageId: messageId));
+    } catch (e) {
+      debugPrint('[NotificationService] Error en recuperación por interacción en pantalla (iOS): $e');
     }
   }
 
