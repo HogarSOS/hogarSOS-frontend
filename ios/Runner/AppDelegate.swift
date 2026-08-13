@@ -17,6 +17,12 @@ import GoogleMaps
   // tiene acceso directo a la instancia que recibió el toque real.
   static var notificacionInicialCapturada: [AnyHashable: Any]?
 
+  // Propiedad (antes variable local dentro de didInitializeImplicitFlutterEngine)
+  // para poder usar el mismo canal también desde userNotificationCenter(_:didReceive:)
+  // — ver "toqueEnVivo" más abajo. nil hasta que el motor Flutter termina de
+  // inicializarse, lo que además sirve como señal de "¿ya puedo hablar con Dart?".
+  private var canalNotificacionInicial: FlutterMethodChannel?
+
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -37,22 +43,44 @@ import GoogleMaps
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
-  // Se ejecuta tanto si el usuario tocó la notificación con la app cerrada (arranque
-  // en frío) como en segundo plano — en ambos casos guardamos el userInfo (solo lo
-  // consume el canal nativo de más abajo si de verdad hubo un arranque en frío, ver
-  // deep_link_listener.dart). Reenviar con super (en vez de llamar completionHandler
-  // nosotros mismos) es lo que preserva intacto el camino ya existente hacia
-  // firebase_messaging (FlutterAppDelegate → lifeCycleDelegate → FLTFirebaseMessagingPlugin,
-  // que es quien de verdad debe llamar completionHandler): verificado leyendo el
-  // código fuente real de FlutterAppDelegate.mm y FLTFirebaseMessagingPlugin.m que
-  // ese es el único camino por el que hoy funciona onMessageOpenedApp en segundo
-  // plano — llamar completionHandler aquí también lo habría roto para siempre.
+  // Se ejecuta con cualquier toque de notificación, sea cual sea el estado de la
+  // app (cerrada, segundo plano o primer plano) — el único punto nativo común a
+  // los tres casos.
   override func userNotificationCenter(
     _ center: UNUserNotificationCenter,
     didReceive response: UNNotificationResponse,
     withCompletionHandler completionHandler: @escaping () -> Void
   ) {
-    AppDelegate.notificacionInicialCapturada = response.notification.request.content.userInfo
+    let userInfo = response.notification.request.content.userInfo
+    AppDelegate.notificacionInicialCapturada = userInfo
+
+    // Con la app ya corriendo (segundo plano o primer plano), este mismo toque
+    // también debería llegar a Dart vía onMessageOpenedApp de firebase_messaging
+    // — pero ese camino pasa por FLTFirebaseMessagingPlugin (código de terceros)
+    // y no hay forma de verificar en producción si de verdad lo hace. En vez de
+    // depender solo de eso, se envía el mismo userInfo también por este canal,
+    // que sí es nuestro y ya está probado (es el mismo que usa el arranque en
+    // frío, ver notificacionInicialCapturada arriba). deep_link_listener.dart
+    // deduplica por messageId, así que si onMessageOpenedApp también llega para
+    // este mismo toque, no se procesa dos veces (ver dedup en _recibirNotificacion).
+    // canalNotificacionInicial es nil hasta que el motor termina de inicializarse
+    // (arranque en frío real) — en ese caso no hay nada que enviar aquí, el
+    // canal nativo de una sola vez ya cubre ese caso mediante la variable
+    // estática de arriba.
+    if let canal = canalNotificacionInicial {
+      DispatchQueue.main.async {
+        canal.invokeMethod("toqueEnVivo", arguments: userInfo)
+      }
+    }
+
+    // Reenviar con super (en vez de llamar completionHandler nosotros mismos) es
+    // lo que preserva intacto el camino ya existente hacia firebase_messaging
+    // (FlutterAppDelegate → lifeCycleDelegate → FLTFirebaseMessagingPlugin, que
+    // es quien de verdad debe llamar completionHandler): verificado leyendo el
+    // código fuente real de FlutterAppDelegate.mm y FLTFirebaseMessagingPlugin.m
+    // que ese es el único camino por el que hoy funciona onMessageOpenedApp en
+    // segundo plano — llamar completionHandler aquí también lo habría roto para
+    // siempre. El envío por canal de arriba es aparte y no interfiere con esto.
     super.userNotificationCenter(center, didReceive: response, withCompletionHandler: completionHandler)
   }
 
@@ -70,6 +98,7 @@ import GoogleMaps
       name: "es.hogarsos.app/initial_notification",
       binaryMessenger: engineBridge.applicationRegistrar.messenger()
     )
+    self.canalNotificacionInicial = canalNotificacionInicial
     canalNotificacionInicial.setMethodCallHandler { call, result in
       guard call.method == "getInitialNotification" else {
         result(FlutterMethodNotImplemented)

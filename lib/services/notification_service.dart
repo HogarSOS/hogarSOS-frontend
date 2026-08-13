@@ -241,9 +241,48 @@ class NotificationService {
     // Notificación pulsada con la app en segundo plano (no cerrada del
     // todo) — vuelca al mismo stream que getInitialMessage() más abajo,
     // para que DeepLinkListener tenga un único sitio donde enrutar.
+    // Vía redundante en iOS desde AppDelegate.swift (ver "toqueEnVivo" más
+    // abajo): este listener se deja intacto porque, si en algún momento sí
+    // llega a dispararse, la deduplicación por messageId de DeepLinkListener
+    // ya evita procesar el mismo toque dos veces.
     FirebaseMessaging.onMessageOpenedApp.listen((mensaje) {
+      // [DIAG-NOTIF-IOS] Instrumentación temporal para diagnosticar el bug
+      // de navegación en segundo plano/primer plano en iOS — retirar tras
+      // confirmar la causa raíz con logs reales en dispositivo.
+      debugPrint(
+        '[DIAG-NOTIF-IOS] onMessageOpenedApp recibido '
+        'ts=${DateTime.now().toIso8601String()} '
+        'messageId=${mensaje.messageId} '
+        'tipo=${mensaje.data['tipo']} '
+        'solicitudId=${mensaje.data['solicitudId']}',
+      );
       _aperturasController.add(mensaje);
     });
+
+    // Solo iOS: vía redundante para un toque con la app ya corriendo (segundo
+    // plano o primer plano), enviada directamente desde AppDelegate.swift en
+    // cuanto ocurre — ver comentario de userNotificationCenter(_:didReceive:)
+    // allí sobre por qué no basta con confiar solo en onMessageOpenedApp de
+    // arriba. Mismo canal que ya usa comprobarNotificacionInicialNativa() para
+    // el arranque en frío, pero en la dirección contraria (nativo llama a
+    // Dart en vez de Dart preguntar a nativo).
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      _canalNotificacionInicial.setMethodCallHandler((llamada) async {
+        if (llamada.method != 'toqueEnVivo') return;
+        final userInfo = (llamada.arguments as Map).map((clave, valor) => MapEntry(clave.toString(), valor));
+        final messageId = userInfo['gcm.message_id'] as String?;
+        // [DIAG-NOTIF-IOS] Instrumentación temporal — ver comentario de
+        // onMessageOpenedApp arriba.
+        debugPrint(
+          '[DIAG-NOTIF-IOS] toqueEnVivo (canal nativo) recibido '
+          'ts=${DateTime.now().toIso8601String()} '
+          'messageId=$messageId '
+          'tipo=${userInfo['tipo']} '
+          'solicitudId=${userInfo['solicitudId']}',
+        );
+        _aperturasController.add(RemoteMessage(data: userInfo, messageId: messageId));
+      });
+    }
   }
 
   // Solo se dispara para notificaciones mostradas por este plugin (ver

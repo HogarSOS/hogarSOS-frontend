@@ -106,17 +106,36 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
   // por mensaje, así que basta con recordar el último ya procesado.
   void _recibirNotificacion(RemoteMessage mensaje) {
     final id = mensaje.messageId;
-    if (id != null && id == _ultimaNotificacionProcesadaId) return;
+    if (id != null && id == _ultimaNotificacionProcesadaId) {
+      // [DIAG-NOTIF-IOS] temporal.
+      debugPrint(
+        '[DIAG-NOTIF-IOS] descartada en _recibirNotificacion: '
+        'motivo=duplicado (mismo messageId ya procesado) messageId=$id',
+      );
+      return;
+    }
     _notificacionPendiente = mensaje;
     _intentarProcesarNotificacionPendiente();
   }
 
   void _intentarProcesarNotificacionPendiente() {
     final mensaje = _notificacionPendiente;
-    if (mensaje == null) return;
+    if (mensaje == null) {
+      // [DIAG-NOTIF-IOS] temporal.
+      debugPrint('[DIAG-NOTIF-IOS] _intentarProcesarNotificacionPendiente: nada pendiente, no hace nada');
+      return;
+    }
 
     final authState = ref.read(authProvider);
-    if (authState.restaurando) return; // build() reintenta cuando termine
+    if (authState.restaurando) {
+      // [DIAG-NOTIF-IOS] temporal.
+      debugPrint(
+        '[DIAG-NOTIF-IOS] descartada en _intentarProcesarNotificacionPendiente: '
+        'motivo=authState.restaurando=true (se reintentará cuando termine) '
+        'messageId=${mensaje.messageId}',
+      );
+      return; // build() reintenta cuando termine
+    }
 
     _notificacionPendiente = null;
     _ultimaNotificacionProcesadaId = mensaje.messageId;
@@ -126,7 +145,14 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
     // tenía sesión cuando llegó; no merece la pena "recordarla" hasta
     // después de un login manual posterior).
     final usuario = authState.usuario;
-    if (usuario == null) return;
+    if (usuario == null) {
+      // [DIAG-NOTIF-IOS] temporal.
+      debugPrint(
+        '[DIAG-NOTIF-IOS] descartada en _intentarProcesarNotificacionPendiente: '
+        'motivo=sin usuario en sesión messageId=${mensaje.messageId}',
+      );
+      return;
+    }
 
     _navegarPorNotificacion(mensaje, usuario.role);
   }
@@ -137,19 +163,43 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
 
   Future<void> _navegarPorNotificacionAsync(RemoteMessage mensaje, UserRole role) async {
     final solicitudId = mensaje.data['solicitudId'] as String?;
-    if (solicitudId == null) return;
-
-    final navigator = navigatorKey.currentState;
-    if (navigator == null) return;
-
     final tipo = mensaje.data['tipo'] as String?;
+    final navigator = navigatorKey.currentState;
+    // [DIAG-NOTIF-IOS] temporal — punto de entrada, antes de cualquier
+    // descarte posible, para saber siempre en qué estado llegó aquí.
+    final authStateEntrada = ref.read(authProvider);
+    debugPrint(
+      '[DIAG-NOTIF-IOS] entrando en _navegarPorNotificacionAsync '
+      'ts=${DateTime.now().toIso8601String()} '
+      'navigatorNoNulo=${navigator != null} '
+      'restaurando=${authStateEntrada.restaurando} '
+      'tipo=$tipo solicitudId=$solicitudId rutaActual=$rutaActual',
+    );
+
+    if (solicitudId == null) {
+      debugPrint('[DIAG-NOTIF-IOS] descartada en _navegarPorNotificacionAsync: motivo=solicitudId nulo en el payload');
+      return;
+    }
+
+    if (navigator == null) {
+      debugPrint('[DIAG-NOTIF-IOS] descartada en _navegarPorNotificacionAsync: motivo=navigatorKey.currentState es null');
+      return;
+    }
+
     if (tipo == 'chat_mensaje') {
       final ruta = 'chat/$solicitudId';
-      if (rutaActual == ruta) return; // ya está viendo ese chat
+      if (rutaActual == ruta) {
+        debugPrint('[DIAG-NOTIF-IOS] descartada en rama chat_mensaje: motivo=ya está viendo esa ruta ruta=$ruta');
+        return; // ya está viendo ese chat
+      }
       navigator.push(MaterialPageRoute(
         settings: RouteSettings(name: ruta),
         builder: (_) => ChatScreen(serviceRequestId: solicitudId),
       ));
+      debugPrint(
+        '[DIAG-NOTIF-IOS] navegación ejecutada ts=${DateTime.now().toIso8601String()} '
+        'destino=$ruta rutaPrevia=$rutaActual resultado=push chat_mensaje ok',
+      );
       return;
     }
 
@@ -161,11 +211,18 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
     // preciso que se puede hacer hoy sin construir una pantalla nueva.
     if (role == UserRole.cliente) {
       final ruta = 'solicitud/$solicitudId';
-      if (rutaActual == ruta) return;
+      if (rutaActual == ruta) {
+        debugPrint('[DIAG-NOTIF-IOS] descartada en rama cliente: motivo=ya está viendo esa ruta ruta=$ruta');
+        return;
+      }
       navigator.push(MaterialPageRoute(
         settings: RouteSettings(name: ruta),
         builder: (_) => SeguimientoSolicitudScreen(solicitudId: solicitudId),
       ));
+      debugPrint(
+        '[DIAG-NOTIF-IOS] navegación ejecutada ts=${DateTime.now().toIso8601String()} '
+        'destino=$ruta rutaPrevia=$rutaActual resultado=push cliente ok',
+      );
     } else if (role == UserRole.profesional) {
       // A diferencia de los dos casos de arriba (que empujan una pantalla
       // nueva, visible pase lo que pase), este solo cambia un provider que
@@ -176,6 +233,7 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
       // rechazado" con el chat abierto no hacía nada visible hasta volver
       // atrás — la pestaña correcta ya estaba seleccionada debajo.
       navigator.popUntil((route) => route.isFirst);
+      debugPrint('[DIAG-NOTIF-IOS] rama profesional: popUntil ejecutado ts=${DateTime.now().toIso8601String()}');
 
       // En un arranque en frío, ProfesionalShellScreen acaba de montarse
       // y su propio initState() programa un addPostFrameCallback que
@@ -188,6 +246,21 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
       // la pestaña de verdad.
       await Future.delayed(const Duration(milliseconds: 400));
       ref.read(profesionalTabIndexProvider.notifier).state = 2;
+      debugPrint(
+        '[DIAG-NOTIF-IOS] navegación ejecutada ts=${DateTime.now().toIso8601String()} '
+        'destino=pestaña Trabajos activos (index 2) resultado=profesionalTabIndexProvider fijado a 2',
+      );
+
+      // [DIAG-NOTIF-IOS] temporal — relectura diferida para detectar si
+      // algo sobrescribe el valor después de fijarlo aquí (escenario D).
+      unawaited(Future.delayed(const Duration(milliseconds: 300), () {
+        final valorActual = ref.read(profesionalTabIndexProvider);
+        debugPrint(
+          '[DIAG-NOTIF-IOS] relectura +300ms tras fijar pestaña: '
+          'valorActual=$valorActual (esperado=2) '
+          'ts=${DateTime.now().toIso8601String()}',
+        );
+      }));
     }
   }
 
