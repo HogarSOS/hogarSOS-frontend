@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'api_service.dart';
 
@@ -32,7 +33,7 @@ import 'api_service.dart';
 /// su cuenta (`setForegroundNotificationPresentationOptions` más abajo,
 /// con todo en `true`). `.show()` de flutter_local_notifications se
 /// queda solo para Android (ver más abajo), que nunca tuvo este problema.
-class NotificationService {
+class NotificationService with WidgetsBindingObserver {
   NotificationService._internal();
   static final NotificationService instance = NotificationService._internal();
 
@@ -65,6 +66,17 @@ class NotificationService {
     description: 'Solicitudes, mensajes y pagos de Hogar SOS',
     importance: Importance.high,
   );
+
+  /// Registra los listeners de notificaciones (canal nativo iOS incluido)
+  /// sin esperar a que haya sesión — a diferencia de registrarToken(), que
+  /// además pide permiso y registra el token FCM (eso sí necesita esperar
+  /// al login). Llamar cuanto antes al arrancar (ver DeepLinkListener):
+  /// antes de este cambio, el handler de 'toqueEnVivo' solo se registraba
+  /// dentro de registrarToken() — un toque en vivo llegado antes de que
+  /// eso completara se perdía en silencio. Idempotente
+  /// (_listenerConfigurado), no importa si registrarToken() la llama
+  /// también más tarde.
+  Future<void> iniciarListenersTemprano() => _configurarListeners();
 
   /// Llamar tras un login/registro exitoso y tras restaurar sesión al
   /// arrancar — el token de FCM puede rotar en cualquier momento, así
@@ -169,6 +181,10 @@ class NotificationService {
   Future<void> _configurarListeners() async {
     if (_listenerConfigurado) return;
     _listenerConfigurado = true;
+
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      WidgetsBinding.instance.addObserver(this);
+    }
 
     // Sin `iOS:` a propósito — pasar DarwinInitializationSettings hace
     // que este plugin se declare UNUserNotificationCenterDelegate, y
@@ -299,6 +315,40 @@ class NotificationService {
       _aperturasController.add(RemoteMessage(data: data));
     } catch (e) {
       debugPrint('[NotificationService] Error al parsear el payload de la notificación local: $e');
+    }
+  }
+
+  /// Respaldo del canal en vivo (ver toqueEnVivo arriba): si un toque
+  /// llegó con la app en segundo plano justo cuando el proceso está
+  /// reanudando, el invokeMethod nativo puede dispararse antes de que el
+  /// motor de Flutter esté listo para recibirlo. Al volver a primer
+  /// plano (único momento en que aplica: en primer plano ya no hay
+  /// transición de estado que lo dispare, pero tampoco hace falta, el
+  /// canal ya lleva rato registrado) se pregunta explícitamente al
+  /// nativo por el último toque capturado.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_comprobarUltimoToqueEnVivo());
+    }
+  }
+
+  Future<void> _comprobarUltimoToqueEnVivo() async {
+    if (defaultTargetPlatform != TargetPlatform.iOS) return;
+    try {
+      final userInfo = await _canalNotificacionInicial.invokeMapMethod<Object?, Object?>(
+        'getUltimoToqueEnVivo',
+      );
+      if (userInfo == null) return;
+      final data = userInfo.map((clave, valor) => MapEntry(clave.toString(), valor));
+      final messageId = data['gcm.message_id'] as String?;
+      debugPrint(
+        '[DIAG-NOTIF-IOS] getUltimoToqueEnVivo recuperó un toque no entregado '
+        'ts=${DateTime.now().toIso8601String()} messageId=$messageId',
+      );
+      _aperturasController.add(RemoteMessage(data: data, messageId: messageId));
+    } catch (e) {
+      debugPrint('[NotificationService] Error leyendo el último toque en vivo (iOS): $e');
     }
   }
 

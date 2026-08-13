@@ -73,6 +73,7 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
       onError: (e) => debugPrint('[DeepLinkListener] Error en uriLinkStream: $e'),
     );
 
+    unawaited(NotificationService.instance.iniciarListenersTemprano());
     unawaited(NotificationService.instance.comprobarMensajeInicial());
     unawaited(NotificationService.instance.comprobarNotificacionInicialNativa());
     _aperturasSub = NotificationService.instance.aperturasPorNotificacion.listen(_recibirNotificacion);

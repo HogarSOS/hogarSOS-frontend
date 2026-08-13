@@ -17,6 +17,16 @@ import GoogleMaps
   // tiene acceso directo a la instancia que recibió el toque real.
   static var notificacionInicialCapturada: [AnyHashable: Any]?
 
+  // Último toque en vivo (segundo plano o primer plano) capturado en
+  // userNotificationCenter(_:didReceive:) — además de enviarse por
+  // invokeMethod("toqueEnVivo", ...) de inmediato, se guarda aquí por si
+  // Dart todavía no tenía su setMethodCallHandler registrado en ese
+  // instante exacto: invokeMethod no reintenta ni avisa si no hay
+  // receptor, así que sin este respaldo esa entrega se pierde en
+  // silencio. Dart puede "tirar" de él con getUltimoToqueEnVivo (mismo
+  // patrón one-shot que notificacionInicialCapturada de arriba).
+  static var ultimoToqueEnVivo: [AnyHashable: Any]?
+
   // Propiedad (antes variable local dentro de didInitializeImplicitFlutterEngine)
   // para poder usar el mismo canal también desde userNotificationCenter(_:didReceive:)
   // — ver "toqueEnVivo" más abajo. nil hasta que el motor Flutter termina de
@@ -53,6 +63,7 @@ import GoogleMaps
   ) {
     let userInfo = response.notification.request.content.userInfo
     AppDelegate.notificacionInicialCapturada = userInfo
+    AppDelegate.ultimoToqueEnVivo = userInfo
 
     // Con la app ya corriendo (segundo plano o primer plano), este mismo toque
     // también debería llegar a Dart vía onMessageOpenedApp de firebase_messaging
@@ -100,12 +111,16 @@ import GoogleMaps
     )
     self.canalNotificacionInicial = canalNotificacionInicial
     canalNotificacionInicial.setMethodCallHandler { call, result in
-      guard call.method == "getInitialNotification" else {
+      switch call.method {
+      case "getInitialNotification":
+        result(AppDelegate.notificacionInicialCapturada)
+        AppDelegate.notificacionInicialCapturada = nil
+      case "getUltimoToqueEnVivo":
+        result(AppDelegate.ultimoToqueEnVivo)
+        AppDelegate.ultimoToqueEnVivo = nil
+      default:
         result(FlutterMethodNotImplemented)
-        return
       }
-      result(AppDelegate.notificacionInicialCapturada)
-      AppDelegate.notificacionInicialCapturada = nil
     }
 
     // Bug de meses: en iOS, con la app en primer plano, FirebaseMessaging.onMessage
