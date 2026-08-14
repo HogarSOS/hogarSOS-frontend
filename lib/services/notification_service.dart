@@ -278,16 +278,6 @@ class NotificationService with WidgetsBindingObserver {
     // llega a dispararse, la deduplicación por messageId de DeepLinkListener
     // ya evita procesar el mismo toque dos veces.
     FirebaseMessaging.onMessageOpenedApp.listen((mensaje) {
-      // [DIAG-NOTIF-IOS] Instrumentación temporal para diagnosticar el bug
-      // de navegación en segundo plano/primer plano en iOS — retirar tras
-      // confirmar la causa raíz con logs reales en dispositivo.
-      debugPrint(
-        '[DIAG-NOTIF-IOS] onMessageOpenedApp recibido '
-        'ts=${DateTime.now().toIso8601String()} '
-        'messageId=${mensaje.messageId} '
-        'tipo=${mensaje.data['tipo']} '
-        'solicitudId=${mensaje.data['solicitudId']}',
-      );
       _aperturasController.add(mensaje);
     });
 
@@ -303,15 +293,6 @@ class NotificationService with WidgetsBindingObserver {
         if (llamada.method != 'toqueEnVivo') return;
         final userInfo = (llamada.arguments as Map).map((clave, valor) => MapEntry(clave.toString(), valor));
         final messageId = userInfo['gcm.message_id'] as String?;
-        // [DIAG-NOTIF-IOS] Instrumentación temporal — ver comentario de
-        // onMessageOpenedApp arriba.
-        debugPrint(
-          '[DIAG-NOTIF-IOS] toqueEnVivo (canal nativo) recibido '
-          'ts=${DateTime.now().toIso8601String()} '
-          'messageId=$messageId '
-          'tipo=${userInfo['tipo']} '
-          'solicitudId=${userInfo['solicitudId']}',
-        );
         _aperturasController.add(RemoteMessage(data: userInfo, messageId: messageId));
       });
     }
@@ -358,10 +339,6 @@ class NotificationService with WidgetsBindingObserver {
       if (userInfo == null) return;
       final data = userInfo.map((clave, valor) => MapEntry(clave.toString(), valor));
       final messageId = data['gcm.message_id'] as String?;
-      debugPrint(
-        '[DIAG-NOTIF-IOS] getUltimoToqueEnVivo recuperó un toque no entregado '
-        'ts=${DateTime.now().toIso8601String()} messageId=$messageId',
-      );
       _aperturasController.add(RemoteMessage(data: data, messageId: messageId));
     } catch (e) {
       debugPrint('[NotificationService] Error leyendo el último toque en vivo (iOS): $e');
@@ -392,10 +369,6 @@ class NotificationService with WidgetsBindingObserver {
       final data = userInfo.map((clave, valor) => MapEntry(clave.toString(), valor));
       final messageId = data['gcm.message_id'] as String?;
       if (messageId != pendiente) return;
-      debugPrint(
-        '[DIAG-NOTIF-IOS] getUltimoToqueEnVivo recuperado tras interacción en pantalla '
-        'ts=${DateTime.now().toIso8601String()} messageId=$messageId',
-      );
       _aperturasController.add(RemoteMessage(data: data, messageId: messageId));
     } catch (e) {
       debugPrint('[NotificationService] Error en recuperación por interacción en pantalla (iOS): $e');
