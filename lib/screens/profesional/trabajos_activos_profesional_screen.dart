@@ -413,20 +413,29 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
                     decoration: InputDecoration(labelText: t.presupuestoDialogoHorasEstimadasHint),
                   ),
                 ],
+                // Justo debajo del importe/tarifa, no al final del
+                // diálogo (UX pre-lanzamiento, 2026-08-14) — antes
+                // quedaba por debajo del campo de mensaje, fuera de la
+                // vista inicial del diálogo (con el teclado abierto,
+                // solo visible haciendo scroll), así que era fácil
+                // enviar un presupuesto sin fijarse en si incluía IVA
+                // o no. El cálculo del importe no cambia: este checkbox
+                // solo se guarda junto al presupuesto (incluyeIva), no
+                // se usa para calcular monto/tarifaHora.
+                CheckboxListTile(
+                  value: incluyeIva,
+                  onChanged: (valor) => setState(() => incluyeIva = valor ?? false),
+                  title: Text(t.presupuestoDialogoIncluyeIva, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                ),
                 const SizedBox(height: 10),
                 TextField(
                   controller: mensajeController,
                   maxLines: 2,
                   minLines: 1,
                   decoration: InputDecoration(hintText: t.presupuestoDialogoMensajeHint),
-                ),
-                CheckboxListTile(
-                  value: incluyeIva,
-                  onChanged: (valor) => setState(() => incluyeIva = valor ?? false),
-                  title: Text(t.presupuestoDialogoIncluyeIva, style: const TextStyle(fontSize: 13.5)),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
                 ),
               ],
             ),
