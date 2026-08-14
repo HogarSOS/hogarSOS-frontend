@@ -420,6 +420,14 @@ class AppLocalizationsEs extends AppLocalizations {
       'Este cierre ya no está pendiente de respuesta';
 
   @override
+  String get apiErrHorasDemasiadoBajas =>
+      'Las horas declaradas son demasiado bajas';
+
+  @override
+  String get apiErrConfirmacionReduccionRequerida =>
+      'Esta reducción es muy grande respecto a lo estimado — confírmala explícitamente';
+
+  @override
   String get apiErrSinArchivo => 'No se ha recibido ningún archivo';
 
   @override
@@ -2436,9 +2444,38 @@ class AppLocalizationsEs extends AppLocalizations {
       'El profesional ha terminado el trabajo';
 
   @override
-  String seguimientoCierreHorasDetalle(String horas, String importe) {
-    return 'Horas declaradas: $horas — importe: $importe €';
+  String get seguimientoCierreHorasLabelEstimadas => 'Horas estimadas';
+
+  @override
+  String get seguimientoCierreHorasLabelReales => 'Horas realizadas';
+
+  @override
+  String get seguimientoCierreHorasLabelTarifa => 'Tarifa';
+
+  @override
+  String get seguimientoCierreHorasLabelImporte => 'Importe final';
+
+  @override
+  String seguimientoCierreHorasAvisoReduccion(String porcentaje) {
+    return 'Las horas declaradas son un $porcentaje% de lo estimado. Revisa el importe antes de confirmar.';
   }
+
+  @override
+  String get seguimientoCierreHorasDialogoTitulo =>
+      '¿Confirmar esta reducción?';
+
+  @override
+  String seguimientoCierreHorasDialogoDetalle(
+      String reales, String estimadas, String porcentaje) {
+    return 'El profesional declaró $reales h reales frente a las $estimadas h estimadas ($porcentaje%). Si confirmas, se cobrará solo el importe de las horas reales y se liberará el resto de lo retenido en tu tarjeta.';
+  }
+
+  @override
+  String get seguimientoCierreHorasDialogoCancelar => 'Cancelar';
+
+  @override
+  String get seguimientoCierreHorasDialogoConfirmar =>
+      'Confirmar de todas formas';
 
   @override
   String get seguimientoCierreHorasReclamar => 'Reclamar';

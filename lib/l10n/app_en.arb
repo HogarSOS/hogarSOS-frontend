@@ -132,6 +132,8 @@
   "apiErrDecisionHorasRequerida": "Please indicate whether you accept or reject the reported hours",
   "apiErrCierreNoEncontrado": "Closing report not found",
   "apiErrCierreNoPendiente": "This closing report is no longer awaiting a response",
+  "apiErrHorasDemasiadoBajas": "The reported hours are too low",
+  "apiErrConfirmacionReduccionRequerida": "This reduction is much lower than estimated — please confirm it explicitly",
   "apiErrSinArchivo": "No file was received",
   "apiErrUsuarioNoEncontrado": "User not found",
   "apiErrPagoAtascadoNoEncontrado": "There's no pending authorization to release for this request",
@@ -865,13 +867,27 @@
   "seguimientoCierreHorasConfirmadoExito": "Hours confirmed — payment released",
   "seguimientoCierreHorasError": "Couldn't respond to the hours closure",
   "seguimientoCierreHorasTitulo": "The professional has finished the job",
-  "seguimientoCierreHorasDetalle": "Hours declared: {horas} — amount: €{importe}",
-  "@seguimientoCierreHorasDetalle": {
+  "seguimientoCierreHorasLabelEstimadas": "Estimated hours",
+  "seguimientoCierreHorasLabelReales": "Actual hours",
+  "seguimientoCierreHorasLabelTarifa": "Rate",
+  "seguimientoCierreHorasLabelImporte": "Final amount",
+  "seguimientoCierreHorasAvisoReduccion": "The reported hours are {porcentaje}% of what was estimated. Review the amount before confirming.",
+  "@seguimientoCierreHorasAvisoReduccion": {
     "placeholders": {
-      "horas": { "type": "String" },
-      "importe": { "type": "String" }
+      "porcentaje": { "type": "String" }
     }
   },
+  "seguimientoCierreHorasDialogoTitulo": "Confirm this reduction?",
+  "seguimientoCierreHorasDialogoDetalle": "The professional reported {reales} actual hours vs. {estimadas} estimated hours ({porcentaje}%). If you confirm, only the amount for the actual hours will be charged and the rest of the hold on your card will be released.",
+  "@seguimientoCierreHorasDialogoDetalle": {
+    "placeholders": {
+      "reales": { "type": "String" },
+      "estimadas": { "type": "String" },
+      "porcentaje": { "type": "String" }
+    }
+  },
+  "seguimientoCierreHorasDialogoCancelar": "Cancel",
+  "seguimientoCierreHorasDialogoConfirmar": "Confirm anyway",
   "seguimientoCierreHorasReclamar": "Report a problem",
   "seguimientoCierreHorasConfirmar": "Confirm"
 }

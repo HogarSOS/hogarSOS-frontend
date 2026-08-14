@@ -107,20 +107,39 @@ class AmpliacionInfo {
 
 /// Cierre de un trabajo "por_horas": el profesional declara las horas
 /// reales, pero el pago no se libera hasta que el cliente lo confirma.
+///
+/// `horasEstimadas`/`reduccionAnomala`/`porcentaje` los calcula el
+/// backend (serializarCierreHoras, auditoría 2026-08-14) comparando
+/// contra el presupuesto — no se recalculan aquí para que el umbral
+/// exacto viva en un único sitio (serviceRequest.controller.ts).
 class CierreHorasInfo {
   final String id;
   final double horasReales;
+  final double? horasEstimadas;
   final EstadoPresupuesto estado;
   final DateTime createdAt;
+  final bool reduccionAnomala;
+  final int? porcentaje;
 
-  CierreHorasInfo({required this.id, required this.horasReales, required this.estado, required this.createdAt});
+  CierreHorasInfo({
+    required this.id,
+    required this.horasReales,
+    this.horasEstimadas,
+    required this.estado,
+    required this.createdAt,
+    this.reduccionAnomala = false,
+    this.porcentaje,
+  });
 
   factory CierreHorasInfo.fromJson(Map<String, dynamic> json) {
     return CierreHorasInfo(
       id: json['id'] as String,
       horasReales: (json['horasReales'] as num).toDouble(),
+      horasEstimadas: (json['horasEstimadas'] as num?)?.toDouble(),
       estado: estadoPresupuestoFromString(json['estado'] as String),
       createdAt: DateTime.parse(json['createdAt'] as String),
+      reduccionAnomala: json['reduccionAnomala'] as bool? ?? false,
+      porcentaje: (json['porcentaje'] as num?)?.toInt(),
     );
   }
 }

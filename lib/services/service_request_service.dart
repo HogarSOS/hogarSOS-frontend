@@ -161,9 +161,20 @@ class ServiceRequestService {
   /// El cliente confirma (o rechaza) las horas reales que declaró el
   /// profesional al completar un trabajo "por_horas" — aceptar es lo
   /// que de verdad completa la solicitud y libera el pago.
-  Future<void> responderCierreHoras(String id, String cierreId, {required bool aceptar}) async {
+  ///
+  /// `confirmarReduccionGrande` solo hace falta cuando
+  /// `CierreHorasInfo.reduccionAnomala` es true (auditoría 2026-08-14,
+  /// protección anti-evasión) — sin ella el backend responde
+  /// HOURS_REDUCTION_CONFIRMATION_REQUIRED en vez de liberar el pago.
+  Future<void> responderCierreHoras(
+    String id,
+    String cierreId, {
+    required bool aceptar,
+    bool confirmarReduccionGrande = false,
+  }) async {
     await _api.post('/service-requests/$id/cierre-horas/$cierreId/responder', data: {
       'accion': aceptar ? 'aceptar' : 'rechazar',
+      if (confirmarReduccionGrande) 'confirmarReduccionGrande': true,
     });
   }
 

@@ -248,6 +248,7 @@ class _Contenido extends ConsumerWidget {
               serviceRequestId: solicitud.id,
               cierreHoras: solicitud.cierreHoras!,
               tarifaHora: solicitud.presupuesto?.tarifaHora,
+              horasEstimadas: solicitud.presupuesto?.horasEstimadas,
               onRespondido: onRecargar,
             )
           else if (solicitud.ampliacion?.estado == EstadoPresupuesto.pendiente)
@@ -786,18 +787,25 @@ class _CierreHorasPendienteCard extends ConsumerWidget {
     required this.serviceRequestId,
     required this.cierreHoras,
     required this.tarifaHora,
+    required this.horasEstimadas,
     required this.onRespondido,
   });
 
   final String serviceRequestId;
   final CierreHorasInfo cierreHoras;
   final double? tarifaHora;
+  final double? horasEstimadas;
   final Future<void> Function({bool silencioso}) onRespondido;
 
-  Future<void> _confirmar(BuildContext context) async {
+  Future<void> _confirmar(BuildContext context, {bool confirmarReduccionGrande = false}) async {
     final t = AppLocalizations.of(context);
     try {
-      await ServiceRequestService().responderCierreHoras(serviceRequestId, cierreHoras.id, aceptar: true);
+      await ServiceRequestService().responderCierreHoras(
+        serviceRequestId,
+        cierreHoras.id,
+        aceptar: true,
+        confirmarReduccionGrande: confirmarReduccionGrande,
+      );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.seguimientoCierreHorasConfirmadoExito)));
       onRespondido();
@@ -811,12 +819,45 @@ class _CierreHorasPendienteCard extends ConsumerWidget {
     }
   }
 
+  /// La reducción anómala (auditoría 2026-08-14, protección
+  /// anti-evasión) nunca se acepta con un solo toque: se le pide al
+  /// cliente que confirme explícitamente viendo la comparación otra
+  /// vez, en un diálogo aparte del botón "Confirmar" de la tarjeta —
+  /// así una pulsación accidental o distraída no libera un pago muy
+  /// por debajo de lo estimado.
+  Future<void> _confirmarConAviso(BuildContext context) async {
+    final t = AppLocalizations.of(context);
+    final estimadas = horasEstimadas;
+    final porcentaje = cierreHoras.porcentaje;
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(t.seguimientoCierreHorasDialogoTitulo),
+        content: Text(
+          t.seguimientoCierreHorasDialogoDetalle(
+            cierreHoras.horasReales.toStringAsFixed(1),
+            estimadas?.toStringAsFixed(1) ?? '—',
+            porcentaje != null ? '$porcentaje%' : '—',
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(t.seguimientoCierreHorasDialogoCancelar)),
+          FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: Text(t.seguimientoCierreHorasDialogoConfirmar)),
+        ],
+      ),
+    );
+    if (confirmado == true && context.mounted) {
+      await _confirmar(context, confirmarReduccionGrande: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final importeFinal = (tarifaHora ?? 0) * cierreHoras.horasReales;
     final comisiones = ref.watch(comisionesProvider);
+    final esAnomala = cierreHoras.reduccionAnomala;
 
     return Container(
       width: double.infinity,
@@ -829,11 +870,40 @@ class _CierreHorasPendienteCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(t.seguimientoCierreHorasTitulo, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5)),
-          const SizedBox(height: 8),
-          Text(
-            t.seguimientoCierreHorasDetalle(cierreHoras.horasReales.toStringAsFixed(1), importeFinal.toStringAsFixed(2)),
-            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
-          ),
+          const SizedBox(height: 10),
+          // Comparación completa ANTES de aceptar (auditoría
+          // 2026-08-14) — antes solo se veían las horas declaradas y
+          // el importe, sin nada al lado con lo que compararlas.
+          if (horasEstimadas != null)
+            _FilaCierreHoras(etiqueta: t.seguimientoCierreHorasLabelEstimadas, valor: '${horasEstimadas!.toStringAsFixed(1)} h'),
+          _FilaCierreHoras(etiqueta: t.seguimientoCierreHorasLabelReales, valor: '${cierreHoras.horasReales.toStringAsFixed(1)} h'),
+          if (tarifaHora != null)
+            _FilaCierreHoras(etiqueta: t.seguimientoCierreHorasLabelTarifa, valor: '${tarifaHora!.toStringAsFixed(2)} €/h'),
+          _FilaCierreHoras(etiqueta: t.seguimientoCierreHorasLabelImporte, valor: '${importeFinal.toStringAsFixed(2)} €', destacado: true),
+          if (esAnomala) ...[
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: colorScheme.errorContainer.withOpacity(0.6),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.warning_amber_rounded, size: 18, color: colorScheme.error),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      t.seguimientoCierreHorasAvisoReduccion(cierreHoras.porcentaje != null ? '${cierreHoras.porcentaje}' : '—'),
+                      style: TextStyle(fontSize: 12.5, color: colorScheme.onErrorContainer, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           comisiones.when(
             data: (info) => _DesgloseComision(montoBase: importeFinal, comisiones: info),
             loading: () => const SizedBox.shrink(),
@@ -857,11 +927,36 @@ class _CierreHorasPendienteCard extends ConsumerWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: FilledButton(
-                  onPressed: () => _confirmar(context),
+                  onPressed: () => esAnomala ? _confirmarConAviso(context) : _confirmar(context),
                   child: Text(t.seguimientoCierreHorasConfirmar),
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilaCierreHoras extends StatelessWidget {
+  const _FilaCierreHoras({required this.etiqueta, required this.valor, this.destacado = false});
+
+  final String etiqueta;
+  final String valor;
+  final bool destacado;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(etiqueta, style: const TextStyle(fontSize: 13, color: Colors.black54)),
+          Text(
+            valor,
+            style: TextStyle(fontSize: destacado ? 14.5 : 13, fontWeight: destacado ? FontWeight.w800 : FontWeight.w600),
           ),
         ],
       ),

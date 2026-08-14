@@ -800,6 +800,18 @@ abstract class AppLocalizations {
   /// **'Este cierre ya no está pendiente de respuesta'**
   String get apiErrCierreNoPendiente;
 
+  /// No description provided for @apiErrHorasDemasiadoBajas.
+  ///
+  /// In es, this message translates to:
+  /// **'Las horas declaradas son demasiado bajas'**
+  String get apiErrHorasDemasiadoBajas;
+
+  /// No description provided for @apiErrConfirmacionReduccionRequerida.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta reducción es muy grande respecto a lo estimado — confírmala explícitamente'**
+  String get apiErrConfirmacionReduccionRequerida;
+
   /// No description provided for @apiErrSinArchivo.
   ///
   /// In es, this message translates to:
@@ -4259,11 +4271,60 @@ abstract class AppLocalizations {
   /// **'El profesional ha terminado el trabajo'**
   String get seguimientoCierreHorasTitulo;
 
-  /// No description provided for @seguimientoCierreHorasDetalle.
+  /// No description provided for @seguimientoCierreHorasLabelEstimadas.
   ///
   /// In es, this message translates to:
-  /// **'Horas declaradas: {horas} — importe: {importe} €'**
-  String seguimientoCierreHorasDetalle(String horas, String importe);
+  /// **'Horas estimadas'**
+  String get seguimientoCierreHorasLabelEstimadas;
+
+  /// No description provided for @seguimientoCierreHorasLabelReales.
+  ///
+  /// In es, this message translates to:
+  /// **'Horas realizadas'**
+  String get seguimientoCierreHorasLabelReales;
+
+  /// No description provided for @seguimientoCierreHorasLabelTarifa.
+  ///
+  /// In es, this message translates to:
+  /// **'Tarifa'**
+  String get seguimientoCierreHorasLabelTarifa;
+
+  /// No description provided for @seguimientoCierreHorasLabelImporte.
+  ///
+  /// In es, this message translates to:
+  /// **'Importe final'**
+  String get seguimientoCierreHorasLabelImporte;
+
+  /// No description provided for @seguimientoCierreHorasAvisoReduccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Las horas declaradas son un {porcentaje}% de lo estimado. Revisa el importe antes de confirmar.'**
+  String seguimientoCierreHorasAvisoReduccion(String porcentaje);
+
+  /// No description provided for @seguimientoCierreHorasDialogoTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Confirmar esta reducción?'**
+  String get seguimientoCierreHorasDialogoTitulo;
+
+  /// No description provided for @seguimientoCierreHorasDialogoDetalle.
+  ///
+  /// In es, this message translates to:
+  /// **'El profesional declaró {reales} h reales frente a las {estimadas} h estimadas ({porcentaje}%). Si confirmas, se cobrará solo el importe de las horas reales y se liberará el resto de lo retenido en tu tarjeta.'**
+  String seguimientoCierreHorasDialogoDetalle(
+      String reales, String estimadas, String porcentaje);
+
+  /// No description provided for @seguimientoCierreHorasDialogoCancelar.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar'**
+  String get seguimientoCierreHorasDialogoCancelar;
+
+  /// No description provided for @seguimientoCierreHorasDialogoConfirmar.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar de todas formas'**
+  String get seguimientoCierreHorasDialogoConfirmar;
 
   /// No description provided for @seguimientoCierreHorasReclamar.
   ///

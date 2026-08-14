@@ -150,6 +150,10 @@ String? _mensajePorCodigo(String? code, AppLocalizations t) {
       return t.apiErrCierreNoEncontrado;
     case 'HOURS_CLOSURE_NOT_PENDING':
       return t.apiErrCierreNoPendiente;
+    case 'HOURS_TOO_LOW':
+      return t.apiErrHorasDemasiadoBajas;
+    case 'HOURS_REDUCTION_CONFIRMATION_REQUIRED':
+      return t.apiErrConfirmacionReduccionRequerida;
     case 'UPLOAD_NO_FILE':
       return t.apiErrSinArchivo;
     case 'USER_NOT_FOUND':
