@@ -10,11 +10,32 @@ import '../services/chat_service.dart';
 import '../services/service_request_service.dart';
 import '../utils/contact_filter.dart';
 
+/// Estado local de un mensaje que ya se pintó en pantalla pero todavía
+/// no está confirmado en el stream real de Firestore.
+enum _EstadoEnvio { enviando, error }
+
+class _MensajePendiente {
+  _MensajePendiente({
+    required this.intentoId,
+    required this.texto,
+    required this.autorId,
+    required this.enviadoEn,
+  });
+
+  final String intentoId;
+  final String texto;
+  final String autorId;
+  final DateTime enviadoEn;
+  _EstadoEnvio estado = _EstadoEnvio.enviando;
+}
+
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({
     super.key,
     required this.serviceRequestId,
     this.nombreContraparte,
+    this.servicioSolicitud,
+    this.miUidOverride,
   });
 
   final String serviceRequestId;
@@ -27,15 +48,23 @@ class ChatScreen extends ConsumerStatefulWidget {
   /// cae al título genérico en vez de mostrar un hueco en blanco.
   final String? nombreContraparte;
 
+  // Inyectables SOLO para tests (ver chat_screen_duplicacion_test.dart) —
+  // en la app real siempre son null. ChatService en sí se obtiene vía
+  // chatServiceProvider (Riverpod), no aquí, para poder sobreescribirlo
+  // con un ProviderScope en los tests igual que el resto de providers.
+  final ServiceRequestService? servicioSolicitud;
+  final String? miUidOverride;
+
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
-  final _chatService = ChatService();
   final _mensajeController = TextEditingController();
   final _scrollController = ScrollController();
   final _campoFocusNode = FocusNode();
+
+  late final _servicioSolicitud = widget.servicioSolicitud ?? ServiceRequestService();
 
   // El "autor" del mensaje SIEMPRE debe ser el UID de Firebase Auth, no
   // el id de Postgres (AppUser.id) — es el único identificador que
@@ -43,7 +72,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   // y usar el otro dejaba el chat con una identidad de autor que nadie
   // podía validar y que se rompería en cuanto las reglas exigieran
   // request.resource.data.autorId == request.auth.uid.
-  String get _miUid => FirebaseAuth.instance.currentUser?.uid ?? '';
+  String get _miUid => widget.miUidOverride ?? (FirebaseAuth.instance.currentUser?.uid ?? '');
+
+  // Mensajes propios ya pintados optimistamente pero aún sin confirmar
+  // en el stream real (auditoría 2026-08-14, duplicación con red
+  // intermitente) — ver _enviar()/_reintentar() y la reconciliación en
+  // build(). Vive solo en memoria: al salir del chat se pierde a
+  // propósito (ver el comentario de _enviar más abajo), sin dejar
+  // "mensajes fantasma" al volver a entrar.
+  final List<_MensajePendiente> _pendientes = [];
 
   // Cuenta de mensajes del build anterior — permite distinguir "llegó un
   // mensaje nuevo" (hay que bajar el scroll) de un rebuild cualquiera del
@@ -87,7 +124,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       // igualmente (la sincronización real sigue en marcha en el
       // backend en segundo plano) — mismo comportamiento que cualquier
       // otro fallo de esta llamada, ya tolerado más abajo.
-      await ServiceRequestService()
+      await _servicioSolicitud
           .sincronizarChat(widget.serviceRequestId)
           .timeout(const Duration(seconds: 5));
     } catch (e) {
@@ -97,7 +134,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     // así si alguien abre el chat, mira brevemente y sale sin llegar a
     // mandar mensaje, igual queda como "leído" en vez de seguir marcando
     // "nuevo" en la lista de conversaciones.
-    unawaited(ServiceRequestService().marcarChatLeido(widget.serviceRequestId));
+    unawaited(_servicioSolicitud.marcarChatLeido(widget.serviceRequestId));
     if (!mounted) return;
     setState(() => _listo = true);
   }
@@ -111,7 +148,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     // vive en Firestore (ver chat_read_provider.dart), así que en
     // cuanto este POST escribe el campo, el stream ya activo en la
     // lista de conversaciones/badge se actualiza solo.
-    unawaited(ServiceRequestService().marcarChatLeido(widget.serviceRequestId));
+    unawaited(_servicioSolicitud.marcarChatLeido(widget.serviceRequestId));
     _mensajeController.dispose();
     _scrollController.dispose();
     _campoFocusNode.dispose();
@@ -174,20 +211,51 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
 
     _mensajeController.clear();
+
+    // ID del INTENTO, no del contenido — dos mensajes con el mismo texto
+    // enviados por separado (ahora y dentro de un rato) son dos intentos
+    // distintos, cada uno con su propio ID nuevo aquí. Solo un reintento
+    // de ESTE mismo intento (ver _reintentar) reutiliza este ID.
+    final intentoId = ref.read(chatServiceProvider).nuevoIdIntento(widget.serviceRequestId);
+    final pendiente = _MensajePendiente(intentoId: intentoId, texto: texto, autorId: _miUid, enviadoEn: DateTime.now());
+    setState(() => _pendientes.add(pendiente));
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollAlFinal());
+
+    await _intentarEnviar(pendiente);
+  }
+
+  /// Compartido entre el envío inicial y el reintento manual — ambos
+  /// deben pasar por el mismo camino para que un reintento reutilice
+  /// exactamente el mismo intentoId (idempotencia, ver
+  /// ChatService.enviarMensaje). El mensaje pendiente se retira de
+  /// _pendientes por reconciliación en build() en cuanto aparece en el
+  /// stream real (por su id) — aquí solo se marca error si hace falta,
+  /// nunca se retira "a mano" en el camino de éxito, para tener un único
+  /// sitio que decide "esto ya está confirmado".
+  Future<void> _intentarEnviar(_MensajePendiente pendiente) async {
     try {
-      await _chatService.enviarMensaje(
-        serviceRequestId: widget.serviceRequestId,
-        texto: texto,
-        autorId: _miUid,
-      );
+      await ref.read(chatServiceProvider).enviarMensaje(
+            serviceRequestId: widget.serviceRequestId,
+            intentoId: pendiente.intentoId,
+            texto: pendiente.texto,
+            autorId: pendiente.autorId,
+          );
     } catch (e) {
       debugPrint('[ChatScreen] Error al enviar mensaje: $e');
       if (!mounted) return;
+      setState(() => pendiente.estado = _EstadoEnvio.error);
       final t = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(t.chatErrorEnviar)),
       );
     }
+  }
+
+  /// Toca sobre un mensaje en estado de error — reintenta el MISMO
+  /// intento (mismo intentoId), nunca crea uno nuevo.
+  Future<void> _reintentar(_MensajePendiente pendiente) async {
+    setState(() => pendiente.estado = _EstadoEnvio.enviando);
+    await _intentarEnviar(pendiente);
   }
 
   @override
@@ -217,7 +285,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               // StreamBuilder se queda en la rama "sin datos todavía"
               // (el mismo spinner que ya mostraba mientras cargaban los
               // primeros mensajes), sin suscribirse todavía a Firestore.
-              stream: _listo ? _chatService.observarMensajes(widget.serviceRequestId) : null,
+              stream: _listo ? ref.watch(chatServiceProvider).observarMensajes(widget.serviceRequestId) : null,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   debugPrint('[ChatScreen] Error en el stream de mensajes: ${snapshot.error}');
@@ -227,86 +295,75 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 final mensajes = snapshot.data!;
-                if (mensajes.isEmpty) {
+                _procesarMensajesActualizados(mensajes);
+
+                // Reconciliación (auditoría 2026-08-14): un pendiente cuyo
+                // intentoId ya aparece en el stream real está confirmado
+                // — se retira de la vista aquí, en un único sitio, en vez
+                // de intentar sincronizarlo también desde el propio
+                // Future de enviarMensaje() (evita dos caminos que
+                // podrían desincronizarse entre sí).
+                final idsConfirmados = mensajes.map((m) => m.id).toSet();
+                final pendientesVisibles =
+                    _pendientes.where((p) => !idsConfirmados.contains(p.intentoId)).toList();
+                if (mensajes.isEmpty && pendientesVisibles.isEmpty) {
                   _mensajesPrevios = 0;
                   return Center(
                     child: Text(t.chatSinMensajes, style: TextStyle(color: colorScheme.onSurfaceVariant)),
                   );
                 }
-                _procesarMensajesActualizados(mensajes);
+
                 return ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.all(16),
-                  itemCount: mensajes.length,
+                  itemCount: mensajes.length + pendientesVisibles.length,
                   itemBuilder: (context, index) {
-                    final mensaje = mensajes[index];
-                    final esMio = mensaje.autorId == _miUid;
-                    // Leído por la otra persona: solo tiene sentido para
-                    // mis propios mensajes (nunca pinto un check en los
-                    // mensajes ajenos, como en cualquier app de chat).
-                    final leido = esMio && otroLastRead != null && !mensaje.enviadoEn.isAfter(otroLastRead);
-                    return Align(
-                      alignment: esMio ? Alignment.centerRight : Alignment.centerLeft,
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.75,
-                        ),
-                        decoration: BoxDecoration(
-                          // Un color para "lo mío", otro claramente
-                          // distinto para "lo del otro" — antes la
-                          // burbuja ajena usaba un gris neutro sin
-                          // identidad propia, ahora un segundo color de
-                          // marca en vez de un simple "no-color".
-                          color: esMio ? colorScheme.primary : colorScheme.secondaryContainer,
-                          borderRadius: BorderRadius.only(
-                            topLeft: const Radius.circular(18),
-                            topRight: const Radius.circular(18),
-                            bottomLeft: Radius.circular(esMio ? 18 : 4),
-                            bottomRight: Radius.circular(esMio ? 4 : 18),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              mensaje.texto,
-                              style: TextStyle(
-                                color: esMio ? colorScheme.onPrimary : colorScheme.onSecondaryContainer,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  // Antes fijo a formato 24h independientemente
-                                  // del idioma — DateFormat.jm(locale) usa
-                                  // 12h con AM/PM para inglés y 24h para
-                                  // español, como espera cada lector.
-                                  DateFormat.jm(t.localeName).format(mensaje.enviadoEn),
-                                  style: TextStyle(
-                                    fontSize: 10.5,
-                                    color: (esMio ? colorScheme.onPrimary : colorScheme.onSecondaryContainer)
-                                        .withOpacity(0.75),
-                                  ),
+                    if (index < mensajes.length) {
+                      final mensaje = mensajes[index];
+                      final esMio = mensaje.autorId == _miUid;
+                      // Leído por la otra persona: solo tiene sentido para
+                      // mis propios mensajes (nunca pinto un check en los
+                      // mensajes ajenos, como en cualquier app de chat).
+                      final leido = esMio && otroLastRead != null && !mensaje.enviadoEn.isAfter(otroLastRead);
+                      return _burbuja(
+                        context: context,
+                        texto: mensaje.texto,
+                        enviadoEn: mensaje.enviadoEn,
+                        esMio: esMio,
+                        icono: esMio
+                            ? Icon(
+                                leido ? Icons.done_all : Icons.done,
+                                size: 14,
+                                color: leido
+                                    ? colorScheme.onPrimary
+                                    : colorScheme.onPrimary.withOpacity(0.75),
+                              )
+                            : null,
+                      );
+                    }
+                    final pendiente = pendientesVisibles[index - mensajes.length];
+                    final esError = pendiente.estado == _EstadoEnvio.error;
+                    return _burbuja(
+                      context: context,
+                      texto: pendiente.texto,
+                      enviadoEn: pendiente.enviadoEn,
+                      esMio: true,
+                      // Reloj mientras se envía, aviso tocable para
+                      // reintentar si falló — mismo hueco visual que ya
+                      // usan los checks de enviado/leído, sin añadir
+                      // chrome nuevo a la burbuja.
+                      icono: GestureDetector(
+                        onTap: esError ? () => _reintentar(pendiente) : null,
+                        child: esError
+                            ? Icon(Icons.error_outline, size: 14, color: colorScheme.errorContainer)
+                            : SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.5,
+                                  color: colorScheme.onPrimary.withValues(alpha: 0.75),
                                 ),
-                                if (esMio) ...[
-                                  const SizedBox(width: 3),
-                                  Icon(
-                                    leido ? Icons.done_all : Icons.done,
-                                    size: 14,
-                                    color: leido
-                                        ? colorScheme.onPrimary
-                                        : colorScheme.onPrimary.withOpacity(0.75),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
                       ),
                     );
                   },
@@ -337,6 +394,78 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Burbuja de un mensaje — compartida entre los reales (del stream) y
+  /// los pendientes/optimistas, para no duplicar la construcción visual
+  /// en dos sitios. `icono` es lo que va junto a la hora (checks de
+  /// enviado/leído para un mensaje real, reloj o aviso de error para uno
+  /// pendiente); null para mensajes ajenos, que nunca llevan icono.
+  Widget _burbuja({
+    required BuildContext context,
+    required String texto,
+    required DateTime enviadoEn,
+    required bool esMio,
+    required Widget? icono,
+  }) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    return Align(
+      alignment: esMio ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
+        ),
+        decoration: BoxDecoration(
+          // Un color para "lo mío", otro claramente distinto para "lo
+          // del otro" — antes la burbuja ajena usaba un gris neutro sin
+          // identidad propia, ahora un segundo color de marca en vez de
+          // un simple "no-color".
+          color: esMio ? colorScheme.primary : colorScheme.secondaryContainer,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(18),
+            topRight: const Radius.circular(18),
+            bottomLeft: Radius.circular(esMio ? 18 : 4),
+            bottomRight: Radius.circular(esMio ? 4 : 18),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              texto,
+              style: TextStyle(
+                color: esMio ? colorScheme.onPrimary : colorScheme.onSecondaryContainer,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  // Antes fijo a formato 24h independientemente del
+                  // idioma — DateFormat.jm(locale) usa 12h con AM/PM
+                  // para inglés y 24h para español, como espera cada
+                  // lector.
+                  DateFormat.jm(t.localeName).format(enviadoEn),
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    color: (esMio ? colorScheme.onPrimary : colorScheme.onSecondaryContainer).withOpacity(0.75),
+                  ),
+                ),
+                if (icono != null) ...[
+                  const SizedBox(width: 3),
+                  icono,
+                ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

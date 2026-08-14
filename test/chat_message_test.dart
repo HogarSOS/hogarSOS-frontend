@@ -11,8 +11,9 @@ import 'package:hogarsos/services/chat_service.dart';
 // deleteMe no sabe limpiar. Falla aquí antes de que llegue a producción.
 void main() {
   group('ChatMessage — contrato de datos (sin PII más allá del autorId)', () {
-    test('toFirestore() solo serializa texto, autorId y enviadoEn', () {
+    test('toFirestore() solo serializa texto, autorId y enviadoEn (el id vive fuera del documento)', () {
       final mensaje = ChatMessage(
+        id: 'msg-1',
         texto: 'Hola, ¿a qué hora vienes?',
         autorId: 'uid-cliente-123',
         enviadoEn: DateTime(2026, 8, 14),
@@ -21,14 +22,15 @@ void main() {
       expect(mensaje.toFirestore().keys.toSet(), {'texto', 'autorId', 'enviadoEn'});
     });
 
-    test('fromFirestore() parsea correctamente con un Timestamp real', () {
+    test('fromFirestore() parsea correctamente con un Timestamp real, usando el id del documento', () {
       final ahora = DateTime(2026, 8, 14, 10, 30);
-      final mensaje = ChatMessage.fromFirestore({
+      final mensaje = ChatMessage.fromFirestore('msg-2', {
         'texto': 'Ya estoy en camino',
         'autorId': 'uid-profesional-456',
         'enviadoEn': Timestamp.fromDate(ahora),
       });
 
+      expect(mensaje.id, 'msg-2');
       expect(mensaje.texto, 'Ya estoy en camino');
       expect(mensaje.autorId, 'uid-profesional-456');
       expect(mensaje.enviadoEn, ahora);
@@ -39,7 +41,7 @@ void main() {
     // .serverTimestamp() no se resuelve hasta que el servidor confirma).
     test('fromFirestore() no revienta si enviadoEn llega null (mensaje local recién enviado)', () {
       expect(
-        () => ChatMessage.fromFirestore({'texto': 'Enviando...', 'autorId': 'uid-1', 'enviadoEn': null}),
+        () => ChatMessage.fromFirestore('msg-3', {'texto': 'Enviando...', 'autorId': 'uid-1', 'enviadoEn': null}),
         returnsNormally,
       );
     });

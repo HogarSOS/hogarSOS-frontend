@@ -5,13 +5,20 @@ import 'package:flutter/foundation.dart';
 import 'api_service.dart';
 
 class ChatMessage {
+  // El ID del documento de Firestore — desde la auditoría de duplicación
+  // (2026-08-14), es el mismo valor que el "ID de intento" generado por
+  // el cliente al componer el mensaje (ver ChatService.nuevoIdIntento):
+  // permite reconciliar un mensaje optimista/pendiente con su versión
+  // real en el stream sin ambigüedad. NO se serializa en toFirestore()
+  // (es el identificador del documento, no un campo dentro de él).
+  final String id;
   final String texto;
   final String autorId;
   final DateTime enviadoEn;
 
-  ChatMessage({required this.texto, required this.autorId, required this.enviadoEn});
+  ChatMessage({required this.id, required this.texto, required this.autorId, required this.enviadoEn});
 
-  factory ChatMessage.fromFirestore(Map<String, dynamic> data) {
+  factory ChatMessage.fromFirestore(String id, Map<String, dynamic> data) {
     // 'enviadoEn' viene como null en la primera versión LOCAL del
     // documento (antes de que el servidor confirme el
     // FieldValue.serverTimestamp()) — esto pasa siempre para el propio
@@ -20,6 +27,7 @@ class ChatMessage {
     // enviaba un mensaje.
     final timestamp = data['enviadoEn'] as Timestamp?;
     return ChatMessage(
+      id: id,
       texto: data['texto'] as String,
       autorId: data['autorId'] as String,
       enviadoEn: timestamp?.toDate() ?? DateTime.now(),
@@ -66,12 +74,33 @@ class EstadoLecturaChat {
   DateTime? miLastRead(String miUid) => _esCliente(miUid) ? lastReadCliente : lastReadProfesional;
 }
 
+/// Interfaz mínima de ChatService — existe SOLO para poder sustituirlo
+/// por un fake en tests (ver chat_screen_duplicacion_test.dart) sin
+/// construir nunca un ChatService real: su campo `_firestore` llama a
+/// `FirebaseFirestore.instance` en el inicializador, que revienta sin
+/// Firebase.initializeApp() aunque una subclase sobrescriba todos los
+/// métodos (el inicializador de la superclase se ejecuta igual). Con
+/// `implements` en vez de `extends`, el fake nunca construye la clase
+/// real, así que ese campo nunca se evalúa.
+abstract class ChatServiceBase {
+  Stream<List<ChatMessage>> observarMensajes(String serviceRequestId);
+  Stream<ChatMessage?> observarUltimoMensaje(String serviceRequestId);
+  Stream<EstadoLecturaChat> observarEstadoLectura(String serviceRequestId);
+  String nuevoIdIntento(String serviceRequestId);
+  Future<void> enviarMensaje({
+    required String serviceRequestId,
+    required String intentoId,
+    required String texto,
+    required String autorId,
+  });
+}
+
 /// Chat en tiempo real con Firestore, separado del backend Node.js a
 /// propósito: Firestore ya resuelve la sincronización en tiempo real y
 /// el modo offline sin que tengamos que montar websockets propios en
 /// la API. Cada solicitud de servicio tiene su propia colección de
 /// mensajes bajo /service_requests/{id}/messages.
-class ChatService {
+class ChatService implements ChatServiceBase {
   final _firestore = FirebaseFirestore.instance;
 
   DocumentReference<Map<String, dynamic>> _solicitudRef(String serviceRequestId) {
@@ -91,13 +120,14 @@ class ChatService {
   // (el caso normal hoy) esto no cambia nada visible.
   static const _limiteMensajes = 200;
 
+  @override
   Stream<List<ChatMessage>> observarMensajes(String serviceRequestId) {
     return _mensajesRef(serviceRequestId)
         .orderBy('enviadoEn', descending: true)
         .limit(_limiteMensajes)
         .snapshots()
         .map((snapshot) => snapshot.docs.reversed
-            .map((doc) => ChatMessage.fromFirestore(doc.data()))
+            .map((doc) => ChatMessage.fromFirestore(doc.id, doc.data()))
             .toList());
   }
 
@@ -106,14 +136,18 @@ class ChatService {
   /// trabajos_activos_profesional_screen.dart), donde suscribirse al
   /// historial completo de cada conversación sería mucho más caro que
   /// necesitar solo su último mensaje.
+  @override
   Stream<ChatMessage?> observarUltimoMensaje(String serviceRequestId) {
     return _mensajesRef(serviceRequestId)
         .orderBy('enviadoEn', descending: true)
         .limit(1)
         .snapshots()
-        .map((snapshot) => snapshot.docs.isEmpty ? null : ChatMessage.fromFirestore(snapshot.docs.first.data()));
+        .map((snapshot) => snapshot.docs.isEmpty
+            ? null
+            : ChatMessage.fromFirestore(snapshot.docs.first.id, snapshot.docs.first.data()));
   }
 
+  @override
   Stream<EstadoLecturaChat> observarEstadoLectura(String serviceRequestId) {
     return _solicitudRef(serviceRequestId).snapshots().map((doc) {
       final data = doc.data();
@@ -127,13 +161,64 @@ class ChatService {
     });
   }
 
+  /// ID de un intento de envío NUEVO — se genera una vez por composición
+  /// de mensaje (un tap en "Enviar"), ANTES de llamar a enviarMensaje(),
+  /// para poder pintar el mensaje como "pendiente" con el mismo ID que
+  /// tendrá el documento real. Reintentar el MISMO intento (p. ej. tras
+  /// un fallo, o si la app se cerró antes de confirmar) debe reutilizar
+  /// este mismo ID — nunca generar uno nuevo, o se perdería la
+  /// idempotencia. Dos mensajes legítimos distintos (aunque el texto sea
+  /// idéntico) SIEMPRE deben llamar a este método por separado, cada uno
+  /// con su propio ID: la identidad es del intento, no del contenido.
+  ///
+  /// `.doc().id` genera el ID en el propio dispositivo (mismo algoritmo
+  /// que usaba `.add()` antes) sin ningún viaje de red — funciona igual
+  /// con o sin conexión.
+  @override
+  String nuevoIdIntento(String serviceRequestId) => _mensajesRef(serviceRequestId).doc().id;
+
+  /// Envío idempotente: `intentoId` (ver nuevoIdIntento) fija el ID del
+  /// documento en vez de dejar que Firestore genere uno nuevo en cada
+  /// llamada (lo que hacía `.add()` antes) — así, si esta función se
+  /// llama dos veces con el MISMO intentoId (un reintento tras perder la
+  /// conexión, o tras cerrar y reabrir la app antes de confirmar), la
+  /// segunda llamada nunca crea un segundo mensaje.
+  ///
+  /// firestore.rules bloquea a propósito CUALQUIER `update` sobre un
+  /// mensaje ya creado (son inmutables) — no se abre una vía genérica de
+  /// edición solo para permitir este reintento. En vez de eso: si el
+  /// documento ya existe (el intento anterior sí llegó a escribirse en
+  /// el servidor), Firestore rechaza este segundo `.set()` con
+  /// `permission-denied` porque lo evalúa como `update`, no `create`. Se
+  /// distingue de un problema de permisos REAL leyendo el documento
+  /// (`allow read` sí está permitido a los participantes): si existe, es
+  /// el reintento de un envío que ya tuvo éxito → se trata como éxito,
+  /// SIN volver a avisar al backend (evita una notificación push
+  /// duplicada por el mismo mensaje). Si no existe, el permission-denied
+  /// era real (p. ej. ya no eres participante) y se propaga tal cual.
+  @override
   Future<void> enviarMensaje({
     required String serviceRequestId,
+    required String intentoId,
     required String texto,
     required String autorId,
   }) async {
-    final mensaje = ChatMessage(texto: texto, autorId: autorId, enviadoEn: DateTime.now());
-    await _mensajesRef(serviceRequestId).add(mensaje.toFirestore());
+    final mensaje = ChatMessage(id: intentoId, texto: texto, autorId: autorId, enviadoEn: DateTime.now());
+    final ref = _mensajesRef(serviceRequestId).doc(intentoId);
+
+    try {
+      await ref.set(mensaje.toFirestore());
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        final existente = await ref.get();
+        if (existente.exists) {
+          // Reintento de un intento que ya se envió con éxito antes —
+          // ni el mensaje ni la notificación se repiten.
+          return;
+        }
+      }
+      rethrow;
+    }
 
     // El chat vive 100% en Firestore (ver comentario de la clase) — el
     // backend nunca se entera por su cuenta de que se envió un mensaje,

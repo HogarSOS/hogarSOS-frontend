@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/chat_service.dart';
 
-final chatServiceProvider = Provider((ref) => ChatService());
+final chatServiceProvider = Provider<ChatServiceBase>((ref) => ChatService());
 
 final _ultimoMensajeProvider = StreamProvider.autoDispose.family<ChatMessage?, String>((ref, serviceRequestId) {
   final servicio = ref.watch(chatServiceProvider);
