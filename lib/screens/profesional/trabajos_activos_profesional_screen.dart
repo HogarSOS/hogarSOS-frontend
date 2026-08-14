@@ -289,68 +289,89 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
     final valorController = TextEditingController();
     final mensajeController = TextEditingController();
 
+    // _procesando evita que un doble tap en "Confirmar" (o un segundo
+    // tap mientras la petición anterior sigue en curso) dispare dos
+    // llamadas a pedirAmpliacion — la garantía real de que nunca se
+    // creen dos ampliaciones pendientes está en el backend (índice
+    // único parcial, P2 #3), esto es solo UX, mismo patrón que
+    // seguimiento_solicitud_screen.dart.
+    var procesando = false;
+
     final pedido = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(esCerrado ? t.trabajosActivosAmpliarPresupuestoTitulo : t.trabajosActivosPedirAmpliacionTitulo),
-        // Dos TextField apilados sin scroll era el diálogo con más
-        // riesgo de overflow de teclado de toda la pantalla — mismo fix
-        // que en home_profesional_screen.dart.
-        content: SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: valorController,
-                autofocus: true,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  labelText: esCerrado
-                      ? t.trabajosActivosAmpliarPresupuestoMontoHint
-                      : t.trabajosActivosPedirAmpliacionHorasHint,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(esCerrado ? t.trabajosActivosAmpliarPresupuestoTitulo : t.trabajosActivosPedirAmpliacionTitulo),
+          // Dos TextField apilados sin scroll era el diálogo con más
+          // riesgo de overflow de teclado de toda la pantalla — mismo fix
+          // que en home_profesional_screen.dart.
+          content: SingleChildScrollView(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: valorController,
+                  autofocus: true,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: esCerrado
+                        ? t.trabajosActivosAmpliarPresupuestoMontoHint
+                        : t.trabajosActivosPedirAmpliacionHorasHint,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: mensajeController,
-                maxLines: 2,
-                minLines: 1,
-                decoration: InputDecoration(hintText: t.trabajosActivosAmpliacionMotivoHint),
-              ),
-            ],
+                const SizedBox(height: 10),
+                TextField(
+                  controller: mensajeController,
+                  maxLines: 2,
+                  minLines: 1,
+                  decoration: InputDecoration(hintText: t.trabajosActivosAmpliacionMotivoHint),
+                ),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: procesando ? null : () => Navigator.of(context).pop(false),
+              child: Text(t.perfilCancelar),
+            ),
+            FilledButton(
+              onPressed: procesando
+                  ? null
+                  : () async {
+                      final valor = double.tryParse(valorController.text.replaceAll(',', '.'));
+                      if (valor == null || valor <= 0) return;
+                      setState(() => procesando = true);
+                      try {
+                        await ServiceRequestService().pedirAmpliacion(
+                          trabajo.id,
+                          horasAdicionales: esCerrado ? null : valor,
+                          montoAdicional: esCerrado ? valor : null,
+                          mensaje: mensajeController.text.trim(),
+                        );
+                        if (!context.mounted) return;
+                        Navigator.of(context).pop(true);
+                      } catch (e) {
+                        debugPrint('[TrabajosActivosProfesionalScreen] Error al pedir ampliación: $e');
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(mensajeDeError(e, contexto: t.trabajosActivosPedirAmpliacionError, t: t))),
+                        );
+                      } finally {
+                        if (context.mounted) setState(() => procesando = false);
+                      }
+                    },
+              child: procesando
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(t.trabajosActivosPrecioFinalConfirmar),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(t.perfilCancelar),
-          ),
-          FilledButton(
-            onPressed: () async {
-              final valor = double.tryParse(valorController.text.replaceAll(',', '.'));
-              if (valor == null || valor <= 0) return;
-              try {
-                await ServiceRequestService().pedirAmpliacion(
-                  trabajo.id,
-                  horasAdicionales: esCerrado ? null : valor,
-                  montoAdicional: esCerrado ? valor : null,
-                  mensaje: mensajeController.text.trim(),
-                );
-                if (!context.mounted) return;
-                Navigator.of(context).pop(true);
-              } catch (e) {
-                debugPrint('[TrabajosActivosProfesionalScreen] Error al pedir ampliación: $e');
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(mensajeDeError(e, contexto: t.trabajosActivosPedirAmpliacionError, t: t))),
-                );
-              }
-            },
-            child: Text(t.trabajosActivosPrecioFinalConfirmar),
-          ),
-        ],
       ),
     );
 
@@ -372,6 +393,12 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
     final tarifaController = TextEditingController();
     final horasController = TextEditingController();
     final mensajeController = TextEditingController();
+    // Evita que un doble tap en "Confirmar" dispare dos llamadas a
+    // enviarPresupuesto — la garantía real de que nunca se creen dos
+    // presupuestos pendientes está en el backend (índice único
+    // parcial, P2 #3), esto es solo UX, mismo patrón que
+    // seguimiento_solicitud_screen.dart.
+    var procesando = false;
 
     final enviado = await showDialog<bool>(
       context: context,
@@ -442,47 +469,64 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
+              onPressed: procesando ? null : () => Navigator.of(context).pop(false),
               child: Text(t.perfilCancelar),
             ),
             FilledButton(
-              onPressed: () async {
-                final mensaje = mensajeController.text.trim();
-                try {
-                  if (tipo == TipoPresupuesto.cerrado) {
-                    final monto = double.tryParse(montoController.text.replaceAll(',', '.'));
-                    if (monto == null || monto <= 0) return;
-                    await ServiceRequestService().enviarPresupuesto(
-                      trabajo.id,
-                      tipo: tipo,
-                      monto: monto,
-                      mensaje: mensaje,
-                      incluyeIva: incluyeIva,
-                    );
-                  } else {
-                    final tarifa = double.tryParse(tarifaController.text.replaceAll(',', '.'));
-                    final horas = double.tryParse(horasController.text.replaceAll(',', '.'));
-                    if (tarifa == null || tarifa <= 0 || horas == null || horas <= 0) return;
-                    await ServiceRequestService().enviarPresupuesto(
-                      trabajo.id,
-                      tipo: tipo,
-                      tarifaHora: tarifa,
-                      horasEstimadas: horas,
-                      mensaje: mensaje,
-                      incluyeIva: incluyeIva,
-                    );
-                  }
-                  if (!context.mounted) return;
-                  Navigator.of(context).pop(true);
-                } catch (e) {
-                  debugPrint('[TrabajosActivosProfesionalScreen] Error al enviar presupuesto: $e');
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(mensajeDeError(e, contexto: t.presupuestoEnviadoError, t: t))),
-                  );
-                }
-              },
-              child: Text(t.trabajosActivosPrecioFinalConfirmar),
+              onPressed: procesando
+                  ? null
+                  : () async {
+                      final mensaje = mensajeController.text.trim();
+                      double? monto;
+                      double? tarifa;
+                      double? horas;
+                      if (tipo == TipoPresupuesto.cerrado) {
+                        monto = double.tryParse(montoController.text.replaceAll(',', '.'));
+                        if (monto == null || monto <= 0) return;
+                      } else {
+                        tarifa = double.tryParse(tarifaController.text.replaceAll(',', '.'));
+                        horas = double.tryParse(horasController.text.replaceAll(',', '.'));
+                        if (tarifa == null || tarifa <= 0 || horas == null || horas <= 0) return;
+                      }
+                      setState(() => procesando = true);
+                      try {
+                        if (tipo == TipoPresupuesto.cerrado) {
+                          await ServiceRequestService().enviarPresupuesto(
+                            trabajo.id,
+                            tipo: tipo,
+                            monto: monto,
+                            mensaje: mensaje,
+                            incluyeIva: incluyeIva,
+                          );
+                        } else {
+                          await ServiceRequestService().enviarPresupuesto(
+                            trabajo.id,
+                            tipo: tipo,
+                            tarifaHora: tarifa,
+                            horasEstimadas: horas,
+                            mensaje: mensaje,
+                            incluyeIva: incluyeIva,
+                          );
+                        }
+                        if (!context.mounted) return;
+                        Navigator.of(context).pop(true);
+                      } catch (e) {
+                        debugPrint('[TrabajosActivosProfesionalScreen] Error al enviar presupuesto: $e');
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(mensajeDeError(e, contexto: t.presupuestoEnviadoError, t: t))),
+                        );
+                      } finally {
+                        if (context.mounted) setState(() => procesando = false);
+                      }
+                    },
+              child: procesando
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(t.trabajosActivosPrecioFinalConfirmar),
             ),
           ],
         ),
