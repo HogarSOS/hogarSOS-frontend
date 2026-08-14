@@ -113,6 +113,10 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
     final numTrabajosNuevosSinVer =
         trabajos.where((t) => t.estado == EstadoSolicitud.aceptada && !trabajosVistos.contains(t.id)).length;
     final hayTrabajoNuevoSinVer = numTrabajosNuevosSinVer > 0;
+    // Suma de ambas señales para el número del badge: si solo se contaran
+    // los mensajes, un trabajo nuevo sin mensajes mostraría un badge
+    // visible con "0" dentro, más confuso que el punto ciego anterior.
+    final numBadgeMensajes = numConversacionesNoLeidas + numTrabajosNuevosSinVer;
 
     // Badge del icono de la app (UX#6) — booleano (0/1), no la cuenta
     // exacta: iOS no tiene un "punto sin número" a nivel de sistema (su
@@ -147,10 +151,12 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
             NavigationDestination(
               icon: Badge(
                 isLabelVisible: hayMensajesNoLeidos || hayTrabajoNuevoSinVer,
+                label: Text('$numBadgeMensajes'),
                 child: const Icon(Icons.chat_bubble_outline),
               ),
               selectedIcon: Badge(
                 isLabelVisible: hayMensajesNoLeidos || hayTrabajoNuevoSinVer,
+                label: Text('$numBadgeMensajes'),
                 child: const Icon(Icons.chat_bubble),
               ),
               label: t.navMensajes,

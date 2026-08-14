@@ -110,8 +110,16 @@ class _ClienteShellScreenState extends ConsumerState<ClienteShellScreen> {
             label: t.navInicio,
           ),
           NavigationDestination(
-            icon: Badge(isLabelVisible: hayMensajesNoLeidos, child: const Icon(Icons.chat_bubble_outline)),
-            selectedIcon: Badge(isLabelVisible: hayMensajesNoLeidos, child: const Icon(Icons.chat_bubble)),
+            icon: Badge(
+              isLabelVisible: hayMensajesNoLeidos,
+              label: Text('$numConversacionesNoLeidas'),
+              child: const Icon(Icons.chat_bubble_outline),
+            ),
+            selectedIcon: Badge(
+              isLabelVisible: hayMensajesNoLeidos,
+              label: Text('$numConversacionesNoLeidas'),
+              child: const Icon(Icons.chat_bubble),
+            ),
             label: t.navMensajes,
           ),
           NavigationDestination(
