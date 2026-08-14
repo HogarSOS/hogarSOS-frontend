@@ -82,12 +82,23 @@ class ChatService {
     return _solicitudRef(serviceRequestId).collection('messages');
   }
 
+  // Límite de rendimiento (auditoría pre-lanzamiento): sin tope, un
+  // trabajo recurrente con meses de conversación descargaría y
+  // mantendría en memoria el historial completo cada vez que se abre el
+  // chat. Se pide descendente + limit (los últimos N) y se invierte en
+  // memoria para seguir devolviendo el orden ascendente que espera la
+  // pantalla — con menos de _limiteMensajes mensajes en la conversación
+  // (el caso normal hoy) esto no cambia nada visible.
+  static const _limiteMensajes = 200;
+
   Stream<List<ChatMessage>> observarMensajes(String serviceRequestId) {
     return _mensajesRef(serviceRequestId)
-        .orderBy('enviadoEn', descending: false)
+        .orderBy('enviadoEn', descending: true)
+        .limit(_limiteMensajes)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => ChatMessage.fromFirestore(doc.data())).toList());
+        .map((snapshot) => snapshot.docs.reversed
+            .map((doc) => ChatMessage.fromFirestore(doc.data()))
+            .toList());
   }
 
   /// Solo el último mensaje — usado para el indicador de "mensaje nuevo"

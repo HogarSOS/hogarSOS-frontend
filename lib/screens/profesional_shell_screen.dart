@@ -95,12 +95,60 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
     final t = AppLocalizations.of(context);
     final indiceActual = ref.watch(profesionalTabIndexProvider);
 
-    // Punto rojo en la pestaña "Mensajes" (aquí es "Trabajos activos")
-    // si algún trabajo asignado tiene un mensaje nuevo sin abrir, O si
-    // hay un trabajo recién aceptado que el profesional todavía no ha
-    // abierto — antes, si se ignoraba el push "¡Te han elegido!", no
-    // quedaba ninguna señal dentro de la app y el trabajo podía pasar
-    // desapercibido indefinidamente.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) => _onPopInvoked(didPop),
+      child: Scaffold(
+        body: IndexedStack(index: indiceActual, children: _pantallas),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: indiceActual,
+          onDestinationSelected: (i) => ref.read(profesionalTabIndexProvider.notifier).state = i,
+          destinations: [
+            NavigationDestination(
+              icon: const Icon(Icons.person_outline),
+              selectedIcon: const Icon(Icons.person),
+              label: t.navPerfil,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.home_repair_service_outlined),
+              selectedIcon: const Icon(Icons.home_repair_service),
+              label: t.navSolicitudesCercanas,
+            ),
+            NavigationDestination(
+              icon: const _BadgeMensajesProfesional(child: Icon(Icons.chat_bubble_outline)),
+              selectedIcon: const _BadgeMensajesProfesional(child: Icon(Icons.chat_bubble)),
+              label: t.navMensajes,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.account_balance_wallet_outlined),
+              selectedIcon: const Icon(Icons.account_balance_wallet),
+              label: t.navCentroPagos,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Badge de la pestaña Mensajes/Trabajos activos, aislado en su propio
+/// [ConsumerWidget] (rendimiento, auditoría pre-lanzamiento) — mismo
+/// motivo que _BadgeMensajesCliente en cliente_shell_screen.dart: antes
+/// este cálculo vivía en el build() del shell entero, así que cualquier
+/// cambio de unreadChatProvider o trabajosVistosProvider reconstruía
+/// todo el Scaffold/NavigationBar, no solo el punto rojo.
+class _BadgeMensajesProfesional extends ConsumerWidget {
+  const _BadgeMensajesProfesional({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Punto rojo si algún trabajo asignado tiene un mensaje nuevo sin
+    // abrir, O si hay un trabajo recién aceptado que el profesional
+    // todavía no ha abierto — antes, si se ignoraba el push "¡Te han
+    // elegido!", no quedaba ninguna señal dentro de la app y el trabajo
+    // podía pasar desapercibido indefinidamente.
     final trabajosAsync = ref.watch(assignedRequestsProvider);
     final trabajos = trabajosAsync.maybeWhen(
       data: (lista) => lista,
@@ -129,46 +177,10 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
       AppBadgeService.instance.actualizar((hayMensajesNoLeidos || hayTrabajoNuevoSinVer) ? 1 : 0);
     });
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) => _onPopInvoked(didPop),
-      child: Scaffold(
-        body: IndexedStack(index: indiceActual, children: _pantallas),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: indiceActual,
-          onDestinationSelected: (i) => ref.read(profesionalTabIndexProvider.notifier).state = i,
-          destinations: [
-            NavigationDestination(
-              icon: const Icon(Icons.person_outline),
-              selectedIcon: const Icon(Icons.person),
-              label: t.navPerfil,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.home_repair_service_outlined),
-              selectedIcon: const Icon(Icons.home_repair_service),
-              label: t.navSolicitudesCercanas,
-            ),
-            NavigationDestination(
-              icon: Badge(
-                isLabelVisible: hayMensajesNoLeidos || hayTrabajoNuevoSinVer,
-                label: Text('$numBadgeMensajes'),
-                child: const Icon(Icons.chat_bubble_outline),
-              ),
-              selectedIcon: Badge(
-                isLabelVisible: hayMensajesNoLeidos || hayTrabajoNuevoSinVer,
-                label: Text('$numBadgeMensajes'),
-                child: const Icon(Icons.chat_bubble),
-              ),
-              label: t.navMensajes,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.account_balance_wallet_outlined),
-              selectedIcon: const Icon(Icons.account_balance_wallet),
-              label: t.navCentroPagos,
-            ),
-          ],
-        ),
-      ),
+    return Badge(
+      isLabelVisible: hayMensajesNoLeidos || hayTrabajoNuevoSinVer,
+      label: Text('$numBadgeMensajes'),
+      child: child,
     );
   }
 }

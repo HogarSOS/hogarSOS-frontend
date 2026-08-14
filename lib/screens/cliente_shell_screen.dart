@@ -72,10 +72,51 @@ class _ClienteShellScreenState extends ConsumerState<ClienteShellScreen> {
     final t = AppLocalizations.of(context);
     final indiceActual = ref.watch(clienteTabIndexProvider);
 
-    // Punto rojo en la pestaña "Mensajes" si alguna conversación activa
-    // tiene un mensaje nuevo sin abrir — reutiliza
-    // resumenActividadClienteProvider (ya compartido con Inicio y
-    // Mensajes, sin llamada de red adicional) para saber qué
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) => _onPopInvoked(didPop),
+      child: Scaffold(
+      body: IndexedStack(index: indiceActual, children: _pantallas),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: indiceActual,
+        onDestinationSelected: (i) => ref.read(clienteTabIndexProvider.notifier).state = i,
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
+            label: t.navInicio,
+          ),
+          NavigationDestination(
+            icon: const _BadgeMensajesCliente(child: Icon(Icons.chat_bubble_outline)),
+            selectedIcon: const _BadgeMensajesCliente(child: Icon(Icons.chat_bubble)),
+            label: t.navMensajes,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.person_outline),
+            selectedIcon: const Icon(Icons.person),
+            label: t.navPerfil,
+          ),
+        ],
+      ),
+      ),
+    );
+  }
+}
+
+/// Badge de la pestaña Mensajes, aislado en su propio [ConsumerWidget]
+/// (rendimiento, auditoría pre-lanzamiento): antes este cálculo vivía en
+/// el build() del shell entero, así que CUALQUIER cambio de
+/// unreadChatProvider reconstruía todo el Scaffold/NavigationBar, no
+/// solo el punto rojo. Aquí solo se reconstruye este icono pequeño.
+class _BadgeMensajesCliente extends ConsumerWidget {
+  const _BadgeMensajesCliente({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Reutiliza resumenActividadClienteProvider (ya compartido con
+    // Inicio y Mensajes, sin llamada de red adicional) para saber qué
     // conversaciones existen, y unreadChatProvider por cada una.
     final resumenAsync = ref.watch(resumenActividadClienteProvider);
     final idsActivos = resumenAsync.maybeWhen(
@@ -95,41 +136,10 @@ class _ClienteShellScreenState extends ConsumerState<ClienteShellScreen> {
       AppBadgeService.instance.actualizar(hayMensajesNoLeidos ? 1 : 0);
     });
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) => _onPopInvoked(didPop),
-      child: Scaffold(
-      body: IndexedStack(index: indiceActual, children: _pantallas),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: indiceActual,
-        onDestinationSelected: (i) => ref.read(clienteTabIndexProvider.notifier).state = i,
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home),
-            label: t.navInicio,
-          ),
-          NavigationDestination(
-            icon: Badge(
-              isLabelVisible: hayMensajesNoLeidos,
-              label: Text('$numConversacionesNoLeidas'),
-              child: const Icon(Icons.chat_bubble_outline),
-            ),
-            selectedIcon: Badge(
-              isLabelVisible: hayMensajesNoLeidos,
-              label: Text('$numConversacionesNoLeidas'),
-              child: const Icon(Icons.chat_bubble),
-            ),
-            label: t.navMensajes,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.person_outline),
-            selectedIcon: const Icon(Icons.person),
-            label: t.navPerfil,
-          ),
-        ],
-      ),
-      ),
+    return Badge(
+      isLabelVisible: hayMensajesNoLeidos,
+      label: Text('$numConversacionesNoLeidas'),
+      child: child,
     );
   }
 }
