@@ -219,10 +219,10 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: () async {
-          await ref.read(nearbyRequestsProvider.notifier).cargar();
-          ref.read(assignedRequestsProvider.notifier).cargar();
-        },
+        onRefresh: () => Future.wait([
+          ref.read(nearbyRequestsProvider.notifier).cargar(),
+          ref.read(assignedRequestsProvider.notifier).cargar(),
+        ]),
         child: CustomScrollView(
           slivers: [
             // Acceso rápido a disponibilidad (roadmap económico, punto 2):
