@@ -244,7 +244,7 @@ class _Contenido extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
           if (solicitud.cierreHoras?.estado == EstadoPresupuesto.pendiente)
-            _CierreHorasPendienteCard(
+            CierreHorasPendienteCard(
               serviceRequestId: solicitud.id,
               cierreHoras: solicitud.cierreHoras!,
               tarifaHora: solicitud.presupuesto?.tarifaHora,
@@ -252,7 +252,7 @@ class _Contenido extends ConsumerWidget {
               onRespondido: onRecargar,
             )
           else if (solicitud.ampliacion?.estado == EstadoPresupuesto.pendiente)
-            _AmpliacionPendienteCard(
+            AmpliacionPendienteCard(
               serviceRequestId: solicitud.id,
               ampliacion: solicitud.ampliacion!,
               tarifaHora: solicitud.presupuesto?.tarifaHora,
@@ -292,7 +292,7 @@ class _Contenido extends ConsumerWidget {
           else if (solicitud.presupuesto == null)
             _EsperandoPresupuesto(texto: t.seguimientoEsperandoPresupuesto)
           else if (solicitud.presupuesto!.estado == EstadoPresupuesto.pendiente)
-            _PresupuestoPendienteCard(
+            PresupuestoPendienteCard(
               serviceRequestId: solicitud.id,
               presupuesto: solicitud.presupuesto!,
               onRespondido: onRecargar,
@@ -551,16 +551,35 @@ class _DesgloseComision extends StatelessWidget {
   }
 }
 
-class _PresupuestoPendienteCard extends ConsumerWidget {
-  const _PresupuestoPendienteCard({
+class PresupuestoPendienteCard extends ConsumerStatefulWidget {
+  const PresupuestoPendienteCard({
+    super.key,
     required this.serviceRequestId,
     required this.presupuesto,
     required this.onRespondido,
+    this.servicio,
   });
 
   final String serviceRequestId;
   final PresupuestoInfo presupuesto;
   final Future<void> Function({bool silencioso}) onRespondido;
+  // Inyectable solo para tests (ver seguimiento_solicitud_doble_pulsacion_test.dart) —
+  // en la app real siempre es null y se usa ServiceRequestService().
+  final ServiceRequestService? servicio;
+
+  @override
+  ConsumerState<PresupuestoPendienteCard> createState() => _PresupuestoPendienteCardState();
+}
+
+class _PresupuestoPendienteCardState extends ConsumerState<PresupuestoPendienteCard> {
+  // Un solo tap ya deshabilita el botón mientras responderPresupuesto()
+  // está en vuelo — sin esto, un doble tap rápido (red lenta) disparaba
+  // dos peticiones; el backend ya las protege con un updateMany
+  // condicionado a estado:'pendiente' (no hay riesgo de doble
+  // aceptación real), pero la segunda petición siempre volvía como un
+  // 409 "ya no está pendiente" confuso para el usuario.
+  bool _procesando = false;
+  bool _procesandoAceptar = false;
 
   Future<void> _responder(BuildContext context, bool aceptar) async {
     final t = AppLocalizations.of(context);
@@ -587,29 +606,37 @@ class _PresupuestoPendienteCard extends ConsumerWidget {
       if (confirmado != true || !context.mounted) return;
     }
 
+    setState(() {
+      _procesando = true;
+      _procesandoAceptar = aceptar;
+    });
     try {
-      await ServiceRequestService().responderPresupuesto(serviceRequestId, presupuesto.id, aceptar: aceptar);
+      await (widget.servicio ?? ServiceRequestService())
+          .responderPresupuesto(widget.serviceRequestId, widget.presupuesto.id, aceptar: aceptar);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(aceptar ? t.seguimientoPresupuestoAceptadoExito : t.seguimientoPresupuestoRechazadoExito)),
       );
-      onRespondido();
+      widget.onRespondido();
     } catch (e) {
       debugPrint('[SeguimientoSolicitudScreen] Error al responder presupuesto: $e');
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(mensajeDeError(e, contexto: t.seguimientoPresupuestoError, t: t))),
       );
-      onRespondido();
+      widget.onRespondido();
+    } finally {
+      if (mounted) setState(() => _procesando = false);
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final esPorHoras = presupuesto.tipo == TipoPresupuesto.porHoras;
+    final esPorHoras = widget.presupuesto.tipo == TipoPresupuesto.porHoras;
     final comisiones = ref.watch(comisionesProvider);
+    final presupuesto = widget.presupuesto;
 
     return Container(
       width: double.infinity,
@@ -655,15 +682,19 @@ class _PresupuestoPendienteCard extends ConsumerWidget {
               Expanded(
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(foregroundColor: colorScheme.error),
-                  onPressed: () => _responder(context, false),
-                  child: Text(t.seguimientoPresupuestoRechazar),
+                  onPressed: _procesando ? null : () => _responder(context, false),
+                  child: _procesando && !_procesandoAceptar
+                      ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                      : Text(t.seguimientoPresupuestoRechazar),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: FilledButton(
-                  onPressed: () => _responder(context, true),
-                  child: Text(t.seguimientoPresupuestoAceptar),
+                  onPressed: _procesando ? null : () => _responder(context, true),
+                  child: _procesando && _procesandoAceptar
+                      ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                      : Text(t.seguimientoPresupuestoAceptar),
                 ),
               ),
             ],
@@ -678,43 +709,63 @@ class _PresupuestoPendienteCard extends ConsumerWidget {
 /// profesional pide más tiempo del estimado, el cliente acepta (se
 /// autorizará el importe adicional en un paso aparte, ver
 /// `pagoPendienteDeAutorizar`) o rechaza (el trabajo sigue igual).
-class _AmpliacionPendienteCard extends ConsumerWidget {
-  const _AmpliacionPendienteCard({
+class AmpliacionPendienteCard extends ConsumerStatefulWidget {
+  const AmpliacionPendienteCard({
+    super.key,
     required this.serviceRequestId,
     required this.ampliacion,
     required this.tarifaHora,
     required this.onRespondido,
+    this.servicio,
   });
 
   final String serviceRequestId;
   final AmpliacionInfo ampliacion;
   final double? tarifaHora;
   final Future<void> Function({bool silencioso}) onRespondido;
+  final ServiceRequestService? servicio;
+
+  @override
+  ConsumerState<AmpliacionPendienteCard> createState() => _AmpliacionPendienteCardState();
+}
+
+class _AmpliacionPendienteCardState extends ConsumerState<AmpliacionPendienteCard> {
+  // Mismo guard que PresupuestoPendienteCard — ver su comentario.
+  bool _procesando = false;
+  bool _procesandoAceptar = false;
 
   Future<void> _responder(BuildContext context, bool aceptar) async {
     final t = AppLocalizations.of(context);
+    setState(() {
+      _procesando = true;
+      _procesandoAceptar = aceptar;
+    });
     try {
-      await ServiceRequestService().responderAmpliacion(serviceRequestId, ampliacion.id, aceptar: aceptar);
+      await (widget.servicio ?? ServiceRequestService())
+          .responderAmpliacion(widget.serviceRequestId, widget.ampliacion.id, aceptar: aceptar);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(aceptar ? t.seguimientoAmpliacionAceptadaExito : t.seguimientoAmpliacionRechazadaExito)),
       );
-      onRespondido();
+      widget.onRespondido();
     } catch (e) {
       debugPrint('[SeguimientoSolicitudScreen] Error al responder ampliación: $e');
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(mensajeDeError(e, contexto: t.seguimientoAmpliacionError, t: t))),
       );
-      onRespondido();
+      widget.onRespondido();
+    } finally {
+      if (mounted) setState(() => _procesando = false);
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final importeAdicional = ampliacion.importeAdicional(tarifaHora);
+    final ampliacion = widget.ampliacion;
+    final importeAdicional = ampliacion.importeAdicional(widget.tarifaHora);
     final comisiones = ref.watch(comisionesProvider);
 
     return Container(
@@ -759,15 +810,19 @@ class _AmpliacionPendienteCard extends ConsumerWidget {
               Expanded(
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(foregroundColor: colorScheme.error),
-                  onPressed: () => _responder(context, false),
-                  child: Text(t.seguimientoPresupuestoRechazar),
+                  onPressed: _procesando ? null : () => _responder(context, false),
+                  child: _procesando && !_procesandoAceptar
+                      ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                      : Text(t.seguimientoPresupuestoRechazar),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: FilledButton(
-                  onPressed: () => _responder(context, true),
-                  child: Text(t.seguimientoPresupuestoAceptar),
+                  onPressed: _procesando ? null : () => _responder(context, true),
+                  child: _procesando && _procesandoAceptar
+                      ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                      : Text(t.seguimientoPresupuestoAceptar),
                 ),
               ),
             ],
@@ -782,13 +837,15 @@ class _AmpliacionPendienteCard extends ConsumerWidget {
 /// trabajo "por_horas" — el cliente las confirma (eso libera el pago)
 /// o, si no está de acuerdo, abre una reclamación (no hay
 /// renegociación automática, se resuelve por chat o soporte).
-class _CierreHorasPendienteCard extends ConsumerWidget {
-  const _CierreHorasPendienteCard({
+class CierreHorasPendienteCard extends ConsumerStatefulWidget {
+  const CierreHorasPendienteCard({
+    super.key,
     required this.serviceRequestId,
     required this.cierreHoras,
     required this.tarifaHora,
     required this.horasEstimadas,
     required this.onRespondido,
+    this.servicio,
   });
 
   final String serviceRequestId;
@@ -796,26 +853,40 @@ class _CierreHorasPendienteCard extends ConsumerWidget {
   final double? tarifaHora;
   final double? horasEstimadas;
   final Future<void> Function({bool silencioso}) onRespondido;
+  final ServiceRequestService? servicio;
+
+  @override
+  ConsumerState<CierreHorasPendienteCard> createState() => _CierreHorasPendienteCardState();
+}
+
+class _CierreHorasPendienteCardState extends ConsumerState<CierreHorasPendienteCard> {
+  // Mismo guard que PresupuestoPendienteCard — ver su comentario. Aquí
+  // solo hace falta un flag (una única acción de red, "Confirmar"): el
+  // botón "Reclamar" solo navega, no llama al backend directamente.
+  bool _procesando = false;
 
   Future<void> _confirmar(BuildContext context, {bool confirmarReduccionGrande = false}) async {
     final t = AppLocalizations.of(context);
+    setState(() => _procesando = true);
     try {
-      await ServiceRequestService().responderCierreHoras(
-        serviceRequestId,
-        cierreHoras.id,
+      await (widget.servicio ?? ServiceRequestService()).responderCierreHoras(
+        widget.serviceRequestId,
+        widget.cierreHoras.id,
         aceptar: true,
         confirmarReduccionGrande: confirmarReduccionGrande,
       );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.seguimientoCierreHorasConfirmadoExito)));
-      onRespondido();
+      widget.onRespondido();
     } catch (e) {
       debugPrint('[SeguimientoSolicitudScreen] Error al confirmar horas: $e');
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(mensajeDeError(e, contexto: t.seguimientoCierreHorasError, t: t))),
       );
-      onRespondido();
+      widget.onRespondido();
+    } finally {
+      if (mounted) setState(() => _procesando = false);
     }
   }
 
@@ -827,15 +898,15 @@ class _CierreHorasPendienteCard extends ConsumerWidget {
   /// por debajo de lo estimado.
   Future<void> _confirmarConAviso(BuildContext context) async {
     final t = AppLocalizations.of(context);
-    final estimadas = horasEstimadas;
-    final porcentaje = cierreHoras.porcentaje;
+    final estimadas = widget.horasEstimadas;
+    final porcentaje = widget.cierreHoras.porcentaje;
     final confirmado = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(t.seguimientoCierreHorasDialogoTitulo),
         content: Text(
           t.seguimientoCierreHorasDialogoDetalle(
-            cierreHoras.horasReales.toStringAsFixed(1),
+            widget.cierreHoras.horasReales.toStringAsFixed(1),
             estimadas?.toStringAsFixed(1) ?? '—',
             porcentaje != null ? '$porcentaje%' : '—',
           ),
@@ -852,9 +923,12 @@ class _CierreHorasPendienteCard extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final cierreHoras = widget.cierreHoras;
+    final horasEstimadas = widget.horasEstimadas;
+    final tarifaHora = widget.tarifaHora;
     final importeFinal = (tarifaHora ?? 0) * cierreHoras.horasReales;
     final comisiones = ref.watch(comisionesProvider);
     final esAnomala = cierreHoras.reduccionAnomala;
@@ -875,10 +949,10 @@ class _CierreHorasPendienteCard extends ConsumerWidget {
           // 2026-08-14) — antes solo se veían las horas declaradas y
           // el importe, sin nada al lado con lo que compararlas.
           if (horasEstimadas != null)
-            _FilaCierreHoras(etiqueta: t.seguimientoCierreHorasLabelEstimadas, valor: '${horasEstimadas!.toStringAsFixed(1)} h'),
+            _FilaCierreHoras(etiqueta: t.seguimientoCierreHorasLabelEstimadas, valor: '${horasEstimadas.toStringAsFixed(1)} h'),
           _FilaCierreHoras(etiqueta: t.seguimientoCierreHorasLabelReales, valor: '${cierreHoras.horasReales.toStringAsFixed(1)} h'),
           if (tarifaHora != null)
-            _FilaCierreHoras(etiqueta: t.seguimientoCierreHorasLabelTarifa, valor: '${tarifaHora!.toStringAsFixed(2)} €/h'),
+            _FilaCierreHoras(etiqueta: t.seguimientoCierreHorasLabelTarifa, valor: '${tarifaHora.toStringAsFixed(2)} €/h'),
           _FilaCierreHoras(etiqueta: t.seguimientoCierreHorasLabelImporte, valor: '${importeFinal.toStringAsFixed(2)} €', destacado: true),
           if (esAnomala) ...[
             const SizedBox(height: 10),
@@ -915,20 +989,24 @@ class _CierreHorasPendienteCard extends ConsumerWidget {
               Expanded(
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(foregroundColor: colorScheme.error),
-                  onPressed: () async {
-                    final resultado = await Navigator.of(context).push<bool>(
-                      MaterialPageRoute(builder: (_) => ReportarProblemaScreen(serviceRequestId: serviceRequestId)),
-                    );
-                    if (resultado == true) onRespondido();
-                  },
+                  onPressed: _procesando
+                      ? null
+                      : () async {
+                          final resultado = await Navigator.of(context).push<bool>(
+                            MaterialPageRoute(builder: (_) => ReportarProblemaScreen(serviceRequestId: widget.serviceRequestId)),
+                          );
+                          if (resultado == true) widget.onRespondido();
+                        },
                   child: Text(t.seguimientoCierreHorasReclamar),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: FilledButton(
-                  onPressed: () => esAnomala ? _confirmarConAviso(context) : _confirmar(context),
-                  child: Text(t.seguimientoCierreHorasConfirmar),
+                  onPressed: _procesando ? null : () => esAnomala ? _confirmarConAviso(context) : _confirmar(context),
+                  child: _procesando
+                      ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                      : Text(t.seguimientoCierreHorasConfirmar),
                 ),
               ),
             ],
