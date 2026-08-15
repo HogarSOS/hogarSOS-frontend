@@ -151,10 +151,47 @@ class AuthService {
     }
   }
 
+  /// P2 #6: códigos que el backend devuelve cuando /auth/register
+  /// rechaza explícitamente la petición SIN haber creado nada — ver
+  /// auth.controller.ts (`register`). Son los únicos casos en los que
+  /// es seguro revertir el usuario de Firebase: el backend confirmó
+  /// que no hay fila en Postgres. Ante cualquier otra cosa (timeout,
+  /// error de conexión, 500/INTERNAL_ERROR, una respuesta que no trae
+  /// `code`, o un fallo posterior al guardar localmente) no sabemos si
+  /// Postgres ya creó la cuenta, así que se conserva la identidad de
+  /// Firebase — un reintento con el mismo firebaseUid se reconcilia
+  /// solo contra el backend, ya idempotente por diseño.
+  static const _codigosRechazoConfirmado = {
+    'VALIDATION_INVALID',
+    'AUTH_FIREBASE_TOKEN_INVALID',
+    'AUTH_FIREBASE_TOKEN_NO_CONTACT',
+    'AUTH_USER_ALREADY_EXISTS',
+  };
+
+  // No privado, static (con @visibleForTesting) a propósito: es la
+  // decisión completa de "revertir o no" reducida a una función pura de
+  // un DioException, sin ningún estado de instancia — así se puede
+  // probar directamente sin construir un AuthService (su constructor
+  // toca FirebaseAuth.instance, que exige Firebase.initializeApp() y
+  // este proyecto no tiene mockito/mocktail ni un adaptador de Dio de
+  // pruebas para simular ese arranque).
+  @visibleForTesting
+  static bool esRechazoConfirmadoDelBackend(DioException e) {
+    final data = e.response?.data;
+    final codigo = data is Map ? data['code']?.toString() : null;
+    return codigo != null && _codigosRechazoConfirmado.contains(codigo);
+  }
+
   /// Registro/login con email y contraseña vía Firebase, seguido del
   /// intercambio por el JWT propio. Si Firebase crea el usuario pero
-  /// el backend falla después, se revierte (borra) el usuario de
-  /// Firebase para evitar estados inconsistentes.
+  /// el backend RECHAZA explícitamente la petición (uno de los códigos
+  /// de arriba), se revierte (borra) el usuario de Firebase. Ante
+  /// cualquier fallo ambiguo (red, timeout, 500, o un fallo al guardar
+  /// la sesión localmente DESPUÉS de un 201 exitoso) NO se revierte:
+  /// no hay forma de saber desde aquí si el backend ya creó la cuenta,
+  /// y borrar Firebase en ese caso es lo que deja al usuario bloqueado
+  /// sin poder ni registrarse (email ya usado en Postgres) ni iniciar
+  /// sesión (firebaseUid nuevo, sin fila correspondiente).
   Future<AuthResult> registrarConEmail({
     required String email,
     required String password,
@@ -198,11 +235,17 @@ class AuthService {
       return resultado;
     } on DioException catch (e) {
       debugPrint('[AuthService] Fallo al registrar en el backend: ${e.type} — ${e.message}');
-      await _revertirUsuarioFirebase(credencial);
+      if (AuthService.esRechazoConfirmadoDelBackend(e)) {
+        await _revertirUsuarioFirebase(credencial);
+      }
       throw AuthException(_codigoDio(e), causa: e);
     } catch (e) {
+      // No es un DioException: la petición HTTP en sí no falló (o ni
+      // siquiera se sabe si falló — puede ser getIdToken() antes de
+      // llamar al backend, o _guardarSesion() DESPUÉS de un 201 ya
+      // exitoso). En ninguno de los dos casos hay una confirmación del
+      // backend de que no se creó nada, así que no se revierte Firebase.
       debugPrint('[AuthService] Error inesperado al registrar en el backend: $e');
-      await _revertirUsuarioFirebase(credencial);
       throw AuthException('unexpected', causa: e);
     }
   }
