@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
 import 'api_service.dart';
+import 'installation_id_service.dart';
 import 'token_storage.dart';
 
 class AuthResult {
@@ -296,9 +297,15 @@ class AuthService {
   /// backend caído) el logout local se completa igualmente — un fallo
   /// de red nunca debe dejar a alguien atrapado sin poder cerrar
   /// sesión en su propio dispositivo.
+  ///
+  /// P2 #5: manda también el installationId de ESTE dispositivo, para
+  /// que el backend borre solo su UserFcmToken (deja de recibir push
+  /// de inmediato) sin tocar los de otros dispositivos del mismo
+  /// usuario.
   Future<void> logout() async {
     try {
-      await ApiService.instance.client.post('/auth/logout');
+      final installationId = await InstallationIdService.instance.obtener();
+      await ApiService.instance.client.post('/auth/logout', data: {'installationId': installationId});
     } catch (e) {
       debugPrint('[AuthService] Fallo al revocar la sesión en el backend (logout local continúa): $e');
     }

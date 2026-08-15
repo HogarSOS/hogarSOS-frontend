@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'api_service.dart';
+import 'installation_id_service.dart';
 
 /// Notificaciones push (FCM). Pide permiso, registra el token del
 /// dispositivo en el backend y muestra la notificación cuando llega
@@ -141,7 +142,11 @@ class NotificationService with WidgetsBindingObserver {
       }
       if (token == null) return;
 
-      await ApiService.instance.client.patch('/auth/me/fcm-token', data: {'fcmToken': token});
+      final installationId = await InstallationIdService.instance.obtener();
+      await ApiService.instance.client.patch(
+        '/auth/me/fcm-token',
+        data: {'fcmToken': token, 'installationId': installationId},
+      );
       debugPrint('[NotificationService] Token FCM registrado');
 
       // Con el timing de registro de plugins corregido en AppDelegate.swift
@@ -162,7 +167,14 @@ class NotificationService with WidgetsBindingObserver {
       await _tokenRefreshSub?.cancel();
       _tokenRefreshSub = _messaging.onTokenRefresh.listen((nuevoToken) async {
         try {
-          await ApiService.instance.client.patch('/auth/me/fcm-token', data: {'fcmToken': nuevoToken});
+          // Mismo installationId de siempre: el backend reconoce la
+          // rotación por (userId, installationId) y actualiza la fila
+          // existente en vez de crear una nueva (ver UserFcmToken).
+          final installationId = await InstallationIdService.instance.obtener();
+          await ApiService.instance.client.patch(
+            '/auth/me/fcm-token',
+            data: {'fcmToken': nuevoToken, 'installationId': installationId},
+          );
         } catch (e) {
           debugPrint('[NotificationService] Error al refrescar token: $e');
         }
