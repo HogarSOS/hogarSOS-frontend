@@ -58,6 +58,13 @@ class StuckPayment {
   final int intentosLiberacion;
   final String? ultimoError;
   final bool dineroRetenidoEnPlataforma;
+  // P2 #7: un contracargo de Stripe puede afectar a un pago YA liberado
+  // — por eso viaja aparte de `estado`, que en ese caso seguiría diciendo
+  // 'liberado' sin más.
+  final bool enDisputa;
+  final String? disputaEstado;
+  final double? disputaMonto;
+  final String? disputaId;
 
   StuckPayment({
     required this.paymentId,
@@ -73,6 +80,10 @@ class StuckPayment {
     required this.intentosLiberacion,
     required this.ultimoError,
     required this.dineroRetenidoEnPlataforma,
+    required this.enDisputa,
+    required this.disputaEstado,
+    required this.disputaMonto,
+    required this.disputaId,
   });
 
   factory StuckPayment.fromJson(Map<String, dynamic> json) {
@@ -90,6 +101,10 @@ class StuckPayment {
       intentosLiberacion: json['intentosLiberacion'] as int,
       ultimoError: json['ultimoError'] as String?,
       dineroRetenidoEnPlataforma: json['dineroRetenidoEnPlataforma'] as bool,
+      enDisputa: json['enDisputa'] as bool,
+      disputaEstado: json['disputaEstado'] as String?,
+      disputaMonto: (json['disputaMonto'] as num?)?.toDouble(),
+      disputaId: json['disputaId'] as String?,
     );
   }
 }
@@ -99,11 +114,13 @@ class StuckPayment {
 class StuckPaymentsSummary {
   final int total;
   final double importeRetenidoEnPlataforma;
+  final int disputasActivas;
   final List<StuckPayment> pagos;
 
   StuckPaymentsSummary({
     required this.total,
     required this.importeRetenidoEnPlataforma,
+    required this.disputasActivas,
     required this.pagos,
   });
 
@@ -111,6 +128,7 @@ class StuckPaymentsSummary {
     return StuckPaymentsSummary(
       total: json['total'] as int,
       importeRetenidoEnPlataforma: (json['importeRetenidoEnPlataforma'] as num).toDouble(),
+      disputasActivas: json['disputasActivas'] as int,
       pagos: (json['pagos'] as List)
           .map((p) => StuckPayment.fromJson(p as Map<String, dynamic>))
           .toList(),

@@ -672,6 +672,13 @@
     "placeholders": { "error": { "type": "String" } }
   },
   "adminPagoAtascadoSinProfesional": "Sin profesional asignado",
+  "adminContracargoBadge": "⚠️ Contracargo Stripe: {estado}, {monto} €",
+  "@adminContracargoBadge": {
+    "placeholders": { "estado": { "type": "String" }, "monto": { "type": "String" } }
+  },
+  "adminContracargoVerEnStripe": "Ver en Stripe",
+  "adminContracargoBloqueaReintento": "Bloqueado por disputa",
+  "adminContracargoErrorAbrirStripe": "No se pudo abrir Stripe",
   "adminReintentarLiberacion": "Reintentar liberación",
   "adminReintentarLiberacionConfirmarTitulo": "¿Reintentar liberación?",
   "adminReintentarLiberacionConfirmarTexto": "Se intentará capturar y transferir este pago de nuevo. Es seguro repetir la operación aunque ya esté en curso o parcialmente hecha.",

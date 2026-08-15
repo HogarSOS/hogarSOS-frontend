@@ -1984,6 +1984,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminPagoAtascadoSinProfesional => 'No professional assigned';
 
   @override
+  String adminContracargoBadge(String estado, String monto) {
+    return '⚠️ Stripe chargeback: $estado, $monto €';
+  }
+
+  @override
+  String get adminContracargoVerEnStripe => 'View in Stripe';
+
+  @override
+  String get adminContracargoBloqueaReintento => 'Blocked by dispute';
+
+  @override
+  String get adminContracargoErrorAbrirStripe => 'Couldn\'t open Stripe';
+
+  @override
   String get adminReintentarLiberacion => 'Retry release';
 
   @override

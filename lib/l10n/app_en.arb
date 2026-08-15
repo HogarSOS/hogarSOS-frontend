@@ -672,6 +672,13 @@
     "placeholders": { "error": { "type": "String" } }
   },
   "adminPagoAtascadoSinProfesional": "No professional assigned",
+  "adminContracargoBadge": "⚠️ Stripe chargeback: {estado}, {monto} €",
+  "@adminContracargoBadge": {
+    "placeholders": { "estado": { "type": "String" }, "monto": { "type": "String" } }
+  },
+  "adminContracargoVerEnStripe": "View in Stripe",
+  "adminContracargoBloqueaReintento": "Blocked by dispute",
+  "adminContracargoErrorAbrirStripe": "Couldn't open Stripe",
   "adminReintentarLiberacion": "Retry release",
   "adminReintentarLiberacionConfirmarTitulo": "Retry release?",
   "adminReintentarLiberacionConfirmarTexto": "This will try to capture and transfer this payment again. It's safe to repeat even if it's already in progress or partially done.",

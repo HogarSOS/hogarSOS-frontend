@@ -3530,6 +3530,30 @@ abstract class AppLocalizations {
   /// **'Sin profesional asignado'**
   String get adminPagoAtascadoSinProfesional;
 
+  /// No description provided for @adminContracargoBadge.
+  ///
+  /// In es, this message translates to:
+  /// **'⚠️ Contracargo Stripe: {estado}, {monto} €'**
+  String adminContracargoBadge(String estado, String monto);
+
+  /// No description provided for @adminContracargoVerEnStripe.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver en Stripe'**
+  String get adminContracargoVerEnStripe;
+
+  /// No description provided for @adminContracargoBloqueaReintento.
+  ///
+  /// In es, this message translates to:
+  /// **'Bloqueado por disputa'**
+  String get adminContracargoBloqueaReintento;
+
+  /// No description provided for @adminContracargoErrorAbrirStripe.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo abrir Stripe'**
+  String get adminContracargoErrorAbrirStripe;
+
   /// No description provided for @adminReintentarLiberacion.
   ///
   /// In es, this message translates to:

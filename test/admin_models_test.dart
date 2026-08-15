@@ -18,6 +18,10 @@ void main() {
         'intentosLiberacion': 2,
         'ultimoError': 'Stripe timeout',
         'dineroRetenidoEnPlataforma': true,
+        'enDisputa': false,
+        'disputaEstado': null,
+        'disputaMonto': null,
+        'disputaId': null,
       });
 
       expect(pago.paymentId, 'pago-1');
@@ -28,6 +32,38 @@ void main() {
       expect(pago.intentosLiberacion, 2);
       expect(pago.ultimoError, 'Stripe timeout');
       expect(pago.dineroRetenidoEnPlataforma, true);
+      expect(pago.enDisputa, false);
+    });
+
+    // P2 #7: un contracargo puede afectar a un pago YA liberado — por
+    // eso viaja aparte de `estado`, que en ese caso seguiría diciendo
+    // 'liberado' sin más.
+    test('parsea un pago liberado con una disputa de Stripe activa', () {
+      final pago = StuckPayment.fromJson({
+        'paymentId': 'pago-3',
+        'serviceRequestId': 'sr-3',
+        'estado': 'liberado',
+        'estadoSolicitud': 'completada',
+        'categoria': 'Fontanería',
+        'clienteNombre': 'Ana Sánchez',
+        'profesionalNombre': 'José Fernández',
+        'montoProfesional': 95,
+        'capturadoAt': '2026-08-04T09:00:00.000Z',
+        'createdAt': '2026-08-03T09:00:00.000Z',
+        'intentosLiberacion': 0,
+        'ultimoError': null,
+        'dineroRetenidoEnPlataforma': false,
+        'enDisputa': true,
+        'disputaEstado': 'needs_response',
+        'disputaMonto': 45.0,
+        'disputaId': 'dp_1',
+      });
+
+      expect(pago.estado, 'liberado');
+      expect(pago.enDisputa, true);
+      expect(pago.disputaEstado, 'needs_response');
+      expect(pago.disputaMonto, 45.0);
+      expect(pago.disputaId, 'dp_1');
     });
 
     // El backend puede devolver profesionalNombre/capturadoAt/ultimoError
@@ -49,12 +85,17 @@ void main() {
         'intentosLiberacion': 0,
         'ultimoError': null,
         'dineroRetenidoEnPlataforma': false,
+        'enDisputa': false,
+        'disputaEstado': null,
+        'disputaMonto': null,
+        'disputaId': null,
       });
 
       expect(pago.profesionalNombre, isNull);
       expect(pago.capturadoAt, isNull);
       expect(pago.ultimoError, isNull);
       expect(pago.dineroRetenidoEnPlataforma, false);
+      expect(pago.enDisputa, false);
     });
   });
 
@@ -63,6 +104,7 @@ void main() {
       final resumen = StuckPaymentsSummary.fromJson({
         'total': 2,
         'importeRetenidoEnPlataforma': 95.5,
+        'disputasActivas': 1,
         'pagos': [
           {
             'paymentId': 'pago-1',
@@ -78,12 +120,17 @@ void main() {
             'intentosLiberacion': 2,
             'ultimoError': null,
             'dineroRetenidoEnPlataforma': true,
+            'enDisputa': false,
+            'disputaEstado': null,
+            'disputaMonto': null,
+            'disputaId': null,
           },
         ],
       });
 
       expect(resumen.total, 2);
       expect(resumen.importeRetenidoEnPlataforma, 95.5);
+      expect(resumen.disputasActivas, 1);
       expect(resumen.pagos, hasLength(1));
       expect(resumen.pagos.first.paymentId, 'pago-1');
     });
@@ -92,6 +139,7 @@ void main() {
       final resumen = StuckPaymentsSummary.fromJson({
         'total': 0,
         'importeRetenidoEnPlataforma': 0,
+        'disputasActivas': 0,
         'pagos': [],
       });
 

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/admin_models.dart';
 import '../../providers/auth_provider.dart';
@@ -513,7 +514,7 @@ class _PagosAtascadosTabState extends State<_PagosAtascadosTab> {
   Future<void> _recargar() async {
     setState(() => _futuro = widget.adminService.listarPagosAtascados());
     await _futuro.catchError(
-      (_) => StuckPaymentsSummary(total: 0, importeRetenidoEnPlataforma: 0, pagos: []),
+      (_) => StuckPaymentsSummary(total: 0, importeRetenidoEnPlataforma: 0, disputasActivas: 0, pagos: []),
     );
   }
 
@@ -632,6 +633,46 @@ class _PagoAtascadoCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // P2 #7: un contracargo de Stripe es una incidencia financiera
+            // distinta de un fallo técnico de liberación — banda propia
+            // para que no se confunda con el resto de la tarjeta, visible
+            // incluso si `pago.estado` ya es 'liberado'.
+            if (pago.enDisputa) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.gavel_rounded, size: 16, color: colorScheme.onErrorContainer),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        t.adminContracargoBadge(pago.disputaEstado ?? '', pago.disputaMonto?.toStringAsFixed(2) ?? '?'),
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: colorScheme.onErrorContainer,
+                        ),
+                      ),
+                    ),
+                    if (pago.disputaId != null)
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        onPressed: () => _abrirDisputaEnStripe(context, pago.disputaId!),
+                        child: Text(t.adminContracargoVerEnStripe, style: const TextStyle(fontSize: 12.5)),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
             Row(
               children: [
                 Icon(
@@ -694,7 +735,11 @@ class _PagoAtascadoCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: procesando ? null : onReintentar,
+                // P2 #7: con una disputa bloqueante, el backend rechaza
+                // cualquier intento de mover dinero (PAGO_EN_DISPUTA) — se
+                // deshabilita aquí para no dejar que el admin pulse hacia
+                // un error ya sabido de antemano.
+                onPressed: (procesando || pago.enDisputa) ? null : onReintentar,
                 icon: procesando
                     ? const SizedBox(
                         height: 16,
@@ -702,13 +747,35 @@ class _PagoAtascadoCard extends StatelessWidget {
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
                     : const Icon(Icons.replay, size: 18),
-                label: Text(t.adminReintentarLiberacion),
+                label: Text(pago.enDisputa ? t.adminContracargoBloqueaReintento : t.adminReintentarLiberacion),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+/// "Ver en Stripe" del badge de contracargo — igual que el resto de
+/// enlaces externos de la app (centro_pagos_screen.dart), sin URL propia
+/// del backend: el dashboard de Stripe usa una ruta estable por id de
+/// disputa, tanto en modo test como live.
+Future<void> _abrirDisputaEnStripe(BuildContext context, String disputaId) async {
+  final t = AppLocalizations.of(context);
+  try {
+    final abierto = await launchUrl(
+      Uri.parse('https://dashboard.stripe.com/disputes/$disputaId'),
+      mode: LaunchMode.externalApplication,
+    );
+    if (!abierto && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.adminContracargoErrorAbrirStripe)));
+    }
+  } catch (e) {
+    debugPrint('[AdminScreen] Error al abrir la disputa en Stripe: $e');
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.adminContracargoErrorAbrirStripe)));
+    }
   }
 }
 

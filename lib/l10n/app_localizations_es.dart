@@ -2001,6 +2001,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get adminPagoAtascadoSinProfesional => 'Sin profesional asignado';
 
   @override
+  String adminContracargoBadge(String estado, String monto) {
+    return '⚠️ Contracargo Stripe: $estado, $monto €';
+  }
+
+  @override
+  String get adminContracargoVerEnStripe => 'Ver en Stripe';
+
+  @override
+  String get adminContracargoBloqueaReintento => 'Bloqueado por disputa';
+
+  @override
+  String get adminContracargoErrorAbrirStripe => 'No se pudo abrir Stripe';
+
+  @override
   String get adminReintentarLiberacion => 'Reintentar liberación';
 
   @override
