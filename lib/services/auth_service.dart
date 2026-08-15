@@ -289,7 +289,19 @@ class AuthService {
     return AppUser.fromJson(usuarioJson);
   }
 
+  /// Revoca la sesión en el backend (P2 #4) antes de limpiar el estado
+  /// local. Best-effort a propósito: la llamada va ANTES de
+  /// `TokenStorage.instance.clear()` porque necesita el access token
+  /// todavía guardado para autenticarse, pero si falla (sin red,
+  /// backend caído) el logout local se completa igualmente — un fallo
+  /// de red nunca debe dejar a alguien atrapado sin poder cerrar
+  /// sesión en su propio dispositivo.
   Future<void> logout() async {
+    try {
+      await ApiService.instance.client.post('/auth/logout');
+    } catch (e) {
+      debugPrint('[AuthService] Fallo al revocar la sesión en el backend (logout local continúa): $e');
+    }
     await _firebaseAuth.signOut();
     await TokenStorage.instance.clear();
   }
