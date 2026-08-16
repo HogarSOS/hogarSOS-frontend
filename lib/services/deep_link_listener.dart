@@ -195,16 +195,18 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
       // atrás — la pestaña correcta ya estaba seleccionada debajo.
       navigator.popUntil((route) => route.isFirst);
 
-      // En un arranque en frío, ProfesionalShellScreen acaba de montarse
-      // y su propio initState() programa un addPostFrameCallback que
-      // RESETEA profesionalTabIndexProvider a su valor por defecto (0) —
-      // ver profesional_shell_screen.dart. Si fijamos la pestaña aquí en
-      // el mismo instante, esa reset puede ejecutarse después y pisarnos
-      // el valor. Confirmado en real: la notificación "postulacion_
-      // aceptada" en frío aterrizaba en Perfil en vez de Trabajos activos.
-      // Un pequeño margen deja que esa reset ya haya pasado antes de fijar
-      // la pestaña de verdad.
-      await Future.delayed(const Duration(milliseconds: 400));
+      // Sin delay ni carrera de tiempos: se escriben los DOS providers de
+      // forma síncrona.
+      // - profesionalTabIndexProvider directo: gana cuando el shell ya
+      //   está estable (caso normal — la app llevaba un rato abierta).
+      // - pendingProfesionalTabRequestProvider: red de seguridad para el
+      //   caso de arranque en frío, donde ProfesionalShellScreen puede
+      //   estar montándose justo ahora — su propio initState() consulta
+      //   este valor en su postFrameCallback y lo hace ganar sobre
+      //   `pestanaInicial` si lo encuentra (ver profesional_shell_screen.dart).
+      //   Cuál de los dos escribe "el último" ya no importa: el resultado
+      //   final es el mismo sea cual sea el orden real de ejecución.
+      ref.read(pendingProfesionalTabRequestProvider.notifier).state = 2;
       ref.read(profesionalTabIndexProvider.notifier).state = 2;
     }
   }

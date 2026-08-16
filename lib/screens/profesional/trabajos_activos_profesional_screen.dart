@@ -61,7 +61,18 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
     // así también cubre los datos que YA estuvieran cargados al entrar
     // (assignedRequestsProvider es compartido con el shell), no solo
     // los que lleguen después.
-    void marcarVistosDe(List<AssignedRequest> trabajos) {
+    Future<void> marcarVistosDe(List<AssignedRequest> trabajos) async {
+      // Bug real (auditoría 2026-08-15): sin esperar aquí, esta
+      // comprobación podía correr antes de que trabajosVistosProvider
+      // terminara de cargar su set persistido (arranca en `{}`) —
+      // trataba un trabajo YA visto en una sesión anterior como nuevo
+      // otra vez, y si esa carga tardía llegaba DESPUÉS de marcarVistos()
+      // aquí abajo, sobrescribía el estado entero y deshacía el "ya
+      // visto" recién marcado: el mismo trabajo volvía a contar como
+      // nuevo en el siguiente sondeo, reabriendo el aviso una y otra vez.
+      await ref.read(trabajosVistosProvider.notifier).listo;
+      if (!mounted) return;
+
       // El set ANTES de marcar es lo que distingue "ya lo había visto"
       // de "me acabo de enterar" — sin esto, cada carga (incluida la
       // primera al entrar) contaría como "nuevo".

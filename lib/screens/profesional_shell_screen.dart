@@ -19,6 +19,28 @@ import 'profesional/centro_pagos_screen.dart';
 /// "Completar perfil" en Disponibilidad salta a la pestaña Perfil.
 final profesionalTabIndexProvider = StateProvider<int>((ref) => 0);
 
+/// Petición de pestaña pendiente de aplicar, dejada por quien navega
+/// desde FUERA de una pantalla concreta (deep_link_listener.dart) antes
+/// de saber si `ProfesionalShellScreen` ya terminó de montar o no.
+///
+/// Existe para eliminar de raíz la carrera entre esa navegación externa
+/// y el reset a `pestanaInicial` que initState() hace abajo — sin esto,
+/// cuál de los dos gana dependía de qué llegara primero (ver commit que
+/// introdujo el `Future.delayed(400ms)` como parche de tiempos, que
+/// seguía perdiendo la carrera en la práctica). En vez de adivinar un
+/// tiempo, initState() CONSULTA este valor en el único momento en que de
+/// verdad importa (su propio postFrameCallback) y lo deja ganar si
+/// existe — determinista pase lo que pase antes.
+final pendingProfesionalTabRequestProvider = StateProvider<int?>((ref) => null);
+
+/// La decisión en sí, aparte de dónde se lee/escribe — pura y sin
+/// `BuildContext`/`ref`/temporizadores de por medio, para poder probar el
+/// contrato exacto ("pendiente gana si existe, si no pestanaInicial") sin
+/// tener que montar todo el árbol de `ProfesionalShellScreen`.
+int resolverPestanaAlMontar({required int? pendiente, required int pestanaInicial}) {
+  return pendiente ?? pestanaInicial;
+}
+
 /// Contenedor de navegación inferior del profesional — el mismo patrón
 /// que ClienteShellScreen (IndexedStack + NavigationBar), para que la
 /// navegación se sienta igual sea cual sea el rol con el que se entró.
@@ -62,8 +84,34 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(profesionalTabIndexProvider.notifier).state = widget.pestanaInicial;
+      if (!mounted) return;
+      // Si una navegación externa (notificación) ya dejó una pestaña
+      // pendiente antes de que este callback llegara a ejecutarse, esa
+      // pestaña gana sobre `pestanaInicial` — sin esto, este reset podía
+      // pisar justo lo que el usuario tocó para llegar aquí.
+      final pendiente = ref.read(pendingProfesionalTabRequestProvider);
+      ref.read(profesionalTabIndexProvider.notifier).state =
+          resolverPestanaAlMontar(pendiente: pendiente, pestanaInicial: widget.pestanaInicial);
+      if (pendiente != null) {
+        ref.read(pendingProfesionalTabRequestProvider.notifier).state = null;
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    // Revisión adversarial: una notificación que llega con el shell YA
+    // estable solo necesita el write directo a profesionalTabIndexProvider
+    // (ver deep_link_listener.dart) — pero también deja escrito
+    // `pending` "por si acaso" el shell no hubiera montado todavía. Si
+    // nadie llega a consumirlo (este caso exacto: ya estaba montado), se
+    // queda ahí. Sin este dispose(), un logout/login posterior en la
+    // MISMA ejecución de la app haría que el siguiente
+    // ProfesionalShellScreen que monte lo encuentre y salte a la pestaña
+    // de una notificación de la sesión ANTERIOR, que ya no tiene nada
+    // que ver con esta.
+    ref.read(pendingProfesionalTabRequestProvider.notifier).state = null;
+    super.dispose();
   }
 
   // Este shell es la raíz de la navegación tras el login/registro
