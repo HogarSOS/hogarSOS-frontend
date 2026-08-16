@@ -295,14 +295,24 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
           const SizedBox(height: 20),
           EntradaAnimada(
             retraso: const Duration(milliseconds: 160),
+            // Acción normal, no destructiva — antes usaba el mismo rojo
+            // que "Eliminar cuenta" justo debajo, lo que hacía que las
+            // dos parecieran igual de graves y facilitaba confundirlas.
             child: OutlinedButton.icon(
               onPressed: () => _confirmarCerrarSesion(context, ref),
               icon: const Icon(Icons.logout),
               label: Text(t.perfilCerrarSesion),
-              style: OutlinedButton.styleFrom(foregroundColor: colorScheme.error),
             ),
           ),
-          const SizedBox(height: 10),
+          // Más separación + un divisor entre la acción normal y la
+          // destructiva (auditoría UX 2026-08-15: demasiado juntas y del
+          // mismo color, fácil de tocar "Eliminar cuenta" por error).
+          const SizedBox(height: 28),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Divider(color: colorScheme.outlineVariant),
+          ),
+          const SizedBox(height: 12),
           EntradaAnimada(
             retraso: const Duration(milliseconds: 180),
             child: TextButton(

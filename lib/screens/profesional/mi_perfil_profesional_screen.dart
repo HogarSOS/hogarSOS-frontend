@@ -679,14 +679,25 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                       const SizedBox(height: 8),
                       EntradaAnimada(
                         retraso: const Duration(milliseconds: 300),
+                        // Acción normal, no destructiva — antes en rojo,
+                        // el mismo color que "Eliminar cuenta" justo
+                        // debajo (y sin separación alguna entre ambas),
+                        // lo que las hacía parecer igual de graves y
+                        // fáciles de confundir (auditoría UX 2026-08-15).
                         child: Center(
                           child: TextButton.icon(
                             onPressed: _confirmarCerrarSesion,
-                            icon: Icon(Icons.logout, size: 18, color: colorScheme.error),
-                            label: Text(t.perfilCerrarSesion, style: TextStyle(color: colorScheme.error)),
+                            icon: const Icon(Icons.logout, size: 18),
+                            label: Text(t.perfilCerrarSesion),
                           ),
                         ),
                       ),
+                      const SizedBox(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 40),
+                        child: Divider(color: colorScheme.outlineVariant),
+                      ),
+                      const SizedBox(height: 8),
                       EntradaAnimada(
                         retraso: const Duration(milliseconds: 320),
                         child: Center(
