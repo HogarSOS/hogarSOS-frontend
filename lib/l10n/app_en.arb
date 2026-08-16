@@ -392,6 +392,10 @@
   "@trabajosActivosTeEligieron": {
     "placeholders": { "categoria": { "type": "String" } }
   },
+  "trabajosActivosTeEligieronVarios": "You've been selected for {n} new {n, plural, one{job} other{jobs}}! Check Active jobs.",
+  "@trabajosActivosTeEligieronVarios": {
+    "placeholders": { "n": { "type": "int" } }
+  },
   "trabajosActivosVerTrabajo": "View job",
   "trabajosActivosVacio": "You have no active jobs right now",
   "trabajosActivosErrorCargar": "Couldn't load your jobs",

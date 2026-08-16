@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
-import '../auth/login_screen.dart';
 import '../../widgets/entrada_animada.dart';
 import '../../widgets/eliminar_cuenta.dart';
 import 'editar_perfil_screen.dart';
@@ -91,12 +90,10 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
     );
 
     if (confirmado == true) {
+      // Fuente única de verdad de navegación (revisión arquitectónica
+      // 2026-08-16): no se navega a LoginScreen aquí — AuthGateScreen ya
+      // reconstruye solo en cuanto authProvider.usuario pasa a null.
       await ref.read(authProvider.notifier).logout();
-      if (!context.mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
     }
   }
 

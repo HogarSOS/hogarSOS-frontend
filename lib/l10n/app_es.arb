@@ -392,6 +392,10 @@
   "@trabajosActivosTeEligieron": {
     "placeholders": { "categoria": { "type": "String" } }
   },
+  "trabajosActivosTeEligieronVarios": "¡Te han elegido para {n} {n, plural, one{trabajo nuevo} other{trabajos nuevos}}! Revisa Trabajos activos.",
+  "@trabajosActivosTeEligieronVarios": {
+    "placeholders": { "n": { "type": "int" } }
+  },
   "trabajosActivosVerTrabajo": "Ver trabajo",
   "trabajosActivosVacio": "No tienes trabajos activos ahora mismo",
   "trabajosActivosErrorCargar": "No se pudieron cargar tus trabajos",

@@ -1177,6 +1177,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String trabajosActivosTeEligieronVarios(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'jobs',
+      one: 'job',
+    );
+    return 'You\'ve been selected for $n new $_temp0! Check Active jobs.';
+  }
+
+  @override
   String get trabajosActivosVerTrabajo => 'View job';
 
   @override

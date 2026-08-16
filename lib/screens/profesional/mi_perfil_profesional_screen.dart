@@ -20,7 +20,6 @@ import '../../widgets/lista_opiniones.dart';
 import '../legal/privacidad_screen.dart';
 import '../legal/terminos_screen.dart';
 import '../../widgets/verification_badge.dart';
-import '../auth/login_screen.dart';
 import '../../utils/imagen_autenticada.dart';
 
 /// Perfil del profesional — rediseño "tarjetas independientes": cada
@@ -299,12 +298,13 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
     );
 
     if (confirmado == true) {
+      // Fuente única de verdad de navegación (revisión arquitectónica
+      // 2026-08-16): no se navega a LoginScreen aquí — AuthGateScreen ya
+      // reconstruye solo en cuanto authProvider.usuario pasa a null.
+      // Navegar aquí además creaba una segunda instancia del shell
+      // compitiendo con la de AuthGateScreen (causa raíz del crash "ref
+      // after disposed").
       await ref.read(authProvider.notifier).logout();
-      if (!mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
     }
   }
 

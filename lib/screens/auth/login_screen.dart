@@ -6,11 +6,8 @@ import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/brand_mark.dart';
 import '../../utils/error_extraction.dart';
-import '../admin/admin_screen.dart';
-import '../cliente_shell_screen.dart';
 import '../legal/privacidad_screen.dart';
 import '../legal/terminos_screen.dart';
-import '../profesional_shell_screen.dart';
 import 'verificar_codigo_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -53,21 +50,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  // Perfil es la primera pestaña del shell (índice 0 por defecto) —
-  // antes había que pasar pestanaInicial: 3 a mano solo para el caso de
-  // registro, para que un profesional recién creado viera primero su
-  // perfil y lo completara (foto, categorías...); ya no hace falta el
-  // caso especial, login normal y registro coinciden. Compartido entre
-  // el flujo de email (aquí mismo) y el de teléfono (tras autoverificar
-  // sin pasar por VerificarCodigoScreen).
-  Widget _destinoSegunRol(UserRole role) {
-    return switch (role) {
-      UserRole.profesional => const ProfesionalShellScreen(),
-      UserRole.admin => const AdminScreen(),
-      UserRole.cliente => const ClienteShellScreen(),
-    };
-  }
-
   Future<void> _enviar() async {
     if (_modoTelefono) return _enviarPorTelefono();
 
@@ -104,14 +86,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       );
     }
 
-    if (!mounted) return;
-
-    final usuario = ref.read(authProvider).usuario;
-    if (usuario == null) return; // el error ya se muestra vía authProvider.error
-
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => _destinoSegunRol(usuario.role)),
-    );
+    // Fuente única de verdad de navegación (revisión arquitectónica
+    // 2026-08-16): no se navega aquí — AuthGateScreen (raíz de la app)
+    // observa authProvider y construye el Shell/pantalla correcta en
+    // cuanto ve usuario != null (o el error ya queda pintado por
+    // authState.errorCode en build(), más abajo, si el login falló).
+    // Antes, esta pantalla hacía ADEMÁS su propio pushReplacement al
+    // Shell — dos caminos construyendo la misma pantalla para el MISMO
+    // evento de login podían crear dos instancias simultáneas; una de
+    // ellas quedaba con su listener/temporizador huérfano (causa real
+    // del crash "Cannot use ref after the widget was disposed" en el
+    // profesional).
   }
 
   /// Pide el SMS y, según lo que responda Firebase, o pasa a
@@ -167,12 +152,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   esRegistro: _modoRegistro,
                   recordarSesion: _recordarSesion,
                 );
-            if (!mounted) return;
-            final usuario = ref.read(authProvider).usuario;
-            if (usuario == null) return;
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => _destinoSegunRol(usuario.role)),
-            );
+            // No se navega aquí — mismo motivo que _enviar() más arriba:
+            // AuthGateScreen es la única fuente de verdad.
           },
           onError: (codigoError) {
             if (!mounted) return;

@@ -4,9 +4,6 @@ import '../../l10n/app_localizations.dart';
 import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/error_extraction.dart';
-import '../admin/admin_screen.dart';
-import '../cliente_shell_screen.dart';
-import '../profesional_shell_screen.dart';
 
 /// Pantalla de introducir el código SMS de 6 dígitos — segundo paso del
 /// login/registro por teléfono (el primero es login_screen.dart, que
@@ -75,19 +72,16 @@ class _VerificarCodigoScreenState extends ConsumerState<VerificarCodigoScreen> {
         );
 
     if (!mounted) return;
-    final usuario = ref.read(authProvider).usuario;
-    if (usuario == null) return; // el error ya se muestra vía authProvider.error, más abajo
+    if (ref.read(authProvider).usuario == null) return; // el error ya se muestra vía authProvider.error, más abajo
 
-    final destino = switch (usuario.role) {
-      UserRole.profesional => const ProfesionalShellScreen(),
-      UserRole.admin => const AdminScreen(),
-      UserRole.cliente => const ClienteShellScreen(),
-    };
-
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => destino),
-      (route) => false,
-    );
+    // Esta pantalla está empujada ENCIMA de la ruta base (donde vive
+    // AuthGateScreen) — a diferencia de login_screen.dart, aquí no basta
+    // con "no navegar": hay que volver a esa ruta para que se vea.
+    // AuthGateScreen ya construye el Shell correcto en cuanto ve
+    // authProvider.usuario actualizado (fuente única de verdad,
+    // revisión arquitectónica 2026-08-16) — no se construye ningún
+    // Shell aquí.
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   Future<void> _reenviar() async {
@@ -123,17 +117,10 @@ class _VerificarCodigoScreenState extends ConsumerState<VerificarCodigoScreen> {
                   recordarSesion: widget.recordarSesion,
                 );
             if (!mounted) return;
-            final usuario = ref.read(authProvider).usuario;
-            if (usuario == null) return;
-            final destino = switch (usuario.role) {
-              UserRole.profesional => const ProfesionalShellScreen(),
-              UserRole.admin => const AdminScreen(),
-              UserRole.cliente => const ClienteShellScreen(),
-            };
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => destino),
-              (route) => false,
-            );
+            if (ref.read(authProvider).usuario == null) return;
+            // Mismo motivo que _confirmar(): volver a la ruta base, no
+            // construir otro Shell aquí.
+            Navigator.of(context).popUntil((route) => route.isFirst);
           },
           onError: (codigoError) {
             if (!mounted) return;

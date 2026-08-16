@@ -11,7 +11,6 @@ import '../../theme/brand_mark.dart';
 import '../../utils/category_display.dart';
 import '../../utils/error_extraction.dart';
 import '../../widgets/entrada_animada.dart';
-import '../auth/login_screen.dart';
 import '../../utils/imagen_autenticada.dart';
 
 class AdminScreen extends ConsumerStatefulWidget {
@@ -29,12 +28,10 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
   // lo tenía. Sin confirmación: el admin es un rol de confianza y esta
   // acción es fácilmente reversible (solo cierra la sesión local).
   Future<void> _cerrarSesion() async {
+    // Fuente única de verdad de navegación (revisión arquitectónica
+    // 2026-08-16): no se navega a LoginScreen aquí — AuthGateScreen ya
+    // reconstruye solo en cuanto authProvider.usuario pasa a null.
     await ref.read(authProvider.notifier).logout();
-    if (!mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (route) => false,
-    );
   }
 
   @override

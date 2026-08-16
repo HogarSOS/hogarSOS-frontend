@@ -2066,6 +2066,12 @@ abstract class AppLocalizations {
   /// **'¡Te han elegido para {categoria}! Ahora está en Trabajos activos.'**
   String trabajosActivosTeEligieron(String categoria);
 
+  /// No description provided for @trabajosActivosTeEligieronVarios.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Te han elegido para {n} {n, plural, one{trabajo nuevo} other{trabajos nuevos}}! Revisa Trabajos activos.'**
+  String trabajosActivosTeEligieronVarios(int n);
+
   /// No description provided for @trabajosActivosVerTrabajo.
   ///
   /// In es, this message translates to:

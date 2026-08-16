@@ -116,6 +116,22 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
     with WidgetsBindingObserver, PollingLifecycleMixin {
   DateTime? _ultimaPulsacionAtras;
 
+  // Suscripción de assignedRequestsProvider — se guarda y se cierra
+  // explícitamente en dispose(), en vez de confiar en el autocierre que
+  // promete la documentación de ref.listenManual ("no hace falta cerrar
+  // en dispose(), se cierra solo"). Causa real, confirmada con
+  // instrumentación en dispositivo (2026-08-16): esa promesa no se
+  // cumplía aquí — tras un logout, dispose() de la instancia vieja se
+  // ejecutaba y stopPolling() cancelaba su Timer correctamente, pero
+  // ESTA suscripción seguía viva y seguía recibiendo los cargar() de la
+  // sesión SIGUIENTE, disparando _avisarDeTrabajosNuevos sobre un ref ya
+  // no válido — "Cannot use ref after the widget was disposed" cada 10s,
+  // indefinidamente. `mounted` no servía de guarda porque seguía
+  // devolviendo true en ese callback huérfano (el chequeo real de
+  // Riverpod mira el Element, no el State). Cierre explícito, no un
+  // guard adicional.
+  late final ProviderSubscription<AsyncValue<List<AssignedRequest>>> _suscripcionTrabajos;
+
   // IDs de trabajos para los que YA se mostró el SnackBar "te han
   // elegido" en ESTA ejecución de la app — solo en memoria, a propósito
   // (revisión UX 2026-08-16). Distinto de trabajosVistosProvider (que
@@ -182,7 +198,8 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
     startPolling(const Duration(seconds: 10), () {
       ref.read(assignedRequestsProvider.notifier).cargar();
     });
-    ref.listenManual(assignedRequestsProvider, (_, next) => next.whenData(_avisarDeTrabajosNuevos));
+    _suscripcionTrabajos =
+        ref.listenManual(assignedRequestsProvider, (_, next) => next.whenData(_avisarDeTrabajosNuevos));
     final actuales = ref.read(assignedRequestsProvider).valueOrNull;
     if (actuales != null) _avisarDeTrabajosNuevos(actuales);
   }
@@ -206,15 +223,20 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
   /// nuevo, disparando un SnackBar "te han elegido" para un trabajo que
   /// el profesional ya conocía. Mismo bug, mismo fix, sitio distinto.
   ///
-  /// Segundo fallo real, confirmado en dispositivo (logcat): "Cannot use
-  /// 'ref' after the widget was disposed" — este método se invoca desde
-  /// `ref.listenManual`, cuyo callback puede seguir en vuelo justo cuando
-  /// el shell se desmonta (p. ej. el `cargar()` de fondo de
-  /// assignedRequestsProvider termina y notifica justo en ese instante).
-  /// `mounted` es una propiedad plana de `State` — a diferencia de `ref`,
-  /// siempre es segura de leer aunque el widget ya esté desmontado — así
-  /// que se comprueba ANTES de tocar `ref` por primera vez, no solo
-  /// después del `await`.
+  /// Segundo fallo real — causa raíz encontrada con instrumentación en
+  /// dispositivo real (2026-08-16), no una suposición: la promesa de
+  /// `ref.listenManual` de cerrarse solo al desmontar el widget no se
+  /// cumplía aquí — tras un logout, `dispose()` de la instancia vieja
+  /// corría y `stopPolling()` cancelaba su Timer correctamente, pero esa
+  /// suscripción concreta seguía viva y recibía los `cargar()` de la
+  /// sesión SIGUIENTE, dando lugar a "Cannot use ref after the widget
+  /// was disposed" cada 10s, indefinidamente. `mounted` no servía de
+  /// nada ahí — en ese callback huérfano seguía devolviendo `true` (el
+  /// chequeo real de Riverpod mira el Element, no el State). El fix de
+  /// fondo está en `initState()`/`dispose()`: la suscripción se guarda y
+  /// se cierra explícitamente, sin depender del autocierre. El guard de
+  /// `mounted` de aquí abajo se mantiene solo como defensa adicional
+  /// normal (mismo patrón que el resto de la app), no como el fix.
   Future<void> _avisarDeTrabajosNuevos(List<AssignedRequest> trabajos) async {
     if (!mounted) return;
     await ref.read(trabajosVistosProvider.notifier).listo;
@@ -230,31 +252,52 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final t = AppLocalizations.of(context);
-      for (final trabajo in nuevos) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(t.trabajosActivosTeEligieron(nombreLocalizadoCategoria(context, trabajo.categoria))),
-            duration: const Duration(seconds: 6),
-            action: SnackBarAction(
-              label: t.trabajosActivosVerTrabajo,
-              // Antes esto solo cambiaba profesionalTabIndexProvider a 2
-              // (Trabajos activos era una pestaña, siempre montada). Ahora
-              // que ya no lo es, hace falta un push real — mismo camino
-              // que ya usa la tarjeta "Tienes X trabajos activos" de
-              // Solicitudes.
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const TrabajosActivosProfesionalScreen()),
-              ),
+      // Un único SnackBar, nunca uno por trabajo (revisión 2026-08-16):
+      // antes, con varios trabajos nuevos a la vez (ej. tras recuperar el
+      // almacenamiento persistido — trabajosVistosProvider vacío),
+      // showSnackBar() se llamaba en bucle, una vez por trabajo, sin
+      // esperar entre una llamada y otra. Confirmado en dispositivo real
+      // con 22 trabajos nuevos simultáneos: el ScaffoldMessenger quedaba
+      // con el primer SnackBar completamente congelado — ni avanzaba a
+      // la cola, ni respondía al toque, ni desaparecía pasados los 6s
+      // previstos. Un solo mensaje combinado evita por completo la
+      // situación (nunca hay más de un showSnackBar() por aviso), además
+      // de ser mejor UX incluso si la cola hubiera funcionado bien: nadie
+      // quiere 22 avisos seguidos.
+      final mensaje = nuevos.length == 1
+          ? t.trabajosActivosTeEligieron(nombreLocalizadoCategoria(context, nuevos.first.categoria))
+          : t.trabajosActivosTeEligieronVarios(nuevos.length);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(mensaje),
+          duration: const Duration(seconds: 6),
+          action: SnackBarAction(
+            label: t.trabajosActivosVerTrabajo,
+            // Antes esto solo cambiaba profesionalTabIndexProvider a 2
+            // (Trabajos activos era una pestaña, siempre montada). Ahora
+            // que ya no lo es, hace falta un push real — mismo camino
+            // que ya usa la tarjeta "Tienes X trabajos activos" de
+            // Solicitudes.
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const TrabajosActivosProfesionalScreen()),
             ),
           ),
-        );
-      }
+        ),
+      );
     });
   }
 
   @override
   void dispose() {
     stopPolling();
+    // Cierre explícito (causa raíz real del crash "ref after disposed",
+    // ver el docstring de _avisarDeTrabajosNuevos) — el autocierre que
+    // promete la documentación de ref.listenManual no se cumplía aquí.
+    // Sin esto, esta suscripción seguía viva después de dispose() y
+    // recibía los cargar() de la sesión SIGUIENTE tras un logout/login,
+    // intentando usar un ref ya no válido cada vez que
+    // assignedRequestsProvider se actualizaba.
+    _suscripcionTrabajos.close();
     // Revisión adversarial: una notificación que llega con el shell YA
     // estable solo necesita el write directo a profesionalTabIndexProvider
     // (ver deep_link_listener.dart) — pero también deja escrito

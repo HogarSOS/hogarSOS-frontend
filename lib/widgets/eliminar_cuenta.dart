@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
-import '../screens/auth/login_screen.dart';
 import '../services/user_service.dart';
 
 /// Eliminar cuenta — requisito de la política de datos de Google Play
@@ -49,10 +48,13 @@ Future<void> confirmarYEliminarCuenta(BuildContext context, WidgetRef ref) async
   }
 
   if (!context.mounted) return;
+  // Fuente única de verdad de navegación (revisión arquitectónica
+  // 2026-08-16): no se navega a LoginScreen aquí — este widget vive
+  // dentro del árbol que ya controla AuthGateScreen (Perfil de cliente
+  // o de profesional), así que en cuanto logout() deja
+  // authProvider.usuario en null, AuthGateScreen reconstruye solo y
+  // muestra LoginScreen. Navegar aquí ADEMÁS creaba una segunda
+  // instancia compitiendo con la de AuthGateScreen — la misma causa
+  // raíz que el crash "ref after disposed" en el profesional.
   await ref.read(authProvider.notifier).logout();
-  if (!context.mounted) return;
-  Navigator.of(context).pushAndRemoveUntil(
-    MaterialPageRoute(builder: (_) => const LoginScreen()),
-    (route) => false,
-  );
 }
