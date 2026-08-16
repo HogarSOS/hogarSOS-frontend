@@ -41,6 +41,19 @@ int resolverPestanaAlMontar({required int? pendiente, required int pestanaInicia
   return pendiente ?? pestanaInicial;
 }
 
+/// Cuántas solicitudes cercanas están sin postular todavía — pura, sin
+/// `ref`/`BuildContext`, para poder probar el contrato exacto del badge
+/// de "Solicitudes" sin montar el widget. A diferencia de
+/// trabajosVistosProvider (trabajos ya asignados, que se quedan para
+/// siempre en la lista y necesitan un "visto" persistente para
+/// distinguir nuevo de ya visto), una solicitud cercana sale sola de la
+/// lista en cuanto se postula, se ignora o expira — "cuántas hay sin
+/// postular ahora mismo" ya es la señal correcta sin guardar nada en
+/// disco ni inventar un estado "visto" artificial.
+int contarSolicitudesSinPostular(List<NearbyRequest> solicitudes) {
+  return solicitudes.where((s) => !s.yaPostulado).length;
+}
+
 /// Contenedor de navegación inferior del profesional — el mismo patrón
 /// que ClienteShellScreen (IndexedStack + NavigationBar), para que la
 /// navegación se sienta igual sea cual sea el rol con el que se entró.
@@ -158,8 +171,8 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
               label: t.navPerfil,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.home_repair_service_outlined),
-              selectedIcon: const Icon(Icons.home_repair_service),
+              icon: const _BadgeSolicitudesProfesional(child: Icon(Icons.home_repair_service_outlined)),
+              selectedIcon: const _BadgeSolicitudesProfesional(child: Icon(Icons.home_repair_service)),
               label: t.navSolicitudesCercanas,
             ),
             NavigationDestination(
@@ -228,6 +241,34 @@ class _BadgeMensajesProfesional extends ConsumerWidget {
     return Badge(
       isLabelVisible: hayMensajesNoLeidos || hayTrabajoNuevoSinVer,
       label: Text('$numBadgeMensajes'),
+      child: child,
+    );
+  }
+}
+
+/// Badge de la pestaña Solicitudes — antes no había ninguna señal dentro
+/// de la app de que hubiera una solicitud cercana nueva a la que
+/// postularse; un profesional que ignorara o no viera el push "nueva
+/// solicitud" podía no enterarse nunca. Sin estado "visto" persistente
+/// (ver contarSolicitudesSinPostular más arriba): el número en vivo de
+/// solicitudes sin postular ya es la señal correcta.
+class _BadgeSolicitudesProfesional extends ConsumerWidget {
+  const _BadgeSolicitudesProfesional({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final solicitudesAsync = ref.watch(nearbyRequestsProvider);
+    final solicitudes = solicitudesAsync.maybeWhen(
+      data: (lista) => lista,
+      orElse: () => const <NearbyRequest>[],
+    );
+    final numSinPostular = contarSolicitudesSinPostular(solicitudes);
+
+    return Badge(
+      isLabelVisible: numSinPostular > 0,
+      label: Text('$numSinPostular'),
       child: child,
     );
   }

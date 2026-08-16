@@ -14,6 +14,47 @@ import '../screens/cliente/seguimiento_solicitud_screen.dart';
 import '../screens/profesional_shell_screen.dart';
 import 'notification_service.dart';
 
+/// Deep link de Stripe Connect recibido antes de que authProvider
+/// terminara de restaurar la sesión (posible con getInitialLink() en un
+/// arranque en frío) — se reintenta en build() en cuanto restaurando pase
+/// a false. Provider a nivel de módulo (no campo privado del State) para
+/// poder probar el contrato exacto con un ProviderContainer, mismo
+/// patrón que pendingProfesionalTabRequestProvider en
+/// profesional_shell_screen.dart. Un segundo link mientras el primero
+/// sigue pendiente simplemente sobrescribe este valor: el último gana,
+/// sin encolar.
+final pendingStripeReturnLinkProvider = StateProvider<Uri?>((ref) => null);
+
+/// Qué hacer con el deep link de Stripe pendiente — pura, sin
+/// BuildContext/ref/temporizadores de por medio, para poder probar el
+/// contrato exacto sin montar DeepLinkListener (solo se llama cuando ya
+/// se sabe que hay un URI pendiente). Mismo patrón que
+/// resolverPestanaAlMontar en profesional_shell_screen.dart.
+enum DecisionDeepLinkStripe { esperar, descartar, procesar }
+
+DecisionDeepLinkStripe resolverDeepLinkStripePendiente({
+  required bool restaurando,
+  required UserRole? rolUsuario,
+}) {
+  if (restaurando) return DecisionDeepLinkStripe.esperar;
+  if (rolUsuario != UserRole.profesional) return DecisionDeepLinkStripe.descartar;
+  return DecisionDeepLinkStripe.procesar;
+}
+
+/// A qué pestaña del shell del profesional debe llevar una notificación
+/// (ya descartado el caso 'chat_mensaje', que empuja una pantalla en vez
+/// de cambiar de pestaña) — pura, para poder probar el contrato exacto
+/// sin RemoteMessage/Navigator de por medio. 'nueva_solicitud' es la
+/// ÚNICA notificación de rol profesional sobre una solicitud a la que
+/// todavía no está vinculado (nada aceptado, nada postulado) — vive en
+/// "Solicitudes" (pestaña 1), no en "Trabajos activos" (pestaña 2) como
+/// el resto de tipos (postulacion_aceptada, presupuesto_aceptado,
+/// cierre_horas_*...), que sí son sobre un trabajo en el que el
+/// profesional ya está metido.
+int resolverPestanaDeNotificacionProfesional(String? tipo) {
+  return tipo == 'nueva_solicitud' ? 1 : 2;
+}
+
 /// Envuelve el `home` de la app para escuchar dos cosas que llegan desde
 /// fuera de una pantalla concreta, sin BuildContext propio:
 ///
@@ -48,9 +89,8 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
   // Notificación recibida antes de que authProvider terminara de
   // restaurar la sesión (posible con getInitialMessage() en un arranque
   // en frío) — se reintenta en build() en cuanto restaurando pase a
-  // false, en vez de perderla como hace _procesar() con el link de
-  // Stripe (ahí no hace falta: un deep link solo llega con la app ya en
-  // marcha y, en la práctica, con sesión ya restaurada).
+  // false. Mismo problema y mismo mecanismo aplican al deep link de
+  // Stripe, ver pendingStripeReturnLinkProvider arriba del todo.
   RemoteMessage? _notificacionPendiente;
   String? _ultimaNotificacionProcesadaId;
 
@@ -82,14 +122,56 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
   void _procesar(Uri uri) {
     if (uri.scheme != 'hogarsos' || uri.host != 'stripe-return') return;
 
-    // Este deep link solo tiene sentido para un profesional que venía de
-    // configurar su cuenta de cobro — si por lo que sea nadie ha
-    // iniciado sesión todavía o es un cliente, no hay nada que refrescar.
-    final usuario = ref.read(authProvider).usuario;
-    if (usuario?.role != UserRole.profesional) return;
+    // No se procesa aquí mismo: se deja pendiente y se intenta de
+    // inmediato — si authProvider ya terminó de restaurar (caso normal,
+    // app caliente), _intentarProcesarDeepLinkPendiente() lo consume en
+    // el acto, mismo comportamiento que antes. Si todavía no terminó
+    // (arranque en frío), se reintenta solo una vez, cuando build() vea
+    // `restaurando` pasar a false (ver más abajo) — nunca con un timer.
+    ref.read(pendingStripeReturnLinkProvider.notifier).state = uri;
+    _intentarProcesarDeepLinkPendiente();
+  }
+
+  void _intentarProcesarDeepLinkPendiente() {
+    final uri = ref.read(pendingStripeReturnLinkProvider);
+    if (uri == null) return;
+
+    final authState = ref.read(authProvider);
+    final decision = resolverDeepLinkStripePendiente(
+      restaurando: authState.restaurando,
+      rolUsuario: authState.usuario?.role,
+    );
+    if (decision == DecisionDeepLinkStripe.esperar) {
+      return; // build() reintenta cuando restaurando pase a false
+    }
+
+    // Se limpia AQUÍ, tanto si se va a procesar como si se descarta —
+    // restaurando solo pasa de true a false una vez en toda la vida de
+    // la app (ver AuthNotifier._restaurarSesionInicial), así que esta es
+    // la única ventana de reintento real. Limpiarlo incondicionalmente
+    // evita que un login posterior (de la misma sesión de la app, con
+    // restaurando ya en false para siempre) reciba un deep link de una
+    // cuenta distinta que quedó sin consumir.
+    ref.read(pendingStripeReturnLinkProvider.notifier).state = null;
+
+    if (decision == DecisionDeepLinkStripe.descartar) return;
 
     ref.read(stripeReturnEventProvider.notifier).state++;
     ref.read(disponibilidadProvider.notifier).cargar();
+
+    // Mismo patrón que _navegarPorNotificacionAsync (BUG 1, ayer): en un
+    // arranque en frío, ProfesionalShellScreen puede estar montándose
+    // justo ahora, y su propio initState() resetea profesionalTabIndexProvider
+    // a pestanaInicial en un postFrameCallback — sin escribir también
+    // pendingProfesionalTabRequestProvider, ese reset podía ejecutarse
+    // DESPUÉS de esta línea y pisar el índice 3, dejando al profesional
+    // en "Mi perfil". Confirmado en real con logging temporal: la
+    // decisión llegaba a "procesar" y fijaba profesionalTabIndexProvider
+    // correctamente, pero el shell lo sobrescribía justo después.
+    // Escribir ambos, sin delay, hace que el resultado final sea el
+    // mismo sea cual sea el orden real de ejecución — ver
+    // profesional_shell_screen.dart.
+    ref.read(pendingProfesionalTabRequestProvider.notifier).state = 3;
     ref.read(profesionalTabIndexProvider.notifier).state = 3;
 
     final context = navigatorKey.currentContext;
@@ -195,6 +277,8 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
       // atrás — la pestaña correcta ya estaba seleccionada debajo.
       navigator.popUntil((route) => route.isFirst);
 
+      final pestanaDestino = resolverPestanaDeNotificacionProfesional(tipo);
+
       // Sin delay ni carrera de tiempos: se escriben los DOS providers de
       // forma síncrona.
       // - profesionalTabIndexProvider directo: gana cuando el shell ya
@@ -206,8 +290,8 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
       //   `pestanaInicial` si lo encuentra (ver profesional_shell_screen.dart).
       //   Cuál de los dos escribe "el último" ya no importa: el resultado
       //   final es el mismo sea cual sea el orden real de ejecución.
-      ref.read(pendingProfesionalTabRequestProvider.notifier).state = 2;
-      ref.read(profesionalTabIndexProvider.notifier).state = 2;
+      ref.read(pendingProfesionalTabRequestProvider.notifier).state = pestanaDestino;
+      ref.read(profesionalTabIndexProvider.notifier).state = pestanaDestino;
     }
   }
 
@@ -220,10 +304,14 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
 
   @override
   Widget build(BuildContext context) {
-    // Reintenta la notificación que llegó antes de que restaurando
-    // terminara — ver el comentario de _notificacionPendiente arriba.
+    // Reintenta la notificación y/o el deep link de Stripe que hayan
+    // llegado antes de que restaurando terminara — ver los comentarios
+    // de _notificacionPendiente y pendingStripeReturnLinkProvider arriba.
     ref.listen(authProvider, (previo, actual) {
-      if (!actual.restaurando) _intentarProcesarNotificacionPendiente();
+      if (!actual.restaurando) {
+        _intentarProcesarNotificacionPendiente();
+        _intentarProcesarDeepLinkPendiente();
+      }
     });
     // Build 34 — mecanismo de recuperación, no solución definitiva: ver
     // comprobarToquePendienteTrasInteraccion en NotificationService. Solo
