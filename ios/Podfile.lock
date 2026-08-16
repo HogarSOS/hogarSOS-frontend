@@ -1188,6 +1188,8 @@ PODS:
     - abseil/meta/type_traits
     - abseil/xcprivacy
   - abseil/xcprivacy (1.20240722.0)
+  - app_badge_plus (1.3.3):
+    - Flutter
   - app_links (7.0.0):
     - Flutter
   - BoringSSL-GRPC (0.0.37):
@@ -1426,46 +1428,71 @@ PODS:
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
-  - Stripe (23.27.6):
-    - StripeApplePay (= 23.27.6)
-    - StripeCore (= 23.27.6)
-    - StripePayments (= 23.27.6)
-    - StripePaymentsUI (= 23.27.6)
-    - StripeUICore (= 23.27.6)
+  - Stripe (25.17.0):
+    - StripeApplePay (= 25.17.0)
+    - StripeCore (= 25.17.0)
+    - StripeIssuing (= 25.17.0)
+    - StripePayments (= 25.17.0)
+    - StripePaymentsUI (= 25.17.0)
+    - StripeUICore (= 25.17.0)
   - stripe_ios (0.0.1):
     - Flutter
-    - Stripe (~> 23.27.0)
-    - StripeApplePay (~> 23.27.0)
-    - StripeFinancialConnections (~> 23.27.0)
-    - StripePayments (~> 23.27.0)
-    - StripePaymentSheet (~> 23.27.0)
-    - StripePaymentsUI (~> 23.27.0)
-  - StripeApplePay (23.27.6):
-    - StripeCore (= 23.27.6)
-  - StripeCore (23.27.6)
-  - StripeFinancialConnections (23.27.6):
-    - StripeCore (= 23.27.6)
-    - StripeUICore (= 23.27.6)
-  - StripePayments (23.27.6):
-    - StripeCore (= 23.27.6)
-    - StripePayments/Stripe3DS2 (= 23.27.6)
-  - StripePayments/Stripe3DS2 (23.27.6):
-    - StripeCore (= 23.27.6)
-  - StripePaymentSheet (23.27.6):
-    - StripeApplePay (= 23.27.6)
-    - StripeCore (= 23.27.6)
-    - StripePayments (= 23.27.6)
-    - StripePaymentsUI (= 23.27.6)
-  - StripePaymentsUI (23.27.6):
-    - StripeCore (= 23.27.6)
-    - StripePayments (= 23.27.6)
-    - StripeUICore (= 23.27.6)
-  - StripeUICore (23.27.6):
-    - StripeCore (= 23.27.6)
+    - Stripe (~> 25.17.0)
+    - stripe_ios/stripe_ios (= 0.0.1)
+    - stripe_ios/stripe_objc (= 0.0.1)
+    - StripeApplePay (~> 25.17.0)
+    - StripeFinancialConnections (~> 25.17.0)
+    - StripePayments (~> 25.17.0)
+    - StripePaymentSheet (~> 25.17.0)
+    - StripePaymentsUI (~> 25.17.0)
+  - stripe_ios/stripe_ios (0.0.1):
+    - Flutter
+    - Stripe (~> 25.17.0)
+    - stripe_ios/stripe_objc
+    - StripeApplePay (~> 25.17.0)
+    - StripeFinancialConnections (~> 25.17.0)
+    - StripePayments (~> 25.17.0)
+    - StripePaymentSheet (~> 25.17.0)
+    - StripePaymentsUI (~> 25.17.0)
+  - stripe_ios/stripe_objc (0.0.1):
+    - Flutter
+    - Stripe (~> 25.17.0)
+    - StripeApplePay (~> 25.17.0)
+    - StripeFinancialConnections (~> 25.17.0)
+    - StripePayments (~> 25.17.0)
+    - StripePaymentSheet (~> 25.17.0)
+    - StripePaymentsUI (~> 25.17.0)
+  - StripeApplePay (25.17.0):
+    - StripeCore (= 25.17.0)
+  - StripeCore (25.17.0)
+  - StripeFinancialConnections (25.17.0):
+    - StripeCore (= 25.17.0)
+    - StripeUICore (= 25.17.0)
+  - StripeIssuing (25.17.0):
+    - StripeCore (= 25.17.0)
+    - StripePayments (= 25.17.0)
+    - StripePaymentsUI (= 25.17.0)
+  - StripePayments (25.17.0):
+    - StripeCore (= 25.17.0)
+    - StripePayments/Stripe3DS2 (= 25.17.0)
+  - StripePayments/Stripe3DS2 (25.17.0):
+    - StripeCore (= 25.17.0)
+  - StripePaymentSheet (25.17.0):
+    - StripeApplePay (= 25.17.0)
+    - StripeCore (= 25.17.0)
+    - StripePayments (= 25.17.0)
+    - StripePaymentsUI (= 25.17.0)
+  - StripePaymentsUI (25.17.0):
+    - StripeCore (= 25.17.0)
+    - StripePayments (= 25.17.0)
+    - StripeUICore (= 25.17.0)
+  - StripeUICore (25.17.0):
+    - StripeCore (= 25.17.0)
   - url_launcher_ios (0.0.1):
     - Flutter
 
 DEPENDENCIES:
+  - app_badge_plus (from `.symlinks/plugins/app_badge_plus/ios`)
   - app_links (from `.symlinks/plugins/app_links/ios`)
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
@@ -1512,12 +1539,15 @@ SPEC REPOS:
     - StripeApplePay
     - StripeCore
     - StripeFinancialConnections
+    - StripeIssuing
     - StripePayments
     - StripePaymentSheet
     - StripePaymentsUI
     - StripeUICore
 
 EXTERNAL SOURCES:
+  app_badge_plus:
+    :path: ".symlinks/plugins/app_badge_plus/ios"
   app_links:
     :path: ".symlinks/plugins/app_links/ios"
   cloud_firestore:
@@ -1549,6 +1579,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   abseil: a05cc83bf02079535e17169a73c5be5ba47f714b
+  app_badge_plus: 8cb62c80b81ac86c6048ce648913c17e3a6e71c7
   app_links: a754cbec3c255bd4bbb4d236ecc06f28cd9a7ce8
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
   cloud_firestore: fdcc87898326e396d6ef6df543acf9b5c2034b95
@@ -1585,15 +1616,16 @@ SPEC CHECKSUMS:
   PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
-  Stripe: 9fec845645e39f371e6898926d096fd9c2feb5a5
-  stripe_ios: 5accba1ff472f89300e1676c351166f29dc93ced
-  StripeApplePay: 5f017e8dfe259fafbab70137776189deef754bb2
-  StripeCore: 01ec57f0dddfe742054dc6a322f811426c25313d
-  StripeFinancialConnections: 56698cb6274bf89fb8c76b934f6156f368e97765
-  StripePayments: 6adf11faf1b7038e77aa97019410305c6adca79d
-  StripePaymentSheet: 3eaf870c4388e44b0cc37e4c69d00b6957fd8bd7
-  StripePaymentsUI: 59ccddeacad592b09fa67e8d641340820ddb4751
-  StripeUICore: 879bbf5889265db13f52fac8aad7a176ba62481f
+  Stripe: da4f210385ff97d786968eb751d5c0d5c47ba539
+  stripe_ios: 4cc4ead50c59fe63e0ef7507c3a3bae056f88abb
+  StripeApplePay: 7b1b6e86eb75be5d4bcf109c34224adf38000fe2
+  StripeCore: 60849de0ae448eb9a7ed4ee8208acce78832b255
+  StripeFinancialConnections: 280e67822cea7a8f89fb4fa97e6e7fb7293cff27
+  StripeIssuing: 7ece6d6d59ddb8636de386257175e71ced6966ad
+  StripePayments: befce228ec3545503c6ac54603b7e5a7cdb01a06
+  StripePaymentSheet: 11fe4afb439379bf905a09d99d99b80a6fac5cf1
+  StripePaymentsUI: c0e4426ec5aeaaedf3e4f32d30b77c4ef6e3dafa
+  StripeUICore: 124b860ab571114c2dec947d7b66a11e0d3238b6
   url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
 
 PODFILE CHECKSUM: 49c49f6cfb63d41a81442082d093830bd012c472
