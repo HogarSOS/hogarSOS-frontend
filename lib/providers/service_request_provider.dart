@@ -43,13 +43,25 @@ class NearbyRequestsNotifier extends StateNotifier<AsyncValue<List<NearbyRequest
     }
   }
 
-  /// Oculta una solicitud de la lista local sin llamar a la API — no
-  /// existe un endpoint de "rechazar" porque la solicitud sigue siendo
-  /// visible para otros profesionales; "ignorar" es solo un filtro local.
-  void ocultar(String solicitudId) {
+  /// Ignora una solicitud de forma persistente por cuenta (no por
+  /// dispositivo) — ver ignorarSolicitud en postulacion.controller.ts.
+  /// No vuelve a aparecer en ningún sondeo posterior, ni en otro
+  /// dispositivo con la misma cuenta, ni tras cerrar y reabrir la app.
+  /// Optimista: la quita de la lista al instante y llama al backend; si
+  /// la llamada falla, la devuelve a la lista y relanza el error para
+  /// que la pantalla pueda avisar (mismo patrón que
+  /// DisponibilidadNotifier.actualizar).
+  Future<void> ignorar(String solicitudId) async {
+    final anterior = state;
     state = state.whenData(
       (lista) => lista.where((s) => s.id != solicitudId).toList(),
     );
+    try {
+      await _servicio.ignorar(solicitudId);
+    } catch (e) {
+      state = anterior;
+      rethrow;
+    }
   }
 
   /// Se postula a una solicitud — a diferencia de aceptar, NO la quita

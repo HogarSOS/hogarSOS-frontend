@@ -357,10 +357,13 @@
 
   "profesionalTituloSolicitudes": "Solicitudes cerca de ti",
   "profesionalDisponibleAhoraAviso": "Estás disponible: te pueden llegar solicitudes nuevas",
+  "profesionalChipDisponible": "Disponible",
+  "profesionalChipNoDisponible": "No disponible",
   "salirPulsaOtraVez": "Pulsa atrás otra vez para salir",
   "profesionalSinSolicitudes": "No hay solicitudes cerca ahora mismo",
   "profesionalErrorCargar": "No se pudieron cargar las solicitudes",
   "profesionalIgnorar": "Ignorar",
+  "profesionalErrorIgnorar": "No se pudo ignorar la solicitud",
   "profesionalAceptar": "Aceptar",
   "profesionalSolicitudAceptada": "Solicitud aceptada. El cliente autorizará el pago.",
   "profesionalYaNoDisponible": "No se pudo aceptar — puede que ya no esté disponible",
@@ -428,6 +431,8 @@
   "disponibilidadEstadoAyuda": "Elige un único estado — determina si y cuándo recibes solicitudes.",
   "disponibilidadOpcionNoDisponibleTitulo": "No disponible",
   "disponibilidadOpcionNoDisponibleAyuda": "No recibirás solicitudes nuevas",
+  "disponibilidadOpcionDisponibleTitulo": "Disponible",
+  "disponibilidadOpcionDisponibleAyuda": "Recibirás solicitudes nuevas",
 
   "seguimientoTitulo": "Tu solicitud",
   "seguimientoError": "No se pudo cargar la solicitud",

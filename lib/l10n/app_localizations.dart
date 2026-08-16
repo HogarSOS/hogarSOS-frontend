@@ -1910,6 +1910,18 @@ abstract class AppLocalizations {
   /// **'Estás disponible: te pueden llegar solicitudes nuevas'**
   String get profesionalDisponibleAhoraAviso;
 
+  /// No description provided for @profesionalChipDisponible.
+  ///
+  /// In es, this message translates to:
+  /// **'Disponible'**
+  String get profesionalChipDisponible;
+
+  /// No description provided for @profesionalChipNoDisponible.
+  ///
+  /// In es, this message translates to:
+  /// **'No disponible'**
+  String get profesionalChipNoDisponible;
+
   /// No description provided for @salirPulsaOtraVez.
   ///
   /// In es, this message translates to:
@@ -1933,6 +1945,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ignorar'**
   String get profesionalIgnorar;
+
+  /// No description provided for @profesionalErrorIgnorar.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo ignorar la solicitud'**
+  String get profesionalErrorIgnorar;
 
   /// No description provided for @profesionalAceptar.
   ///
@@ -2281,6 +2299,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No recibirás solicitudes nuevas'**
   String get disponibilidadOpcionNoDisponibleAyuda;
+
+  /// No description provided for @disponibilidadOpcionDisponibleTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Disponible'**
+  String get disponibilidadOpcionDisponibleTitulo;
+
+  /// No description provided for @disponibilidadOpcionDisponibleAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Recibirás solicitudes nuevas'**
+  String get disponibilidadOpcionDisponibleAyuda;
 
   /// No description provided for @seguimientoTitulo.
   ///

@@ -1076,6 +1076,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'You\'re available: new requests can reach you';
 
   @override
+  String get profesionalChipDisponible => 'Available';
+
+  @override
+  String get profesionalChipNoDisponible => 'Not available';
+
+  @override
   String get salirPulsaOtraVez => 'Press back again to exit';
 
   @override
@@ -1086,6 +1092,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profesionalIgnorar => 'Ignore';
+
+  @override
+  String get profesionalErrorIgnorar => 'Couldn\'t ignore the request';
 
   @override
   String get profesionalAceptar => 'Accept';
@@ -1295,6 +1304,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get disponibilidadOpcionNoDisponibleAyuda =>
       'You won\'t receive new requests';
+
+  @override
+  String get disponibilidadOpcionDisponibleTitulo => 'Available';
+
+  @override
+  String get disponibilidadOpcionDisponibleAyuda =>
+      'You\'ll receive new requests';
 
   @override
   String get seguimientoTitulo => 'Your request';

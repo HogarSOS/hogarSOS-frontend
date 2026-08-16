@@ -357,10 +357,13 @@
 
   "profesionalTituloSolicitudes": "Requests near you",
   "profesionalDisponibleAhoraAviso": "You're available: new requests can reach you",
+  "profesionalChipDisponible": "Available",
+  "profesionalChipNoDisponible": "Not available",
   "salirPulsaOtraVez": "Press back again to exit",
   "profesionalSinSolicitudes": "No requests nearby right now",
   "profesionalErrorCargar": "Couldn't load requests",
   "profesionalIgnorar": "Ignore",
+  "profesionalErrorIgnorar": "Couldn't ignore the request",
   "profesionalAceptar": "Accept",
   "profesionalSolicitudAceptada": "Request accepted. The customer will authorize payment.",
   "profesionalYaNoDisponible": "Couldn't accept — it may no longer be available",
@@ -428,6 +431,8 @@
   "disponibilidadEstadoAyuda": "Choose a single state — it determines if and when you receive requests.",
   "disponibilidadOpcionNoDisponibleTitulo": "Not available",
   "disponibilidadOpcionNoDisponibleAyuda": "You won't receive new requests",
+  "disponibilidadOpcionDisponibleTitulo": "Available",
+  "disponibilidadOpcionDisponibleAyuda": "You'll receive new requests",
 
   "seguimientoTitulo": "Your request",
   "seguimientoError": "Couldn't load the request",

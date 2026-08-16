@@ -91,6 +91,15 @@ class ServiceRequestService {
     await _api.post('/service-requests/$id/postulaciones', data: {'mensaje': mensaje});
   }
 
+  /// El profesional ignora una solicitud cercana — persistente por
+  /// cuenta (el backend la guarda ligada al profesionalId del token, no
+  /// al dispositivo), no vuelve a aparecer en listarCercanas() hasta que
+  /// se postule de verdad. Ver ignorarSolicitud en
+  /// postulacion.controller.ts.
+  Future<void> ignorar(String id) async {
+    await _api.post('/service-requests/$id/ignorar');
+  }
+
   Future<List<PostulacionCandidate>> listarPostulaciones(String id) async {
     final respuesta = await _api.get('/service-requests/$id/postulaciones');
     final lista = respuesta.data['postulaciones'] as List;

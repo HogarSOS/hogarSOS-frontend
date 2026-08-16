@@ -4,7 +4,6 @@ import '../../l10n/app_localizations.dart';
 import '../../models/service_request_model.dart';
 import '../../providers/disponibilidad_provider.dart';
 import '../../providers/service_request_provider.dart';
-import '../../services/professional_service.dart' show EstadoCuentaStripe, ModoDisponibilidad;
 import '../../theme/brand_mark.dart';
 import '../../utils/error_extraction.dart';
 import '../../utils/polling_lifecycle_mixin.dart';
@@ -14,11 +13,12 @@ import 'trabajos_activos_profesional_screen.dart';
 import '../../utils/imagen_autenticada.dart';
 
 /// Pestaña "Inicio" del Panel Profesional: la lista de solicitudes
-/// cercanas, más un acceso rápido en el AppBar para ponerse "No
-/// disponible" sin salir de esta pantalla (roadmap económico, punto 2)
-/// — el control completo (horario laboral/24h) sigue viviendo en "Mi
-/// perfil", este botón solo cubre el caso rápido de "quiero dejar de
-/// recibir solicitudes ya mismo".
+/// cercanas a las que se puede enviar candidatura. Sin control de
+/// disponibilidad aquí a propósito (revisión de producto 2026-08-16):
+/// el acceso rápido que existía antes se podía pulsar sin querer y
+/// duplicaba el selector de "Mi perfil" — solo queda un indicador de
+/// solo lectura (ver _ChipDisponibilidad) para que el profesional sepa
+/// su estado mientras mira solicitudes, sin poder cambiarlo desde aquí.
 class HomeProfesionalScreen extends ConsumerStatefulWidget {
   const HomeProfesionalScreen({super.key});
 
@@ -80,6 +80,22 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
         SnackBar(content: Text(mensajeDeError(e, contexto: t.profesionalYaNoDisponible, t: t))),
       );
       ref.read(nearbyRequestsProvider.notifier).cargar();
+    }
+  }
+
+  /// Ignora una solicitud — ver NearbyRequestsNotifier.ignorar(): es
+  /// optimista (desaparece al instante), así que un fallo de red la
+  /// devuelve a la lista y aquí solo hace falta avisar del error.
+  Future<void> _ignorar(BuildContext context, WidgetRef ref, String solicitudId) async {
+    final t = AppLocalizations.of(context);
+    try {
+      await ref.read(nearbyRequestsProvider.notifier).ignorar(solicitudId);
+    } catch (e) {
+      debugPrint('[HomeProfesionalScreen] Error al ignorar: $e');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.profesionalErrorIgnorar, t: t))),
+      );
     }
   }
 
@@ -146,60 +162,6 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
     );
   }
 
-  /// Apaga la disponibilidad al instante — sin pedir confirmación, a
-  /// diferencia de activarla (que si requiere perfil completo/verificado,
-  /// comprobado dentro del propio provider al activarla desde "Mi
-  /// perfil"). Desactivar nunca se bloquea.
-  Future<void> _ponerseNoDisponible(BuildContext context, WidgetRef ref, ModoDisponibilidad modoActual) async {
-    final t = AppLocalizations.of(context);
-    try {
-      await ref.read(disponibilidadProvider.notifier).actualizar(disponible: false, modo: modoActual);
-    } catch (e) {
-      debugPrint('[HomeProfesionalScreen] Error al ponerse no disponible: $e');
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(mensajeDeError(e, contexto: t.profesionalErrorDisponibilidad, t: t))),
-      );
-    }
-  }
-
-  /// BUG 002 (QA, 2026-08-03): la tarjeta de disponibilidad solo permitía
-  /// pausar — una vez en "No disponible" desaparecía del todo, sin dejar
-  /// rastro del estado ni forma de volver a activarse sin ir a "Mi
-  /// perfil". Ahora la tarjeta sigue visible en los dos estados (ver
-  /// _TarjetaDisponibilidad) y este método reactiva directamente desde
-  /// aquí, con los mismos requisitos que ya comprobaba
-  /// _SelectorDisponibilidad en Mi perfil (perfil completo, verificado,
-  /// Stripe configurado) — si falta algo, se explica con el mismo texto
-  /// en vez de intentarlo y fallar en el backend. Reutiliza el último
-  /// `modo` conocido (horario laboral / 24h) en vez de forzar uno fijo.
-  Future<void> _ponerseDisponible(BuildContext context, WidgetRef ref, DisponibilidadState estado) async {
-    final t = AppLocalizations.of(context);
-
-    if (!estado.perfilCompleto) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.disponibilidadPerfilIncompleto)));
-      return;
-    }
-    if (!estado.estaVerificado) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.disponibilidadPendienteVerificacion)));
-      return;
-    }
-    if (estado.estadoCuentaStripe != EstadoCuentaStripe.configurada) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.disponibilidadPendienteStripe)));
-      return;
-    }
-
-    try {
-      await ref.read(disponibilidadProvider.notifier).actualizar(disponible: true, modo: estado.modo);
-    } catch (e) {
-      debugPrint('[HomeProfesionalScreen] Error al ponerse disponible: $e');
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(mensajeDeError(e, contexto: t.profesionalErrorDisponibilidad, t: t))),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
@@ -214,7 +176,14 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
           children: [
             const HogarSosMark(size: 28),
             const SizedBox(width: 10),
-            Text(t.profesionalTituloSolicitudes),
+            Flexible(child: Text(t.profesionalTituloSolicitudes, overflow: TextOverflow.ellipsis)),
+            const SizedBox(width: 8),
+            // Solo lectura a propósito (revisión de producto 2026-08-16):
+            // el acceso rápido que existía aquí antes se podía pulsar sin
+            // querer y duplicaba el selector de "Mi perfil" — este chip
+            // no tiene onTap, cambiar de estado exige ir conscientemente
+            // a Mi Perfil.
+            _ChipDisponibilidad(disponibilidadAsync: disponibilidadAsync),
           ],
         ),
       ),
@@ -225,30 +194,6 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
         ]),
         child: CustomScrollView(
           slivers: [
-            // Acceso rápido a disponibilidad (roadmap económico, punto 2):
-            // antes era un icono de rayo suelto en el AppBar, sin texto — un
-            // usuario nuevo no tenía forma de adivinar qué hacía sin
-            // mantener pulsado para ver el tooltip, y un toque perdido ahí
-            // apagaba la disponibilidad sin confirmación ni aviso previo.
-            // BUG 002 (QA, 2026-08-03): la tarjeta solo se mostraba estando
-            // disponible — al pulsar "No disponible" desaparecía del todo,
-            // dejando el estado del profesional sin ningún indicio visible
-            // y sin forma de volver a activarse sin salir a "Mi perfil".
-            // Ahora la tarjeta es siempre visible (ver _TarjetaDisponibilidad),
-            // en los dos estados, con su propio botón para alternar.
-            disponibilidadAsync.maybeWhen(
-              data: (estado) => SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                  child: _TarjetaDisponibilidad(
-                    estado: estado,
-                    onPausar: () => _ponerseNoDisponible(context, ref, estado.modo),
-                    onActivar: () => _ponerseDisponible(context, ref, estado),
-                  ),
-                ),
-              ),
-              orElse: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
-            ),
             // Solo se muestra si hay trabajos aceptados pendientes de
             // completar — sin este acceso, aceptar una solicitud la
             // hacía desaparecer sin dejar ningún rastro ni forma de
@@ -295,7 +240,7 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
                         retraso: Duration(milliseconds: 40 * index),
                         child: _TarjetaSolicitudCercana(
                           solicitud: solicitud,
-                          onIgnorar: () => ref.read(nearbyRequestsProvider.notifier).ocultar(solicitud.id),
+                          onIgnorar: () => _ignorar(context, ref, solicitud.id),
                           onPostularse: () => _postularse(context, ref, solicitud),
                         ),
                       ),
@@ -328,98 +273,46 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
   }
 }
 
-/// Tarjeta de disponibilidad, siempre visible — antes solo existía en
-/// el estado "disponible" (con un botón para pausar), y desaparecía
-/// del todo al pasar a "No disponible" (BUG 002 de QA: el estado
-/// quedaba sin ningún indicio visible y sin forma de volver a
-/// activarse sin salir a "Mi perfil"). Ahora cubre los dos estados con
-/// el mismo componente, dejando claro tanto la disponibilidad actual
-/// como la acción del botón, sin necesitar un tooltip.
-class _TarjetaDisponibilidad extends StatelessWidget {
-  const _TarjetaDisponibilidad({
-    required this.estado,
-    required this.onPausar,
-    required this.onActivar,
-  });
+/// Indicador de disponibilidad de solo lectura — antes había aquí una
+/// tarjeta grande con botón para pausar/activar (acceso rápido, roadmap
+/// económico); revisión de producto 2026-08-16 la quitó porque se podía
+/// pulsar sin querer y duplicaba el selector de "Mi perfil" (única
+/// forma real de cambiar el estado). Este chip no tiene `onTap` — solo
+/// informa, para que el profesional no vaya "a ciegas" mientras mira
+/// solicitudes sin tener que salir a Mi Perfil a comprobarlo.
+class _ChipDisponibilidad extends StatelessWidget {
+  const _ChipDisponibilidad({required this.disponibilidadAsync});
 
-  final DisponibilidadState estado;
-  final VoidCallback onPausar;
-  final VoidCallback onActivar;
+  final AsyncValue<DisponibilidadState> disponibilidadAsync;
 
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
-    if (estado.disponible) {
-      return Container(
-        padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-        decoration: BoxDecoration(
-          color: Colors.amber.withOpacity(0.13),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.amber.withOpacity(0.35)),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.bolt, color: Colors.amber.shade800, size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                t.profesionalDisponibleAhoraAviso,
-                style: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
+    return disponibilidadAsync.maybeWhen(
+      data: (estado) {
+        final color = estado.disponible ? Colors.amber.shade800 : colorScheme.onSurfaceVariant;
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.14),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.circle, size: 8, color: color),
+              const SizedBox(width: 5),
+              Text(
+                estado.disponible ? t.profesionalChipDisponible : t.profesionalChipNoDisponible,
+                style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: color),
               ),
-            ),
-            TextButton(
-              onPressed: onPausar,
-              style: TextButton.styleFrom(foregroundColor: Colors.amber.shade900),
-              child: Text(t.disponibilidadOpcionNoDisponibleTitulo),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outlineVariant),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.bolt_outlined, color: colorScheme.onSurfaceVariant, size: 20),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  t.disponibilidadOpcionNoDisponibleTitulo,
-                  style: TextStyle(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                ),
-                Text(
-                  t.profesionalNoDisponibleAyuda,
-                  style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 11.5),
-                ),
-              ],
-            ),
+            ],
           ),
-          TextButton(
-            onPressed: onActivar,
-            child: Text(t.profesionalPonerseDisponibleBoton),
-          ),
-        ],
-      ),
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
     );
   }
 }

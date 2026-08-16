@@ -1093,23 +1093,29 @@ class _TarjetaContacto extends StatelessWidget {
   }
 }
 
-enum _OpcionDisponibilidad { noDisponible, horarioLaboral, veinticuatroHoras }
+enum _OpcionDisponibilidad { noDisponible, disponible }
 
 /// Selector de disponibilidad — antes era su propia pestaña
 /// (DisponibilidadProfesionalScreen), movida aquí dentro de "Mi perfil"
 /// por decisión del roadmap económico (punto 2: Registro → Verificación
-/// + Stripe en paralelo → Disponible, todo centrado en el perfil). Usa
-/// `disponibilidadProvider`, compartido con el acceso rápido de "No
-/// disponible" en la pestaña Solicitudes cercanas, para que ambos
-/// sitios reflejen siempre el mismo estado sin desincronizarse.
+/// + Stripe en paralelo → Disponible, todo centrado en el perfil).
+///
+/// Revisión de producto 2026-08-16: antes había un tercer estado
+/// ("horario laboral" vs "24h"), pero `modoDisponibilidad` nunca tuvo
+/// ningún efecto real — ninguna query, notificación ni job lo leía, no
+/// se mostraba al cliente en ningún sitio, y no hay ninguna franja
+/// horaria real detrás de "horario laboral" (confirmado con grep en
+/// todo el backend). Se colapsó a un único "Disponible" para no
+/// preguntarle al profesional algo cuya respuesta no cambiaba nada. El
+/// campo sigue en BD sin tocar (backend, migración) — si algún día se
+/// decide dar valor real a "24h" (ej. insignia visible al cliente), se
+/// reengancha ahí, no hace falta reconstruirlo desde cero.
 class _SelectorDisponibilidad extends ConsumerWidget {
   const _SelectorDisponibilidad();
 
   Future<void> _elegir(BuildContext context, WidgetRef ref, DisponibilidadState actual, _OpcionDisponibilidad opcion) async {
     final t = AppLocalizations.of(context);
-    final opcionActual = !actual.disponible
-        ? _OpcionDisponibilidad.noDisponible
-        : (actual.modo == ModoDisponibilidad.veinticuatroHoras ? _OpcionDisponibilidad.veinticuatroHoras : _OpcionDisponibilidad.horarioLaboral);
+    final opcionActual = actual.disponible ? _OpcionDisponibilidad.disponible : _OpcionDisponibilidad.noDisponible;
     if (opcion == opcionActual) return;
 
     // Sin categoría/foto no hay ninguna búsqueda en la que el
@@ -1121,9 +1127,12 @@ class _SelectorDisponibilidad extends ConsumerWidget {
     }
 
     try {
+      // modo: se reenvía el que ya hubiera, sin preguntar — el campo
+      // sigue en BD pero ya no se elige desde aquí (ver comentario de
+      // la clase).
       await ref.read(disponibilidadProvider.notifier).actualizar(
             disponible: opcion != _OpcionDisponibilidad.noDisponible,
-            modo: opcion == _OpcionDisponibilidad.veinticuatroHoras ? ModoDisponibilidad.veinticuatroHoras : ModoDisponibilidad.horarioLaboral,
+            modo: actual.modo,
           );
     } catch (e) {
       debugPrint('[_SelectorDisponibilidad] Error al cambiar disponibilidad: $e');
@@ -1144,9 +1153,7 @@ class _SelectorDisponibilidad extends ConsumerWidget {
       loading: () => const Center(child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator(strokeWidth: 2))),
       error: (_, __) => Text(t.disponibilidadTitulo, style: TextStyle(fontSize: 13, color: colorScheme.error)),
       data: (estado) {
-        final opcionActual = !estado.disponible
-            ? _OpcionDisponibilidad.noDisponible
-            : (estado.modo == ModoDisponibilidad.veinticuatroHoras ? _OpcionDisponibilidad.veinticuatroHoras : _OpcionDisponibilidad.horarioLaboral);
+        final opcionActual = estado.disponible ? _OpcionDisponibilidad.disponible : _OpcionDisponibilidad.noDisponible;
         final bloqueado = !estado.perfilCompleto || !estado.puedeActivarse;
 
         return Column(
@@ -1194,23 +1201,13 @@ class _SelectorDisponibilidad extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             _TarjetaOpcionDisponibilidad(
-              icono: Icons.wb_sunny_outlined,
+              icono: Icons.bolt,
               color: Colors.amber.shade700,
-              titulo: t.disponibilidadModoHorarioLaboral,
-              ayuda: t.disponibilidadModoHorarioLaboralAyuda,
-              seleccionada: opcionActual == _OpcionDisponibilidad.horarioLaboral,
+              titulo: t.disponibilidadOpcionDisponibleTitulo,
+              ayuda: t.disponibilidadOpcionDisponibleAyuda,
+              seleccionada: opcionActual == _OpcionDisponibilidad.disponible,
               deshabilitada: bloqueado,
-              onTap: () => _elegir(context, ref, estado, _OpcionDisponibilidad.horarioLaboral),
-            ),
-            const SizedBox(height: 8),
-            _TarjetaOpcionDisponibilidad(
-              icono: Icons.nightlight_round,
-              color: Colors.indigo,
-              titulo: t.disponibilidadModo24h,
-              ayuda: t.disponibilidadModo24hAyuda,
-              seleccionada: opcionActual == _OpcionDisponibilidad.veinticuatroHoras,
-              deshabilitada: bloqueado,
-              onTap: () => _elegir(context, ref, estado, _OpcionDisponibilidad.veinticuatroHoras),
+              onTap: () => _elegir(context, ref, estado, _OpcionDisponibilidad.disponible),
             ),
           ],
         );
