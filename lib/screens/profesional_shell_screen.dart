@@ -205,7 +205,18 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
   /// `{}`) y tratar un trabajo YA visto en una sesión anterior como
   /// nuevo, disparando un SnackBar "te han elegido" para un trabajo que
   /// el profesional ya conocía. Mismo bug, mismo fix, sitio distinto.
+  ///
+  /// Segundo fallo real, confirmado en dispositivo (logcat): "Cannot use
+  /// 'ref' after the widget was disposed" — este método se invoca desde
+  /// `ref.listenManual`, cuyo callback puede seguir en vuelo justo cuando
+  /// el shell se desmonta (p. ej. el `cargar()` de fondo de
+  /// assignedRequestsProvider termina y notifica justo en ese instante).
+  /// `mounted` es una propiedad plana de `State` — a diferencia de `ref`,
+  /// siempre es segura de leer aunque el widget ya esté desmontado — así
+  /// que se comprueba ANTES de tocar `ref` por primera vez, no solo
+  /// después del `await`.
   Future<void> _avisarDeTrabajosNuevos(List<AssignedRequest> trabajos) async {
+    if (!mounted) return;
     await ref.read(trabajosVistosProvider.notifier).listo;
     if (!mounted) return;
 
