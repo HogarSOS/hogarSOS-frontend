@@ -1082,6 +1082,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profesionalChipNoDisponible => 'Not available';
 
   @override
+  String profesionalEstadoLinea(String estado) {
+    return 'Your status · $estado';
+  }
+
+  @override
   String get salirPulsaOtraVez => 'Press back again to exit';
 
   @override

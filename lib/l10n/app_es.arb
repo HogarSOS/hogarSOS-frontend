@@ -359,6 +359,10 @@
   "profesionalDisponibleAhoraAviso": "Estás disponible: te pueden llegar solicitudes nuevas",
   "profesionalChipDisponible": "Disponible",
   "profesionalChipNoDisponible": "No disponible",
+  "profesionalEstadoLinea": "Tu estado · {estado}",
+  "@profesionalEstadoLinea": {
+    "placeholders": { "estado": { "type": "String" } }
+  },
   "salirPulsaOtraVez": "Pulsa atrás otra vez para salir",
   "profesionalSinSolicitudes": "No hay solicitudes cerca ahora mismo",
   "profesionalErrorCargar": "No se pudieron cargar las solicitudes",

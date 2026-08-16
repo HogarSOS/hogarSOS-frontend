@@ -359,6 +359,10 @@
   "profesionalDisponibleAhoraAviso": "You're available: new requests can reach you",
   "profesionalChipDisponible": "Available",
   "profesionalChipNoDisponible": "Not available",
+  "profesionalEstadoLinea": "Your status · {estado}",
+  "@profesionalEstadoLinea": {
+    "placeholders": { "estado": { "type": "String" } }
+  },
   "salirPulsaOtraVez": "Press back again to exit",
   "profesionalSinSolicitudes": "No requests nearby right now",
   "profesionalErrorCargar": "Couldn't load requests",

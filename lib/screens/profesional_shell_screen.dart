@@ -7,7 +7,10 @@ import '../providers/chat_read_provider.dart';
 import '../providers/service_request_provider.dart';
 import '../providers/trabajos_vistos_provider.dart';
 import '../services/app_badge_service.dart';
+import '../utils/category_display.dart';
+import '../utils/polling_lifecycle_mixin.dart';
 import 'profesional/home_profesional_screen.dart';
+import 'profesional/mensajes_profesional_screen.dart';
 import 'profesional/mi_perfil_profesional_screen.dart';
 import 'profesional/trabajos_activos_profesional_screen.dart';
 import 'profesional/centro_pagos_screen.dart';
@@ -54,6 +57,41 @@ int contarSolicitudesSinPostular(List<NearbyRequest> solicitudes) {
   return solicitudes.where((s) => !s.yaPostulado).length;
 }
 
+/// Cuántos trabajos aceptados no ha visto todavía el profesional — pura,
+/// misma forma que contarSolicitudesSinPostular. Antes esta cuenta vivía
+/// mezclada dentro de _BadgeMensajesProfesional (revisión UX
+/// 2026-08-16): con Mensajes convertido en una lista de conversaciones,
+/// esta señal se separa y pasa a representar el punto de la tarjeta
+/// "Tienes X trabajos activos" en Solicitudes — mismo
+/// trabajosVistosProvider de siempre (marcarVistos() al entrar a
+/// Trabajos activos), sin mecanismo de persistencia nuevo.
+int contarTrabajosNuevosSinVer(List<AssignedRequest> trabajos, Set<String> vistos) {
+  return trabajos.where((t) => t.estado == EstadoSolicitud.aceptada && !vistos.contains(t.id)).length;
+}
+
+/// A qué acción debe llevar una notificación de rol profesional sobre un
+/// trabajo (ya descartado el caso 'chat_mensaje' en deep_link_listener.dart,
+/// que empuja ChatScreen directo sin pasar por aquí) — pura, para poder
+/// probar el contrato exacto sin RemoteMessage/Navigator de por medio.
+///
+/// 'nueva_solicitud' es la ÚNICA notificación de rol profesional sobre
+/// una solicitud a la que todavía no está vinculado (nada aceptado, nada
+/// postulado) — vive en "Solicitudes" (pestaña 1). El resto
+/// (postulacion_aceptada, presupuesto_aceptado, cierre_horas_*,
+/// ampliacion_*...) son sobre un trabajo en el que el profesional ya
+/// está metido — antes vivían en la pestaña 2 (entonces Trabajos
+/// activos); con Mensajes en el índice 2 (revisión UX 2026-08-16),
+/// "trabajo activo" ya no es una pestaña, así que estos tipos pasan a
+/// EMPUJAR TrabajosActivosProfesionalScreen en vez de cambiar de índice
+/// (ver deep_link_listener.dart, que hace ese push).
+enum DestinoNotificacionProfesional { solicitudes, trabajosActivos }
+
+DestinoNotificacionProfesional resolverDestinoNotificacionProfesional(String? tipo) {
+  return tipo == 'nueva_solicitud'
+      ? DestinoNotificacionProfesional.solicitudes
+      : DestinoNotificacionProfesional.trabajosActivos;
+}
+
 /// Contenedor de navegación inferior del profesional — el mismo patrón
 /// que ClienteShellScreen (IndexedStack + NavigationBar), para que la
 /// navegación se sienta igual sea cual sea el rol con el que se entró.
@@ -74,8 +112,21 @@ class ProfesionalShellScreen extends ConsumerStatefulWidget {
   ConsumerState<ProfesionalShellScreen> createState() => _ProfesionalShellScreenState();
 }
 
-class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen> {
+class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
+    with WidgetsBindingObserver, PollingLifecycleMixin {
   DateTime? _ultimaPulsacionAtras;
+
+  // IDs de trabajos para los que YA se mostró el SnackBar "te han
+  // elegido" en ESTA ejecución de la app — solo en memoria, a propósito
+  // (revisión UX 2026-08-16). Distinto de trabajosVistosProvider (que
+  // persiste a disco y significa "el profesional entró a Trabajos
+  // activos y lo miró"): este set solo evita repetir el mismo aviso en
+  // cada sondeo de 10s mientras siga sin visitar la pantalla. Si se
+  // reutilizara trabajosVistosProvider para esto, marcar "avisado" sería
+  // indistinguible de marcar "visto de verdad", y el punto de la tarjeta
+  // de Solicitudes (contarTrabajosNuevosSinVer) desaparecería en cuanto
+  // sonara el SnackBar, aunque el profesional lo hubiera ignorado.
+  final Set<String> _idsYaAvisados = {};
 
   // Orden pedido por el usuario tras probar la beta: Perfil primero (es
   // lo primero que se ve al entrar, en vez de tener que ir a buscarlo a
@@ -86,10 +137,17 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
   // Disponibilidad ya no es una pestaña propia (roadmap económico,
   // punto 2): se movió dentro de "Mi perfil", con acceso rápido a "No
   // disponible" desde Solicitudes cercanas — ver disponibilidad_provider.dart.
+  //
+  // Mensajes (revisión UX 2026-08-16) muestra ahora MensajesProfesionalScreen
+  // (lista de conversaciones) en vez de TrabajosActivosProfesionalScreen
+  // — Trabajos activos sigue existiendo, pero solo como pantalla
+  // independiente accesible desde Solicitudes o desde una notificación
+  // de un trabajo ya asignado (ver resolverDestinoNotificacionProfesional
+  // y deep_link_listener.dart).
   static const _pantallas = [
     MiPerfilProfesionalScreen(),
     HomeProfesionalScreen(),
-    TrabajosActivosProfesionalScreen(),
+    MensajesProfesionalScreen(),
     CentroPagosScreen(),
   ];
 
@@ -109,10 +167,83 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
         ref.read(pendingProfesionalTabRequestProvider.notifier).state = null;
       }
     });
+
+    // Sondeo de assignedRequestsProvider (revisión UX 2026-08-16): antes
+    // vivía dentro de TrabajosActivosProfesionalScreen.initState() —
+    // funcionaba porque esa pantalla era una de las 4 mantenidas vivas
+    // por el IndexedStack de este shell. Ahora que Trabajos activos ya
+    // NO es una pestaña (solo se monta cuando se hace push desde
+    // Solicitudes o desde una notificación), ese sondeo tiene que vivir
+    // aquí — el shell es lo único que está montado de verdad durante
+    // toda la sesión del profesional — para que la tarjeta "Tienes X
+    // trabajos activos", el punto de "trabajo nuevo" y el SnackBar de
+    // "te han elegido" seguan funcionando aunque el profesional nunca
+    // abra esa pantalla.
+    startPolling(const Duration(seconds: 10), () {
+      ref.read(assignedRequestsProvider.notifier).cargar();
+    });
+    ref.listenManual(assignedRequestsProvider, (_, next) => next.whenData(_avisarDeTrabajosNuevos));
+    final actuales = ref.read(assignedRequestsProvider).valueOrNull;
+    if (actuales != null) _avisarDeTrabajosNuevos(actuales);
+  }
+
+  /// SnackBar "te han elegido" (revisión UX 2026-08-16, movido desde
+  /// TrabajosActivosProfesionalScreen) — a diferencia de
+  /// trabajosVistosProvider.marcarVistos() (que solo se llama al entrar
+  /// de verdad a Trabajos activos, y persiste a disco), este método NO
+  /// marca nada como visto: solo evita repetir el aviso dentro de esta
+  /// misma ejecución de la app vía `_idsYaAvisados`. El punto de la
+  /// tarjeta de Solicitudes sigue encendido hasta que el profesional
+  /// entra de verdad a Trabajos activos, sin importar si vio o ignoró
+  /// este SnackBar.
+  ///
+  /// Revisión adversarial (misma sesión, tras la primera pasada): igual
+  /// que marcarVistosDe en trabajos_activos_profesional_screen.dart, hay
+  /// que esperar `trabajosVistosProvider.notifier.listo` ANTES de leer el
+  /// set — si no, en un arranque en frío este método podía correr antes
+  /// de que terminara de cargarse el set persistido de disco (arranca en
+  /// `{}`) y tratar un trabajo YA visto en una sesión anterior como
+  /// nuevo, disparando un SnackBar "te han elegido" para un trabajo que
+  /// el profesional ya conocía. Mismo bug, mismo fix, sitio distinto.
+  Future<void> _avisarDeTrabajosNuevos(List<AssignedRequest> trabajos) async {
+    await ref.read(trabajosVistosProvider.notifier).listo;
+    if (!mounted) return;
+
+    final vistos = ref.read(trabajosVistosProvider);
+    final nuevos = trabajos
+        .where((t) => t.estado == EstadoSolicitud.aceptada && !vistos.contains(t.id) && !_idsYaAvisados.contains(t.id))
+        .toList();
+    if (nuevos.isEmpty) return;
+    _idsYaAvisados.addAll(nuevos.map((t) => t.id));
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final t = AppLocalizations.of(context);
+      for (final trabajo in nuevos) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(t.trabajosActivosTeEligieron(nombreLocalizadoCategoria(context, trabajo.categoria))),
+            duration: const Duration(seconds: 6),
+            action: SnackBarAction(
+              label: t.trabajosActivosVerTrabajo,
+              // Antes esto solo cambiaba profesionalTabIndexProvider a 2
+              // (Trabajos activos era una pestaña, siempre montada). Ahora
+              // que ya no lo es, hace falta un push real — mismo camino
+              // que ya usa la tarjeta "Tienes X trabajos activos" de
+              // Solicitudes.
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const TrabajosActivosProfesionalScreen()),
+              ),
+            ),
+          ),
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
+    stopPolling();
     // Revisión adversarial: una notificación que llega con el shell YA
     // estable solo necesita el write directo a profesionalTabIndexProvider
     // (ver deep_link_listener.dart) — pero también deja escrito
@@ -160,7 +291,14 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
       canPop: false,
       onPopInvokedWithResult: (didPop, _) => _onPopInvoked(didPop),
       child: Scaffold(
-        body: IndexedStack(index: indiceActual, children: _pantallas),
+        body: Stack(
+          children: [
+            IndexedStack(index: indiceActual, children: _pantallas),
+            // Invisible — solo mantiene actualizado el badge del icono de
+            // la app combinando las dos señales (ver la clase de arriba).
+            const _ActualizadorBadgeAppProfesional(),
+          ],
+        ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: indiceActual,
           onDestinationSelected: (i) => ref.read(profesionalTabIndexProvider.notifier).state = i,
@@ -192,12 +330,21 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
   }
 }
 
-/// Badge de la pestaña Mensajes/Trabajos activos, aislado en su propio
-/// [ConsumerWidget] (rendimiento, auditoría pre-lanzamiento) — mismo
-/// motivo que _BadgeMensajesCliente en cliente_shell_screen.dart: antes
-/// este cálculo vivía en el build() del shell entero, así que cualquier
-/// cambio de unreadChatProvider o trabajosVistosProvider reconstruía
-/// todo el Scaffold/NavigationBar, no solo el punto rojo.
+/// Badge de la pestaña Mensajes, aislado en su propio [ConsumerWidget]
+/// (rendimiento, auditoría pre-lanzamiento) — mismo motivo que
+/// _BadgeMensajesCliente en cliente_shell_screen.dart: antes este
+/// cálculo vivía en el build() del shell entero, así que cualquier
+/// cambio de unreadChatProvider reconstruía todo el
+/// Scaffold/NavigationBar, no solo el punto rojo.
+///
+/// Revisión UX 2026-08-16: representa SOLO mensajes no leídos. Antes
+/// sumaba también "trabajos nuevos sin ver" (para compensar que Mensajes
+/// era en realidad Trabajos activos) — esa señal ahora vive aparte, en
+/// el punto de la tarjeta "Tienes X trabajos activos" de Solicitudes
+/// (ver contarTrabajosNuevosSinVer y _TarjetaTrabajosActivos en
+/// home_profesional_screen.dart). El badge del icono de la app (fuera de
+/// la propia pestaña) combina ambas señales por separado, ver
+/// _ActualizadorBadgeAppProfesional más abajo.
 class _BadgeMensajesProfesional extends ConsumerWidget {
   const _BadgeMensajesProfesional({required this.child});
 
@@ -205,44 +352,50 @@ class _BadgeMensajesProfesional extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Punto rojo si algún trabajo asignado tiene un mensaje nuevo sin
-    // abrir, O si hay un trabajo recién aceptado que el profesional
-    // todavía no ha abierto — antes, si se ignoraba el push "¡Te han
-    // elegido!", no quedaba ninguna señal dentro de la app y el trabajo
-    // podía pasar desapercibido indefinidamente.
     final trabajosAsync = ref.watch(assignedRequestsProvider);
     final trabajos = trabajosAsync.maybeWhen(
       data: (lista) => lista,
       orElse: () => const <AssignedRequest>[],
     );
-    final idsTrabajos = trabajos.map((t) => t.id);
-    final numConversacionesNoLeidas = idsTrabajos.where((id) => ref.watch(unreadChatProvider(id))).length;
-    final hayMensajesNoLeidos = numConversacionesNoLeidas > 0;
-    final trabajosVistos = ref.watch(trabajosVistosProvider);
-    final numTrabajosNuevosSinVer =
-        trabajos.where((t) => t.estado == EstadoSolicitud.aceptada && !trabajosVistos.contains(t.id)).length;
-    final hayTrabajoNuevoSinVer = numTrabajosNuevosSinVer > 0;
-    // Suma de ambas señales para el número del badge: si solo se contaran
-    // los mensajes, un trabajo nuevo sin mensajes mostraría un badge
-    // visible con "0" dentro, más confuso que el punto ciego anterior.
-    final numBadgeMensajes = numConversacionesNoLeidas + numTrabajosNuevosSinVer;
+    final numConversacionesNoLeidas =
+        trabajos.map((t) => t.id).where((id) => ref.watch(unreadChatProvider(id))).length;
 
-    // Badge del icono de la app (UX#6) — booleano (0/1), no la cuenta
-    // exacta: iOS no tiene un "punto sin número" a nivel de sistema (su
-    // API nativa es siempre un entero), así que 1 es lo más parecido a
-    // un punto que permite la plataforma — y, a diferencia de un
-    // número real, no puede quedar "mintiendo" si el conteo exacto se
-    // desfasa por la limitación de que esto se calcula solo con la app
-    // en marcha (ver app_badge_service.dart).
+    return Badge(
+      isLabelVisible: numConversacionesNoLeidas > 0,
+      label: Text('$numConversacionesNoLeidas'),
+      child: child,
+    );
+  }
+}
+
+/// Combina las dos señales del profesional (mensajes no leídos + trabajo
+/// nuevo sin ver) en el ÚNICO número que acepta el badge del icono de la
+/// app (AppBadgeService.actualizar — un entero, "el último valor gana",
+/// sin combinar internamente). Antes esto vivía dentro de
+/// _BadgeMensajesProfesional, cuando esa pestaña ERA la mezcla de ambas
+/// señales; separarlas en dos badges visuales distintos (revisión UX
+/// 2026-08-16) habría dejado dos widgets llamando a `actualizar()` por
+/// su cuenta, pisándose el uno al otro según cuál reconstruyera último —
+/// este widget invisible es el único punto que lo calcula y lo aplica,
+/// para que ningún caller quede "ganando por casualidad".
+class _ActualizadorBadgeAppProfesional extends ConsumerWidget {
+  const _ActualizadorBadgeAppProfesional();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final trabajosAsync = ref.watch(assignedRequestsProvider);
+    final trabajos = trabajosAsync.maybeWhen(data: (lista) => lista, orElse: () => const <AssignedRequest>[]);
+    final hayMensajesNoLeidos = trabajos.map((t) => t.id).any((id) => ref.watch(unreadChatProvider(id)));
+    final trabajosVistos = ref.watch(trabajosVistosProvider);
+    final hayTrabajoNuevoSinVer = contarTrabajosNuevosSinVer(trabajos, trabajosVistos) > 0;
+
+    // Booleano (0/1), no la cuenta exacta — iOS no tiene un "punto sin
+    // número" a nivel de sistema (ver app_badge_service.dart).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppBadgeService.instance.actualizar((hayMensajesNoLeidos || hayTrabajoNuevoSinVer) ? 1 : 0);
     });
 
-    return Badge(
-      isLabelVisible: hayMensajesNoLeidos || hayTrabajoNuevoSinVer,
-      label: Text('$numBadgeMensajes'),
-      child: child,
-    );
+    return const SizedBox.shrink();
   }
 }
 

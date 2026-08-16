@@ -1922,6 +1922,12 @@ abstract class AppLocalizations {
   /// **'No disponible'**
   String get profesionalChipNoDisponible;
 
+  /// No description provided for @profesionalEstadoLinea.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu estado · {estado}'**
+  String profesionalEstadoLinea(String estado);
+
   /// No description provided for @salirPulsaOtraVez.
   ///
   /// In es, this message translates to:

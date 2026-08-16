@@ -11,6 +11,7 @@ import '../providers/disponibilidad_provider.dart';
 import '../providers/stripe_return_provider.dart';
 import '../screens/chat_screen.dart';
 import '../screens/cliente/seguimiento_solicitud_screen.dart';
+import '../screens/profesional/trabajos_activos_profesional_screen.dart';
 import '../screens/profesional_shell_screen.dart';
 import 'notification_service.dart';
 
@@ -39,20 +40,6 @@ DecisionDeepLinkStripe resolverDeepLinkStripePendiente({
   if (restaurando) return DecisionDeepLinkStripe.esperar;
   if (rolUsuario != UserRole.profesional) return DecisionDeepLinkStripe.descartar;
   return DecisionDeepLinkStripe.procesar;
-}
-
-/// A qué pestaña del shell del profesional debe llevar una notificación
-/// (ya descartado el caso 'chat_mensaje', que empuja una pantalla en vez
-/// de cambiar de pestaña) — pura, para poder probar el contrato exacto
-/// sin RemoteMessage/Navigator de por medio. 'nueva_solicitud' es la
-/// ÚNICA notificación de rol profesional sobre una solicitud a la que
-/// todavía no está vinculado (nada aceptado, nada postulado) — vive en
-/// "Solicitudes" (pestaña 1), no en "Trabajos activos" (pestaña 2) como
-/// el resto de tipos (postulacion_aceptada, presupuesto_aceptado,
-/// cierre_horas_*...), que sí son sobre un trabajo en el que el
-/// profesional ya está metido.
-int resolverPestanaDeNotificacionProfesional(String? tipo) {
-  return tipo == 'nueva_solicitud' ? 1 : 2;
 }
 
 /// Envuelve el `home` de la app para escuchar dos cosas que llegan desde
@@ -267,31 +254,48 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
         builder: (_) => SeguimientoSolicitudScreen(solicitudId: solicitudId),
       ));
     } else if (role == UserRole.profesional) {
-      // A diferencia de los dos casos de arriba (que empujan una pantalla
-      // nueva, visible pase lo que pase), este solo cambia un provider que
-      // pinta el shell del profesional — si el usuario ya tenía otra
-      // pantalla empujada encima (p. ej. un chat abierto de otro trabajo),
-      // el cambio de pestaña ocurría en silencio detrás sin que se viera.
-      // Confirmado en real: tocar una notificación de "presupuesto
-      // rechazado" con el chat abierto no hacía nada visible hasta volver
-      // atrás — la pestaña correcta ya estaba seleccionada debajo.
+      // A diferencia del caso cliente de arriba (que empuja una pantalla
+      // nueva, visible pase lo que pase), el caso "Solicitudes" de abajo
+      // solo cambia un provider que pinta el shell del profesional — si
+      // el usuario ya tenía otra pantalla empujada encima (p. ej. un chat
+      // abierto de otro trabajo), el cambio de pestaña ocurría en
+      // silencio detrás sin que se viera. Confirmado en real: tocar una
+      // notificación de "presupuesto rechazado" con el chat abierto no
+      // hacía nada visible hasta volver atrás — la pestaña correcta ya
+      // estaba seleccionada debajo. popUntil primero cubre ambos casos.
       navigator.popUntil((route) => route.isFirst);
 
-      final pestanaDestino = resolverPestanaDeNotificacionProfesional(tipo);
+      final destino = resolverDestinoNotificacionProfesional(tipo);
 
-      // Sin delay ni carrera de tiempos: se escriben los DOS providers de
-      // forma síncrona.
-      // - profesionalTabIndexProvider directo: gana cuando el shell ya
-      //   está estable (caso normal — la app llevaba un rato abierta).
-      // - pendingProfesionalTabRequestProvider: red de seguridad para el
-      //   caso de arranque en frío, donde ProfesionalShellScreen puede
-      //   estar montándose justo ahora — su propio initState() consulta
-      //   este valor en su postFrameCallback y lo hace ganar sobre
-      //   `pestanaInicial` si lo encuentra (ver profesional_shell_screen.dart).
-      //   Cuál de los dos escribe "el último" ya no importa: el resultado
-      //   final es el mismo sea cual sea el orden real de ejecución.
-      ref.read(pendingProfesionalTabRequestProvider.notifier).state = pestanaDestino;
-      ref.read(profesionalTabIndexProvider.notifier).state = pestanaDestino;
+      switch (destino) {
+        case DestinoNotificacionProfesional.solicitudes:
+          // Sin delay ni carrera de tiempos: se escriben los DOS
+          // providers de forma síncrona.
+          // - profesionalTabIndexProvider directo: gana cuando el shell
+          //   ya está estable (caso normal — la app llevaba un rato
+          //   abierta).
+          // - pendingProfesionalTabRequestProvider: red de seguridad
+          //   para el caso de arranque en frío, donde
+          //   ProfesionalShellScreen puede estar montándose justo ahora
+          //   — su propio initState() consulta este valor en su
+          //   postFrameCallback y lo hace ganar sobre `pestanaInicial`
+          //   si lo encuentra (ver profesional_shell_screen.dart). Cuál
+          //   de los dos escribe "el último" ya no importa: el
+          //   resultado final es el mismo sea cual sea el orden real de
+          //   ejecución.
+          ref.read(pendingProfesionalTabRequestProvider.notifier).state = 1;
+          ref.read(profesionalTabIndexProvider.notifier).state = 1;
+          break;
+        case DestinoNotificacionProfesional.trabajosActivos:
+          // Revisión UX 2026-08-16: Trabajos activos dejó de ser una
+          // pestaña (el índice 2 ahora es Mensajes, solo conversaciones)
+          // — postulacion_aceptada, presupuesto_aceptado, cierre_horas_*
+          // y ampliacion_* ya no pueden resolverse con un simple cambio
+          // de índice, hace falta un push real, mismo camino que ya usa
+          // la tarjeta "Tienes X trabajos activos" de Solicitudes.
+          navigator.push(MaterialPageRoute(builder: (_) => const TrabajosActivosProfesionalScreen()));
+          break;
+      }
     }
   }
 

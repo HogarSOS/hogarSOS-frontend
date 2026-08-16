@@ -1,36 +1,45 @@
-// Bug real (aprobado tras causa confirmada por código): un profesional
-// podía tocar el push "nueva_solicitud" (nuevo trabajo cercano al que
-// puede enviar candidatura) y aterrizar en "Trabajos activos" (pestaña
-// 2) en vez de "Solicitudes" (pestaña 1, donde vive de verdad) —
-// deep_link_listener.dart mandaba TODA notificación profesional no-chat
-// a la pestaña 2. Confirmado con grep del backend: 'nueva_solicitud' es
-// el ÚNICO tipo enviado a un profesional sobre una solicitud a la que
-// todavía no está vinculado (nada aceptado, nada postulado); el resto
-// (postulacion_aceptada, presupuesto_aceptado, cierre_horas_*...) sí son
-// sobre un trabajo en el que ya está metido, y pertenecen correctamente
-// a la pestaña 2.
+// Bug real (aprobado tras causa confirmada por código, auditoría
+// 2026-08-15): un profesional podía tocar el push "nueva_solicitud"
+// (nuevo trabajo cercano al que puede enviar candidatura) y aterrizar en
+// "Trabajos activos" en vez de "Solicitudes" (pestaña 1, donde vive de
+// verdad) — deep_link_listener.dart mandaba TODA notificación
+// profesional no-chat a la pestaña 2. Confirmado con grep del backend:
+// 'nueva_solicitud' es el ÚNICO tipo enviado a un profesional sobre una
+// solicitud a la que todavía no está vinculado (nada aceptado, nada
+// postulado); el resto (postulacion_aceptada, presupuesto_aceptado,
+// cierre_horas_*, ampliacion_*...) sí son sobre un trabajo en el que ya
+// está metido.
+//
+// Revisión UX 2026-08-16: la pestaña 2 dejó de ser "Trabajos activos"
+// (ahora es Mensajes, solo conversaciones) — resolverPestanaDeNotificacionProfesional
+// (que devolvía un índice de pestaña) se sustituyó por
+// resolverDestinoNotificacionProfesional (que devuelve un DESTINO: la
+// pestaña Solicitudes, o un push real a TrabajosActivosProfesionalScreen
+// para todo lo demás — ver deep_link_listener.dart). El contrato de
+// "nueva_solicitud → Solicitudes, resto → Trabajos" no cambia, solo CÓMO
+// se llega a "Trabajos" (antes índice de pestaña, ahora push).
 //
 // Además, "Solicitudes" no tenía ningún indicador persistente dentro de
-// la app (a diferencia de "Mensajes"/Trabajos activos, que sí tiene
+// la app (a diferencia de "Mensajes", que sí tiene
 // _BadgeMensajesProfesional) — ni entrando por casualidad era obvio que
 // hubiera algo nuevo.
 //
-// Fix: 'nueva_solicitud' se enruta a la pestaña 1 (resto intacto, sigue
-// yendo a la 2) + badge simple en la pestaña, contando solicitudes
-// cercanas sin postular. Sin estado "visto" persistente ni notifier
-// nuevo: una solicitud sale sola de la lista al postularse, ignorarse o
-// expirar (ver NearbyRequestsNotifier en service_request_provider.dart),
-// así que "cuántas hay sin postular ahora mismo" ya es la señal correcta.
+// Fix (2026-08-15): 'nueva_solicitud' se enruta a Solicitudes (resto
+// intacto, sigue yendo a Trabajos activos) + badge simple en la pestaña,
+// contando solicitudes cercanas sin postular. Sin estado "visto"
+// persistente ni notifier nuevo: una solicitud sale sola de la lista al
+// postularse, ignorarse o expirar (ver NearbyRequestsNotifier en
+// service_request_provider.dart), así que "cuántas hay sin postular
+// ahora mismo" ya es la señal correcta.
 //
 // 'chat_mensaje' (tercer tipo pedido en la revisión) no se prueba aquí
 // aparte: ese bloque de deep_link_listener.dart (empuja ChatScreen,
-// nunca cambia de pestaña) no se tocó en absoluto en este cambio —
-// verificado por inspección del diff, cero líneas modificadas ahí.
+// nunca pasa por resolverDestinoNotificacionProfesional) no se tocó en
+// absoluto en ninguno de los dos cambios.
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hogarsos/models/service_request_model.dart';
 import 'package:hogarsos/screens/profesional_shell_screen.dart';
-import 'package:hogarsos/services/deep_link_listener.dart';
 
 NearbyRequest _solicitud({required String id, bool yaPostulado = false}) {
   return NearbyRequest(
@@ -44,28 +53,82 @@ NearbyRequest _solicitud({required String id, bool yaPostulado = false}) {
 }
 
 void main() {
-  group('resolverPestanaDeNotificacionProfesional (función pura de decisión)', () {
-    test('nueva_solicitud → pestaña 1 (Solicitudes)', () {
-      expect(resolverPestanaDeNotificacionProfesional('nueva_solicitud'), 1);
+  group('resolverDestinoNotificacionProfesional (función pura de decisión)', () {
+    test('nueva_solicitud → Solicitudes', () {
+      expect(resolverDestinoNotificacionProfesional('nueva_solicitud'), DestinoNotificacionProfesional.solicitudes);
     });
 
-    test('postulacion_aceptada → sigue yendo a pestaña 2 (Trabajos activos)', () {
-      expect(resolverPestanaDeNotificacionProfesional('postulacion_aceptada'), 2);
+    test('postulacion_aceptada → Trabajos activos (push, ya no es pestaña)', () {
+      expect(
+          resolverDestinoNotificacionProfesional('postulacion_aceptada'), DestinoNotificacionProfesional.trabajosActivos);
     });
 
-    test('presupuesto_aceptado → pestaña 2 (comportamiento previo intacto)', () {
-      expect(resolverPestanaDeNotificacionProfesional('presupuesto_aceptado'), 2);
+    test('presupuesto_aceptado → Trabajos activos (comportamiento previo intacto)', () {
+      expect(
+          resolverDestinoNotificacionProfesional('presupuesto_aceptado'), DestinoNotificacionProfesional.trabajosActivos);
     });
 
-    test('cierre_horas_aceptado / pendiente / rechazado → pestaña 2', () {
-      expect(resolverPestanaDeNotificacionProfesional('cierre_horas_aceptado'), 2);
-      expect(resolverPestanaDeNotificacionProfesional('cierre_horas_pendiente'), 2);
-      expect(resolverPestanaDeNotificacionProfesional('cierre_horas_rechazado'), 2);
+    test('cierre_horas_aceptado / pendiente / rechazado → Trabajos activos', () {
+      expect(resolverDestinoNotificacionProfesional('cierre_horas_aceptado'), DestinoNotificacionProfesional.trabajosActivos);
+      expect(resolverDestinoNotificacionProfesional('cierre_horas_pendiente'), DestinoNotificacionProfesional.trabajosActivos);
+      expect(
+          resolverDestinoNotificacionProfesional('cierre_horas_rechazado'), DestinoNotificacionProfesional.trabajosActivos);
     });
 
-    test('tipo desconocido o null → pestaña 2 por defecto (comportamiento previo intacto)', () {
-      expect(resolverPestanaDeNotificacionProfesional(null), 2);
-      expect(resolverPestanaDeNotificacionProfesional('algo_no_mapeado'), 2);
+    test('ampliacion_aceptada / rechazada → Trabajos activos', () {
+      expect(resolverDestinoNotificacionProfesional('ampliacion_aceptada'), DestinoNotificacionProfesional.trabajosActivos);
+      expect(resolverDestinoNotificacionProfesional('ampliacion_rechazada'), DestinoNotificacionProfesional.trabajosActivos);
+    });
+
+    test('tipo desconocido o null → Trabajos activos por defecto (comportamiento previo intacto)', () {
+      expect(resolverDestinoNotificacionProfesional(null), DestinoNotificacionProfesional.trabajosActivos);
+      expect(resolverDestinoNotificacionProfesional('algo_no_mapeado'), DestinoNotificacionProfesional.trabajosActivos);
+    });
+  });
+
+  group('contarTrabajosNuevosSinVer (indicador de la tarjeta "Tienes X trabajos activos")', () {
+    AssignedRequest trabajo({required String id, required EstadoSolicitud estado}) {
+      return AssignedRequest(
+        id: id,
+        categoria: 'fontaneria',
+        descripcion: 'Grifo que gotea',
+        estado: estado,
+        clienteNombre: 'Cliente $id',
+        createdAt: DateTime(2026, 8, 16),
+        tienePago: false,
+        tieneValoracion: false,
+      );
+    }
+
+    test('lista vacía → 0', () {
+      expect(contarTrabajosNuevosSinVer(const [], const {}), 0);
+    });
+
+    test('trabajo aceptado no visto → cuenta 1', () {
+      final trabajos = [trabajo(id: 'a', estado: EstadoSolicitud.aceptada)];
+      expect(contarTrabajosNuevosSinVer(trabajos, const {}), 1);
+    });
+
+    test('trabajo aceptado ya visto → 0', () {
+      final trabajos = [trabajo(id: 'a', estado: EstadoSolicitud.aceptada)];
+      expect(contarTrabajosNuevosSinVer(trabajos, {'a'}), 0);
+    });
+
+    test('trabajo en_progreso o completado no cuenta, aunque no esté en vistos (solo "aceptada" es "recién elegido")', () {
+      final trabajos = [
+        trabajo(id: 'a', estado: EstadoSolicitud.en_progreso),
+        trabajo(id: 'b', estado: EstadoSolicitud.completada),
+      ];
+      expect(contarTrabajosNuevosSinVer(trabajos, const {}), 0);
+    });
+
+    test('varios trabajos, mezcla de vistos/no vistos → cuenta exacta', () {
+      final trabajos = [
+        trabajo(id: 'a', estado: EstadoSolicitud.aceptada),
+        trabajo(id: 'b', estado: EstadoSolicitud.aceptada),
+        trabajo(id: 'c', estado: EstadoSolicitud.aceptada),
+      ];
+      expect(contarTrabajosNuevosSinVer(trabajos, {'b'}), 2);
     });
   });
 

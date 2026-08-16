@@ -11,11 +11,9 @@ import '../../services/payment_service.dart';
 import '../../services/service_request_service.dart';
 import '../../utils/category_display.dart';
 import '../../utils/error_extraction.dart';
-import '../../utils/polling_lifecycle_mixin.dart';
 import '../../widgets/animated_diff_list.dart';
 import '../../widgets/entrada_animada.dart';
 import '../chat_screen.dart';
-import '../profesional_shell_screen.dart' show profesionalTabIndexProvider;
 import '../reportar_problema_screen.dart';
 import '../cliente/valoracion_screen.dart';
 import '../../utils/imagen_autenticada.dart';
@@ -37,25 +35,22 @@ class TrabajosActivosProfesionalScreen extends ConsumerStatefulWidget {
   ConsumerState<TrabajosActivosProfesionalScreen> createState() => _TrabajosActivosProfesionalScreenState();
 }
 
-class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActivosProfesionalScreen>
-    with WidgetsBindingObserver, PollingLifecycleMixin {
+class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActivosProfesionalScreen> {
   @override
   void initState() {
     super.initState();
-    // Mismo patrón de sondeo que home_profesional_screen.dart: un trabajo
-    // cancelado por el cliente ya no aparece en listMyAssignedRequests
-    // (filtro en el backend), pero sin refrescar esta lista periódicamente
-    // el profesional solo se enteraría con un pull-to-refresh manual —
-    // cada 10s se entera solo, sin spinner de por medio (el refresco es
-    // silencioso, ver AssignedRequestsNotifier.cargar()). Se pausa solo
-    // con la app en segundo plano (ver PollingLifecycleMixin).
-    startPolling(const Duration(seconds: 10), () {
-      ref.read(assignedRequestsProvider.notifier).cargar();
-    });
-
-    // Con solo entrar en esta pestaña se considera "visto" — no hace
-    // falta abrir cada tarjeta suelta. Quita el punto rojo del shell
-    // (ver profesional_shell_screen.dart y trabajos_vistos_provider.dart).
+    // Revisión UX 2026-08-16: el sondeo de assignedRequestsProvider y el
+    // SnackBar "te han elegido" se movieron a ProfesionalShellScreen
+    // (siempre montado durante la sesión del profesional) — esta
+    // pantalla ya no es una pestaña permanente, solo se monta al hacer
+    // push desde Solicitudes o desde una notificación, así que ya no
+    // puede ser la fuente de ese sondeo en segundo plano.
+    //
+    // Lo que SÍ sigue siendo responsabilidad de esta pantalla: marcar
+    // "visto" en cuanto el profesional entra de verdad a mirar la lista
+    // — no hace falta abrir cada tarjeta suelta. Quita el punto de la
+    // tarjeta "Tienes X trabajos activos" en Solicitudes (ver
+    // profesional_shell_screen.dart y trabajos_vistos_provider.dart).
     // `listenManual` (en vez de `ref.listen` en build) porque desde
     // initState no hay build en curso al que enganchar el listener, y
     // así también cubre los datos que YA estuvieran cargados al entrar
@@ -66,59 +61,18 @@ class _TrabajosActivosProfesionalScreenState extends ConsumerState<TrabajosActiv
       // comprobación podía correr antes de que trabajosVistosProvider
       // terminara de cargar su set persistido (arranca en `{}`) —
       // trataba un trabajo YA visto en una sesión anterior como nuevo
-      // otra vez, y si esa carga tardía llegaba DESPUÉS de marcarVistos()
-      // aquí abajo, sobrescribía el estado entero y deshacía el "ya
-      // visto" recién marcado: el mismo trabajo volvía a contar como
-      // nuevo en el siguiente sondeo, reabriendo el aviso una y otra vez.
+      // otra vez.
       await ref.read(trabajosVistosProvider.notifier).listo;
       if (!mounted) return;
-
-      // El set ANTES de marcar es lo que distingue "ya lo había visto"
-      // de "me acabo de enterar" — sin esto, cada carga (incluida la
-      // primera al entrar) contaría como "nuevo".
-      final vistosAntes = ref.read(trabajosVistosProvider);
-      final trabajosNuevos =
-          trabajos.where((t) => t.estado == EstadoSolicitud.aceptada && !vistosAntes.contains(t.id)).toList();
 
       ref.read(trabajosVistosProvider.notifier).marcarVistos(
             trabajos.where((t) => t.estado == EstadoSolicitud.aceptada).map((t) => t.id),
           );
-
-      if (trabajosNuevos.isEmpty) return;
-      // Diferido al siguiente frame: en la primera llamada esto corre
-      // dentro de initState, donde el ScaffoldMessenger todavía no
-      // tiene garantizado un ancestro montado.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        final t = AppLocalizations.of(context);
-        for (final trabajo in trabajosNuevos) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(t.trabajosActivosTeEligieron(nombreLocalizadoCategoria(context, trabajo.categoria))),
-              duration: const Duration(seconds: 6),
-              action: SnackBarAction(
-                label: t.trabajosActivosVerTrabajo,
-                // El propio shell mantiene todas las pestañas montadas
-                // (IndexedStack) — este aviso puede dispararse estando
-                // en otra pestaña, así que "ver trabajo" solo necesita
-                // cambiar el índice activo, no navegar de verdad.
-                onPressed: () => ref.read(profesionalTabIndexProvider.notifier).state = 2,
-              ),
-            ),
-          );
-        }
-      });
     }
 
     final actuales = ref.read(assignedRequestsProvider).valueOrNull;
     if (actuales != null) marcarVistosDe(actuales);
     ref.listenManual(assignedRequestsProvider, (_, next) => next.whenData(marcarVistosDe));
-  }
-
-  @override
-  void dispose() {
-    stopPolling();
-    super.dispose();
   }
 
   /// Completa el trabajo. El importe sale siempre del presupuesto ya

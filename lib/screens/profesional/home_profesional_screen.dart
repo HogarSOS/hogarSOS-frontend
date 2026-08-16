@@ -4,11 +4,13 @@ import '../../l10n/app_localizations.dart';
 import '../../models/service_request_model.dart';
 import '../../providers/disponibilidad_provider.dart';
 import '../../providers/service_request_provider.dart';
+import '../../providers/trabajos_vistos_provider.dart';
 import '../../theme/brand_mark.dart';
 import '../../utils/error_extraction.dart';
 import '../../utils/polling_lifecycle_mixin.dart';
 import '../../widgets/animated_diff_list.dart';
 import '../../widgets/entrada_animada.dart';
+import '../profesional_shell_screen.dart' show contarTrabajosNuevosSinVer;
 import 'trabajos_activos_profesional_screen.dart';
 import '../../utils/imagen_autenticada.dart';
 
@@ -168,22 +170,35 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
     final solicitudesAsync = ref.watch(nearbyRequestsProvider);
     final trabajosActivosAsync = ref.watch(assignedRequestsProvider);
     final disponibilidadAsync = ref.watch(disponibilidadProvider);
+    final trabajosVistos = ref.watch(trabajosVistosProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
+        // Column de 2 líneas en vez del Row de una sola línea de antes
+        // (revisión UX 2026-08-16): con logo + título + chip todos en la
+        // misma línea, el título era el único elemento Flexible y siempre
+        // perdía el pulso por espacio en móviles normales, cortándose. El
+        // indicador de disponibilidad baja a una segunda línea pequeña,
+        // sin competir por el mismo ancho.
+        toolbarHeight: 64,
+        title: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const HogarSosMark(size: 28),
-            const SizedBox(width: 10),
-            Flexible(child: Text(t.profesionalTituloSolicitudes, overflow: TextOverflow.ellipsis)),
-            const SizedBox(width: 8),
-            // Solo lectura a propósito (revisión de producto 2026-08-16):
-            // el acceso rápido que existía aquí antes se podía pulsar sin
-            // querer y duplicaba el selector de "Mi perfil" — este chip
-            // no tiene onTap, cambiar de estado exige ir conscientemente
-            // a Mi Perfil.
-            _ChipDisponibilidad(disponibilidadAsync: disponibilidadAsync),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const HogarSosMark(size: 24),
+                const SizedBox(width: 8),
+                Flexible(child: Text(t.profesionalTituloSolicitudes, overflow: TextOverflow.ellipsis)),
+              ],
+            ),
+            const SizedBox(height: 2),
+            // Puramente informativo (revisión de producto 2026-08-16): sin
+            // onTap/InkWell/GestureDetector — cambiar de estado exige ir
+            // conscientemente a Mi Perfil, único sitio real donde se
+            // modifica la disponibilidad.
+            _EstadoDisponibilidadTexto(disponibilidadAsync: disponibilidadAsync),
           ],
         ),
       ),
@@ -206,6 +221,14 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                     child: _TarjetaTrabajosActivos(
                       cantidad: trabajos.length,
+                      // Señal de "trabajo nuevo sin ver" (revisión UX
+                      // 2026-08-16): antes vivía mezclada en el badge de
+                      // la pestaña Mensajes; ahora que Mensajes es solo
+                      // conversaciones, este punto discreto sobre la
+                      // propia tarjeta de acceso a Trabajos activos es
+                      // quien la representa — mismo trabajosVistosProvider
+                      // de siempre, sin mecanismo nuevo.
+                      hayNuevo: contarTrabajosNuevosSinVer(trabajos, trabajosVistos) > 0,
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const TrabajosActivosProfesionalScreen()),
                       ),
@@ -273,15 +296,13 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
   }
 }
 
-/// Indicador de disponibilidad de solo lectura — antes había aquí una
-/// tarjeta grande con botón para pausar/activar (acceso rápido, roadmap
-/// económico); revisión de producto 2026-08-16 la quitó porque se podía
-/// pulsar sin querer y duplicaba el selector de "Mi perfil" (única
-/// forma real de cambiar el estado). Este chip no tiene `onTap` — solo
-/// informa, para que el profesional no vaya "a ciegas" mientras mira
-/// solicitudes sin tener que salir a Mi Perfil a comprobarlo.
-class _ChipDisponibilidad extends StatelessWidget {
-  const _ChipDisponibilidad({required this.disponibilidadAsync});
+/// Segunda línea del AppBar, puramente informativa — antes era un chip
+/// con fondo/borde junto al título (competía por espacio y lo cortaba);
+/// revisión de producto 2026-08-16 lo bajó a texto plano en su propia
+/// línea. Sigue sin `onTap`/`InkWell`/`GestureDetector` — la única forma
+/// real de cambiar el estado sigue siendo Mi Perfil.
+class _EstadoDisponibilidadTexto extends StatelessWidget {
+  const _EstadoDisponibilidadTexto({required this.disponibilidadAsync});
 
   final AsyncValue<DisponibilidadState> disponibilidadAsync;
 
@@ -293,23 +314,9 @@ class _ChipDisponibilidad extends StatelessWidget {
     return disponibilidadAsync.maybeWhen(
       data: (estado) {
         final color = estado.disponible ? Colors.amber.shade800 : colorScheme.onSurfaceVariant;
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.14),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.circle, size: 8, color: color),
-              const SizedBox(width: 5),
-              Text(
-                estado.disponible ? t.profesionalChipDisponible : t.profesionalChipNoDisponible,
-                style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: color),
-              ),
-            ],
-          ),
+        return Text(
+          t.profesionalEstadoLinea(estado.disponible ? t.profesionalChipDisponible : t.profesionalChipNoDisponible),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: color),
         );
       },
       orElse: () => const SizedBox.shrink(),
@@ -318,9 +325,10 @@ class _ChipDisponibilidad extends StatelessWidget {
 }
 
 class _TarjetaTrabajosActivos extends StatelessWidget {
-  const _TarjetaTrabajosActivos({required this.cantidad, required this.onTap});
+  const _TarjetaTrabajosActivos({required this.cantidad, required this.hayNuevo, required this.onTap});
 
   final int cantidad;
+  final bool hayNuevo;
   final VoidCallback onTap;
 
   @override
@@ -338,7 +346,17 @@ class _TarjetaTrabajosActivos extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
-              Icon(Icons.work_outline, color: colorScheme.onTertiaryContainer),
+              // Punto discreto de "trabajo nuevo sin ver" (revisión UX
+              // 2026-08-16) — sin `label` a propósito: así Badge pinta
+              // solo un punto (smallSize), no un badge numerado. Mismo
+              // criterio visual que el resto de indicadores "vistos" de
+              // la app. Desaparece en cuanto se entra a Trabajos activos
+              // (trabajosVistosProvider.marcarVistos), no antes.
+              Badge(
+                isLabelVisible: hayNuevo,
+                smallSize: 8,
+                child: Icon(Icons.work_outline, color: colorScheme.onTertiaryContainer),
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
