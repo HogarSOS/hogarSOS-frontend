@@ -71,9 +71,15 @@ class ApiService {
   ///   - Emulador Android:  --dart-define=API_BASE_URL=http://10.0.2.2:3000/api
   ///   - Simulador iOS:     --dart-define=API_BASE_URL=http://localhost:3000/api
   ///   - Móvil físico:      --dart-define=API_BASE_URL=http://TU_IP_LOCAL:3000/api
+  /// El dominio propio (hogarsos.es) es independiente de la región de
+  /// Render: hoy resuelve al servicio activo (Frankfurt) y un futuro
+  /// cambio de región no exige recompilar la app, solo mover el dominio
+  /// de servicio en Render. La URL antigua hogarsos-backend.onrender.com
+  /// está atada para siempre al servicio de Oregón — los builds ≤37 que
+  /// la llevan compilada dependen de que ese servicio siga vivo.
   static const String _baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://hogarsos-backend.onrender.com/api',
+    defaultValue: 'https://hogarsos.es/api',
   );
 
   final Dio _dio = Dio(
