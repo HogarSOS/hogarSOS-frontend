@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/stripe_return_provider.dart';
+import '../profesional_shell_screen.dart';
 import '../../services/payment_service.dart';
 import '../../services/professional_service.dart';
 import '../../utils/category_display.dart';
@@ -33,11 +34,16 @@ class _CentroPagosScreenState extends ConsumerState<CentroPagosScreen> {
   bool _error = false;
   bool _iniciandoOnboardingStripe = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _cargar();
-  }
+  // Carga diferida (auditoría de escalabilidad 2026-08-17): este widget
+  // vive en el IndexedStack del shell, que lo monta al abrir la app
+  // aunque la pestaña no esté visible — antes su initState disparaba
+  // GET /payments/me/summary (que además llama a stripe.balance.retrieve
+  // en el backend) en CADA apertura de la app de CADA profesional,
+  // compitiendo por red y conexiones con las llamadas que sí pintan la
+  // pestaña visible. Mismo patrón que la búsqueda inicial de
+  // buscar_screen.dart: no se carga hasta que la pestaña se selecciona
+  // de verdad (índice 3 en ProfesionalShellScreen).
+  bool _yaCargoInicial = false;
 
   Future<void> _cargar() async {
     try {
@@ -90,6 +96,17 @@ class _CentroPagosScreenState extends ConsumerState<CentroPagosScreen> {
     ref.listen<int>(stripeReturnEventProvider, (anterior, actual) {
       if (anterior != null && anterior != actual) _cargar();
     });
+
+    // Primera carga, diferida hasta que la pestaña esté seleccionada —
+    // ver el comentario de _yaCargoInicial. Cubre también el salto
+    // directo a esta pestaña desde una notificación (deep_link_listener
+    // escribe el índice 3 en el mismo provider).
+    if (!_yaCargoInicial && ref.watch(profesionalTabIndexProvider) == 3) {
+      _yaCargoInicial = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _cargar();
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(t.centroPagosTitulo)),
