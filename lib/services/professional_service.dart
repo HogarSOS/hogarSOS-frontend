@@ -163,7 +163,35 @@ class MiPerfilProfesional {
 class ProfessionalService {
   final _api = ApiService.instance.client;
 
-  Future<MiPerfilProfesional> obtenerMiPerfil() async {
+  /// Petición GET /professionals/me actualmente en vuelo, si la hay —
+  /// ver obtenerMiPerfil().
+  static Future<MiPerfilProfesional>? _miPerfilEnVuelo;
+
+  /// Con deduplicación de llamadas SIMULTÁNEAS (single-flight): al abrir
+  /// la app del profesional, el IndexedStack del shell monta las 4
+  /// pestañas de golpe y DisponibilidadNotifier (constructor) y
+  /// MiPerfilProfesionalScreen (initState) disparaban cada uno su propio
+  /// GET /professionals/me en el mismo frame — dos peticiones idénticas
+  /// al endpoint, que además era el más caro del arranque (auditoría de
+  /// escalabilidad 2026-08-17). Si ya hay una en vuelo, ambas comparten
+  /// la misma respuesta.
+  ///
+  /// SOLO deduplica llamadas concurrentes — no hay caché por tiempo: en
+  /// cuanto la petición termina, la siguiente llamada vuelve a ir a la
+  /// red. Así ningún refresco posterior (tras editar el perfil, cambiar
+  /// disponibilidad, volver de Stripe...) puede recibir datos rancios.
+  Future<MiPerfilProfesional> obtenerMiPerfil() {
+    final enVuelo = _miPerfilEnVuelo;
+    if (enVuelo != null) return enVuelo;
+
+    final peticion = _obtenerMiPerfilReal().whenComplete(() {
+      _miPerfilEnVuelo = null;
+    });
+    _miPerfilEnVuelo = peticion;
+    return peticion;
+  }
+
+  Future<MiPerfilProfesional> _obtenerMiPerfilReal() async {
     final respuesta = await _api.get('/professionals/me');
     return MiPerfilProfesional.fromJson(respuesta.data as Map<String, dynamic>);
   }
