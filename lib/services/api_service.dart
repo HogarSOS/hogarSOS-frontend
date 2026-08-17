@@ -94,9 +94,21 @@ class ApiService {
 
   Dio get client => _dio;
 
+  /// Refresh actualmente en vuelo, si lo hay — ver intentarRefrescarToken().
+  Future<bool>? _refreshEnVuelo;
+
   /// Público a propósito: auth_service.dart lo reutiliza para restaurar
   /// la sesión al arrancar en frío, en vez de duplicar esta lógica de
   /// llamada al endpoint de refresh.
+  ///
+  /// Con deduplicación de llamadas simultáneas (single-flight): al volver
+  /// la app a primer plano tras >15 min en segundo plano, TODOS los
+  /// sondeos que se recargan a la vez (assigned/mine del shell,
+  /// nearby/list de Solicitudes...) reciben 401 en el mismo instante y
+  /// cada uno pedía SU PROPIO refresh en paralelo — varios POST
+  /// /auth/refresh idénticos justo en el momento de más carga (auditoría
+  /// de escalabilidad 2026-08-17). Ahora la primera llamada hace el
+  /// refresh real y las demás esperan ese mismo resultado.
   ///
   /// Solo borra los tokens guardados cuando el SERVIDOR rechaza
   /// explícitamente el refresh token (401/403 — está caducado o
@@ -105,7 +117,18 @@ class ApiService {
   /// y se devuelve false sin más: antes cualquier fallo de red aquí
   /// borraba la sesión, así que reabrir la app sin conexión momentánea
   /// mandaba al login aunque el refresh token siguiera siendo válido.
-  Future<bool> intentarRefrescarToken() async {
+  Future<bool> intentarRefrescarToken() {
+    final enVuelo = _refreshEnVuelo;
+    if (enVuelo != null) return enVuelo;
+
+    final peticion = _refrescarTokenReal().whenComplete(() {
+      _refreshEnVuelo = null;
+    });
+    _refreshEnVuelo = peticion;
+    return peticion;
+  }
+
+  Future<bool> _refrescarTokenReal() async {
     final refreshToken = await TokenStorage.instance.getRefreshToken();
     if (refreshToken == null) return false;
 
