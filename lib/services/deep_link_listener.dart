@@ -295,6 +295,14 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
           // la tarjeta "Tienes X trabajos activos" de Solicitudes.
           navigator.push(MaterialPageRoute(builder: (_) => const TrabajosActivosProfesionalScreen()));
           break;
+        case DestinoNotificacionProfesional.centroPagos:
+          // pago_autorizado → pestaña Pagos (índice 3). Mismo doble
+          // write que el caso "solicitudes" de arriba y que el retorno
+          // de Stripe Connect: directo para el shell ya estable,
+          // pendiente como red de seguridad del arranque en frío.
+          ref.read(pendingProfesionalTabRequestProvider.notifier).state = 3;
+          ref.read(profesionalTabIndexProvider.notifier).state = 3;
+          break;
       }
     }
   }

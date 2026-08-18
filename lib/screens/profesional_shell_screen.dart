@@ -84,12 +84,17 @@ int contarTrabajosNuevosSinVer(List<AssignedRequest> trabajos, Set<String> visto
 /// "trabajo activo" ya no es una pestaña, así que estos tipos pasan a
 /// EMPUJAR TrabajosActivosProfesionalScreen en vez de cambiar de índice
 /// (ver deep_link_listener.dart, que hace ese push).
-enum DestinoNotificacionProfesional { solicitudes, trabajosActivos }
+/// 'pago_autorizado' (E2E 2026-08-18): habla de dinero, no de tarea — el
+/// profesional que lo toca espera ver el importe retenido, y eso vive en
+/// el Centro de Pagos (pestaña 3), no en la lista de trabajos. Los
+/// avisos de caducidad NO van ahí: su acción es cerrar el trabajo, que
+/// sí vive en Trabajos activos.
+enum DestinoNotificacionProfesional { solicitudes, trabajosActivos, centroPagos }
 
 DestinoNotificacionProfesional resolverDestinoNotificacionProfesional(String? tipo) {
-  return tipo == 'nueva_solicitud'
-      ? DestinoNotificacionProfesional.solicitudes
-      : DestinoNotificacionProfesional.trabajosActivos;
+  if (tipo == 'nueva_solicitud') return DestinoNotificacionProfesional.solicitudes;
+  if (tipo == 'pago_autorizado') return DestinoNotificacionProfesional.centroPagos;
+  return DestinoNotificacionProfesional.trabajosActivos;
 }
 
 /// Contenedor de navegación inferior del profesional — el mismo patrón

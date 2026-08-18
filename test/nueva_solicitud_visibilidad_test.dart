@@ -80,6 +80,10 @@ void main() {
       expect(resolverDestinoNotificacionProfesional('ampliacion_rechazada'), DestinoNotificacionProfesional.trabajosActivos);
     });
 
+    test('pago_autorizado → Centro de Pagos (E2E 2026-08-18: habla de dinero, no de tarea)', () {
+      expect(resolverDestinoNotificacionProfesional('pago_autorizado'), DestinoNotificacionProfesional.centroPagos);
+    });
+
     test('tipo desconocido o null → Trabajos activos por defecto (comportamiento previo intacto)', () {
       expect(resolverDestinoNotificacionProfesional(null), DestinoNotificacionProfesional.trabajosActivos);
       expect(resolverDestinoNotificacionProfesional('algo_no_mapeado'), DestinoNotificacionProfesional.trabajosActivos);
