@@ -231,9 +231,19 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
       if (rutaActual == ruta) {
         return; // ya está viendo ese chat
       }
+      // El título de la notificación de chat ES el nombre de quien
+      // escribe (ver notifyChatMessage en el backend), es decir, la
+      // contraparte desde el punto de vista de quien recibe — así el
+      // AppBar del chat abierto desde la notificación muestra el nombre
+      // en vez del genérico "Chat". `notification` puede ser null en la
+      // vía nativa de iOS (solo data), y ahí ChatScreen cae con gracia
+      // al título genérico, igual que antes.
       navigator.push(MaterialPageRoute(
         settings: RouteSettings(name: ruta),
-        builder: (_) => ChatScreen(serviceRequestId: solicitudId),
+        builder: (_) => ChatScreen(
+          serviceRequestId: solicitudId,
+          nombreContraparte: mensaje.notification?.title,
+        ),
       ));
       return;
     }
