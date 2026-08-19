@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
 import 'api_service.dart';
 import 'installation_id_service.dart';
+import 'notification_service.dart';
 import 'token_storage.dart';
 
 class AuthResult {
@@ -352,6 +353,11 @@ class AuthService {
     } catch (e) {
       debugPrint('[AuthService] Fallo al revocar la sesión en el backend (logout local continúa): $e');
     }
+    // Aunque la revocación en el backend haya fallado (p. ej. access token
+    // caducado → 401, que corta antes de borrar el UserFcmToken de este
+    // dispositivo), invalida el token FCM en el propio aparato para dejar
+    // de recibir push de inmediato. Ver NotificationService.desregistrarTokenLocal().
+    await NotificationService.instance.desregistrarTokenLocal();
     await _firebaseAuth.signOut();
     await TokenStorage.instance.clear();
   }

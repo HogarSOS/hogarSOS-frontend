@@ -184,6 +184,28 @@ class NotificationService with WidgetsBindingObserver {
     }
   }
 
+  /// Al cerrar sesión: invalida el token FCM en ESTE dispositivo para que
+  /// deje de recibir push de inmediato, aunque la llamada a /auth/logout
+  /// falle (p. ej. token de acceso ya caducado → 401, que corta en el
+  /// authMiddleware antes de que el backend borre su UserFcmToken). Con el
+  /// token borrado en el aparato, el próximo envío del servidor a esa fila
+  /// muerta falla con "unregistered" y notification.service la autolimpia.
+  /// Cancela primero la suscripción de rotación: deleteToken() hace que
+  /// Firebase genere un token nuevo y dispare onTokenRefresh, y no queremos
+  /// re-registrarlo en una sesión ya cerrada. Best-effort — un fallo aquí
+  /// nunca debe impedir cerrar sesión; al reloguear, registrarToken() pide
+  /// y registra un token nuevo.
+  Future<void> desregistrarTokenLocal() async {
+    await _tokenRefreshSub?.cancel();
+    _tokenRefreshSub = null;
+    try {
+      await _messaging.deleteToken();
+      debugPrint('[NotificationService] Token FCM borrado del dispositivo (logout)');
+    } catch (e) {
+      debugPrint('[NotificationService] Error al borrar el token FCM en logout: $e');
+    }
+  }
+
   /// Mismo idioma que resuelve MaterialApp en main.dart: de los dos
   /// soportados (es/en), 'en' solo si el idioma del sistema es
   /// inglés, 'es' en cualquier otro caso (incluido el propio 'es') —
