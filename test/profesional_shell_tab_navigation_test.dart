@@ -48,9 +48,14 @@ void _aplicarNotificacion(ProviderContainer container, int pestanaDestino) {
 /// quedó una pendiente sin consumir (la notificación llegó con el shell
 /// ya estable, así que solo hizo falta el write directo), se limpia al
 /// destruirse — para que un logout/login posterior en la MISMA ejecución
-/// de la app no la herede.
+/// de la app no la herede. Y desde el bug real del 2026-08-22, también
+/// restablece la pestaña activa a 0: sin eso, una sesión que terminó en
+/// Pagos (índice 3) hacía que el PRIMER FOTOGRAMA del shell de la cuenta
+/// siguiente pintara Pagos heredado (y el Centro de Pagos disparara su
+/// carga) antes de que el reset del postFrameCallback llegara.
 void _destruirElShell(ProviderContainer container) {
   container.read(pendingProfesionalTabRequestProvider.notifier).state = null;
+  container.read(profesionalTabIndexProvider.notifier).state = 0;
 }
 
 void main() {
@@ -158,6 +163,45 @@ void main() {
       // 1 y saltaría a Trabajos sin motivo.
       _aplicarMontajeDelShell(container, pestanaInicial: 0);
       expect(container.read(profesionalTabIndexProvider), 0);
+    });
+
+    test(
+        'bug real 2026-08-22: cuenta A termina en Pagos → logout → cuenta B monta directamente en Perfil, sin heredar Pagos ni un fotograma',
+        () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      // Cuenta A: monta y navega a Pagos (índice 3) — p.ej. mirando su
+      // Centro de Pagos, o tras el retorno de Stripe.
+      _aplicarMontajeDelShell(container, pestanaInicial: 0);
+      container.read(profesionalTabIndexProvider.notifier).state = 3;
+      expect(container.read(profesionalTabIndexProvider), 3);
+
+      // Logout: el shell de A se destruye.
+      _destruirElShell(container);
+
+      // CLAVE del bug: el índice debe estar YA en 0 ANTES de que el
+      // shell de B monte — el primer fotograma del IndexedStack usa este
+      // valor tal cual, y con 3 heredado pintaba Pagos y el Centro de
+      // Pagos lanzaba /payments/me/summary para la cuenta nueva.
+      expect(container.read(profesionalTabIndexProvider), 0);
+
+      // Cuenta B monta con normalidad → Perfil.
+      _aplicarMontajeDelShell(container, pestanaInicial: 0);
+      expect(container.read(profesionalTabIndexProvider), 0);
+      expect(container.read(pendingProfesionalTabRequestProvider), isNull);
+    });
+
+    test('el retorno de Stripe DENTRO de una sesión sigue aterrizando en Pagos (el reset solo aplica al cierre de sesión)', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      _aplicarMontajeDelShell(container, pestanaInicial: 0);
+      // deep_link_listener al procesar hogarsos://stripe-return escribe
+      // ambos providers con 3 — idéntico a _aplicarNotificacion(3).
+      _aplicarNotificacion(container, 3);
+
+      expect(container.read(profesionalTabIndexProvider), 3);
     });
   });
 }

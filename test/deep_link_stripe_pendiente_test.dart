@@ -59,6 +59,10 @@ void _reintentarDeepLinkPendiente(
   ProviderContainer container, {
   required bool restaurando,
   required UserRole? rolUsuario,
+  // Estado de verificación conocido en el instante del retorno (lo que
+  // el widget lee de disponibilidadProvider.valueOrNull) — `true`
+  // replica al profesional YA aprobado que volvía de editar su cuenta.
+  bool? estaVerificado,
 }) {
   final uri = container.read(pendingStripeReturnLinkProvider);
   if (uri == null) return;
@@ -74,8 +78,9 @@ void _reintentarDeepLinkPendiente(
   // se omite aquí a propósito: lo relevante para este bug es la
   // navegación de pestaña y el contador de evento, no ese side-effect
   // (que además se traga sus propios errores, ver disponibilidad_provider.dart).
-  container.read(pendingProfesionalTabRequestProvider.notifier).state = 3;
-  container.read(profesionalTabIndexProvider.notifier).state = 3;
+  final destino = pestanaTrasRetornoStripe(estaVerificado: estaVerificado);
+  container.read(pendingProfesionalTabRequestProvider.notifier).state = destino;
+  container.read(profesionalTabIndexProvider.notifier).state = destino;
 }
 
 /// Replica exactamente lo que hace ProfesionalShellScreen.initState() en
@@ -99,9 +104,11 @@ void _recibirDeepLink(
   Uri uri, {
   required bool restaurando,
   required UserRole? rolUsuario,
+  bool? estaVerificado,
 }) {
   container.read(pendingStripeReturnLinkProvider.notifier).state = uri;
-  _reintentarDeepLinkPendiente(container, restaurando: restaurando, rolUsuario: rolUsuario);
+  _reintentarDeepLinkPendiente(container,
+      restaurando: restaurando, rolUsuario: rolUsuario, estaVerificado: estaVerificado);
 }
 
 final _uriCompletado = Uri.parse('hogarsos://stripe-return/completado');
@@ -142,12 +149,41 @@ void main() {
     });
   });
 
+  group('pestanaTrasRetornoStripe (destino según estado del alta, 2026-08-22)', () {
+    test('alta en curso (no aprobado) → Perfil (0): ahí siguen el wizard y "Activarme ahora"', () {
+      expect(pestanaTrasRetornoStripe(estaVerificado: false), 0);
+    });
+
+    test('estado desconocido → Perfil (0): equivocarse hacia Perfil es inofensivo', () {
+      expect(pestanaTrasRetornoStripe(estaVerificado: null), 0);
+    });
+
+    test('ya aprobado (volvía de editar su cuenta) → Pagos (3), como siempre', () {
+      expect(pestanaTrasRetornoStripe(estaVerificado: true), 3);
+    });
+
+    test('e2e: retorno de Stripe con el alta en curso aterriza en Perfil, no en Pagos', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      _recibirDeepLink(container, _uriCompletado,
+          restaurando: false, rolUsuario: UserRole.profesional, estaVerificado: false);
+
+      expect(container.read(profesionalTabIndexProvider), 0);
+      expect(container.read(pendingProfesionalTabRequestProvider), 0);
+      expect(container.read(stripeReturnEventProvider), 1, reason: 'el refresco del estado se dispara igual');
+      expect(container.read(pendingStripeReturnLinkProvider), isNull);
+    });
+  });
+
   group('pendingStripeReturnLinkProvider (contrato end-to-end, cold start real)', () {
     test('app caliente (restaurando ya en false, profesional logueado) → navega en el acto', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      _recibirDeepLink(container, _uriCompletado, restaurando: false, rolUsuario: UserRole.profesional);
+      // Profesional YA aprobado (volvía de "Editar cuenta de cobro").
+      _recibirDeepLink(container, _uriCompletado,
+          restaurando: false, rolUsuario: UserRole.profesional, estaVerificado: true);
 
       expect(container.read(profesionalTabIndexProvider), 3);
       expect(container.read(stripeReturnEventProvider), 1);
@@ -176,7 +212,8 @@ void main() {
 
       // authProvider termina de restaurar la sesión con un profesional —
       // build() vería restaurando pasar a false y llamaría al reintento.
-      _reintentarDeepLinkPendiente(container, restaurando: false, rolUsuario: UserRole.profesional);
+      _reintentarDeepLinkPendiente(container,
+          restaurando: false, rolUsuario: UserRole.profesional, estaVerificado: true);
 
       expect(container.read(profesionalTabIndexProvider), 3);
       expect(container.read(stripeReturnEventProvider), 1);
@@ -194,7 +231,8 @@ void main() {
 
       // authProvider termina de restaurar — el reintento navega y deja
       // pendingProfesionalTabRequestProvider=3 como red de seguridad.
-      _reintentarDeepLinkPendiente(container, restaurando: false, rolUsuario: UserRole.profesional);
+      _reintentarDeepLinkPendiente(container,
+          restaurando: false, rolUsuario: UserRole.profesional, estaVerificado: true);
       expect(container.read(profesionalTabIndexProvider), 3);
 
       // Justo después (mismo cold start), ProfesionalShellScreen termina
@@ -254,7 +292,8 @@ void main() {
       _recibirDeepLink(container, _uriRefresh, restaurando: true, rolUsuario: null);
       expect(container.read(pendingStripeReturnLinkProvider), _uriRefresh, reason: 'sin cola: el segundo reemplaza al primero');
 
-      _reintentarDeepLinkPendiente(container, restaurando: false, rolUsuario: UserRole.profesional);
+      _reintentarDeepLinkPendiente(container,
+          restaurando: false, rolUsuario: UserRole.profesional, estaVerificado: true);
 
       expect(container.read(profesionalTabIndexProvider), 3);
       expect(container.read(stripeReturnEventProvider), 1, reason: 'una sola aplicación, no dos');

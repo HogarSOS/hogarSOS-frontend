@@ -2324,6 +2324,120 @@ abstract class AppLocalizations {
   /// **'El resto de cambios sí se han guardado.'**
   String get infoProfRestoGuardado;
 
+  /// No description provided for @infoProfComoTrabajas.
+  ///
+  /// In es, this message translates to:
+  /// **'Cómo trabajas'**
+  String get infoProfComoTrabajas;
+
+  /// No description provided for @infoProfSinIndicar.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin indicar'**
+  String get infoProfSinIndicar;
+
+  /// No description provided for @infoProfTelefonoResumen.
+  ///
+  /// In es, this message translates to:
+  /// **'Teléfono: solo uso interno'**
+  String get infoProfTelefonoResumen;
+
+  /// No description provided for @infoProfPrecio.
+  ///
+  /// In es, this message translates to:
+  /// **'Precio por hora'**
+  String get infoProfPrecio;
+
+  /// No description provided for @infoProfPrecioOpcional.
+  ///
+  /// In es, this message translates to:
+  /// **'opcional'**
+  String get infoProfPrecioOpcional;
+
+  /// No description provided for @tipoProfesionalCambioSoporte.
+  ///
+  /// In es, this message translates to:
+  /// **'Para cambiar tu tipo profesional, contacta con soporte.'**
+  String get tipoProfesionalCambioSoporte;
+
+  /// No description provided for @infoProfDescripcionContactoError.
+  ///
+  /// In es, this message translates to:
+  /// **'No puedes incluir teléfonos ni datos de contacto en la descripción. Usa la mensajería de HogarSOS para comunicarte con los clientes.'**
+  String get infoProfDescripcionContactoError;
+
+  /// No description provided for @soporteTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Ayuda y soporte'**
+  String get soporteTitulo;
+
+  /// No description provided for @soportePregunta.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Necesitas ayuda con HogarSOS?'**
+  String get soportePregunta;
+
+  /// No description provided for @soporteEmailBoton.
+  ///
+  /// In es, this message translates to:
+  /// **'Escríbenos por email'**
+  String get soporteEmailBoton;
+
+  /// No description provided for @soporteWhatsappBoton.
+  ///
+  /// In es, this message translates to:
+  /// **'Escríbenos por WhatsApp'**
+  String get soporteWhatsappBoton;
+
+  /// No description provided for @soporteAsuntoGeneral.
+  ///
+  /// In es, this message translates to:
+  /// **'Ayuda con HogarSOS'**
+  String get soporteAsuntoGeneral;
+
+  /// No description provided for @soporteAsuntoTipoProfesional.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambio de tipo profesional'**
+  String get soporteAsuntoTipoProfesional;
+
+  /// No description provided for @soporteWhatsappGeneral.
+  ///
+  /// In es, this message translates to:
+  /// **'Hola, necesito ayuda con HogarSOS.'**
+  String get soporteWhatsappGeneral;
+
+  /// No description provided for @soporteWhatsappTipoProfesional.
+  ///
+  /// In es, this message translates to:
+  /// **'Hola, necesito ayuda con el cambio de tipo profesional en HogarSOS.'**
+  String get soporteWhatsappTipoProfesional;
+
+  /// No description provided for @soporteMotivoTipoProfesional.
+  ///
+  /// In es, this message translates to:
+  /// **'Motivo: cambio de tipo profesional'**
+  String get soporteMotivoTipoProfesional;
+
+  /// No description provided for @soporteCopiar.
+  ///
+  /// In es, this message translates to:
+  /// **'Copiar'**
+  String get soporteCopiar;
+
+  /// No description provided for @soporteEmailCopiado.
+  ///
+  /// In es, this message translates to:
+  /// **'Email copiado'**
+  String get soporteEmailCopiado;
+
+  /// No description provided for @soporteErrorAbrir.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo abrir. Copia el email y escríbenos.'**
+  String get soporteErrorAbrir;
+
   /// No description provided for @disponibilidadCompletarPerfil.
   ///
   /// In es, this message translates to:
@@ -2693,14 +2807,20 @@ abstract class AppLocalizations {
   /// No description provided for @tipoProfesionalPersonaFisicaDesc.
   ///
   /// In es, this message translates to:
-  /// **'Trabajo de forma ocasional, sin estar dado de alta como autónomo.'**
+  /// **'Realizo trabajos de forma puntual o esporádica, no como actividad profesional habitual.'**
   String get tipoProfesionalPersonaFisicaDesc;
 
-  /// No description provided for @tipoProfesionalAyudaDuda.
+  /// No description provided for @tipoProfesionalDeclaracionParticular.
   ///
   /// In es, this message translates to:
-  /// **'¿No estás seguro? La mayoría de profesionales son autónomos.'**
-  String get tipoProfesionalAyudaDuda;
+  /// **'Entiendo y acepto que soy responsable de cumplir las obligaciones legales, fiscales y de Seguridad Social que correspondan a mi actividad.'**
+  String get tipoProfesionalDeclaracionParticular;
+
+  /// No description provided for @tipoProfesionalAvisoLegal.
+  ///
+  /// In es, this message translates to:
+  /// **'⚠️ Importante: antes de aceptar trabajos, asegúrate de que tu situación fiscal y laboral te permite realizar esta actividad legalmente. HogarSOS actúa únicamente como plataforma de intermediación: no determina tu obligación de estar dado de alta ni ofrece asesoramiento fiscal o legal.'**
+  String get tipoProfesionalAvisoLegal;
 
   /// No description provided for @altaTitulo.
   ///
@@ -3053,7 +3173,7 @@ abstract class AppLocalizations {
   /// No description provided for @cuentaCobroBotonEditar.
   ///
   /// In es, this message translates to:
-  /// **'Editar cuenta de cobro'**
+  /// **'Modificar cuenta de cobro'**
   String get cuentaCobroBotonEditar;
 
   /// No description provided for @cuentaCobroErrorAbrir.

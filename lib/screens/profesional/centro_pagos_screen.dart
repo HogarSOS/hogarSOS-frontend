@@ -274,6 +274,33 @@ class _TarjetaCuentaCobro extends StatelessWidget {
                 label: Text(requiereActualizacion ? t.cuentaCobroBotonActualizar : t.cuentaCobroBotonConfigurar),
               ),
             ),
+          ] else ...[
+            // Acción visible para el aprobado (ajuste 2026-08-22): tras
+            // sacar la tarjeta de Stripe de Mi perfil, esta es la ÚNICA
+            // puerta de edición post-alta — reutiliza EXACTAMENTE el
+            // flujo existente (onConfigurar → account_onboarding de
+            // Stripe, ver BUG 003).
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: cargando ? null : onConfigurar,
+                style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 13)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (cargando)
+                      const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                    else
+                      const Icon(Icons.edit_outlined, size: 17),
+                    const SizedBox(width: 8),
+                    Text(t.cuentaCobroBotonEditar, style: const TextStyle(fontWeight: FontWeight.w700)),
+                    const SizedBox(width: 6),
+                    const Icon(Icons.arrow_forward, size: 16),
+                  ],
+                ),
+              ),
+            ),
           ],
         ],
       ),

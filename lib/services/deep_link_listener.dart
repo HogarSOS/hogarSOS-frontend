@@ -42,6 +42,20 @@ DecisionDeepLinkStripe resolverDeepLinkStripePendiente({
   return DecisionDeepLinkStripe.procesar;
 }
 
+/// A qué pestaña aterriza el retorno del onboarding de Stripe (ajuste
+/// del 2026-08-22, tras el rediseño del alta):
+/// - Alta EN CURSO (aún no aprobado, o estado desconocido) → Perfil (0):
+///   la continuación natural es el wizard "Completa tu alta", que ahí
+///   mismo muestra la aprobación y el botón "Activarme ahora". Antes se
+///   aterrizaba en Pagos (decisión del 2026-08-18, previa al wizard) y
+///   el recién llegado tenía que volver a Perfil a mano para activarse.
+/// - Ya APROBADO (volvió de "Editar cuenta de cobro") → Pagos (3), como
+///   siempre: ahí está el estado de su cuenta, saldos e historial.
+/// Pura, para testear el contrato sin montar el listener.
+int pestanaTrasRetornoStripe({required bool? estaVerificado}) {
+  return estaVerificado == true ? 3 : 0;
+}
+
 /// Envuelve el `home` de la app para escuchar dos cosas que llegan desde
 /// fuera de una pantalla concreta, sin BuildContext propio:
 ///
@@ -158,8 +172,19 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
     // Escribir ambos, sin delay, hace que el resultado final sea el
     // mismo sea cual sea el orden real de ejecución — ver
     // profesional_shell_screen.dart.
-    ref.read(pendingProfesionalTabRequestProvider.notifier).state = 3;
-    ref.read(profesionalTabIndexProvider.notifier).state = 3;
+    //
+    // El destino depende del estado de verificación YA cargado en el
+    // provider (lectura síncrona; el cargar() de arriba refresca en
+    // paralelo pero no hace falta esperarlo): alta en curso → Perfil
+    // (wizard, aprobación, "Activarme ahora"); ya aprobado (edición de
+    // cuenta) → Pagos, como siempre. Desconocido cuenta como en curso —
+    // equivocarse hacia Perfil es inofensivo, hacia Pagos repetía el
+    // problema original.
+    final destino = pestanaTrasRetornoStripe(
+      estaVerificado: ref.read(disponibilidadProvider).valueOrNull?.estaVerificado,
+    );
+    ref.read(pendingProfesionalTabRequestProvider.notifier).state = destino;
+    ref.read(profesionalTabIndexProvider.notifier).state = destino;
 
     final context = navigatorKey.currentContext;
     if (context == null) return;

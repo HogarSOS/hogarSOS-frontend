@@ -1330,6 +1330,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get infoProfRestoGuardado => 'The rest of your changes were saved.';
 
   @override
+  String get infoProfComoTrabajas => 'How you work';
+
+  @override
+  String get infoProfSinIndicar => 'Not set';
+
+  @override
+  String get infoProfTelefonoResumen => 'Phone: internal use only';
+
+  @override
+  String get infoProfPrecio => 'Hourly rate';
+
+  @override
+  String get infoProfPrecioOpcional => 'optional';
+
+  @override
+  String get tipoProfesionalCambioSoporte =>
+      'To change your professional type, contact support.';
+
+  @override
+  String get infoProfDescripcionContactoError =>
+      'You can\'t include phone numbers or contact details in your description. Use HogarSOS messaging to communicate with clients.';
+
+  @override
+  String get soporteTitulo => 'Help & support';
+
+  @override
+  String get soportePregunta => 'Need help with HogarSOS?';
+
+  @override
+  String get soporteEmailBoton => 'Email us';
+
+  @override
+  String get soporteWhatsappBoton => 'Message us on WhatsApp';
+
+  @override
+  String get soporteAsuntoGeneral => 'Help with HogarSOS';
+
+  @override
+  String get soporteAsuntoTipoProfesional => 'Professional type change';
+
+  @override
+  String get soporteWhatsappGeneral => 'Hi, I need help with HogarSOS.';
+
+  @override
+  String get soporteWhatsappTipoProfesional =>
+      'Hi, I need help changing my professional type in HogarSOS.';
+
+  @override
+  String get soporteMotivoTipoProfesional => 'Reason: professional type change';
+
+  @override
+  String get soporteCopiar => 'Copy';
+
+  @override
+  String get soporteEmailCopiado => 'Email copied';
+
+  @override
+  String get soporteErrorAbrir =>
+      'Couldn\'t open. Copy the email and write to us.';
+
+  @override
   String get disponibilidadCompletarPerfil => 'Complete profile';
 
   @override
@@ -1530,11 +1591,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tipoProfesionalPersonaFisicaDesc =>
-      'I work occasionally, without being registered as self-employed.';
+      'I do occasional or one-off jobs, not as a regular professional activity.';
 
   @override
-  String get tipoProfesionalAyudaDuda =>
-      'Not sure? Most professionals are self-employed.';
+  String get tipoProfesionalDeclaracionParticular =>
+      'I understand and accept that I am responsible for complying with the legal, tax and Social Security obligations that apply to my activity.';
+
+  @override
+  String get tipoProfesionalAvisoLegal =>
+      '⚠️ Important: before accepting jobs, make sure your tax and employment status allows you to carry out this activity legally. HogarSOS acts solely as an intermediary platform: it does not determine whether you are required to register, nor does it provide tax or legal advice.';
 
   @override
   String get altaTitulo => 'Complete your onboarding';
@@ -1741,7 +1806,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cuentaCobroBotonActualizar => 'Update on Stripe';
 
   @override
-  String get cuentaCobroBotonEditar => 'Edit payout account';
+  String get cuentaCobroBotonEditar => 'Modify payout account';
 
   @override
   String get cuentaCobroErrorAbrir =>

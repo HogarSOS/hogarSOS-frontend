@@ -17,6 +17,8 @@ import '../../utils/tipo_profesional_display.dart';
 import '../../widgets/eliminar_cuenta.dart';
 import '../../widgets/entrada_animada.dart';
 import '../../widgets/informacion_profesional.dart';
+import '../../widgets/selector_tipo_profesional.dart';
+import '../../widgets/soporte_sheet.dart';
 import '../../widgets/lista_opiniones.dart';
 import '../../widgets/wizard_alta.dart';
 import 'puente_stripe_screen.dart';
@@ -99,7 +101,12 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
         _perfil = perfil;
         _fotoPerfilUrlActual = perfil.fotoPerfilUrl;
         _documentoIdentidadUrlActual = perfil.documentoIdentidadUrl;
-        _tipoProfesionalSeleccionado = perfil.tipoProfesional;
+        // El del servidor manda; pero si el servidor aún no tiene tipo
+        // (se persiste solo con foto+categoría completas), un refresco
+        // NO debe pisar la elección local todavía sin enviar — sin este
+        // ??, cualquier _cargarPerfil intermedio deshacía la selección
+        // y el subpaso del wizard volvía a "pendiente" solo.
+        _tipoProfesionalSeleccionado = perfil.tipoProfesional ?? _tipoProfesionalSeleccionado;
         // tarifaBase empieza en 0 en el backend hasta el primer envío de
         // verificación — mostrarlo como "0.00" invitaría a enviarlo tal
         // cual, y el backend lo rechazaría (tarifaBase debe ser positiva).
@@ -190,6 +197,14 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
   Future<void> _editarInformacionProfesional() async {
     final t = AppLocalizations.of(context);
 
+    // El tipo queda fijado tras aprobado + Stripe operativa: el
+    // business_type de la cuenta Connect no puede seguir a un cambio
+    // (KYC congelado tras el primer Account Link) — la vía es soporte.
+    // Durante el alta se sigue cambiando desde el wizard, como siempre.
+    final tipoBloqueado = _perfil?.estadoVerificacion == 'aprobado' &&
+        _perfil?.estadoCuentaStripeDetalle == DetalleCuentaStripe.configurada;
+    final tipoActual = _perfil?.tipoProfesional;
+
     final resultado = await showModalBottomSheet<InformacionProfesionalResultado>(
       context: context,
       isScrollControlled: true,
@@ -197,6 +212,8 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
         descripcionInicial: _perfil?.descripcion ?? '',
         telefonoInicial: _perfil?.telefono ?? '',
         tarifaInicial: (_perfil?.tarifaBase ?? 0) > 0 ? _perfil!.tarifaBase : null,
+        tipoEtiqueta: tipoActual != null ? etiquetaTipoProfesional(t, tipoActual) : null,
+        tipoBloqueado: tipoBloqueado,
       ),
     );
     if (resultado == null || !mounted) return;
@@ -299,66 +316,16 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
     _intentarEnviarPerfilAlta();
   }
 
-  /// Diálogo del tipo profesional con el copy de la revisión adversarial
-  /// ("¿Cómo trabajas profesionalmente?") — pensado para entenderse sin
-  /// conocimientos fiscales: descripciones llanas y la etiqueta
-  /// "Particular" en vez de "Persona física" (el valor interno
-  /// persona_fisica en BD no cambia).
+  /// Selector del tipo profesional — rediseño 2026-08-22 (widget propio
+  /// SelectorTipoProfesional): tarjetas seleccionables con estado
+  /// visible + botón Continuar, y declaración de responsabilidad
+  /// obligatoria para "Particular". Devuelve el tipo elegido solo al
+  /// confirmar; cancelar no guarda nada. Los valores enviados al
+  /// backend (autonomo/empresa/persona_fisica) no cambian.
   Future<void> _elegirTipoProfesionalAlta() async {
-    final t = AppLocalizations.of(context);
-
     final elegido = await showDialog<TipoProfesional>(
       context: context,
-      builder: (context) {
-        final colorScheme = Theme.of(context).colorScheme;
-        return AlertDialog(
-          title: Text(t.tipoProfesionalPregunta),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (final (tipo, etiqueta, descripcion) in [
-                  (TipoProfesional.autonomo, t.tipoProfesionalAutonomo, t.tipoProfesionalAutonomoDesc),
-                  (TipoProfesional.empresa, t.tipoProfesionalEmpresa, t.tipoProfesionalEmpresaDesc),
-                  (TipoProfesional.personaFisica, t.tipoProfesionalPersonaFisica, t.tipoProfesionalPersonaFisicaDesc),
-                ])
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(context).pop(tipo),
-                      style: OutlinedButton.styleFrom(
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(etiqueta, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                          const SizedBox(height: 2),
-                          Text(
-                            descripcion,
-                            style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant, height: 1.3),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 4),
-                Text(
-                  t.tipoProfesionalAyudaDuda,
-                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant, fontStyle: FontStyle.italic),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  t.tipoProfesionalTextoLegal,
-                  style: TextStyle(fontSize: 10.5, color: colorScheme.onSurfaceVariant, height: 1.3),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      builder: (context) => SelectorTipoProfesional(seleccionInicial: _tipoProfesionalSeleccionado),
     );
 
     if (elegido == null || !mounted) return;
@@ -705,7 +672,14 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                             child: WizardAlta(
                               fotoOk: _fotoPerfilUrlActual != null,
                               categoriaOk: _categoriasActuales.isNotEmpty,
-                              tipoOk: _perfil?.tipoProfesional != null,
+                              // Cuenta también la selección local (parte
+                              // del fix del selector, 2026-08-22): el
+                              // tipo elegido se persiste vía POST
+                              // /me/verification solo cuando foto y
+                              // categoría existen — sin esto, elegir el
+                              // tipo primero no daba NINGÚN feedback y
+                              // el subpaso parecía roto.
+                              tipoOk: _tipoProfesionalSeleccionado != null || _perfil?.tipoProfesional != null,
                               aprobado: _perfil?.estadoVerificacion == 'aprobado',
                               detalle: _perfil?.estadoCuentaStripeDetalle ?? DetalleCuentaStripe.sinIniciar,
                               disponible: ref.watch(disponibilidadProvider).valueOrNull?.disponible ??
@@ -829,16 +803,22 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                       const SizedBox(height: 16),
                       EntradaAnimada(
                         retraso: const Duration(milliseconds: 150),
-                        // Sección "Información profesional" compacta:
-                        // solo la descripción visible (el único de los
-                        // tres datos que ve el cliente), resumida a 2
-                        // líneas; teléfono y tarifa se editan en la
-                        // misma hoja desde el lápiz único.
+                        // Sección "Información profesional" compacta
+                        // (ajuste 2026-08-22): cuatro filas de una
+                        // línea — tipo (público), descripción resumida
+                        // (pública), teléfono SIN número (uso interno)
+                        // y precio. Lápiz único → editor.
                         child: _TarjetaInfo(
                           icono: Icons.notes_outlined,
-                          titulo: t.miPerfilDescripcionLabel,
+                          titulo: t.infoProfTitulo,
                           onEditar: _editarInformacionProfesional,
-                          child: DescripcionResumen(descripcion: _perfil?.descripcion ?? ''),
+                          child: InformacionProfesionalResumen(
+                            tipoEtiqueta: _perfil?.tipoProfesional != null
+                                ? etiquetaTipoProfesional(t, _perfil!.tipoProfesional!)
+                                : null,
+                            descripcion: _perfil?.descripcion ?? '',
+                            tarifaBase: _perfil?.tarifaBase ?? 0,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -871,6 +851,16 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                         ),
                       ),
                       const SizedBox(height: 24),
+                      // Centro de ayuda (auditoría 2026-08-22): primera
+                      // fila de la zona inferior, por encima de los
+                      // legales y bien separada de Cerrar sesión /
+                      // Eliminar cuenta. Mismo componente que el perfil
+                      // del cliente.
+                      EntradaAnimada(
+                        retraso: const Duration(milliseconds: 280),
+                        child: const FilaAyudaSoporte(),
+                      ),
+                      const SizedBox(height: 4),
                       EntradaAnimada(
                         retraso: const Duration(milliseconds: 290),
                         child: Center(

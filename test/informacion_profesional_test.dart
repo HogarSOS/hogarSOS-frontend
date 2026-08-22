@@ -147,6 +147,67 @@ void main() {
         home: Scaffold(body: child),
       );
 
+  group('contieneContactoExterno — la descripción pública no admite contactos', () {
+    for (final texto in [
+      'Puedes llamarme al 612 345 678',
+      'Tel 612-34-56-78',
+      '+34612345678',
+      'Escríbeme por WhatsApp',
+      'estoy en telegram',
+      'wa.me/34612345678',
+      'mi correo es paco@example.com',
+    ]) {
+      test('detecta: $texto', () => expect(contieneContactoExterno(texto), isTrue));
+    }
+
+    for (final texto in [
+      'Fontanero con 10 años de experiencia en calderas.',
+      'Servicio 24h, presupuestos desde 15€.',
+      'Trabajo en la zona centro desde 1998, Calle Mayor 123.',
+    ]) {
+      test('sin falso positivo: $texto', () => expect(contieneContactoExterno(texto), isFalse));
+    }
+  });
+
+  group('InformacionProfesionalResumen', () {
+    testWidgets('muestra tipo, descripción, teléfono SIN número y precio', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('es'),
+        home: const Scaffold(
+          body: InformacionProfesionalResumen(
+            tipoEtiqueta: 'Autónomo',
+            descripcion: 'Fontanero con experiencia',
+            tarifaBase: 25,
+          ),
+        ),
+      ));
+
+      expect(find.textContaining('Autónomo'), findsOneWidget);
+      expect(find.textContaining('Fontanero con experiencia'), findsOneWidget);
+      expect(find.text('Teléfono: solo uso interno'), findsOneWidget);
+      expect(find.textContaining('25.00 €/h'), findsOneWidget);
+      // Jamás un número de teléfono en la vista principal.
+      expect(find.textContaining('6'), findsNothing);
+    });
+
+    testWidgets('sin datos → Sin indicar / CTA de descripción / opcional', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('es'),
+        home: const Scaffold(
+          body: InformacionProfesionalResumen(tipoEtiqueta: null, descripcion: '', tarifaBase: 0),
+        ),
+      ));
+
+      expect(find.textContaining('Sin indicar'), findsOneWidget);
+      expect(find.textContaining('Añade una breve descripción'), findsOneWidget);
+      expect(find.textContaining('opcional'), findsOneWidget);
+    });
+  });
+
   group('DescripcionResumen', () {
     testWidgets('descripción vacía → llamada a completarla', (tester) async {
       await tester.pumpWidget(envolver(const DescripcionResumen(descripcion: '')));
@@ -207,6 +268,60 @@ void main() {
       expect(resultado!.descripcion, 'Desc nueva');
       expect(resultado!.telefono, '+34699888777');
       expect(resultado!.tarifa, 45.50);
+    });
+
+    testWidgets('descripción con teléfono → error en línea, la hoja NO se cierra y el texto NO se borra', (tester) async {
+      await tester.pumpWidget(envolver(Builder(
+        builder: (context) => FilledButton(
+          onPressed: () => showModalBottomSheet<InformacionProfesionalResultado>(
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => const EditorInformacionProfesional(
+              descripcionInicial: '',
+              telefonoInicial: '',
+              tarifaInicial: null,
+            ),
+          ),
+          child: const Text('abrir'),
+        ),
+      )));
+
+      await tester.tap(find.text('abrir'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).first, 'Llámame al 612 345 678');
+      await tester.tap(find.text('Guardar cambios'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Información profesional'), findsOneWidget); // sigue abierta
+      expect(find.textContaining('No puedes incluir teléfonos'), findsOneWidget);
+      expect(find.text('Llámame al 612 345 678'), findsOneWidget); // el texto no se borra
+    });
+
+    testWidgets('tipo bloqueado (aprobado + Stripe) → fila informativa con la vía de soporte', (tester) async {
+      await tester.pumpWidget(envolver(Builder(
+        builder: (context) => FilledButton(
+          onPressed: () => showModalBottomSheet<InformacionProfesionalResultado>(
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => const EditorInformacionProfesional(
+              descripcionInicial: '',
+              telefonoInicial: '',
+              tarifaInicial: null,
+              tipoEtiqueta: 'Autónomo',
+              tipoBloqueado: true,
+            ),
+          ),
+          child: const Text('abrir'),
+        ),
+      )));
+
+      await tester.tap(find.text('abrir'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Cómo trabajas'), findsOneWidget);
+      expect(find.text('Autónomo'), findsOneWidget);
+      expect(find.text('Para cambiar tu tipo profesional, contacta con soporte.'), findsOneWidget);
     });
 
     testWidgets('tarifa no numérica → error en línea y la hoja NO se cierra', (tester) async {

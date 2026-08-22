@@ -407,35 +407,48 @@ class _SubPaso extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return InkWell(
-      onTap: hecho ? null : onTap,
-      borderRadius: BorderRadius.circular(8),
-      // Variante desplegable (accesibilidad 2026-08-22): con el bloque
-      // abierto, cada subpaso garantiza una zona táctil de ≥44dp de alto
-      // SIN agrandar el texto — pensado para dedos grandes y personas
-      // mayores. La altura extra solo existe mientras está desplegado.
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 44),
-        child: Row(
-          children: [
-            Icon(
-              hecho ? Icons.check : Icons.arrow_forward,
-              size: 15,
-              color: hecho ? const Color(0xFF1EA672) : colorScheme.primary,
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                texto,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  color: hecho ? colorScheme.onSurfaceVariant : colorScheme.primary,
-                  fontWeight: hecho ? FontWeight.w400 : FontWeight.w600,
-                  decoration: hecho ? TextDecoration.lineThrough : null,
-                ),
+    // Revisión de accesibilidad (3ª ronda, 2026-08-22): los subpasos son
+    // LAS acciones del alta y deben percibirse como botones, no como
+    // tres líneas de texto — fila de ~50dp con fondo tenue, flecha
+    // grande y texto a 16 seminegrita, pensada para personas mayores o
+    // con dedos grandes. Solo existe con la tarjeta DESPLEGADA (plegada
+    // queda el resumen compacto de siempre). Un subpaso ya hecho deja de
+    // ser acción: pierde el fondo y queda tachado y atenuado.
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Material(
+        color: hecho ? Colors.transparent : colorScheme.primary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: hecho ? null : onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 50),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Row(
+                children: [
+                  Icon(
+                    hecho ? Icons.check : Icons.arrow_forward,
+                    size: hecho ? 16 : 19,
+                    color: hecho ? const Color(0xFF1EA672) : colorScheme.primary,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      texto,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: hecho ? colorScheme.onSurfaceVariant : colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                        decoration: hecho ? TextDecoration.lineThrough : null,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -314,6 +314,16 @@ class _ProfesionalShellScreenState extends ConsumerState<ProfesionalShellScreen>
     // de una notificación de la sesión ANTERIOR, que ya no tiene nada
     // que ver con esta.
     ref.read(pendingProfesionalTabRequestProvider.notifier).state = null;
+    // Y la pestaña activa, por el mismo motivo (bug real 2026-08-22):
+    // profesionalTabIndexProvider es global y sobrevivía al cambio de
+    // cuenta — si la sesión anterior terminó en Pagos (índice 3), el
+    // shell de la cuenta SIGUIENTE pintaba su primer fotograma con
+    // Pagos heredado (y el Centro de Pagos disparaba su carga) antes de
+    // que el reset del postFrameCallback llegara. Restablecer aquí solo
+    // afecta al cierre/cambio de sesión: el retorno de Stripe y las
+    // notificaciones (que escriben índice + pendiente con el shell ya
+    // montado o montándose) siguen aterrizando en su pestaña.
+    ref.read(profesionalTabIndexProvider.notifier).state = 0;
     super.dispose();
   }
 

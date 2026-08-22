@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../config/soporte.dart';
 import '../l10n/app_localizations.dart';
+import 'soporte_sheet.dart';
 
 /// Sección "Información profesional" (simplificación de Mi perfil,
 /// 2026-08-22): descripción + teléfono + precio por hora dejan de ser
@@ -13,6 +15,23 @@ import '../l10n/app_localizations.dart';
 /// PATCH /professionals/me/profile. El guardado envía SOLO lo que
 /// cambió y, si un endpoint falla, el mensaje dice exactamente qué se
 /// guardó y qué no (ver componerMensajeGuardadoInfoProfesional).
+
+/// Detección de datos de contacto externo en la DESCRIPCIÓN pública
+/// (ajuste 2026-08-22): la ve el cliente antes de contratar — sin
+/// teléfonos, WhatsApp/Telegram ni emails; la comunicación va por la
+/// mensajería de HogarSOS. El campo Teléfono del editor NO pasa por
+/// aquí (es interno y legítimo). Réplica exacta del criterio del
+/// backend (utils/descripcionSinContacto.ts), que es quien impide el
+/// bypass por API — esto solo da el feedback inmediato.
+bool contieneContactoExterno(String texto) {
+  final normalizado = texto.toLowerCase();
+
+  if (RegExp(r'(whats\s?app|wasap|guasap|telegram|t\.me/|wa\.me/)').hasMatch(normalizado)) return true;
+  if (RegExp(r'[\w.+-]+@[\w-]+\.[a-z]{2,}').hasMatch(normalizado)) return true;
+
+  final compacto = texto.replaceAll(RegExp(r'[\s.\-()]'), '');
+  return RegExp(r'\+?\d{7,}').hasMatch(compacto);
+}
 
 /// Lo que el usuario dejó escrito al pulsar Guardar en la hoja.
 class InformacionProfesionalResultado {
@@ -115,6 +134,85 @@ class DescripcionResumen extends StatelessWidget {
   }
 }
 
+/// Resumen compacto de la sección "Información profesional" en Mi
+/// perfil (ajuste 2026-08-22): cuatro filas de una línea. El teléfono
+/// aparece SIN el número (solo uso interno de HogarSOS — el número se
+/// ve únicamente dentro del editor y el cliente jamás lo recibe, con
+/// test de backend que lo fija). El tipo profesional sí es público.
+class InformacionProfesionalResumen extends StatelessWidget {
+  const InformacionProfesionalResumen({
+    super.key,
+    required this.tipoEtiqueta,
+    required this.descripcion,
+    required this.tarifaBase,
+  });
+
+  /// Etiqueta legible del tipo (Autónomo/Empresa/Particular) o null.
+  final String? tipoEtiqueta;
+  final String descripcion;
+  final double tarifaBase;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    Widget fila(String etiqueta, String valor, {bool atenuado = false}) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 6),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$etiqueta: ',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: colorScheme.onSurfaceVariant),
+            ),
+            Expanded(
+              child: Text(
+                valor,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13.5,
+                  height: 1.3,
+                  color: atenuado ? colorScheme.onSurfaceVariant : colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final tieneDescripcion = descripcion.trim().isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        fila(t.infoProfComoTrabajas, tipoEtiqueta ?? t.infoProfSinIndicar, atenuado: tipoEtiqueta == null),
+        fila(
+          t.miPerfilDescripcionLabel,
+          tieneDescripcion ? descripcion : t.infoProfDescripcionCta,
+          atenuado: !tieneDescripcion,
+        ),
+        // Sin el número, a propósito.
+        Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Text(
+            t.infoProfTelefonoResumen,
+            style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
+          ),
+        ),
+        fila(
+          t.infoProfPrecio,
+          tarifaBase > 0 ? '${tarifaBase.toStringAsFixed(2)} €/h' : t.infoProfPrecioOpcional,
+          atenuado: tarifaBase <= 0,
+        ),
+      ],
+    );
+  }
+}
+
 /// Hoja de edición "Información profesional" — tres campos
 /// independientes con sus validaciones de siempre. Solo recoge valores
 /// y valida en local; el guardado (y sus dos endpoints) es del llamador.
@@ -124,6 +222,8 @@ class EditorInformacionProfesional extends StatefulWidget {
     required this.descripcionInicial,
     required this.telefonoInicial,
     required this.tarifaInicial,
+    this.tipoEtiqueta,
+    this.tipoBloqueado = false,
   });
 
   final String descripcionInicial;
@@ -131,6 +231,16 @@ class EditorInformacionProfesional extends StatefulWidget {
 
   /// null = sin tarifa establecida.
   final double? tarifaInicial;
+
+  /// Etiqueta legible del tipo profesional actual (Autónomo/Empresa/
+  /// Particular) — SOLO informativa: el tipo se elige durante el alta
+  /// desde el wizard, no desde este editor.
+  final String? tipoEtiqueta;
+
+  /// true cuando el profesional ya está aprobado con Stripe operativa:
+  /// el tipo queda fijado (el business_type de la cuenta Connect no
+  /// puede seguir a un cambio) y se muestra la vía de soporte.
+  final bool tipoBloqueado;
 
   @override
   State<EditorInformacionProfesional> createState() => _EditorInformacionProfesionalState();
@@ -141,6 +251,7 @@ class _EditorInformacionProfesionalState extends State<EditorInformacionProfesio
   late final TextEditingController _telefonoController;
   late final TextEditingController _tarifaController;
   String? _errorTarifa;
+  String? _errorDescripcion;
 
   @override
   void initState() {
@@ -162,6 +273,14 @@ class _EditorInformacionProfesionalState extends State<EditorInformacionProfesio
 
   void _guardar() {
     final t = AppLocalizations.of(context);
+
+    // La descripción es pública: sin teléfonos ni contactos externos.
+    // Error en línea, sin borrar el texto — el usuario corrige y sigue.
+    final descripcion = _descripcionController.text.trim();
+    if (descripcion.isNotEmpty && contieneContactoExterno(descripcion)) {
+      setState(() => _errorDescripcion = t.infoProfDescripcionContactoError);
+      return;
+    }
 
     // Tarifa: opcional, pero si se escribe algo tiene que ser un número
     // positivo (misma validación que tenía su diálogo individual).
@@ -202,12 +321,70 @@ class _EditorInformacionProfesionalState extends State<EditorInformacionProfesio
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(t.infoProfTitulo, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
+              // "Cómo trabajas" — SOLO informativo aquí: durante el alta
+              // se elige desde el wizard; una vez aprobado con Stripe
+              // operativa queda fijado (la cuenta Connect no puede
+              // seguir a un cambio de tipo) y el camino es soporte.
+              if (widget.tipoEtiqueta != null || widget.tipoBloqueado) ...[
+                Row(
+                  children: [
+                    Text(
+                      '${t.infoProfComoTrabajas}: ',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    ),
+                    Expanded(
+                      child: Text(
+                        widget.tipoEtiqueta ?? t.infoProfSinIndicar,
+                        style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+                if (widget.tipoBloqueado) ...[
+                  const SizedBox(height: 2),
+                  // Acción real, no un callejón sin salida (auditoría de
+                  // soporte 2026-08-22): abre el centro de ayuda con el
+                  // contexto ya preparado — el usuario no tiene que ir a
+                  // buscar el soporte a mano. Fila completa pulsable.
+                  InkWell(
+                    onTap: () => mostrarSoporte(context, contexto: ContextoSoporte.tipoProfesional),
+                    borderRadius: BorderRadius.circular(8),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 40),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              t.tipoProfesionalCambioSoporte,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                                height: 1.3,
+                              ),
+                            ),
+                          ),
+                          Icon(Icons.chevron_right, size: 18, color: Theme.of(context).colorScheme.primary),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+              ],
               TextField(
                 controller: _descripcionController,
                 maxLines: 4,
                 maxLength: 250,
-                decoration: InputDecoration(labelText: t.miPerfilDescripcionLabel),
+                onChanged: (_) {
+                  if (_errorDescripcion != null) setState(() => _errorDescripcion = null);
+                },
+                decoration: InputDecoration(
+                  labelText: t.miPerfilDescripcionLabel,
+                  errorText: _errorDescripcion,
+                  errorMaxLines: 3,
+                ),
               ),
               const SizedBox(height: 12),
               TextField(

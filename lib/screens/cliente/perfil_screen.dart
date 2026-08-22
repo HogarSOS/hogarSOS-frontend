@@ -11,6 +11,7 @@ import 'mis_valoraciones_screen.dart';
 import '../legal/privacidad_screen.dart';
 import '../legal/terminos_screen.dart';
 import '../../utils/imagen_autenticada.dart';
+import '../../widgets/soporte_sheet.dart';
 
 class PerfilScreen extends ConsumerStatefulWidget {
   const PerfilScreen({super.key});
@@ -266,6 +267,10 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                   // mostraba "Próximamente". No se borra t.perfilConfiguracion
                   // ni el icono, solo este acceso — hasta que haya algo real
                   // que configurar (notificaciones, idioma, etc.).
+                  const Divider(height: 1),
+                  // Centro de ayuda (auditoría 2026-08-22): mismo
+                  // componente compartido que el perfil del profesional.
+                  const FilaAyudaSoporte(),
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.privacy_tip_outlined),

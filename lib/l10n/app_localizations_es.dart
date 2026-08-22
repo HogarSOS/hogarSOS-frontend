@@ -1340,6 +1340,68 @@ class AppLocalizationsEs extends AppLocalizations {
   String get infoProfRestoGuardado => 'El resto de cambios sí se han guardado.';
 
   @override
+  String get infoProfComoTrabajas => 'Cómo trabajas';
+
+  @override
+  String get infoProfSinIndicar => 'Sin indicar';
+
+  @override
+  String get infoProfTelefonoResumen => 'Teléfono: solo uso interno';
+
+  @override
+  String get infoProfPrecio => 'Precio por hora';
+
+  @override
+  String get infoProfPrecioOpcional => 'opcional';
+
+  @override
+  String get tipoProfesionalCambioSoporte =>
+      'Para cambiar tu tipo profesional, contacta con soporte.';
+
+  @override
+  String get infoProfDescripcionContactoError =>
+      'No puedes incluir teléfonos ni datos de contacto en la descripción. Usa la mensajería de HogarSOS para comunicarte con los clientes.';
+
+  @override
+  String get soporteTitulo => 'Ayuda y soporte';
+
+  @override
+  String get soportePregunta => '¿Necesitas ayuda con HogarSOS?';
+
+  @override
+  String get soporteEmailBoton => 'Escríbenos por email';
+
+  @override
+  String get soporteWhatsappBoton => 'Escríbenos por WhatsApp';
+
+  @override
+  String get soporteAsuntoGeneral => 'Ayuda con HogarSOS';
+
+  @override
+  String get soporteAsuntoTipoProfesional => 'Cambio de tipo profesional';
+
+  @override
+  String get soporteWhatsappGeneral => 'Hola, necesito ayuda con HogarSOS.';
+
+  @override
+  String get soporteWhatsappTipoProfesional =>
+      'Hola, necesito ayuda con el cambio de tipo profesional en HogarSOS.';
+
+  @override
+  String get soporteMotivoTipoProfesional =>
+      'Motivo: cambio de tipo profesional';
+
+  @override
+  String get soporteCopiar => 'Copiar';
+
+  @override
+  String get soporteEmailCopiado => 'Email copiado';
+
+  @override
+  String get soporteErrorAbrir =>
+      'No se pudo abrir. Copia el email y escríbenos.';
+
+  @override
   String get disponibilidadCompletarPerfil => 'Completar perfil';
 
   @override
@@ -1543,11 +1605,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tipoProfesionalPersonaFisicaDesc =>
-      'Trabajo de forma ocasional, sin estar dado de alta como autónomo.';
+      'Realizo trabajos de forma puntual o esporádica, no como actividad profesional habitual.';
 
   @override
-  String get tipoProfesionalAyudaDuda =>
-      '¿No estás seguro? La mayoría de profesionales son autónomos.';
+  String get tipoProfesionalDeclaracionParticular =>
+      'Entiendo y acepto que soy responsable de cumplir las obligaciones legales, fiscales y de Seguridad Social que correspondan a mi actividad.';
+
+  @override
+  String get tipoProfesionalAvisoLegal =>
+      '⚠️ Importante: antes de aceptar trabajos, asegúrate de que tu situación fiscal y laboral te permite realizar esta actividad legalmente. HogarSOS actúa únicamente como plataforma de intermediación: no determina tu obligación de estar dado de alta ni ofrece asesoramiento fiscal o legal.';
 
   @override
   String get altaTitulo => 'Completa tu alta';
@@ -1755,7 +1821,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cuentaCobroBotonActualizar => 'Actualizar en Stripe';
 
   @override
-  String get cuentaCobroBotonEditar => 'Editar cuenta de cobro';
+  String get cuentaCobroBotonEditar => 'Modificar cuenta de cobro';
 
   @override
   String get cuentaCobroErrorAbrir =>
