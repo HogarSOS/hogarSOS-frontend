@@ -16,6 +16,7 @@ import '../../utils/error_extraction.dart';
 import '../../utils/tipo_profesional_display.dart';
 import '../../widgets/eliminar_cuenta.dart';
 import '../../widgets/entrada_animada.dart';
+import '../../widgets/informacion_profesional.dart';
 import '../../widgets/lista_opiniones.dart';
 import '../../widgets/wizard_alta.dart';
 import 'puente_stripe_screen.dart';
@@ -180,87 +181,75 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
     }
   }
 
-  Future<void> _editarTelefono() async {
+  /// Editor unificado "Información profesional" (simplificación de Mi
+  /// perfil, 2026-08-22): descripción + teléfono + tarifa en una sola
+  /// hoja. Cada campo conserva su endpoint (teléfono → /users/me;
+  /// descripción y tarifa → /professionals/me/profile) y solo se envía
+  /// lo que cambió; si un endpoint falla, el mensaje dice exactamente
+  /// qué se guardó y qué no — nunca un error genérico.
+  Future<void> _editarInformacionProfesional() async {
     final t = AppLocalizations.of(context);
-    final nuevo = await _pedirTexto(
-      titulo: t.editarPerfilTelefono,
-      valorInicial: _perfil?.telefono ?? '',
-      keyboardType: TextInputType.phone,
+
+    final resultado = await showModalBottomSheet<InformacionProfesionalResultado>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => EditorInformacionProfesional(
+        descripcionInicial: _perfil?.descripcion ?? '',
+        telefonoInicial: _perfil?.telefono ?? '',
+        tarifaInicial: (_perfil?.tarifaBase ?? 0) > 0 ? _perfil!.tarifaBase : null,
+      ),
     );
-    if (nuevo == null || !mounted) return;
+    if (resultado == null || !mounted) return;
 
-    try {
-      final usuario = await _userService.actualizarPerfil(telefono: nuevo);
-      ref.read(authProvider.notifier).actualizarUsuario(usuario);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.miPerfilExito)));
-      _cargarPerfil();
-    } catch (e) {
-      debugPrint('[MiPerfilProfesionalScreen] Error al actualizar el teléfono: $e');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${t.miPerfilErrorGuardar}: ${mensajeDeError(e, t: t)}')),
-      );
-    }
-  }
-
-  Future<void> _editarDescripcion() async {
-    final t = AppLocalizations.of(context);
-    final nuevo = await _pedirTexto(
-      titulo: t.miPerfilDescripcionLabel,
-      valorInicial: _perfil?.descripcion ?? '',
-      maxLines: 4,
-      maxLength: 250,
+    final plan = planGuardadoInfoProfesional(
+      descripcionActual: _perfil?.descripcion ?? '',
+      telefonoActual: _perfil?.telefono ?? '',
+      tarifaActual: _perfil?.tarifaBase ?? 0,
+      resultado: resultado,
     );
-    if (nuevo == null || !mounted) return;
+    if (!plan.hayCambios) return;
 
-    try {
-      await _professionalService.actualizarPerfil(descripcion: nuevo);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.miPerfilExito)));
-      _cargarPerfil();
-    } catch (e) {
-      debugPrint('[MiPerfilProfesionalScreen] Error al actualizar la descripción: $e');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${t.miPerfilErrorGuardar}: ${mensajeDeError(e, t: t)}')),
-      );
+    var okDatos = true;
+    var okTelefono = true;
+
+    if (plan.guardarDatosProfesionales) {
+      try {
+        await _professionalService.actualizarPerfil(
+          descripcion: plan.guardarDescripcion ? resultado.descripcion : null,
+          tarifaBase: plan.guardarTarifa ? resultado.tarifa : null,
+        );
+      } catch (e) {
+        debugPrint('[MiPerfilProfesionalScreen] Error al guardar descripción/tarifa: $e');
+        okDatos = false;
+      }
     }
-  }
 
-  /// La tarifa orientativa salió del camino estándar del alta (era una
-  /// fricción heredada: el precio real se acuerda por presupuesto) —
-  /// sigue siendo editable aquí como dato opcional del perfil, porque el
-  /// cliente aún puede filtrar por precio máximo en la búsqueda.
-  Future<void> _editarTarifa() async {
-    final t = AppLocalizations.of(context);
-    final nuevo = await _pedirTexto(
-      titulo: t.miPerfilPrecioLabel,
-      valorInicial: (_perfil?.tarifaBase ?? 0) > 0 ? _perfil!.tarifaBase.toStringAsFixed(2) : '',
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+    if (plan.guardarTelefono) {
+      try {
+        final usuario = await _userService.actualizarPerfil(telefono: resultado.telefono);
+        ref.read(authProvider.notifier).actualizarUsuario(usuario);
+      } catch (e) {
+        debugPrint('[MiPerfilProfesionalScreen] Error al guardar el teléfono: $e');
+        okTelefono = false;
+      }
+    }
+
+    if (!mounted) return;
+
+    final mensajeFallo = componerMensajeGuardadoInfoProfesional(
+      intentoDatos: plan.guardarDatosProfesionales,
+      okDatos: okDatos,
+      intentoTelefono: plan.guardarTelefono,
+      okTelefono: okTelefono,
+      falloDatos: t.infoProfFalloDatos,
+      falloTelefono: t.infoProfFalloTelefono,
+      restoGuardado: t.infoProfRestoGuardado,
     );
-    if (nuevo == null || nuevo.isEmpty || !mounted) return;
 
-    final tarifa = double.tryParse(nuevo.replaceAll(',', '.'));
-    if (tarifa == null || tarifa <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.miPerfilVerificacionErrorFaltaTarifa)),
-      );
-      return;
-    }
-
-    try {
-      await _professionalService.actualizarPerfil(tarifaBase: tarifa);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.miPerfilExito)));
-      _cargarPerfil();
-    } catch (e) {
-      debugPrint('[MiPerfilProfesionalScreen] Error al actualizar la tarifa: $e');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${t.miPerfilErrorGuardar}: ${mensajeDeError(e, t: t)}')),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(mensajeFallo ?? t.miPerfilExito)),
+    );
+    _cargarPerfil();
   }
 
   Future<void> _editarCategorias() async {
@@ -813,13 +802,18 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                           ),
                         ),
                       ],
-                      // La tarjeta clásica de cuenta de cobro solo cuando
-                      // el wizard no está guiando ese paso: aprobado y
-                      // operativa (botón "Editar", BUG 003 — se conserva)
-                      // o en incidencia (rechazado, vía pantalla puente).
-                      if (_perfil?.estadoVerificacion == 'rechazado' ||
-                          (_perfil?.estadoVerificacion == 'aprobado' &&
-                              _perfil?.estadoCuentaStripeDetalle == DetalleCuentaStripe.configurada)) ...[
+                      // Reestructura Perfil/Pagos (2026-08-22): para el
+                      // profesional aprobado y operativo la cuenta de
+                      // cobro tiene un ÚNICO hogar post-alta, la pestaña
+                      // Pagos (estado + "Editar cuenta de cobro" — BUG
+                      // 003 sigue cubierto ALLÍ, no aquí). Esta tarjeta
+                      // solo queda en Perfil para la incidencia
+                      // ('rechazado', junto a la tarjeta de reenvío de
+                      // documentación). El resto de estados con acción
+                      // (alta incompleta, Stripe pendiente/verificando/
+                      // caída tras aprobar) los cubre el wizard de
+                      // arriba, que reaparece solo — regla crítica F.
+                      if (_perfil?.estadoVerificacion == 'rechazado') ...[
                         const SizedBox(height: 16),
                         EntradaAnimada(
                           retraso: const Duration(milliseconds: 135),
@@ -835,13 +829,16 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                       const SizedBox(height: 16),
                       EntradaAnimada(
                         retraso: const Duration(milliseconds: 150),
-                        child: _TarjetaContacto(
-                          telefono: _perfil?.telefono ?? '',
-                          descripcion: _perfil?.descripcion ?? '',
-                          tarifaBase: _perfil?.tarifaBase ?? 0,
-                          onEditarTelefono: _editarTelefono,
-                          onEditarDescripcion: _editarDescripcion,
-                          onEditarTarifa: _editarTarifa,
+                        // Sección "Información profesional" compacta:
+                        // solo la descripción visible (el único de los
+                        // tres datos que ve el cliente), resumida a 2
+                        // líneas; teléfono y tarifa se editan en la
+                        // misma hoja desde el lápiz único.
+                        child: _TarjetaInfo(
+                          icono: Icons.notes_outlined,
+                          titulo: t.miPerfilDescripcionLabel,
+                          onEditar: _editarInformacionProfesional,
+                          child: DescripcionResumen(descripcion: _perfil?.descripcion ?? ''),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -1242,101 +1239,6 @@ class _FilaInfo extends StatelessWidget {
   }
 }
 
-/// Tarjeta combinada de Teléfono + Descripción — dos filas independientes
-/// (cada una con su propio botón de edición y su propio diálogo de
-/// guardado) dentro de una única tarjeta con sombra, en vez de dos
-/// tarjetas completas para dos datos sueltos de una línea cada uno.
-class _TarjetaContacto extends StatelessWidget {
-  const _TarjetaContacto({
-    required this.telefono,
-    required this.descripcion,
-    required this.tarifaBase,
-    required this.onEditarTelefono,
-    required this.onEditarDescripcion,
-    required this.onEditarTarifa,
-  });
-
-  final String telefono;
-  final String descripcion;
-  final double tarifaBase;
-  final VoidCallback onEditarTelefono;
-  final VoidCallback onEditarDescripcion;
-  final VoidCallback onEditarTarifa;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
-    final tieneTelefono = telefono.isNotEmpty;
-    final tieneDescripcion = descripcion.isNotEmpty;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.3)),
-        boxShadow: [
-          BoxShadow(color: colorScheme.shadow.withOpacity(0.05), blurRadius: 18, offset: const Offset(0, 6)),
-        ],
-      ),
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _FilaInfo(
-            icono: Icons.call_outlined,
-            titulo: t.editarPerfilTelefono,
-            onEditar: onEditarTelefono,
-            child: Text(
-              tieneTelefono ? telefono : t.miPerfilTelefonoVacio,
-              style: TextStyle(
-                fontSize: 14.5,
-                color: tieneTelefono ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 14),
-            child: Divider(height: 1),
-          ),
-          _FilaInfo(
-            icono: Icons.notes_outlined,
-            titulo: t.miPerfilDescripcionLabel,
-            onEditar: onEditarDescripcion,
-            child: Text(
-              tieneDescripcion ? descripcion : t.miPerfilDescripcionVacia,
-              style: TextStyle(
-                fontSize: 14.5,
-                height: 1.4,
-                color: tieneDescripcion ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 14),
-            child: Divider(height: 1),
-          ),
-          // Tarifa orientativa (opcional) — antes vivía dentro de la
-          // tarjeta de verificación; al salir el DNI del camino estándar
-          // necesitaba un sitio editable propio.
-          _FilaInfo(
-            icono: Icons.euro_outlined,
-            titulo: t.miPerfilPrecioLabel,
-            onEditar: onEditarTarifa,
-            child: Text(
-              tarifaBase > 0 ? '${tarifaBase.toStringAsFixed(2)} €/h' : '—',
-              style: TextStyle(
-                fontSize: 14.5,
-                color: tarifaBase > 0 ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 enum _OpcionDisponibilidad { noDisponible, disponible }
 
 /// Selector de disponibilidad — antes era su propia pestaña
@@ -1362,11 +1264,13 @@ class _SelectorDisponibilidad extends ConsumerWidget {
     final opcionActual = actual.disponible ? _OpcionDisponibilidad.disponible : _OpcionDisponibilidad.noDisponible;
     if (opcion == opcionActual) return;
 
-    // Sin categoría/foto no hay ninguna búsqueda en la que el
-    // profesional pueda aparecer — "No disponible" nunca se bloquea.
-    final requierePerfilCompleto = opcion != _OpcionDisponibilidad.noDisponible;
-    if (requierePerfilCompleto && !actual.perfilCompleto) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.disponibilidadPerfilIncompleto)));
+    // Activarse exige el alta completa: perfil + verificación + Stripe
+    // (los mismos gates que el backend re-comprueba en el PATCH — esto
+    // es solo la cara amable; la protección real es el 403 del
+    // servidor). "No disponible" nunca se bloquea.
+    if (opcion != _OpcionDisponibilidad.noDisponible &&
+        (!actual.perfilCompleto || !actual.puedeActivarse)) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.disponibilidadCompletaAlta)));
       return;
     }
 
@@ -1490,7 +1394,11 @@ class _TarjetaOpcionDisponibilidad extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
-          onTap: deshabilitada ? null : onTap,
+          // Siempre responde al toque, incluso "bloqueada" (se sigue
+          // viendo atenuada): _elegir explica por qué no se puede
+          // activar todavía ("Completa tu alta…") en vez de un toque
+          // muerto sin respuesta — el bloqueo real vive en el backend.
+          onTap: onTap,
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),

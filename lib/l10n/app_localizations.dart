@@ -2282,6 +2282,48 @@ abstract class AppLocalizations {
   /// **'Configura tu cuenta de cobro con Stripe para poder activarte — sin ella no podrías cobrar los trabajos que aceptes.'**
   String get disponibilidadPendienteStripe;
 
+  /// No description provided for @disponibilidadCompletaAlta.
+  ///
+  /// In es, this message translates to:
+  /// **'Completa tu alta para empezar a recibir ofertas. Te guiamos desde la tarjeta \"Completa tu alta\", arriba en tu perfil.'**
+  String get disponibilidadCompletaAlta;
+
+  /// No description provided for @miPerfilTelefonoAyudaInterno.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo para uso interno de HogarSOS. Los clientes no lo ven.'**
+  String get miPerfilTelefonoAyudaInterno;
+
+  /// No description provided for @infoProfTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Información profesional'**
+  String get infoProfTitulo;
+
+  /// No description provided for @infoProfDescripcionCta.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade una breve descripción para que los clientes te conozcan mejor'**
+  String get infoProfDescripcionCta;
+
+  /// No description provided for @infoProfFalloDatos.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron guardar los cambios de descripción o precio por hora.'**
+  String get infoProfFalloDatos;
+
+  /// No description provided for @infoProfFalloTelefono.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo guardar el teléfono.'**
+  String get infoProfFalloTelefono;
+
+  /// No description provided for @infoProfRestoGuardado.
+  ///
+  /// In es, this message translates to:
+  /// **'El resto de cambios sí se han guardado.'**
+  String get infoProfRestoGuardado;
+
   /// No description provided for @disponibilidadCompletarPerfil.
   ///
   /// In es, this message translates to:
@@ -2699,13 +2741,13 @@ abstract class AppLocalizations {
   /// No description provided for @altaFaltaFoto.
   ///
   /// In es, this message translates to:
-  /// **'Añade tu foto de perfil'**
+  /// **'Añade tu foto'**
   String get altaFaltaFoto;
 
   /// No description provided for @altaFaltaCategoria.
   ///
   /// In es, this message translates to:
-  /// **'Elige al menos una categoría'**
+  /// **'Elige una categoría'**
   String get altaFaltaCategoria;
 
   /// No description provided for @altaFaltaTipo.
@@ -2774,6 +2816,18 @@ abstract class AppLocalizations {
   /// **'Continuar'**
   String get altaBotonContinuar;
 
+  /// No description provided for @altaResumenPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'{paso} pendiente'**
+  String altaResumenPendiente(String paso);
+
+  /// No description provided for @altaResumenPasos.
+  ///
+  /// In es, this message translates to:
+  /// **'{n} pasos'**
+  String altaResumenPasos(int n);
+
   /// No description provided for @altaBotonActivarme.
   ///
   /// In es, this message translates to:
@@ -2786,41 +2840,167 @@ abstract class AppLocalizations {
   /// **'¡Disponibilidad activada! Ya puedes recibir ofertas.'**
   String get altaActivadoExito;
 
-  /// No description provided for @puenteTitulo.
+  /// No description provided for @puenteTituloSeguro.
   ///
   /// In es, this message translates to:
-  /// **'Verifica tu identidad y configura tus cobros'**
-  String get puenteTitulo;
+  /// **'🔐 Verificación y cobros seguros'**
+  String get puenteTituloSeguro;
 
-  /// No description provided for @puenteParrafo1.
+  /// No description provided for @puenteIntro.
   ///
   /// In es, this message translates to:
-  /// **'Te llevamos a Stripe, nuestro proveedor de pagos, para verificar tu identidad y configurar tus cobros en un solo paso.'**
-  String get puenteParrafo1;
+  /// **'Para poder recibir pagos de tus clientes, necesitamos verificar tu identidad y configurar tus datos de cobro.'**
+  String get puenteIntro;
 
-  /// No description provided for @puenteParrafo2.
+  /// No description provided for @puenteQueEsStripeTitulo.
   ///
   /// In es, this message translates to:
-  /// **'Ya hemos rellenado por ti algunos datos que HogarSOS conoce. Revisa que tu nombre coincida exactamente con tu DNI antes de confirmar.'**
-  String get puenteParrafo2;
+  /// **'¿Qué es Stripe?'**
+  String get puenteQueEsStripeTitulo;
 
-  /// No description provided for @puenteParrafo3.
+  /// No description provided for @puenteQueEsStripeTexto.
   ///
   /// In es, this message translates to:
-  /// **'Stripe te pedirá la información necesaria para verificar tu identidad y recibir pagos: fecha de nacimiento, dirección, DNI/NIE y tu IBAN. Puede que también te pida una foto de tu documento.'**
-  String get puenteParrafo3;
+  /// **'Stripe es la plataforma segura que utilizamos para gestionar la verificación y los pagos de los profesionales.'**
+  String get puenteQueEsStripeTexto;
 
-  /// No description provided for @puenteTenAMano.
+  /// No description provided for @puenteQueEsStripeNota.
   ///
   /// In es, this message translates to:
-  /// **'Ten a mano tu DNI y tu IBAN — el proceso suele tardar unos minutos.'**
-  String get puenteTenAMano;
+  /// **'HogarSOS no gestiona directamente tus datos bancarios.'**
+  String get puenteQueEsStripeNota;
+
+  /// No description provided for @puenteBloqueIdentidadTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Verificación de identidad'**
+  String get puenteBloqueIdentidadTitulo;
+
+  /// No description provided for @puenteBloqueIdentidadTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'Stripe comprobará tus datos y puede pedirte tu DNI/NIE u otra documentación.'**
+  String get puenteBloqueIdentidadTexto;
+
+  /// No description provided for @puenteBloqueCobrosTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Configuración de cobros'**
+  String get puenteBloqueCobrosTitulo;
+
+  /// No description provided for @puenteBloqueCobrosTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'Te pedirá los datos necesarios para poder recibir el dinero de tus trabajos.'**
+  String get puenteBloqueCobrosTexto;
+
+  /// No description provided for @puenteBloqueDatosTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos protegidos'**
+  String get puenteBloqueDatosTitulo;
+
+  /// No description provided for @puenteBloqueDatosTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'Stripe gestiona esta información de forma segura y HogarSOS recibe la información necesaria para saber si tu cuenta está lista.'**
+  String get puenteBloqueDatosTexto;
+
+  /// No description provided for @puentePrefillTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya hemos rellenado algunos datos por ti'**
+  String get puentePrefillTitulo;
+
+  /// No description provided for @puentePrefillTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'Usaremos los datos que ya tenemos, como tu nombre, teléfono y email cuando sean válidos, para que tengas que escribir lo menos posible.'**
+  String get puentePrefillTexto;
+
+  /// No description provided for @puenteNecesitarasTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Qué necesitarás'**
+  String get puenteNecesitarasTitulo;
+
+  /// No description provided for @puenteNecesitarasDni.
+  ///
+  /// In es, this message translates to:
+  /// **'DNI/NIE'**
+  String get puenteNecesitarasDni;
+
+  /// No description provided for @puenteNecesitarasIban.
+  ///
+  /// In es, this message translates to:
+  /// **'IBAN'**
+  String get puenteNecesitarasIban;
+
+  /// No description provided for @puenteNecesitarasTelefono.
+  ///
+  /// In es, this message translates to:
+  /// **'Teléfono'**
+  String get puenteNecesitarasTelefono;
+
+  /// No description provided for @puenteNecesitarasDatos.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos personales o de empresa'**
+  String get puenteNecesitarasDatos;
+
+  /// No description provided for @puenteNecesitarasExtra.
+  ///
+  /// In es, this message translates to:
+  /// **'Stripe puede pedirte información adicional durante la verificación.'**
+  String get puenteNecesitarasExtra;
+
+  /// No description provided for @puenteCambioApp1.
+  ///
+  /// In es, this message translates to:
+  /// **'El siguiente paso se realiza en la página segura de Stripe.'**
+  String get puenteCambioApp1;
+
+  /// No description provided for @puenteCambioApp2.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando termines, volverás automáticamente a HogarSOS.'**
+  String get puenteCambioApp2;
 
   /// No description provided for @puenteBoton.
   ///
   /// In es, this message translates to:
-  /// **'Continuar con Stripe'**
+  /// **'Continuar con Stripe →'**
   String get puenteBoton;
+
+  /// No description provided for @puenteBotonRetomar.
+  ///
+  /// In es, this message translates to:
+  /// **'Continúa con Stripe'**
+  String get puenteBotonRetomar;
+
+  /// No description provided for @puenteEnProgresoTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu configuración no está terminada. Puedes continuar donde lo dejaste.'**
+  String get puenteEnProgresoTexto;
+
+  /// No description provided for @puenteVerificandoTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Stripe está verificando tu identidad.'**
+  String get puenteVerificandoTitulo;
+
+  /// No description provided for @puenteVerificandoTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes que hacer nada ahora. Te avisaremos cuando termine.'**
+  String get puenteVerificandoTexto;
+
+  /// No description provided for @puenteConexionSegura.
+  ///
+  /// In es, this message translates to:
+  /// **'🔒 Conexión segura con Stripe'**
+  String get puenteConexionSegura;
 
   /// No description provided for @puentePerfilIncompleto.
   ///

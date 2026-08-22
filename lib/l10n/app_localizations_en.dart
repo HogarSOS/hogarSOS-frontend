@@ -1305,6 +1305,31 @@ class AppLocalizationsEn extends AppLocalizations {
       'Set up your payout account with Stripe to be able to go online — without it you wouldn\'t be able to get paid for jobs you accept.';
 
   @override
+  String get disponibilidadCompletaAlta =>
+      'Complete your onboarding to start receiving offers. We\'ll guide you from the \"Complete your onboarding\" card at the top of your profile.';
+
+  @override
+  String get miPerfilTelefonoAyudaInterno =>
+      'For HogarSOS internal use only. Clients never see it.';
+
+  @override
+  String get infoProfTitulo => 'Professional details';
+
+  @override
+  String get infoProfDescripcionCta =>
+      'Add a short description so clients can get to know you better';
+
+  @override
+  String get infoProfFalloDatos =>
+      'The description or hourly rate changes could not be saved.';
+
+  @override
+  String get infoProfFalloTelefono => 'The phone number could not be saved.';
+
+  @override
+  String get infoProfRestoGuardado => 'The rest of your changes were saved.';
+
+  @override
   String get disponibilidadCompletarPerfil => 'Complete profile';
 
   @override
@@ -1532,10 +1557,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get altaPasoListo => 'Ready to receive offers';
 
   @override
-  String get altaFaltaFoto => 'Add your profile photo';
+  String get altaFaltaFoto => 'Add your photo';
 
   @override
-  String get altaFaltaCategoria => 'Pick at least one category';
+  String get altaFaltaCategoria => 'Pick a category';
 
   @override
   String get altaFaltaTipo => 'Tell us how you work';
@@ -1578,6 +1603,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get altaBotonContinuar => 'Continue';
 
   @override
+  String altaResumenPendiente(String paso) {
+    return '$paso pending';
+  }
+
+  @override
+  String altaResumenPasos(int n) {
+    return '$n steps';
+  }
+
+  @override
   String get altaBotonActivarme => 'Activate me now';
 
   @override
@@ -1585,26 +1620,97 @@ class AppLocalizationsEn extends AppLocalizations {
       'Availability on! You can now receive offers.';
 
   @override
-  String get puenteTitulo => 'Verify your identity and set up your payouts';
+  String get puenteTituloSeguro => '🔐 Secure verification & payouts';
 
   @override
-  String get puenteParrafo1 =>
-      'We\'ll take you to Stripe, our payment provider, to verify your identity and set up your payouts in a single step.';
+  String get puenteIntro =>
+      'To receive payments from your clients, we need to verify your identity and set up your payout details.';
 
   @override
-  String get puenteParrafo2 =>
-      'We\'ve pre-filled some details HogarSOS already knows. Check that your name matches your ID exactly before confirming.';
+  String get puenteQueEsStripeTitulo => 'What is Stripe?';
 
   @override
-  String get puenteParrafo3 =>
-      'Stripe will ask for the information needed to verify your identity and receive payments: date of birth, address, ID number and your IBAN. It may also ask for a photo of your ID document.';
+  String get puenteQueEsStripeTexto =>
+      'Stripe is the secure platform we use to handle verification and payments for professionals.';
 
   @override
-  String get puenteTenAMano =>
-      'Have your ID and IBAN at hand — it usually takes a few minutes.';
+  String get puenteQueEsStripeNota =>
+      'HogarSOS does not directly handle your bank details.';
 
   @override
-  String get puenteBoton => 'Continue with Stripe';
+  String get puenteBloqueIdentidadTitulo => 'Identity verification';
+
+  @override
+  String get puenteBloqueIdentidadTexto =>
+      'Stripe will check your details and may ask for your ID or other documentation.';
+
+  @override
+  String get puenteBloqueCobrosTitulo => 'Payout setup';
+
+  @override
+  String get puenteBloqueCobrosTexto =>
+      'It will ask for the details needed to receive the money from your jobs.';
+
+  @override
+  String get puenteBloqueDatosTitulo => 'Protected data';
+
+  @override
+  String get puenteBloqueDatosTexto =>
+      'Stripe handles this information securely and HogarSOS receives what it needs to know whether your account is ready.';
+
+  @override
+  String get puentePrefillTitulo => 'We\'ve pre-filled some details for you';
+
+  @override
+  String get puentePrefillTexto =>
+      'We\'ll use the details we already have — like your name, phone and email when valid — so you type as little as possible.';
+
+  @override
+  String get puenteNecesitarasTitulo => 'What you\'ll need';
+
+  @override
+  String get puenteNecesitarasDni => 'ID (DNI/NIE)';
+
+  @override
+  String get puenteNecesitarasIban => 'IBAN';
+
+  @override
+  String get puenteNecesitarasTelefono => 'Phone';
+
+  @override
+  String get puenteNecesitarasDatos => 'Personal or company details';
+
+  @override
+  String get puenteNecesitarasExtra =>
+      'Stripe may ask for additional information during verification.';
+
+  @override
+  String get puenteCambioApp1 =>
+      'The next step happens on Stripe\'s secure page.';
+
+  @override
+  String get puenteCambioApp2 =>
+      'When you finish, you\'ll automatically return to HogarSOS.';
+
+  @override
+  String get puenteBoton => 'Continue with Stripe →';
+
+  @override
+  String get puenteBotonRetomar => 'Continue with Stripe';
+
+  @override
+  String get puenteEnProgresoTexto =>
+      'Your setup isn\'t finished. You can pick up where you left off.';
+
+  @override
+  String get puenteVerificandoTitulo => 'Stripe is verifying your identity.';
+
+  @override
+  String get puenteVerificandoTexto =>
+      'Nothing to do right now. We\'ll let you know when it\'s done.';
+
+  @override
+  String get puenteConexionSegura => '🔒 Secure connection with Stripe';
 
   @override
   String get puentePerfilIncompleto =>

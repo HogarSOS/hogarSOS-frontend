@@ -18,7 +18,20 @@ import '../services/professional_service.dart';
 ///
 /// Todo el estado viene del servidor (GET /professionals/me) — cerrar la
 /// app y volver retoma exactamente donde estaba, sin persistencia local.
-class WizardAlta extends StatelessWidget {
+///
+/// Variante DESPLEGABLE (prueba de accesibilidad 2026-08-22): la
+/// cabecera (título + % + barra) es una zona táctil grande que
+/// expande/contrae el detalle. Reglas:
+/// - Abierto por defecto cuando el perfil está incompleto (que el nuevo
+///   vea al instante qué le falta) y SIEMPRE en estados de atención
+///   (acción necesaria / Stripe caída), donde además no se puede cerrar
+///   — una advertencia jamás queda escondida tras un pliegue.
+/// - Cerrado por defecto con el perfil ya completo (50%/75%): queda una
+///   línea de resumen con el paso pendiente.
+/// - La preferencia manual vive solo en el State del widget: al cambiar
+///   de cuenta o reiniciar la app, la pantalla se recrea y vuelve al
+///   comportamiento por defecto — nunca se hereda entre cuentas.
+class WizardAlta extends StatefulWidget {
   const WizardAlta({
     super.key,
     required this.fotoOk,
@@ -51,10 +64,6 @@ class WizardAlta extends StatelessWidget {
   final VoidCallback onStripe;
   final VoidCallback onActivarme;
 
-  bool get _perfilOk => fotoOk && categoriaOk && tipoOk;
-  bool get _configurada => detalle == DetalleCuentaStripe.configurada;
-  bool get _listo => aprobado && _configurada;
-
   /// Progreso por hitos. Pura y estática para poder testearla sin montar
   /// el widget. NUNCA devuelve 100 si Stripe no está operativa o falta
   /// la aprobación — esa es la regla que hace que el porcentaje no
@@ -79,12 +88,27 @@ class WizardAlta extends StatelessWidget {
   }
 
   @override
+  State<WizardAlta> createState() => _WizardAltaState();
+}
+
+class _WizardAltaState extends State<WizardAlta> {
+  /// null = comportamiento por defecto; true/false = elección manual del
+  /// usuario. Vive solo en este State: al cambiar de cuenta o reabrir la
+  /// app la pantalla se recrea y vuelve al valor por defecto — nunca se
+  /// hereda un abierto/cerrado de otra cuenta.
+  bool? _abiertoManual;
+
+  bool get _perfilOk => widget.fotoOk && widget.categoriaOk && widget.tipoOk;
+  bool get _configurada => widget.detalle == DetalleCuentaStripe.configurada;
+  bool get _listo => widget.aprobado && _configurada;
+
+  @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
     // Alta terminada y ya disponible: el wizard desaparece del todo.
-    if (_listo && disponible) return const SizedBox.shrink();
+    if (_listo && widget.disponible) return const SizedBox.shrink();
 
     // Alta terminada pero fuera de línea: banner compacto con el último
     // toque — "Activarme ahora". (También cubre al que se puso "No
@@ -102,8 +126,8 @@ class WizardAlta extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: activando ? null : onActivarme,
-                icon: activando
+                onPressed: widget.activando ? null : widget.onActivarme,
+                icon: widget.activando
                     ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.bolt, size: 18),
                 label: Text(t.altaBotonActivarme),
@@ -114,66 +138,127 @@ class WizardAlta extends StatelessWidget {
       );
     }
 
-    final pct = progreso(perfilOk: _perfilOk, detalle: detalle, aprobado: aprobado);
-    final stripeCaida = aprobado && !_configurada;
+    final pct = WizardAlta.progreso(perfilOk: _perfilOk, detalle: widget.detalle, aprobado: widget.aprobado);
+    final stripeCaida = widget.aprobado && !_configurada;
+    final atencion = stripeCaida || widget.detalle == DetalleCuentaStripe.accionNecesaria;
+
+    // Cerrado por defecto SOLO en los estados de pura espera (Stripe
+    // verificando, o Stripe lista con la aprobación resolviéndose):
+    // ahí no hay nada que hacer y el resumen basta. Con cualquier
+    // acción del usuario pendiente (perfil incompleto, Stripe sin
+    // iniciar o a medias) se abre por defecto — y en atención se FUERZA
+    // abierto y sin posibilidad de cerrar: una advertencia jamás queda
+    // escondida tras un pliegue.
+    final soloEsperando = widget.detalle == DetalleCuentaStripe.enVerificacion ||
+        (_configurada && !widget.aprobado);
+    final abierto = atencion || (_abiertoManual ?? !soloEsperando);
+
+    final subpasosPendientes =
+        [widget.fotoOk, widget.categoriaOk, widget.tipoOk].where((ok) => !ok).length;
+    final pasoPendiente = !_perfilOk ? t.altaPasoPerfil : t.altaPasoIdentidadCobros;
 
     return _Tarjeta(
       borde: stripeCaida ? colorScheme.error.withOpacity(0.5) : null,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.flag_outlined, size: 18, color: colorScheme.onSurfaceVariant),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  t.altaTitulo,
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: colorScheme.onSurfaceVariant),
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 180),
+        alignment: Alignment.topCenter,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Cabecera desplegable: TODA la zona (título + % + chevron +
+            // barra + resumen) es un único InkWell grande, independiente
+            // de los subpasos de abajo — no compiten por el toque.
+            InkWell(
+              onTap: atencion ? null : () => setState(() => _abiertoManual = !abierto),
+              borderRadius: BorderRadius.circular(10),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.flag_outlined, size: 18, color: colorScheme.onSurfaceVariant),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            t.altaTitulo,
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: colorScheme.onSurfaceVariant),
+                          ),
+                        ),
+                        Text(
+                          t.altaProgreso(pct),
+                          style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: colorScheme.primary),
+                        ),
+                        // En atención no hay chevron: no se puede cerrar.
+                        if (!atencion) ...[
+                          const SizedBox(width: 4),
+                          Icon(
+                            abierto ? Icons.expand_less : Icons.expand_more,
+                            size: 20,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: LinearProgressIndicator(
+                        value: pct / 100,
+                        minHeight: 5,
+                        backgroundColor: colorScheme.surfaceContainerHigh,
+                      ),
+                    ),
+                    if (!abierto) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        subpasosPendientes > 0
+                            ? '${t.altaResumenPendiente(pasoPendiente)} · ${t.altaResumenPasos(subpasosPendientes)}'
+                            : t.altaResumenPendiente(pasoPendiente),
+                        maxLines: 2,
+                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: colorScheme.onSurfaceVariant),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              Text(
-                t.altaProgreso(pct),
-                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: colorScheme.primary),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: pct / 100,
-              minHeight: 6,
-              backgroundColor: colorScheme.surfaceContainerHigh,
             ),
-          ),
-          const SizedBox(height: 14),
-          _Paso(estado: _EstadoPaso.hecho, texto: t.altaPasoCuenta),
-          _Paso(
-            estado: _perfilOk ? _EstadoPaso.hecho : _EstadoPaso.actual,
-            texto: t.altaPasoPerfil,
-            hijos: _perfilOk
-                ? null
-                : [
-                    _SubPaso(hecho: fotoOk, texto: t.altaFaltaFoto, onTap: onFoto),
-                    _SubPaso(hecho: categoriaOk, texto: t.altaFaltaCategoria, onTap: onCategorias),
-                    _SubPaso(hecho: tipoOk, texto: t.altaFaltaTipo, onTap: onTipo),
-                  ],
-          ),
-          _Paso(
-            estado: _configurada
-                ? _EstadoPaso.hecho
-                : stripeCaida || detalle == DetalleCuentaStripe.accionNecesaria
-                    ? _EstadoPaso.atencion
-                    : _perfilOk
-                        ? _EstadoPaso.actual
-                        : _EstadoPaso.pendiente,
-            texto: t.altaPasoIdentidadCobros,
-          ),
-          _Paso(estado: _listo ? _EstadoPaso.hecho : _EstadoPaso.pendiente, texto: t.altaPasoListo),
-          const SizedBox(height: 12),
-          _mensajeYAccion(t, colorScheme),
-        ],
+            if (abierto) ...[
+              const SizedBox(height: 8),
+              _Paso(estado: _EstadoPaso.hecho, texto: t.altaPasoCuenta),
+              _Paso(
+                estado: _perfilOk ? _EstadoPaso.hecho : _EstadoPaso.actual,
+                texto: t.altaPasoPerfil,
+                hijos: _perfilOk
+                    ? null
+                    : [
+                        _SubPaso(hecho: widget.fotoOk, texto: t.altaFaltaFoto, onTap: widget.onFoto),
+                        _SubPaso(hecho: widget.categoriaOk, texto: t.altaFaltaCategoria, onTap: widget.onCategorias),
+                        _SubPaso(hecho: widget.tipoOk, texto: t.altaFaltaTipo, onTap: widget.onTipo),
+                      ],
+              ),
+              _Paso(
+                estado: _configurada
+                    ? _EstadoPaso.hecho
+                    : atencion
+                        ? _EstadoPaso.atencion
+                        : _perfilOk
+                            ? _EstadoPaso.actual
+                            : _EstadoPaso.pendiente,
+                texto: t.altaPasoIdentidadCobros,
+              ),
+              _Paso(estado: _listo ? _EstadoPaso.hecho : _EstadoPaso.pendiente, texto: t.altaPasoListo),
+              // Con el perfil incompleto, los subpasos ya listan qué
+              // falta — el mensaje contextual vuelve en cuanto el paso
+              // vivo es Stripe (o hay una advertencia que dar).
+              if (_perfilOk || stripeCaida) ...[
+                const SizedBox(height: 8),
+                _mensajeYAccion(t, colorScheme),
+              ],
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -186,7 +271,7 @@ class WizardAlta extends StatelessWidget {
     String? etiquetaBoton;
     bool esAdvertencia = false;
 
-    if (aprobado && !_configurada) {
+    if (widget.aprobado && !_configurada) {
       mensaje = t.altaMsgStripeCaida;
       etiquetaBoton = t.altaBotonContinuar;
       esAdvertencia = true;
@@ -194,7 +279,7 @@ class WizardAlta extends StatelessWidget {
       mensaje = t.altaMsgPerfilIncompleto;
       etiquetaBoton = null; // los subpasos de Perfil ya son botones directos
     } else {
-      switch (detalle) {
+      switch (widget.detalle) {
         case DetalleCuentaStripe.sinIniciar:
           mensaje = t.altaMsgStripeSinIniciar;
           etiquetaBoton = t.altaBotonContinuar;
@@ -234,10 +319,15 @@ class WizardAlta extends StatelessWidget {
           ),
         ),
         if (etiquetaBoton != null) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           FilledButton.icon(
-            onPressed: onStripe,
-            icon: const Icon(Icons.open_in_new, size: 18),
+            onPressed: widget.onStripe,
+            // Densidad compacta a propósito (ajuste UX 2026-08-22: la
+            // tarjeta debe ceder protagonismo al perfil) — sin
+            // minimumSize, que ya dio problemas con FilledButton en el
+            // panel de admin.
+            style: FilledButton.styleFrom(visualDensity: VisualDensity.compact),
+            icon: const Icon(Icons.open_in_new, size: 17),
             label: Text(etiquetaBoton),
           ),
         ],
@@ -267,12 +357,19 @@ class _Paso extends StatelessWidget {
     };
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: 3),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
+              // Revisión adversarial 2ª ronda (2026-08-22): los pasos
+              // principales son el NIVEL 2 de la jerarquía — al
+              // compactarlos a 12.5/16 quedaron idénticos a los subpasos
+              // (12.5/15) y la tarjeta entera se percibía "pequeña". Se
+              // restauran a 13.5/18; la altura ganada en la compactación
+              // vino de los paddings y de quitar la frase redundante,
+              // que se conservan.
               Icon(icono, size: 18, color: color),
               const SizedBox(width: 8),
               Text(
@@ -287,7 +384,7 @@ class _Paso extends StatelessWidget {
           ),
           if (hijos != null)
             Padding(
-              padding: const EdgeInsets.only(left: 26, top: 4),
+              padding: const EdgeInsets.only(left: 24, top: 2),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: hijos!),
             ),
         ],
@@ -313,8 +410,12 @@ class _SubPaso extends StatelessWidget {
     return InkWell(
       onTap: hecho ? null : onTap,
       borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+      // Variante desplegable (accesibilidad 2026-08-22): con el bloque
+      // abierto, cada subpaso garantiza una zona táctil de ≥44dp de alto
+      // SIN agrandar el texto — pensado para dedos grandes y personas
+      // mayores. La altura extra solo existe mientras está desplegado.
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 44),
         child: Row(
           children: [
             Icon(
@@ -323,13 +424,15 @@ class _SubPaso extends StatelessWidget {
               color: hecho ? const Color(0xFF1EA672) : colorScheme.primary,
             ),
             const SizedBox(width: 6),
-            Text(
-              texto,
-              style: TextStyle(
-                fontSize: 12.5,
-                color: hecho ? colorScheme.onSurfaceVariant : colorScheme.primary,
-                fontWeight: hecho ? FontWeight.w400 : FontWeight.w600,
-                decoration: hecho ? TextDecoration.lineThrough : null,
+            Expanded(
+              child: Text(
+                texto,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  color: hecho ? colorScheme.onSurfaceVariant : colorScheme.primary,
+                  fontWeight: hecho ? FontWeight.w400 : FontWeight.w600,
+                  decoration: hecho ? TextDecoration.lineThrough : null,
+                ),
               ),
             ),
           ],
@@ -361,7 +464,10 @@ class _Tarjeta extends StatelessWidget {
           BoxShadow(color: colorScheme.shadow.withOpacity(0.05), blurRadius: 18, offset: const Offset(0, 6)),
         ],
       ),
-      padding: const EdgeInsets.all(18),
+      // 14 y no 18 como el resto de tarjetas del perfil: ajuste UX
+      // 2026-08-22 — la tarjeta del alta debe ser compacta para que el
+      // perfil tenga más protagonismo en la primera pantalla.
+      padding: const EdgeInsets.all(14),
       child: child,
     );
   }

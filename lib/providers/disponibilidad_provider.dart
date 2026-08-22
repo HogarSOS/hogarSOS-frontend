@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import '../models/user_model.dart';
 import '../services/professional_service.dart';
+import 'auth_provider.dart';
 
 final professionalServiceProvider = Provider((ref) => ProfessionalService());
 
@@ -34,8 +36,8 @@ class DisponibilidadState {
 }
 
 class DisponibilidadNotifier extends StateNotifier<AsyncValue<DisponibilidadState>> {
-  DisponibilidadNotifier(this._servicio) : super(const AsyncValue.loading()) {
-    cargar();
+  DisponibilidadNotifier(this._servicio, {bool autoCargar = true}) : super(const AsyncValue.loading()) {
+    if (autoCargar) cargar();
   }
 
   final ProfessionalService _servicio;
@@ -95,5 +97,17 @@ class DisponibilidadNotifier extends StateNotifier<AsyncValue<DisponibilidadStat
 
 final disponibilidadProvider =
     StateNotifierProvider<DisponibilidadNotifier, AsyncValue<DisponibilidadState>>((ref) {
-  return DisponibilidadNotifier(ref.watch(professionalServiceProvider));
+  // Atado al usuario de la sesión (bug real del 2026-08-22): sin este
+  // watch, el provider sobrevivía a un logout + registro de otra cuenta
+  // y la cuenta NUEVA veía el estado de la ANTERIOR — un profesional
+  // recién creado heredaba `puedeActivarse=true` de una cuenta aprobada
+  // y el selector le ofrecía activarse (el backend lo rechazaba con 403,
+  // pero la UI no debía ofrecerlo). Al cambiar el usuario, Riverpod
+  // reconstruye el notifier desde cero para la cuenta actual.
+  final usuario = ref.watch(authProvider.select((s) => s.usuario));
+  // Solo carga con una sesión de profesional: para cliente/null no hay
+  // nada que pedir (GET /professionals/me fallaría) y el estado se queda
+  // en loading hasta que un profesional real vuelva a necesitarlo.
+  final esProfesional = usuario != null && usuario.role == UserRole.profesional;
+  return DisponibilidadNotifier(ref.watch(professionalServiceProvider), autoCargar: esProfesional);
 });
