@@ -1495,7 +1495,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tipoProfesionalEmpresa => 'Empresa';
 
   @override
-  String get tipoProfesionalPersonaFisica => 'Persona física';
+  String get tipoProfesionalPersonaFisica => 'Particular';
 
   @override
   String get tipoProfesionalTextoLegal =>
@@ -1504,6 +1504,128 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get tipoProfesionalErrorFaltaSeleccion =>
       'Selecciona tu tipo de profesional';
+
+  @override
+  String get tipoProfesionalPregunta => '¿Cómo trabajas profesionalmente?';
+
+  @override
+  String get tipoProfesionalAutonomoDesc =>
+      'Estoy dado de alta como trabajador por cuenta propia.';
+
+  @override
+  String get tipoProfesionalEmpresaDesc =>
+      'Facturo a través de una sociedad (S.L., S.A., cooperativa…).';
+
+  @override
+  String get tipoProfesionalPersonaFisicaDesc =>
+      'Trabajo de forma ocasional, sin estar dado de alta como autónomo.';
+
+  @override
+  String get tipoProfesionalAyudaDuda =>
+      '¿No estás seguro? La mayoría de profesionales son autónomos.';
+
+  @override
+  String get altaTitulo => 'Completa tu alta';
+
+  @override
+  String altaProgreso(int pct) {
+    return 'Tu alta está al $pct%';
+  }
+
+  @override
+  String get altaPasoCuenta => 'Cuenta';
+
+  @override
+  String get altaPasoPerfil => 'Perfil';
+
+  @override
+  String get altaPasoIdentidadCobros => 'Identidad y cobros';
+
+  @override
+  String get altaPasoListo => 'Listo para recibir ofertas';
+
+  @override
+  String get altaFaltaFoto => 'Añade tu foto de perfil';
+
+  @override
+  String get altaFaltaCategoria => 'Elige al menos una categoría';
+
+  @override
+  String get altaFaltaTipo => 'Indica cómo trabajas';
+
+  @override
+  String get altaMsgPerfilIncompleto =>
+      'Te falta completar tu perfil para poder seguir con tu alta.';
+
+  @override
+  String get altaMsgStripeSinIniciar =>
+      'Último paso: verifica tu identidad y configura tus cobros. Ten a mano tu DNI y tu IBAN (~5 minutos).';
+
+  @override
+  String get altaMsgStripeEnProgreso =>
+      'Te quedaste a mitad. Continúa donde lo dejaste.';
+
+  @override
+  String get altaMsgStripeEnVerificacion =>
+      'Stripe está verificando tu identidad. No tienes que hacer nada — te avisaremos.';
+
+  @override
+  String get altaMsgStripeAccion =>
+      'Stripe necesita un dato más para activar tus cobros.';
+
+  @override
+  String get altaMsgRevisionHogarsos =>
+      'Estamos revisando tu alta. Te avisaremos en cuanto esté aprobada.';
+
+  @override
+  String get altaMsgListo => '🎉 ¡Ya estás listo para recibir ofertas!';
+
+  @override
+  String get altaMsgListoAyuda =>
+      'Activa tu disponibilidad para que los clientes puedan encontrarte.';
+
+  @override
+  String get altaMsgStripeCaida =>
+      '⚠️ Tus cobros necesitan una actualización en Stripe.';
+
+  @override
+  String get altaBotonContinuar => 'Continuar';
+
+  @override
+  String get altaBotonActivarme => 'Activarme ahora';
+
+  @override
+  String get altaActivadoExito =>
+      '¡Disponibilidad activada! Ya puedes recibir ofertas.';
+
+  @override
+  String get puenteTitulo => 'Verifica tu identidad y configura tus cobros';
+
+  @override
+  String get puenteParrafo1 =>
+      'Te llevamos a Stripe, nuestro proveedor de pagos, para verificar tu identidad y configurar tus cobros en un solo paso.';
+
+  @override
+  String get puenteParrafo2 =>
+      'Ya hemos rellenado por ti algunos datos que HogarSOS conoce. Revisa que tu nombre coincida exactamente con tu DNI antes de confirmar.';
+
+  @override
+  String get puenteParrafo3 =>
+      'Stripe te pedirá la información necesaria para verificar tu identidad y recibir pagos: fecha de nacimiento, dirección, DNI/NIE y tu IBAN. Puede que también te pida una foto de tu documento.';
+
+  @override
+  String get puenteTenAMano =>
+      'Ten a mano tu DNI y tu IBAN — el proceso suele tardar unos minutos.';
+
+  @override
+  String get puenteBoton => 'Continuar con Stripe';
+
+  @override
+  String get puentePerfilIncompleto =>
+      'Antes de configurar tus cobros, completa tu perfil: foto, al menos una categoría y cómo trabajas.';
+
+  @override
+  String get puenteBotonCompletarPerfil => 'Completar mi perfil';
 
   @override
   String get cuentaCobroTitulo => 'Cuenta de cobro';

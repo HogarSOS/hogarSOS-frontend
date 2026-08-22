@@ -87,6 +87,54 @@ enum EstadoCuentaStripe {
   }
 }
 
+/// Estado detallado de la cuenta de cobro para el wizard "Completa tu
+/// alta" — a diferencia de [EstadoCuentaStripe], separa "Stripe está
+/// verificando, solo hay que esperar" (enVerificacion) de "Stripe
+/// espera una acción del profesional" (accionNecesaria). Lo deriva el
+/// backend leyendo requirements.currently_due en caliente (ver
+/// derivarDetalleCuentaStripe en professional.service.ts).
+enum DetalleCuentaStripe {
+  sinIniciar,
+  enProgreso,
+  enVerificacion,
+  accionNecesaria,
+  configurada;
+
+  static DetalleCuentaStripe fromJson(String? valor) {
+    switch (valor) {
+      case 'sin_iniciar':
+        return DetalleCuentaStripe.sinIniciar;
+      case 'en_progreso':
+        return DetalleCuentaStripe.enProgreso;
+      case 'en_verificacion':
+        return DetalleCuentaStripe.enVerificacion;
+      case 'accion_necesaria':
+        return DetalleCuentaStripe.accionNecesaria;
+      case 'configurada':
+        return DetalleCuentaStripe.configurada;
+      default:
+        return DetalleCuentaStripe.sinIniciar;
+    }
+  }
+
+  /// Retrocompatibilidad: si el backend todavía no manda el campo
+  /// detallado (app nueva contra backend viejo), se aproxima desde el
+  /// estado clásico — 'requiere_actualizacion' cae en accionNecesaria,
+  /// el comportamiento seguro (el botón reabre Stripe, que muestra la
+  /// verdad), y 'pendiente' en sinIniciar/enProgreso no distinguibles,
+  /// se toma enProgreso solo si hay señal de cuenta empezada.
+  static DetalleCuentaStripe desdeEstadoClasico(EstadoCuentaStripe estado) {
+    switch (estado) {
+      case EstadoCuentaStripe.configurada:
+        return DetalleCuentaStripe.configurada;
+      case EstadoCuentaStripe.requiereActualizacion:
+        return DetalleCuentaStripe.accionNecesaria;
+      case EstadoCuentaStripe.pendiente:
+        return DetalleCuentaStripe.sinIniciar;
+    }
+  }
+}
+
 class MiPerfilProfesional {
   final String nombre;
   final String? telefono;
@@ -101,6 +149,7 @@ class MiPerfilProfesional {
   final String? documentoIdentidadUrl;
   final List<String> categorias;
   final EstadoCuentaStripe estadoCuentaStripe;
+  final DetalleCuentaStripe estadoCuentaStripeDetalle;
   final TipoProfesional? tipoProfesional;
   final List<ProfessionalReview> opiniones;
 
@@ -118,6 +167,7 @@ class MiPerfilProfesional {
     this.documentoIdentidadUrl,
     required this.categorias,
     required this.estadoCuentaStripe,
+    required this.estadoCuentaStripeDetalle,
     this.tipoProfesional,
     this.opiniones = const [],
   });
@@ -152,6 +202,10 @@ class MiPerfilProfesional {
       documentoIdentidadUrl: json['documentoIdentidadUrl'] as String?,
       categorias: List<String>.from(json['categorias'] as List? ?? []),
       estadoCuentaStripe: EstadoCuentaStripe.fromJson(json['estadoCuentaStripe'] as String? ?? 'pendiente'),
+      estadoCuentaStripeDetalle: json['estadoCuentaStripeDetalle'] != null
+          ? DetalleCuentaStripe.fromJson(json['estadoCuentaStripeDetalle'] as String)
+          : DetalleCuentaStripe.desdeEstadoClasico(
+              EstadoCuentaStripe.fromJson(json['estadoCuentaStripe'] as String? ?? 'pendiente')),
       tipoProfesional: TipoProfesional.fromJson(json['tipoProfesional'] as String?),
       opiniones: (json['opiniones'] as List? ?? [])
           .map((r) => ProfessionalReview.fromJson(r as Map<String, dynamic>))

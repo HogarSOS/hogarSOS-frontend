@@ -2615,7 +2615,7 @@ abstract class AppLocalizations {
   /// No description provided for @tipoProfesionalPersonaFisica.
   ///
   /// In es, this message translates to:
-  /// **'Persona física'**
+  /// **'Particular'**
   String get tipoProfesionalPersonaFisica;
 
   /// No description provided for @tipoProfesionalTextoLegal.
@@ -2629,6 +2629,210 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Selecciona tu tipo de profesional'**
   String get tipoProfesionalErrorFaltaSeleccion;
+
+  /// No description provided for @tipoProfesionalPregunta.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cómo trabajas profesionalmente?'**
+  String get tipoProfesionalPregunta;
+
+  /// No description provided for @tipoProfesionalAutonomoDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Estoy dado de alta como trabajador por cuenta propia.'**
+  String get tipoProfesionalAutonomoDesc;
+
+  /// No description provided for @tipoProfesionalEmpresaDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Facturo a través de una sociedad (S.L., S.A., cooperativa…).'**
+  String get tipoProfesionalEmpresaDesc;
+
+  /// No description provided for @tipoProfesionalPersonaFisicaDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Trabajo de forma ocasional, sin estar dado de alta como autónomo.'**
+  String get tipoProfesionalPersonaFisicaDesc;
+
+  /// No description provided for @tipoProfesionalAyudaDuda.
+  ///
+  /// In es, this message translates to:
+  /// **'¿No estás seguro? La mayoría de profesionales son autónomos.'**
+  String get tipoProfesionalAyudaDuda;
+
+  /// No description provided for @altaTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Completa tu alta'**
+  String get altaTitulo;
+
+  /// No description provided for @altaProgreso.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu alta está al {pct}%'**
+  String altaProgreso(int pct);
+
+  /// No description provided for @altaPasoCuenta.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuenta'**
+  String get altaPasoCuenta;
+
+  /// No description provided for @altaPasoPerfil.
+  ///
+  /// In es, this message translates to:
+  /// **'Perfil'**
+  String get altaPasoPerfil;
+
+  /// No description provided for @altaPasoIdentidadCobros.
+  ///
+  /// In es, this message translates to:
+  /// **'Identidad y cobros'**
+  String get altaPasoIdentidadCobros;
+
+  /// No description provided for @altaPasoListo.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo para recibir ofertas'**
+  String get altaPasoListo;
+
+  /// No description provided for @altaFaltaFoto.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade tu foto de perfil'**
+  String get altaFaltaFoto;
+
+  /// No description provided for @altaFaltaCategoria.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige al menos una categoría'**
+  String get altaFaltaCategoria;
+
+  /// No description provided for @altaFaltaTipo.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica cómo trabajas'**
+  String get altaFaltaTipo;
+
+  /// No description provided for @altaMsgPerfilIncompleto.
+  ///
+  /// In es, this message translates to:
+  /// **'Te falta completar tu perfil para poder seguir con tu alta.'**
+  String get altaMsgPerfilIncompleto;
+
+  /// No description provided for @altaMsgStripeSinIniciar.
+  ///
+  /// In es, this message translates to:
+  /// **'Último paso: verifica tu identidad y configura tus cobros. Ten a mano tu DNI y tu IBAN (~5 minutos).'**
+  String get altaMsgStripeSinIniciar;
+
+  /// No description provided for @altaMsgStripeEnProgreso.
+  ///
+  /// In es, this message translates to:
+  /// **'Te quedaste a mitad. Continúa donde lo dejaste.'**
+  String get altaMsgStripeEnProgreso;
+
+  /// No description provided for @altaMsgStripeEnVerificacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Stripe está verificando tu identidad. No tienes que hacer nada — te avisaremos.'**
+  String get altaMsgStripeEnVerificacion;
+
+  /// No description provided for @altaMsgStripeAccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Stripe necesita un dato más para activar tus cobros.'**
+  String get altaMsgStripeAccion;
+
+  /// No description provided for @altaMsgRevisionHogarsos.
+  ///
+  /// In es, this message translates to:
+  /// **'Estamos revisando tu alta. Te avisaremos en cuanto esté aprobada.'**
+  String get altaMsgRevisionHogarsos;
+
+  /// No description provided for @altaMsgListo.
+  ///
+  /// In es, this message translates to:
+  /// **'🎉 ¡Ya estás listo para recibir ofertas!'**
+  String get altaMsgListo;
+
+  /// No description provided for @altaMsgListoAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa tu disponibilidad para que los clientes puedan encontrarte.'**
+  String get altaMsgListoAyuda;
+
+  /// No description provided for @altaMsgStripeCaida.
+  ///
+  /// In es, this message translates to:
+  /// **'⚠️ Tus cobros necesitan una actualización en Stripe.'**
+  String get altaMsgStripeCaida;
+
+  /// No description provided for @altaBotonContinuar.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get altaBotonContinuar;
+
+  /// No description provided for @altaBotonActivarme.
+  ///
+  /// In es, this message translates to:
+  /// **'Activarme ahora'**
+  String get altaBotonActivarme;
+
+  /// No description provided for @altaActivadoExito.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Disponibilidad activada! Ya puedes recibir ofertas.'**
+  String get altaActivadoExito;
+
+  /// No description provided for @puenteTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Verifica tu identidad y configura tus cobros'**
+  String get puenteTitulo;
+
+  /// No description provided for @puenteParrafo1.
+  ///
+  /// In es, this message translates to:
+  /// **'Te llevamos a Stripe, nuestro proveedor de pagos, para verificar tu identidad y configurar tus cobros en un solo paso.'**
+  String get puenteParrafo1;
+
+  /// No description provided for @puenteParrafo2.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya hemos rellenado por ti algunos datos que HogarSOS conoce. Revisa que tu nombre coincida exactamente con tu DNI antes de confirmar.'**
+  String get puenteParrafo2;
+
+  /// No description provided for @puenteParrafo3.
+  ///
+  /// In es, this message translates to:
+  /// **'Stripe te pedirá la información necesaria para verificar tu identidad y recibir pagos: fecha de nacimiento, dirección, DNI/NIE y tu IBAN. Puede que también te pida una foto de tu documento.'**
+  String get puenteParrafo3;
+
+  /// No description provided for @puenteTenAMano.
+  ///
+  /// In es, this message translates to:
+  /// **'Ten a mano tu DNI y tu IBAN — el proceso suele tardar unos minutos.'**
+  String get puenteTenAMano;
+
+  /// No description provided for @puenteBoton.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar con Stripe'**
+  String get puenteBoton;
+
+  /// No description provided for @puentePerfilIncompleto.
+  ///
+  /// In es, this message translates to:
+  /// **'Antes de configurar tus cobros, completa tu perfil: foto, al menos una categoría y cómo trabajas.'**
+  String get puentePerfilIncompleto;
+
+  /// No description provided for @puenteBotonCompletarPerfil.
+  ///
+  /// In es, this message translates to:
+  /// **'Completar mi perfil'**
+  String get puenteBotonCompletarPerfil;
 
   /// No description provided for @cuentaCobroTitulo.
   ///

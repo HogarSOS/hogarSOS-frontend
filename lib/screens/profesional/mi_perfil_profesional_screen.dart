@@ -17,6 +17,8 @@ import '../../utils/tipo_profesional_display.dart';
 import '../../widgets/eliminar_cuenta.dart';
 import '../../widgets/entrada_animada.dart';
 import '../../widgets/lista_opiniones.dart';
+import '../../widgets/wizard_alta.dart';
+import 'puente_stripe_screen.dart';
 import '../legal/privacidad_screen.dart';
 import '../legal/terminos_screen.dart';
 import '../../widgets/verification_badge.dart';
@@ -65,16 +67,11 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
   TipoProfesional? _tipoProfesionalSeleccionado;
 
   bool _iniciandoOnboardingStripe = false;
+  bool _activandoDisponibilidad = false;
 
   List<ServiceCategory> _todasCategorias = [];
   List<String> _categoriasActuales = [];
   bool _actualizandoCategorias = false;
-
-  /// Lo mínimo para aparecer en búsquedas de forma útil: foto y al
-  /// menos una categoría. Se recalcula sobre el estado LOCAL (no el
-  /// que vino del servidor) para que el aviso desaparezca al instante
-  /// según se va completando.
-  bool get _perfilCompleto => _fotoPerfilUrlActual != null && _categoriasActuales.isNotEmpty;
 
   @override
   void initState() {
@@ -231,6 +228,41 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
     }
   }
 
+  /// La tarifa orientativa salió del camino estándar del alta (era una
+  /// fricción heredada: el precio real se acuerda por presupuesto) —
+  /// sigue siendo editable aquí como dato opcional del perfil, porque el
+  /// cliente aún puede filtrar por precio máximo en la búsqueda.
+  Future<void> _editarTarifa() async {
+    final t = AppLocalizations.of(context);
+    final nuevo = await _pedirTexto(
+      titulo: t.miPerfilPrecioLabel,
+      valorInicial: (_perfil?.tarifaBase ?? 0) > 0 ? _perfil!.tarifaBase.toStringAsFixed(2) : '',
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+    );
+    if (nuevo == null || nuevo.isEmpty || !mounted) return;
+
+    final tarifa = double.tryParse(nuevo.replaceAll(',', '.'));
+    if (tarifa == null || tarifa <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.miPerfilVerificacionErrorFaltaTarifa)),
+      );
+      return;
+    }
+
+    try {
+      await _professionalService.actualizarPerfil(tarifaBase: tarifa);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.miPerfilExito)));
+      _cargarPerfil();
+    } catch (e) {
+      debugPrint('[MiPerfilProfesionalScreen] Error al actualizar la tarifa: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${t.miPerfilErrorGuardar}: ${mensajeDeError(e, t: t)}')),
+      );
+    }
+  }
+
   Future<void> _editarCategorias() async {
     final t = AppLocalizations.of(context);
     final seleccionInicial = _todasCategorias
@@ -274,6 +306,153 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
       );
     } finally {
       if (mounted) setState(() => _actualizandoCategorias = false);
+    }
+    _intentarEnviarPerfilAlta();
+  }
+
+  /// Diálogo del tipo profesional con el copy de la revisión adversarial
+  /// ("¿Cómo trabajas profesionalmente?") — pensado para entenderse sin
+  /// conocimientos fiscales: descripciones llanas y la etiqueta
+  /// "Particular" en vez de "Persona física" (el valor interno
+  /// persona_fisica en BD no cambia).
+  Future<void> _elegirTipoProfesionalAlta() async {
+    final t = AppLocalizations.of(context);
+
+    final elegido = await showDialog<TipoProfesional>(
+      context: context,
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return AlertDialog(
+          title: Text(t.tipoProfesionalPregunta),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final (tipo, etiqueta, descripcion) in [
+                  (TipoProfesional.autonomo, t.tipoProfesionalAutonomo, t.tipoProfesionalAutonomoDesc),
+                  (TipoProfesional.empresa, t.tipoProfesionalEmpresa, t.tipoProfesionalEmpresaDesc),
+                  (TipoProfesional.personaFisica, t.tipoProfesionalPersonaFisica, t.tipoProfesionalPersonaFisicaDesc),
+                ])
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(tipo),
+                      style: OutlinedButton.styleFrom(
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(etiqueta, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                          const SizedBox(height: 2),
+                          Text(
+                            descripcion,
+                            style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant, height: 1.3),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 4),
+                Text(
+                  t.tipoProfesionalAyudaDuda,
+                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant, fontStyle: FontStyle.italic),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  t.tipoProfesionalTextoLegal,
+                  style: TextStyle(fontSize: 10.5, color: colorScheme.onSurfaceVariant, height: 1.3),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (elegido == null || !mounted) return;
+    setState(() => _tipoProfesionalSeleccionado = elegido);
+    _intentarEnviarPerfilAlta();
+  }
+
+  /// Cierra el paso "Perfil" del wizard: en cuanto foto + categoría +
+  /// tipo existen, persiste el tipo vía POST /me/verification (SIN
+  /// documento de identidad — la verificación de identidad real la hace
+  /// Stripe; el DNI manual queda solo para incidencias) y deja armada la
+  /// aprobación automática del backend. Idempotente y silencioso: se
+  /// llama tras cada pieza completada y solo actúa cuando toca.
+  Future<void> _intentarEnviarPerfilAlta() async {
+    if (_enviandoVerificacion) return;
+    final perfil = _perfil;
+    if (perfil == null) return;
+    // Las incidencias (rechazado) se reenvían desde su propia tarjeta,
+    // con documento — nunca desde este camino silencioso.
+    if (perfil.estadoVerificacion == 'rechazado') return;
+
+    final tipo = _tipoProfesionalSeleccionado;
+    if (tipo == null || _fotoPerfilUrlActual == null || _categoriasActuales.isEmpty) return;
+    // Ya persistido con el mismo tipo — nada que hacer.
+    if (perfil.tipoProfesional == tipo) return;
+
+    final categoriaIds = _todasCategorias
+        .where((c) => _categoriasActuales.contains(c.nombre))
+        .map((c) => c.id)
+        .toList();
+    if (categoriaIds.isEmpty) return;
+
+    setState(() => _enviandoVerificacion = true);
+    try {
+      await _professionalService.enviarVerificacion(
+        categoriaIds: categoriaIds,
+        tipoProfesional: tipo,
+      );
+      if (!mounted) return;
+      await _cargarPerfil();
+    } catch (e) {
+      debugPrint('[MiPerfilProfesionalScreen] Error al enviar el perfil del alta: $e');
+      if (!mounted) return;
+      final t = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${t.miPerfilVerificacionErrorEnvio}: ${mensajeDeError(e, t: t)}')),
+      );
+    } finally {
+      if (mounted) setState(() => _enviandoVerificacion = false);
+    }
+  }
+
+  /// Puerta única al onboarding de Stripe mientras no está aprobado —
+  /// siempre a través de la pantalla puente (nunca salto directo).
+  void _abrirPuenteStripe() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const PuenteStripeScreen()),
+    );
+  }
+
+  /// Último toque del wizard: activa la disponibilidad con el endpoint
+  /// de siempre (mismos gates del backend — nunca se auto-activa).
+  Future<void> _activarmeAhora() async {
+    final t = AppLocalizations.of(context);
+    final estadoDisp = ref.read(disponibilidadProvider).valueOrNull;
+
+    setState(() => _activandoDisponibilidad = true);
+    try {
+      await ref.read(disponibilidadProvider.notifier).actualizar(
+            disponible: true,
+            modo: estadoDisp?.modo ?? ModoDisponibilidad.horarioLaboral,
+          );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.altaActivadoExito)));
+      await _cargarPerfil();
+    } catch (e) {
+      debugPrint('[MiPerfilProfesionalScreen] Error al activar disponibilidad desde el wizard: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.profesionalErrorDisponibilidad, t: t))),
+      );
+    } finally {
+      if (mounted) setState(() => _activandoDisponibilidad = false);
     }
   }
 
@@ -333,6 +512,7 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
       // disponibilidad depende de disponibilidadProvider, no de este
       // estado local.
       ref.read(disponibilidadProvider.notifier).cargar();
+      _intentarEnviarPerfilAlta();
     } catch (e) {
       debugPrint('[MiPerfilProfesionalScreen] Error al subir la foto: $e');
       if (!mounted) return;
@@ -462,6 +642,11 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
     }
   }
 
+  // El caso "pendiente" ya no distingue por si subió el documento de
+  // identidad: con el nuevo flujo de alta el DNI no forma parte del
+  // camino estándar (la identidad la verifica Stripe), así que "sin
+  // enviar documento" dejó de ser un estado con significado — pendiente
+  // es simplemente "alta en curso" (el wizard ya detalla qué falta).
   IconData get _estadoIcono {
     switch (_perfil?.estadoVerificacion) {
       case 'aprobado':
@@ -469,7 +654,7 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
       case 'rechazado':
         return Icons.cancel_outlined;
       default:
-        return _documentoIdentidadUrlActual == null ? Icons.upload_file_outlined : Icons.hourglass_top_outlined;
+        return Icons.hourglass_top_outlined;
     }
   }
 
@@ -480,7 +665,7 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
       case 'rechazado':
         return colorScheme.error;
       default:
-        return _documentoIdentidadUrlActual == null ? colorScheme.outline : const Color(0xFFB98900);
+        return const Color(0xFFB98900);
     }
   }
 
@@ -491,7 +676,7 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
       case 'rechazado':
         return t.miPerfilEstadoRechazado;
       default:
-        return _documentoIdentidadUrlActual == null ? t.miPerfilEstadoSinEnviar : t.miPerfilEstadoPendiente;
+        return t.miPerfilEstadoPendiente;
     }
   }
 
@@ -518,13 +703,31 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 36),
                     children: [
-                      if (!_perfilCompleto)
+                      // Wizard "Completa tu alta" — la guía única del
+                      // alta (sustituye al antiguo aviso de perfil
+                      // incompleto). Se oculta solo cuando el alta está
+                      // terminada Y disponible (lo decide el propio
+                      // widget), y también en 'rechazado': ahí manda la
+                      // tarjeta de incidencia de más abajo.
+                      if ((_perfil?.estadoVerificacion ?? 'pendiente') != 'rechazado')
                         EntradaAnimada(
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: 20),
-                            child: _AvisoPerfilIncompleto(
-                              faltaFoto: _fotoPerfilUrlActual == null,
-                              faltaCategoria: _categoriasActuales.isEmpty,
+                            child: WizardAlta(
+                              fotoOk: _fotoPerfilUrlActual != null,
+                              categoriaOk: _categoriasActuales.isNotEmpty,
+                              tipoOk: _perfil?.tipoProfesional != null,
+                              aprobado: _perfil?.estadoVerificacion == 'aprobado',
+                              detalle: _perfil?.estadoCuentaStripeDetalle ?? DetalleCuentaStripe.sinIniciar,
+                              disponible: ref.watch(disponibilidadProvider).valueOrNull?.disponible ??
+                                  _perfil?.disponible ??
+                                  false,
+                              activando: _activandoDisponibilidad,
+                              onFoto: _elegirFoto,
+                              onCategorias: _editarCategorias,
+                              onTipo: _elegirTipoProfesionalAlta,
+                              onStripe: _abrirPuenteStripe,
+                              onActivarme: _activarmeAhora,
                             ),
                           ),
                         ),
@@ -587,7 +790,13 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                                 ),
                         ),
                       ),
-                      if ((_perfil?.estadoVerificacion ?? 'pendiente') != 'aprobado') ...[
+                      // Tarjeta de incidencia/revisión manual: SOLO en
+                      // 'rechazado'. El camino estándar del alta ya no
+                      // pide la foto del DNI (la identidad la verifica
+                      // Stripe) — el endpoint, el almacenamiento y esta
+                      // tarjeta se conservan para reenvíos tras un
+                      // rechazo con revisión de un admin.
+                      if ((_perfil?.estadoVerificacion ?? 'pendiente') == 'rechazado') ...[
                         const SizedBox(height: 16),
                         EntradaAnimada(
                           retraso: const Duration(milliseconds: 120),
@@ -604,23 +813,35 @@ class _MiPerfilProfesionalScreenState extends ConsumerState<MiPerfilProfesionalS
                           ),
                         ),
                       ],
-                      const SizedBox(height: 16),
-                      EntradaAnimada(
-                        retraso: const Duration(milliseconds: 135),
-                        child: _TarjetaCuentaCobro(
-                          estado: _perfil?.estadoCuentaStripe ?? EstadoCuentaStripe.pendiente,
-                          cargando: _iniciandoOnboardingStripe,
-                          onConfigurar: _configurarCuentaCobro,
+                      // La tarjeta clásica de cuenta de cobro solo cuando
+                      // el wizard no está guiando ese paso: aprobado y
+                      // operativa (botón "Editar", BUG 003 — se conserva)
+                      // o en incidencia (rechazado, vía pantalla puente).
+                      if (_perfil?.estadoVerificacion == 'rechazado' ||
+                          (_perfil?.estadoVerificacion == 'aprobado' &&
+                              _perfil?.estadoCuentaStripeDetalle == DetalleCuentaStripe.configurada)) ...[
+                        const SizedBox(height: 16),
+                        EntradaAnimada(
+                          retraso: const Duration(milliseconds: 135),
+                          child: _TarjetaCuentaCobro(
+                            estado: _perfil?.estadoCuentaStripe ?? EstadoCuentaStripe.pendiente,
+                            cargando: _iniciandoOnboardingStripe,
+                            onConfigurar: _perfil?.estadoCuentaStripe == EstadoCuentaStripe.configurada
+                                ? _configurarCuentaCobro
+                                : _abrirPuenteStripe,
+                          ),
                         ),
-                      ),
+                      ],
                       const SizedBox(height: 16),
                       EntradaAnimada(
                         retraso: const Duration(milliseconds: 150),
                         child: _TarjetaContacto(
                           telefono: _perfil?.telefono ?? '',
                           descripcion: _perfil?.descripcion ?? '',
+                          tarifaBase: _perfil?.tarifaBase ?? 0,
                           onEditarTelefono: _editarTelefono,
                           onEditarDescripcion: _editarDescripcion,
+                          onEditarTarifa: _editarTarifa,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -1029,14 +1250,18 @@ class _TarjetaContacto extends StatelessWidget {
   const _TarjetaContacto({
     required this.telefono,
     required this.descripcion,
+    required this.tarifaBase,
     required this.onEditarTelefono,
     required this.onEditarDescripcion,
+    required this.onEditarTarifa,
   });
 
   final String telefono;
   final String descripcion;
+  final double tarifaBase;
   final VoidCallback onEditarTelefono;
   final VoidCallback onEditarDescripcion;
+  final VoidCallback onEditarTarifa;
 
   @override
   Widget build(BuildContext context) {
@@ -1084,6 +1309,25 @@ class _TarjetaContacto extends StatelessWidget {
                 fontSize: 14.5,
                 height: 1.4,
                 color: tieneDescripcion ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 14),
+            child: Divider(height: 1),
+          ),
+          // Tarifa orientativa (opcional) — antes vivía dentro de la
+          // tarjeta de verificación; al salir el DNI del camino estándar
+          // necesitaba un sitio editable propio.
+          _FilaInfo(
+            icono: Icons.euro_outlined,
+            titulo: t.miPerfilPrecioLabel,
+            onEditar: onEditarTarifa,
+            child: Text(
+              tarifaBase > 0 ? '${tarifaBase.toStringAsFixed(2)} €/h' : '—',
+              style: TextStyle(
+                fontSize: 14.5,
+                color: tarifaBase > 0 ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -1504,55 +1748,6 @@ class _TarjetaCuentaCobro extends StatelessWidget {
                   ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _AvisoPerfilIncompleto extends StatelessWidget {
-  const _AvisoPerfilIncompleto({required this.faltaFoto, required this.faltaCategoria});
-
-  final bool faltaFoto;
-  final bool faltaCategoria;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
-
-    final partes = <String>[
-      if (faltaFoto) t.miPerfilFaltaFoto,
-      if (faltaCategoria) t.miPerfilFaltaCategoria,
-    ];
-
-    return Material(
-      color: colorScheme.errorContainer,
-      borderRadius: BorderRadius.circular(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(Icons.info_outline, color: colorScheme.onErrorContainer),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    t.miPerfilIncompletoTitulo,
-                    style: TextStyle(fontWeight: FontWeight.w700, color: colorScheme.onErrorContainer),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${t.miPerfilIncompletoAyuda} ${partes.join(", ")}.',
-                    style: TextStyle(fontSize: 12.5, color: colorScheme.onErrorContainer),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

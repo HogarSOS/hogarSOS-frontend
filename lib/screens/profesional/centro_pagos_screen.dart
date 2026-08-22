@@ -7,6 +7,7 @@ import '../../providers/stripe_return_provider.dart';
 import '../profesional_shell_screen.dart';
 import '../../services/payment_service.dart';
 import '../../services/professional_service.dart';
+import 'puente_stripe_screen.dart';
 import '../../utils/category_display.dart';
 import '../../widgets/entrada_animada.dart';
 
@@ -65,6 +66,19 @@ class _CentroPagosScreenState extends ConsumerState<CentroPagosScreen> {
   }
 
   Future<void> _configurarCuentaCobro() async {
+    // Puerta unificada (revisión adversarial punto 12): mientras la
+    // cuenta no está operativa, este botón lleva a la misma pantalla
+    // puente que el wizard de "Mi perfil" — con sus expectativas, su
+    // control de perfil completo y su prefill —, nunca directo a Stripe.
+    // Solo "Editar cuenta de cobro" (ya configurada) mantiene el salto
+    // directo de siempre.
+    if (_resumen?.estadoCuentaStripe != EstadoCuentaStripe.configurada) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const PuenteStripeScreen()),
+      );
+      return;
+    }
+
     setState(() => _iniciandoOnboardingStripe = true);
     try {
       final url = await _professionalService.iniciarOnboardingStripe();

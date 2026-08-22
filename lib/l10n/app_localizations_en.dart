@@ -1493,6 +1493,127 @@ class AppLocalizationsEn extends AppLocalizations {
       'Select your professional type';
 
   @override
+  String get tipoProfesionalPregunta => 'How do you work professionally?';
+
+  @override
+  String get tipoProfesionalAutonomoDesc =>
+      'I\'m registered as a self-employed worker.';
+
+  @override
+  String get tipoProfesionalEmpresaDesc =>
+      'I invoice through a company (Ltd., co-op…).';
+
+  @override
+  String get tipoProfesionalPersonaFisicaDesc =>
+      'I work occasionally, without being registered as self-employed.';
+
+  @override
+  String get tipoProfesionalAyudaDuda =>
+      'Not sure? Most professionals are self-employed.';
+
+  @override
+  String get altaTitulo => 'Complete your onboarding';
+
+  @override
+  String altaProgreso(int pct) {
+    return 'Your onboarding is $pct% complete';
+  }
+
+  @override
+  String get altaPasoCuenta => 'Account';
+
+  @override
+  String get altaPasoPerfil => 'Profile';
+
+  @override
+  String get altaPasoIdentidadCobros => 'Identity & payouts';
+
+  @override
+  String get altaPasoListo => 'Ready to receive offers';
+
+  @override
+  String get altaFaltaFoto => 'Add your profile photo';
+
+  @override
+  String get altaFaltaCategoria => 'Pick at least one category';
+
+  @override
+  String get altaFaltaTipo => 'Tell us how you work';
+
+  @override
+  String get altaMsgPerfilIncompleto =>
+      'Complete your profile to continue with your onboarding.';
+
+  @override
+  String get altaMsgStripeSinIniciar =>
+      'Last step: verify your identity and set up your payouts. Have your ID and IBAN at hand (~5 minutes).';
+
+  @override
+  String get altaMsgStripeEnProgreso =>
+      'You left halfway through. Pick up where you left off.';
+
+  @override
+  String get altaMsgStripeEnVerificacion =>
+      'Stripe is verifying your identity. Nothing to do — we\'ll let you know.';
+
+  @override
+  String get altaMsgStripeAccion =>
+      'Stripe needs one more detail to activate your payouts.';
+
+  @override
+  String get altaMsgRevisionHogarsos =>
+      'We\'re reviewing your onboarding. We\'ll let you know as soon as it\'s approved.';
+
+  @override
+  String get altaMsgListo => '🎉 You\'re ready to receive offers!';
+
+  @override
+  String get altaMsgListoAyuda =>
+      'Turn on your availability so clients can find you.';
+
+  @override
+  String get altaMsgStripeCaida => '⚠️ Your payouts need an update in Stripe.';
+
+  @override
+  String get altaBotonContinuar => 'Continue';
+
+  @override
+  String get altaBotonActivarme => 'Activate me now';
+
+  @override
+  String get altaActivadoExito =>
+      'Availability on! You can now receive offers.';
+
+  @override
+  String get puenteTitulo => 'Verify your identity and set up your payouts';
+
+  @override
+  String get puenteParrafo1 =>
+      'We\'ll take you to Stripe, our payment provider, to verify your identity and set up your payouts in a single step.';
+
+  @override
+  String get puenteParrafo2 =>
+      'We\'ve pre-filled some details HogarSOS already knows. Check that your name matches your ID exactly before confirming.';
+
+  @override
+  String get puenteParrafo3 =>
+      'Stripe will ask for the information needed to verify your identity and receive payments: date of birth, address, ID number and your IBAN. It may also ask for a photo of your ID document.';
+
+  @override
+  String get puenteTenAMano =>
+      'Have your ID and IBAN at hand — it usually takes a few minutes.';
+
+  @override
+  String get puenteBoton => 'Continue with Stripe';
+
+  @override
+  String get puentePerfilIncompleto =>
+      'Before setting up your payouts, complete your profile: photo, at least one category and how you work.';
+
+  @override
+  String get puenteBotonCompletarPerfil => 'Complete my profile';
+
+  @override
   String get cuentaCobroTitulo => 'Payout account';
 
   @override

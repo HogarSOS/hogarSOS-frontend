@@ -218,11 +218,23 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
     final tipo = mensaje.data['tipo'] as String?;
     final navigator = navigatorKey.currentState;
 
-    if (solicitudId == null) {
+    if (navigator == null) {
       return;
     }
 
-    if (navigator == null) {
+    // verificacion_aprobada no lleva solicitudId — su destino es la
+    // pestaña Perfil (índice 0), donde vive el wizard "Completa tu alta"
+    // con el botón "Activarme ahora". Mismo doble write que el resto de
+    // destinos por pestaña: directo para el shell ya estable, pendiente
+    // como red de seguridad del arranque en frío.
+    if (tipo == 'verificacion_aprobada' && role == UserRole.profesional) {
+      navigator.popUntil((route) => route.isFirst);
+      ref.read(pendingProfesionalTabRequestProvider.notifier).state = 0;
+      ref.read(profesionalTabIndexProvider.notifier).state = 0;
+      return;
+    }
+
+    if (solicitudId == null) {
       return;
     }
 
