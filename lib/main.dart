@@ -51,15 +51,26 @@ Future<void> main() async {
   // saliendo por consola como siempre. Sin identificadores de usuario
   // (nada de setUserIdentifier/custom keys con PII): stack trace,
   // modelo de dispositivo y un UUID de instalación propio de Crashlytics.
-  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(kReleaseMode);
-  if (kReleaseMode) {
-    // Errores del framework Flutter (build/layout/gesture...).
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-    // Errores asíncronos fuera del framework (futures sin catch, zonas).
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
+  // REGLA (bloqueador del build 41, 2026-08-23): Crashlytics es
+  // telemetría, NUNCA una dependencia crítica del arranque. Su init va
+  // entera dentro de un try/catch para que ningún fallo suyo (como la
+  // PlatformException "FirebaseCrashlytics component is not present"
+  // que dejó el 41 clavado en el splash antes de runApp) pueda impedir
+  // que la app llegue al Home: si falla, se anota por consola y la app
+  // arranca igual, solo que sin crash reporting.
+  try {
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(kReleaseMode);
+    if (kReleaseMode) {
+      // Errores del framework Flutter (build/layout/gesture...).
+      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+      // Errores asíncronos fuera del framework (futures sin catch, zonas).
+      PlatformDispatcher.instance.onError = (error, stack) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        return true;
+      };
+    }
+  } catch (e) {
+    debugPrint('[main] Crashlytics no disponible (la app continúa sin telemetría): $e');
   }
 
   // Una build de release con clave de TEST no debe llegar a los usuarios:
