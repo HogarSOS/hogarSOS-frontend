@@ -2,19 +2,33 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>426602101481-09e68ldglo15v84lsdcskj86irf2g04u.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.426602101481-09e68ldglo15v84lsdcskj86irf2g04u</string>
 	<key>API_KEY</key>
 	<string>AIzaSyC9sNtUyUmy15SE9QygtNTBYJnPboKShoo</string>
-	<key>BUNDLE_ID</key>
-	<string>es.hogarsos.app</string>
 	<key>GCM_SENDER_ID</key>
 	<string>426602101481</string>
-	<key>GOOGLE_APP_ID</key>
-	<string>1:426602101481:ios:cb35191208b15787274e78</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>es.hogarsos.app</string>
 	<key>PROJECT_ID</key>
 	<string>hogarsos</string>
 	<key>STORAGE_BUCKET</key>
 	<string>hogarsos.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:426602101481:ios:cb35191208b15787274e78</string>
 </dict>
 </plist>
