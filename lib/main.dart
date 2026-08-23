@@ -1,8 +1,11 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 
 import 'app_keys.dart';
@@ -40,6 +43,24 @@ bool get _claveDeTestEnRelease => kReleaseMode && _clavePublicaStripe.startsWith
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  // Crashlytics (build 41, decisión post-auditoría del build 40): la app
+  // no tenía NINGÚN crash reporting — un fallo en producción era
+  // invisible salvo que el usuario lo contara. Solo en release: en
+  // debug/profile la recogida queda apagada y los errores siguen
+  // saliendo por consola como siempre. Sin identificadores de usuario
+  // (nada de setUserIdentifier/custom keys con PII): stack trace,
+  // modelo de dispositivo y un UUID de instalación propio de Crashlytics.
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(kReleaseMode);
+  if (kReleaseMode) {
+    // Errores del framework Flutter (build/layout/gesture...).
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    // Errores asíncronos fuera del framework (futures sin catch, zonas).
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
 
   // Una build de release con clave de TEST no debe llegar a los usuarios:
   // el Payment Sheet se abriría con normalidad, el cliente vería "pago

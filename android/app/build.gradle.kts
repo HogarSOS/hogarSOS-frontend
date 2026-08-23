@@ -4,6 +4,10 @@ plugins {
     id("com.android.application")
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.gms.google-services")
+    // Crashlytics (build 41): sube automáticamente el mapping de R8 en
+    // cada build de release para que los stack traces lleguen
+    // desofuscados a la consola de Firebase.
+    id("com.google.firebase.crashlytics")
 }
 
 val keystorePropertiesFile = rootProject.file("key.properties")

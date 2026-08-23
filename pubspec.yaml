@@ -58,6 +58,7 @@ dependencies:
   # excepción) en launchers Android que no lo soportan, ver
   # app_badge_service.dart.
   app_badge_plus: ^1.2.4
+  firebase_crashlytics: ^4.3.10
 
 dev_dependencies:
   flutter_test:
