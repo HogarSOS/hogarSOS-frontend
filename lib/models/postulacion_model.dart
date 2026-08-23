@@ -1,3 +1,5 @@
+import 'tipo_profesional.dart';
+
 /// Un profesional postulado a una solicitud, tal como lo ve el
 /// cliente al elegir. No reutiliza ProfessionalSummary (modelo de la
 /// búsqueda de profesionales, sin mensaje de disponibilidad ni el
@@ -14,6 +16,13 @@ class PostulacionCandidate {
   final bool estaVerificado;
   final DateTime createdAt;
 
+  /// Situación fiscal declarada (Autónomo/Empresa/Particular) para que
+  /// el cliente la vea ANTES de elegir. Nullable a propósito: una API
+  /// antigua sin el campo, o un valor desconocido, se queda en null y
+  /// la tarjeta simplemente no pinta el chip (TipoProfesional.fromJson
+  /// ya devuelve null en ambos casos).
+  final TipoProfesional? tipoProfesional;
+
   PostulacionCandidate({
     required this.id,
     required this.profesionalId,
@@ -25,6 +34,7 @@ class PostulacionCandidate {
     required this.mensaje,
     required this.estaVerificado,
     required this.createdAt,
+    this.tipoProfesional,
   });
 
   factory PostulacionCandidate.fromJson(Map<String, dynamic> json) {
@@ -39,6 +49,7 @@ class PostulacionCandidate {
       mensaje: json['mensaje'] as String? ?? '',
       estaVerificado: json['estado_verificacion'] == 'aprobado',
       createdAt: DateTime.parse(json['created_at'] as String),
+      tipoProfesional: TipoProfesional.fromJson(json['tipo_profesional'] as String?),
     );
   }
 }

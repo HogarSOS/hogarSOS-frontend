@@ -645,7 +645,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'View history and ongoing requests';
 
   @override
-  String get homeSubtitulo => 'What do you need fixed today?';
+  String get homeSubtitulo => 'How can we help you today?';
 
   @override
   String get homeBuscarPlaceholder => 'Search for a professional or service...';
@@ -661,7 +661,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeSolicitarProfesionalAyuda =>
-      'Tell us what you need and we\'ll connect you';
+      'Tell us what you need and we\'ll help you solve it.';
 
   @override
   String get homeDescribeProblema => 'Describe the problem';

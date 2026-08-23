@@ -648,7 +648,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ver historial y solicitudes en curso';
 
   @override
-  String get homeSubtitulo => '¿Qué necesitas arreglar hoy?';
+  String get homeSubtitulo => '¿Cómo podemos ayudarte hoy?';
 
   @override
   String get homeBuscarPlaceholder => 'Busca un profesional o servicio...';
@@ -664,7 +664,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeSolicitarProfesionalAyuda =>
-      'Cuéntanos qué necesitas y te ponemos en contacto';
+      'Cuéntanos qué necesitas y te ayudaremos a solucionarlo.';
 
   @override
   String get homeDescribeProblema => 'Describe el problema';

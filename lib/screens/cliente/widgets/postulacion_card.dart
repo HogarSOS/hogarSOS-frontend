@@ -3,6 +3,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../models/postulacion_model.dart';
 import '../../../widgets/verification_badge.dart';
 import '../../../utils/imagen_autenticada.dart';
+import '../../../utils/tipo_profesional_display.dart';
 
 /// Tarjeta de un candidato en la pantalla "Elegir profesional" — mismo
 /// lenguaje visual que ProfessionalCard (búsqueda), pero con los datos
@@ -88,6 +89,31 @@ class PostulacionCard extends StatelessWidget {
                           ],
                         ],
                       ),
+                      // Tipo declarado (Autónomo/Empresa/Particular) como chip
+                      // propio, separado del nombre: el cliente lo ve ANTES de
+                      // elegir sin entrar al perfil (hallazgo C del cierre P0).
+                      // API antigua o tipo desconocido → null → no se pinta.
+                      // Va en su propia línea (no en la fila del nombre ni la
+                      // de valoración) para que un nombre largo o la fuente
+                      // grande del sistema nunca lo desborden.
+                      if (c.tipoProfesional != null) ...[
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            etiquetaTipoProfesional(t, c.tipoProfesional!),
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
