@@ -1816,7 +1816,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cuentaCobroEstadoPendiente =>
-      'Configura tu cuenta de cobro con Stripe para poder recibir pagos por tus trabajos.';
+      'Necesitas una cuenta de cobro con Stripe para recibir el dinero de tus trabajos. Si ya la empezaste, continuarás donde lo dejaste.';
 
   @override
   String get cuentaCobroEstadoRequiereActualizacion =>

@@ -321,6 +321,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     if (index < mensajes.length) {
                       final mensaje = mensajes[index];
                       final esMio = mensaje.autorId == _miUid;
+                      // Nombre del remitente SOLO en la primera burbuja de
+                      // cada racha de la contraparte (nunca en las mías:
+                      // ya se identifican por alineación y color). Se
+                      // resuelve dinámico desde nombreContraparte — el
+                      // nombre público que ya muestran el AppBar y las
+                      // listas —, jamás guardado en el mensaje: así un
+                      // cambio de nombre (o la anonimización RGPD a
+                      // "Usuario eliminado") se refleja también en los
+                      // mensajes antiguos. Sin nombre disponible (entrada
+                      // por push sin título), simplemente no hay etiqueta.
+                      final inicioRacha = index == 0 || mensajes[index - 1].autorId != mensaje.autorId;
+                      final nombreAutor = !esMio && inicioRacha ? widget.nombreContraparte : null;
                       // Leído por la otra persona: solo tiene sentido para
                       // mis propios mensajes (nunca pinto un check en los
                       // mensajes ajenos, como en cualquier app de chat).
@@ -330,6 +342,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         texto: mensaje.texto,
                         enviadoEn: mensaje.enviadoEn,
                         esMio: esMio,
+                        nombreAutor: nombreAutor,
                         icono: esMio
                             ? Icon(
                                 leido ? Icons.done_all : Icons.done,
@@ -409,12 +422,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     required DateTime enviadoEn,
     required bool esMio,
     required Widget? icono,
+    String? nombreAutor,
   }) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    return Align(
-      alignment: esMio ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
+    final burbuja = Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         constraints: BoxConstraints(
@@ -466,6 +478,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
           ],
         ),
+      );
+
+    return Align(
+      alignment: esMio ? Alignment.centerRight : Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: esMio ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (nombreAutor != null && nombreAutor.isNotEmpty)
+            Container(
+              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+              padding: const EdgeInsets.only(left: 8, top: 6),
+              child: Text(
+                nombreAutor,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          burbuja,
+        ],
       ),
     );
   }

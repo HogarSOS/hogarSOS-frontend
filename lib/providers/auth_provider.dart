@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../app_keys.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/notification_service.dart';
@@ -182,6 +183,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> logout() async {
     await _authService.logout();
+    // Los SnackBars viven en el ScaffoldMessenger raíz, no en la pantalla
+    // que los mostró: uno ya visible (p. ej. "¡Te han elegido!") seguía en
+    // pantalla sus ~4s de duración por encima del login tras cerrar
+    // sesión. Todo aviso pendiente pertenece a la sesión que termina aquí.
+    scaffoldMessengerKey.currentState?.clearSnackBars();
     state = const AuthState(restaurando: false);
   }
 }

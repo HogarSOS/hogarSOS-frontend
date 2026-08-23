@@ -3161,7 +3161,7 @@ abstract class AppLocalizations {
   /// No description provided for @cuentaCobroEstadoPendiente.
   ///
   /// In es, this message translates to:
-  /// **'Configura tu cuenta de cobro con Stripe para poder recibir pagos por tus trabajos.'**
+  /// **'Necesitas una cuenta de cobro con Stripe para recibir el dinero de tus trabajos. Si ya la empezaste, continuarás donde lo dejaste.'**
   String get cuentaCobroEstadoPendiente;
 
   /// No description provided for @cuentaCobroEstadoRequiereActualizacion.

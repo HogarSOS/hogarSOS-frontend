@@ -1801,7 +1801,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cuentaCobroEstadoPendiente =>
-      'Set up your payout account with Stripe to get paid for your jobs.';
+      'You need a Stripe payout account to receive the money from your jobs. If you already started, you\'ll pick up where you left off.';
 
   @override
   String get cuentaCobroEstadoRequiereActualizacion =>

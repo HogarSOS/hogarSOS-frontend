@@ -584,7 +584,7 @@
   "puenteBotonCompletarPerfil": "Completar mi perfil",
   "cuentaCobroTitulo": "Cuenta de cobro",
   "cuentaCobroEstadoConfigurada": "Configurada — ya puedes recibir pagos.",
-  "cuentaCobroEstadoPendiente": "Configura tu cuenta de cobro con Stripe para poder recibir pagos por tus trabajos.",
+  "cuentaCobroEstadoPendiente": "Necesitas una cuenta de cobro con Stripe para recibir el dinero de tus trabajos. Si ya la empezaste, continuarás donde lo dejaste.",
   "cuentaCobroEstadoRequiereActualizacion": "Stripe necesita más información para poder pagarte. Complétala para seguir cobrando.",
   "cuentaCobroBotonConfigurar": "Configurar cuenta de cobro",
   "cuentaCobroBotonActualizar": "Actualizar en Stripe",

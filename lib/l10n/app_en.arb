@@ -584,7 +584,7 @@
   "puenteBotonCompletarPerfil": "Complete my profile",
   "cuentaCobroTitulo": "Payout account",
   "cuentaCobroEstadoConfigurada": "Set up — you can now receive payments.",
-  "cuentaCobroEstadoPendiente": "Set up your payout account with Stripe to get paid for your jobs.",
+  "cuentaCobroEstadoPendiente": "You need a Stripe payout account to receive the money from your jobs. If you already started, you'll pick up where you left off.",
   "cuentaCobroEstadoRequiereActualizacion": "Stripe needs more information to be able to pay you. Complete it to keep getting paid.",
   "cuentaCobroBotonConfigurar": "Set up payout account",
   "cuentaCobroBotonActualizar": "Update on Stripe",
