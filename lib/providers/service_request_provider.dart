@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/service_category_model.dart';
 import '../models/service_request_model.dart';
+import '../models/user_model.dart';
 import '../services/service_request_service.dart';
+import 'auth_provider.dart';
 
 final serviceRequestServiceProvider = Provider((ref) => ServiceRequestService());
 
@@ -17,8 +19,8 @@ final categoriesProvider = FutureProvider<List<ServiceCategory>>((ref) async {
 /// soportar "refrescar" y "quitar de la lista al aceptar" sin recargar
 /// toda la pantalla.
 class NearbyRequestsNotifier extends StateNotifier<AsyncValue<List<NearbyRequest>>> {
-  NearbyRequestsNotifier(this._servicio) : super(const AsyncValue.loading()) {
-    cargar();
+  NearbyRequestsNotifier(this._servicio, {bool autoCargar = true}) : super(const AsyncValue.loading()) {
+    if (autoCargar) cargar();
   }
 
   final ServiceRequestService _servicio;
@@ -34,12 +36,17 @@ class NearbyRequestsNotifier extends StateNotifier<AsyncValue<List<NearbyRequest
     if (!state.hasValue) state = const AsyncValue.loading();
     try {
       final solicitudes = await _servicio.listarCercanas();
+      // `mounted`: si el provider se reconstruyó a mitad de la petición
+      // (logout / cambio de cuenta — ver el watch de authProvider abajo),
+      // esta respuesta pertenece a la cuenta ANTERIOR y no debe escribir
+      // nada en el notifier nuevo ni en el viejo (ya disposed).
+      if (!mounted) return;
       state = AsyncValue.data(solicitudes);
     } catch (e, st) {
       // Un refresco silencioso que falla (ej. un blip de red) no debe
       // borrar una lista que ya se estaba mostrando bien — solo se
       // convierte en pantalla de error si es la primera carga.
-      if (!state.hasValue) state = AsyncValue.error(e, st);
+      if (mounted && !state.hasValue) state = AsyncValue.error(e, st);
     }
   }
 
@@ -59,7 +66,7 @@ class NearbyRequestsNotifier extends StateNotifier<AsyncValue<List<NearbyRequest
     try {
       await _servicio.ignorar(solicitudId);
     } catch (e) {
-      state = anterior;
+      if (mounted) state = anterior;
       rethrow;
     }
   }
@@ -70,6 +77,7 @@ class NearbyRequestsNotifier extends StateNotifier<AsyncValue<List<NearbyRequest
   /// `yaPostulado` para que esta tarjeta deje de ofrecer el botón.
   Future<void> postularse(String solicitudId, {required String mensaje}) async {
     await _servicio.postularse(solicitudId, mensaje: mensaje);
+    if (!mounted) return;
     state = state.whenData(
       (lista) => lista
           .map((s) => s.id == solicitudId
@@ -91,7 +99,18 @@ class NearbyRequestsNotifier extends StateNotifier<AsyncValue<List<NearbyRequest
 
 final nearbyRequestsProvider =
     StateNotifierProvider<NearbyRequestsNotifier, AsyncValue<List<NearbyRequest>>>((ref) {
-  return NearbyRequestsNotifier(ref.watch(serviceRequestServiceProvider));
+  // Atado al usuario de la sesión (auditoría del build 40, hallazgo F3 —
+  // misma clase de bug que disponibilidadProvider corrigió el
+  // 2026-08-22): sin este watch, el provider sobrevivía a un logout +
+  // login de otra cuenta en el mismo dispositivo y la cuenta nueva veía
+  // durante unos segundos las solicitudes de la anterior, hasta que el
+  // sondeo de 10s del shell recargaba con el token correcto. Al cambiar
+  // el usuario, Riverpod reconstruye el notifier desde cero (loading) y
+  // el guard `mounted` de cargar() impide que una respuesta tardía de la
+  // cuenta anterior escriba nada.
+  final usuario = ref.watch(authProvider.select((s) => s.usuario));
+  final esProfesional = usuario != null && usuario.role == UserRole.profesional;
+  return NearbyRequestsNotifier(ref.watch(serviceRequestServiceProvider), autoCargar: esProfesional);
 });
 
 /// Trabajos que el profesional ya aceptó y aún no completó (o completó
@@ -102,8 +121,8 @@ final nearbyRequestsProvider =
 /// pull-to-refresh manual, y ese sondeo no debe tirar la lista a un
 /// spinner en cada vuelta — ver cargar().
 class AssignedRequestsNotifier extends StateNotifier<AsyncValue<List<AssignedRequest>>> {
-  AssignedRequestsNotifier(this._servicio) : super(const AsyncValue.loading()) {
-    cargar();
+  AssignedRequestsNotifier(this._servicio, {bool autoCargar = true}) : super(const AsyncValue.loading()) {
+    if (autoCargar) cargar();
   }
 
   final ServiceRequestService _servicio;
@@ -112,9 +131,13 @@ class AssignedRequestsNotifier extends StateNotifier<AsyncValue<List<AssignedReq
     if (!state.hasValue) state = const AsyncValue.loading();
     try {
       final trabajos = await _servicio.listarTrabajosAsignados();
+      // Mismo guard que NearbyRequestsNotifier.cargar(): una respuesta
+      // que llega tras un cambio de cuenta pertenece a la sesión
+      // anterior y no debe escribirse.
+      if (!mounted) return;
       state = AsyncValue.data(trabajos);
     } catch (e, st) {
-      if (!state.hasValue) state = AsyncValue.error(e, st);
+      if (mounted && !state.hasValue) state = AsyncValue.error(e, st);
     }
   }
 
@@ -131,7 +154,13 @@ class AssignedRequestsNotifier extends StateNotifier<AsyncValue<List<AssignedReq
 
 final assignedRequestsProvider =
     StateNotifierProvider<AssignedRequestsNotifier, AsyncValue<List<AssignedRequest>>>((ref) {
-  return AssignedRequestsNotifier(ref.watch(serviceRequestServiceProvider));
+  // Mismo esquema que nearbyRequestsProvider (hallazgo F3): atado al
+  // usuario de la sesión para que un cambio de cuenta reconstruya el
+  // estado desde cero en vez de heredar los trabajos de la cuenta
+  // anterior.
+  final usuario = ref.watch(authProvider.select((s) => s.usuario));
+  final esProfesional = usuario != null && usuario.role == UserRole.profesional;
+  return AssignedRequestsNotifier(ref.watch(serviceRequestServiceProvider), autoCargar: esProfesional);
 });
 
 /// Resumen de "solicitudes activas" para el banner de Inicio del

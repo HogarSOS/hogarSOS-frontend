@@ -108,6 +108,8 @@
   "apiErrPerfilProfesionalNoEncontrado": "Professional profile not found",
   "apiErrProfesionalNoVerificado": "You can't set yourself as available until you're verified",
   "apiErrCuentaStripeNoConfigurada": "You can't set yourself as available until you set up your payout account",
+  "apiErrPerfilProfesionalIncompleto": "Complete your profile before going available: you need a photo and at least one category",
+  "apiErrDescripcionConContacto": "Your description can't include phone numbers, emails or WhatsApp/Telegram — communication goes through HogarSOS messaging",
   "apiErrCategoriasInvalidas": "One or more categories aren't valid",
   "apiErrParametrosBusquedaInvalidos": "Invalid search parameters",
   "apiErrValorarSoloCompletado": "You can only rate a service that's already completed",

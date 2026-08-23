@@ -102,6 +102,14 @@ String? _mensajePorCodigo(String? code, AppLocalizations t) {
       return t.apiErrProfesionalNoVerificado;
     case 'PROFESSIONAL_STRIPE_NOT_CONFIGURED':
       return t.apiErrCuentaStripeNoConfigurada;
+    // Códigos del backend de la rama alta-profesionales (71df049) —
+    // producción aún no los emite, pero la app debe entenderlos desde
+    // YA para que el despliegue del backend no degrade estos errores a
+    // un mensaje genérico (auditoría del build 40, hallazgo F1).
+    case 'PROFESSIONAL_PROFILE_INCOMPLETE':
+      return t.apiErrPerfilProfesionalIncompleto;
+    case 'DESCRIPCION_CONTACTO_NO_PERMITIDO':
+      return t.apiErrDescripcionConContacto;
     case 'CATEGORIES_INVALID':
       return t.apiErrCategoriasInvalidas;
     case 'SEARCH_PARAMS_INVALID':

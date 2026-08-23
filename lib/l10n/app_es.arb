@@ -108,6 +108,8 @@
   "apiErrPerfilProfesionalNoEncontrado": "Perfil de profesional no encontrado",
   "apiErrProfesionalNoVerificado": "No puedes ponerte disponible hasta ser verificado",
   "apiErrCuentaStripeNoConfigurada": "No puedes ponerte disponible hasta configurar tu cuenta de cobro",
+  "apiErrPerfilProfesionalIncompleto": "Completa tu perfil antes de activarte: necesitas foto y al menos una categoría",
+  "apiErrDescripcionConContacto": "La descripción no puede incluir teléfonos, emails ni WhatsApp/Telegram — la comunicación va por la mensajería de HogarSOS",
   "apiErrCategoriasInvalidas": "Una o más categorías no son válidas",
   "apiErrParametrosBusquedaInvalidos": "Parámetros de búsqueda inválidos",
   "apiErrValorarSoloCompletado": "Solo se puede valorar un servicio ya completado",

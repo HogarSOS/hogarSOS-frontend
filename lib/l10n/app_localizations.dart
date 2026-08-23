@@ -656,6 +656,18 @@ abstract class AppLocalizations {
   /// **'No puedes ponerte disponible hasta configurar tu cuenta de cobro'**
   String get apiErrCuentaStripeNoConfigurada;
 
+  /// No description provided for @apiErrPerfilProfesionalIncompleto.
+  ///
+  /// In es, this message translates to:
+  /// **'Completa tu perfil antes de activarte: necesitas foto y al menos una categoría'**
+  String get apiErrPerfilProfesionalIncompleto;
+
+  /// No description provided for @apiErrDescripcionConContacto.
+  ///
+  /// In es, this message translates to:
+  /// **'La descripción no puede incluir teléfonos, emails ni WhatsApp/Telegram — la comunicación va por la mensajería de HogarSOS'**
+  String get apiErrDescripcionConContacto;
+
   /// No description provided for @apiErrCategoriasInvalidas.
   ///
   /// In es, this message translates to:

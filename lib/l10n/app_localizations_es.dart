@@ -332,6 +332,14 @@ class AppLocalizationsEs extends AppLocalizations {
       'No puedes ponerte disponible hasta configurar tu cuenta de cobro';
 
   @override
+  String get apiErrPerfilProfesionalIncompleto =>
+      'Completa tu perfil antes de activarte: necesitas foto y al menos una categoría';
+
+  @override
+  String get apiErrDescripcionConContacto =>
+      'La descripción no puede incluir teléfonos, emails ni WhatsApp/Telegram — la comunicación va por la mensajería de HogarSOS';
+
+  @override
   String get apiErrCategoriasInvalidas => 'Una o más categorías no son válidas';
 
   @override

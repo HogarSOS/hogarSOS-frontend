@@ -330,6 +330,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can\'t set yourself as available until you set up your payout account';
 
   @override
+  String get apiErrPerfilProfesionalIncompleto =>
+      'Complete your profile before going available: you need a photo and at least one category';
+
+  @override
+  String get apiErrDescripcionConContacto =>
+      'Your description can\'t include phone numbers, emails or WhatsApp/Telegram — communication goes through HogarSOS messaging';
+
+  @override
   String get apiErrCategoriasInvalidas =>
       'One or more categories aren\'t valid';
 

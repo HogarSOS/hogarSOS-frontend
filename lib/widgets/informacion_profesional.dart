@@ -29,8 +29,25 @@ bool contieneContactoExterno(String texto) {
   if (RegExp(r'(whats\s?app|wasap|guasap|telegram|t\.me/|wa\.me/)').hasMatch(normalizado)) return true;
   if (RegExp(r'[\w.+-]+@[\w-]+\.[a-z]{2,}').hasMatch(normalizado)) return true;
 
-  final compacto = texto.replaceAll(RegExp(r'[\s.\-()]'), '');
-  return RegExp(r'\+?\d{7,}').hasMatch(compacto);
+  // Teléfonos: cada grupo de dígitos (admitiendo los separadores típicos
+  // de un número escrito a trozos) se compacta y solo cuenta como
+  // contacto si tiene FORMA de teléfono: 9 dígitos empezando por 6/7/8/9
+  // (móvil/fijo español), 34 + esos 9, o un +internacional de 9-15
+  // dígitos. La regla anterior ("7+ dígitos seguidos") bloqueaba
+  // cantidades con separador de miles ("1.000.000") y cualquier cifra
+  // larga legítima — auditoría del build 40, falso positivo F6. El coste
+  // asumido es el inverso: un número deliberadamente disfrazado (dígitos
+  // de más, letras entre medias) ya no se caza aquí — para eso está la
+  // revisión del backend, esto solo es el feedback inmediato del editor.
+  for (final m in RegExp(r'\+?\d(?:[\s.\-()]*\d)+').allMatches(texto)) {
+    var compacto = m.group(0)!.replaceAll(RegExp(r'[\s.\-()]'), '');
+    final internacional = compacto.startsWith('+');
+    if (internacional) compacto = compacto.substring(1);
+    if (internacional && compacto.length >= 9 && compacto.length <= 15) return true;
+    if (compacto.length == 11 && RegExp(r'^34[6789]').hasMatch(compacto)) return true;
+    if (compacto.length == 9 && RegExp(r'^[6789]').hasMatch(compacto)) return true;
+  }
+  return false;
 }
 
 /// Lo que el usuario dejó escrito al pulsar Guardar en la hoja.

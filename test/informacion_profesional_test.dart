@@ -156,6 +156,11 @@ void main() {
       'estoy en telegram',
       'wa.me/34612345678',
       'mi correo es paco@example.com',
+      // Casos explícitos de la auditoría del build 40 (F6):
+      'llámame: 600 123 123',
+      'fijo 912.345.678',
+      '34 600 123 123',
+      '+49 170 1234567',
     ]) {
       test('detecta: $texto', () => expect(contieneContactoExterno(texto), isTrue));
     }
@@ -164,6 +169,12 @@ void main() {
       'Fontanero con 10 años de experiencia en calderas.',
       'Servicio 24h, presupuestos desde 15€.',
       'Trabajo en la zona centro desde 1998, Calle Mayor 123.',
+      // Falsos positivos de la regla vieja ("7+ dígitos"), cazados en la
+      // auditoría del build 40 (F6) — cantidades y cifras legítimas:
+      'He gestionado reformas de más de 1.000.000 de euros.',
+      'Presupuesto récord: 10.000.000',
+      'Referencia catastral 1234567',
+      'Empresa fundada en 1998, más de 20.000 clientes.',
     ]) {
       test('sin falso positivo: $texto', () => expect(contieneContactoExterno(texto), isFalse));
     }

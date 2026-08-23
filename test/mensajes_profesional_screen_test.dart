@@ -77,6 +77,13 @@ Widget _pantallaDePrueba({
   return ProviderScope(
     overrides: [
       serviceRequestServiceProvider.overrideWithValue(_FakeServiceRequestService(trabajos)),
+      // El provider real ahora observa authProvider (fix F3, cambio de
+      // cuenta) y AuthNotifier no puede construirse en tests (Firebase).
+      // Se construye el notifier directamente sobre el servicio fake —
+      // misma semántica de autocarga que tenía el test.
+      assignedRequestsProvider.overrideWith(
+        (ref) => AssignedRequestsNotifier(ref.watch(serviceRequestServiceProvider)),
+      ),
       unreadChatProvider.overrideWith((ref, id) => noLeidos[id] ?? false),
     ],
     child: MaterialApp(
