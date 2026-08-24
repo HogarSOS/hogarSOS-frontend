@@ -447,11 +447,17 @@ class _EsperandoPresupuesto extends StatelessWidget {
 /// es 0% para ambas partes, se muestra además el distintivo de
 /// promoción (derivado en tiempo real de los porcentajes, no de una
 /// fecha).
+///
+/// Los importes vienen YA CALCULADOS por el backend ([DesglosePago],
+/// `GET /payments/desglose`): desde el modelo por tramos (10% hasta
+/// 500 € acumulados por solicitud + 5% del exceso) el total depende de
+/// lo ya autorizado en la solicitud, así que calcularlo aquí con un
+/// porcentaje plano mostraría un número distinto del que se cobra.
 class _DesgloseComision extends StatelessWidget {
-  const _DesgloseComision({required this.montoBase, required this.comisiones, this.incluyeIva});
+  const _DesgloseComision({required this.desglose, required this.esPromo, this.incluyeIva});
 
-  final double montoBase;
-  final ComisionesInfo comisiones;
+  final DesglosePago desglose;
+  final bool esPromo;
   // null = no aplica a este importe (ampliación/cierre de horas, que no
   // llevan su propia declaración de IVA); true/false = lo que declaró
   // el profesional al enviar el presupuesto original.
@@ -477,8 +483,8 @@ class _DesgloseComision extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final total = comisiones.totalCliente(montoBase);
-    final comision = total - montoBase;
+    final total = desglose.total;
+    final comision = desglose.comision;
 
     TextStyle estiloEtiqueta({bool destacado = false}) => TextStyle(
           fontSize: destacado ? 13.5 : 12.5,
@@ -510,7 +516,7 @@ class _DesgloseComision extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (comisiones.esPromoLanzamiento)
+          if (esPromo)
             Container(
               margin: const EdgeInsets.only(bottom: 6),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -523,7 +529,7 @@ class _DesgloseComision extends StatelessWidget {
                 style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: colorScheme.onTertiaryContainer),
               ),
             ),
-          filaImporte(t.desglosePagoPresupuestoLabel, montoBase),
+          filaImporte(t.desglosePagoPresupuestoLabel, desglose.montoBase),
           filaImporte(
             t.desglosePagoGastosGestionLabel,
             comision,
@@ -637,6 +643,11 @@ class _PresupuestoPendienteCardState extends ConsumerState<PresupuestoPendienteC
     final esPorHoras = widget.presupuesto.tipo == TipoPresupuesto.porHoras;
     final comisiones = ref.watch(comisionesProvider);
     final presupuesto = widget.presupuesto;
+    final desglose = ref.watch(desglosePendienteProvider((
+      serviceRequestId: widget.serviceRequestId,
+      montoBase: presupuesto.importeTotal,
+      modo: 'autorizacion',
+    )));
 
     return Container(
       width: double.infinity,
@@ -660,10 +671,10 @@ class _PresupuestoPendienteCardState extends ConsumerState<PresupuestoPendienteC
                 : t.seguimientoPresupuestoCerradoDetalle(presupuesto.monto!.toStringAsFixed(2)),
             style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
           ),
-          comisiones.when(
-            data: (info) => _DesgloseComision(
-              montoBase: presupuesto.importeTotal,
-              comisiones: info,
+          desglose.when(
+            data: (d) => _DesgloseComision(
+              desglose: d,
+              esPromo: comisiones.maybeWhen(data: (i) => i.esPromoLanzamiento, orElse: () => false),
               incluyeIva: presupuesto.incluyeIva,
             ),
             loading: () => const SizedBox.shrink(),
@@ -767,6 +778,14 @@ class _AmpliacionPendienteCardState extends ConsumerState<AmpliacionPendienteCar
     final ampliacion = widget.ampliacion;
     final importeAdicional = ampliacion.importeAdicional(widget.tarifaHora);
     final comisiones = ref.watch(comisionesProvider);
+    // 'autorizacion': una ampliación AÑADE base a la solicitud, así que
+    // su comisión es la marginal sobre el acumulado ya autorizado — si el
+    // trabajo ya superó los 500 €, esta parte va al 5%, no al 10%.
+    final desglose = ref.watch(desglosePendienteProvider((
+      serviceRequestId: widget.serviceRequestId,
+      montoBase: importeAdicional,
+      modo: 'autorizacion',
+    )));
 
     return Container(
       width: double.infinity,
@@ -792,8 +811,11 @@ class _AmpliacionPendienteCardState extends ConsumerState<AmpliacionPendienteCar
                 : t.seguimientoAmpliacionMontoDetalle(importeAdicional.toStringAsFixed(2)),
             style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
           ),
-          comisiones.when(
-            data: (info) => _DesgloseComision(montoBase: importeAdicional, comisiones: info),
+          desglose.when(
+            data: (d) => _DesgloseComision(
+              desglose: d,
+              esPromo: comisiones.maybeWhen(data: (i) => i.esPromoLanzamiento, orElse: () => false),
+            ),
             loading: () => const SizedBox.shrink(),
             error: (_, __) => const SizedBox.shrink(),
           ),
@@ -931,6 +953,15 @@ class _CierreHorasPendienteCardState extends ConsumerState<CierreHorasPendienteC
     final tarifaHora = widget.tarifaHora;
     final importeFinal = (tarifaHora ?? 0) * cierreHoras.horasReales;
     final comisiones = ref.watch(comisionesProvider);
+    // 'cierre': el desglose refleja lo que se CAPTURARÁ de verdad — el
+    // consumo en orden de las autorizaciones ya congeladas, no un
+    // recálculo con la fórmula vigente (si las horas reales quedan por
+    // debajo de lo autorizado, se paga proporcionalmente menos).
+    final desglose = ref.watch(desglosePendienteProvider((
+      serviceRequestId: widget.serviceRequestId,
+      montoBase: importeFinal,
+      modo: 'cierre',
+    )));
     final esAnomala = cierreHoras.reduccionAnomala;
 
     return Container(
@@ -978,8 +1009,11 @@ class _CierreHorasPendienteCardState extends ConsumerState<CierreHorasPendienteC
               ),
             ),
           ],
-          comisiones.when(
-            data: (info) => _DesgloseComision(montoBase: importeFinal, comisiones: info),
+          desglose.when(
+            data: (d) => _DesgloseComision(
+              desglose: d,
+              esPromo: comisiones.maybeWhen(data: (i) => i.esPromoLanzamiento, orElse: () => false),
+            ),
             loading: () => const SizedBox.shrink(),
             error: (_, __) => const SizedBox.shrink(),
           ),

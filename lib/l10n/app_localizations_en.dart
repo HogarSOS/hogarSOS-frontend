@@ -2341,7 +2341,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get desglosePagoGastosGestionInfo =>
-      'The management fee covers verifying the professional\'s identity, protecting your payment until the job is finished, and Hogar SOS support if any issue comes up.';
+      'The management fee covers verifying the professional\'s identity, protecting your payment until the job is finished, and Hogar SOS support if any issue comes up. It is 10% of the service price up to €500; above that, only 5% on the part over €500.';
 
   @override
   String get desglosePagoTotalLabel => 'Total';

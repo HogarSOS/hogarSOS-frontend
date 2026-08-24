@@ -4129,7 +4129,7 @@ abstract class AppLocalizations {
   /// No description provided for @desglosePagoGastosGestionInfo.
   ///
   /// In es, this message translates to:
-  /// **'Los gastos de gestión incluyen la verificación de identidad del profesional, el pago protegido hasta la finalización del trabajo y el soporte de Hogar SOS en caso de incidencias.'**
+  /// **'Los gastos de gestión incluyen la verificación de identidad del profesional, el pago protegido hasta la finalización del trabajo y el soporte de Hogar SOS en caso de incidencias. Son un 10% del precio del servicio hasta 500 €; a partir de ahí, solo un 5% sobre la parte que pase de 500 €.'**
   String get desglosePagoGastosGestionInfo;
 
   /// No description provided for @desglosePagoTotalLabel.

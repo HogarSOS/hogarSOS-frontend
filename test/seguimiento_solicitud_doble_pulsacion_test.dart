@@ -80,6 +80,16 @@ Widget _envolver(Widget child) {
       comisionesProvider.overrideWith(
         (ref) async => ComisionesInfo(comisionClientePorcentaje: 5, comisionProfesionalPorcentaje: 0),
       ),
+      // Ídem para el desglose calculado por el backend (modelo por
+      // tramos): un desglose fijo cualquiera, coherente con base 100.
+      desglosePendienteProvider.overrideWith(
+        (ref, args) async => DesglosePago(
+          montoBase: args.montoBase,
+          comision: args.montoBase * 0.05,
+          total: args.montoBase * 1.05,
+          baseAcumulada: 0,
+        ),
+      ),
     ],
     child: MaterialApp(
       // Fijo a propósito: sin esto, flutter test puede resolver el

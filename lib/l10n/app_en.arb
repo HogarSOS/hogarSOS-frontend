@@ -832,7 +832,7 @@
   "seguimientoPromoLanzamiento": "🎉 Launch promotion",
   "desglosePagoPresupuestoLabel": "Quote",
   "desglosePagoGastosGestionLabel": "Management fee",
-  "desglosePagoGastosGestionInfo": "The management fee covers verifying the professional's identity, protecting your payment until the job is finished, and Hogar SOS support if any issue comes up.",
+  "desglosePagoGastosGestionInfo": "The management fee covers verifying the professional's identity, protecting your payment until the job is finished, and Hogar SOS support if any issue comes up. It is 10% of the service price up to €500; above that, only 5% on the part over €500.",
   "desglosePagoTotalLabel": "Total",
   "desglosePagoIvaIncluido": "The professional states this amount includes VAT",
   "desglosePagoIvaNoIncluido": "The professional states this amount does not include VAT",

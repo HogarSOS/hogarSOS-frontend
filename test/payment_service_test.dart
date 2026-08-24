@@ -10,22 +10,21 @@ import 'package:hogarsos/services/payment_service.dart';
 // incorrecto de dinero real, sin que ningún error visible lo delate.
 void main() {
   group('ComisionesInfo — cálculo de importes mostrados al usuario', () {
-    test('totalCliente añade el porcentaje de comisión sobre el montoBase', () {
-      final comisiones = ComisionesInfo(comisionClientePorcentaje: 5, comisionProfesionalPorcentaje: 0);
-
-      expect(comisiones.totalCliente(100), 105);
-    });
-
+    // totalCliente ya NO existe a propósito: desde el modelo por tramos
+    // (10% hasta 500 € acumulados por solicitud + 5% del exceso) el total
+    // del cliente depende de lo ya autorizado en la solicitud, así que lo
+    // sirve el backend (DesglosePago) y la app solo lo pinta. Reintroducir
+    // un cálculo lineal aquí volvería a abrir la puerta a mostrar un
+    // número distinto del que se cobra.
     test('totalProfesional resta el porcentaje de comisión del montoBase', () {
       final comisiones = ComisionesInfo(comisionClientePorcentaje: 0, comisionProfesionalPorcentaje: 10);
 
       expect(comisiones.totalProfesional(100), 90);
     });
 
-    test('con 0%/0% el cliente paga exactamente el montoBase y el profesional lo recibe íntegro', () {
+    test('con 0% el profesional recibe el montoBase íntegro', () {
       final comisiones = ComisionesInfo(comisionClientePorcentaje: 0, comisionProfesionalPorcentaje: 0);
 
-      expect(comisiones.totalCliente(37.5), 37.5);
       expect(comisiones.totalProfesional(37.5), 37.5);
     });
 
@@ -33,6 +32,36 @@ void main() {
       expect(ComisionesInfo(comisionClientePorcentaje: 0, comisionProfesionalPorcentaje: 0).esPromoLanzamiento, isTrue);
       expect(ComisionesInfo(comisionClientePorcentaje: 5, comisionProfesionalPorcentaje: 0).esPromoLanzamiento, isFalse);
       expect(ComisionesInfo(comisionClientePorcentaje: 0, comisionProfesionalPorcentaje: 3).esPromoLanzamiento, isFalse);
+    });
+  });
+
+  group('DesglosePago.fromJson — desglose servido por el backend', () {
+    test('parsea el desglose completo', () {
+      final desglose = DesglosePago.fromJson({
+        'montoBase': 500,
+        'comision': 25,
+        'total': 525,
+        'baseAcumulada': 500,
+      });
+
+      expect(desglose.montoBase, 500.0);
+      expect(desglose.comision, 25.0);
+      expect(desglose.total, 525.0);
+      expect(desglose.baseAcumulada, 500.0);
+    });
+
+    // Mismo caso real que CobroHistorial: el backend serializa Decimal
+    // como num entero cuando no hay decimales — el .toDouble() evita el
+    // cast error.
+    test('acepta números con y sin decimales, y baseAcumulada ausente', () {
+      final desglose = DesglosePago.fromJson({
+        'montoBase': 750.5,
+        'comision': 62.55,
+        'total': 813.05,
+      });
+
+      expect(desglose.comision, 62.55);
+      expect(desglose.baseAcumulada, 0.0);
     });
   });
 

@@ -19,7 +19,12 @@ class PaymentIntentResult {
 
 /// Porcentajes de comisión vigentes ahora mismo (`GET /payments/comisiones`).
 /// Puramente informativo — el backend es quien fija los importes reales
-/// al crear cada autorización.
+/// al crear cada autorización. Desde el modelo por tramos (10% hasta
+/// 500 € de servicio acumulado por solicitud + 5% sobre el exceso) la
+/// app NUNCA calcula el total del cliente con estos porcentajes: los
+/// desgloses que ve el cliente llegan ya calculados por el backend
+/// (ver [DesglosePago] / obtenerDesglose). Aquí solo queda lo que sigue
+/// siendo lineal: el porcentaje del profesional y el distintivo de promo.
 class ComisionesInfo {
   final double comisionClientePorcentaje;
   final double comisionProfesionalPorcentaje;
@@ -34,13 +39,40 @@ class ComisionesInfo {
   /// mismo ninguna de las dos partes paga comisión.
   bool get esPromoLanzamiento => comisionClientePorcentaje == 0 && comisionProfesionalPorcentaje == 0;
 
-  /// Importe que pagaría el cliente por un `montoBase` dado, con la
-  /// comisión vigente.
-  double totalCliente(double montoBase) => montoBase * (1 + comisionClientePorcentaje / 100);
-
   /// Importe que recibiría el profesional por un `montoBase` dado, con
   /// la comisión vigente.
   double totalProfesional(double montoBase) => montoBase * (1 - comisionProfesionalPorcentaje / 100);
+}
+
+/// Desglose exacto de un pago pendiente, servido por el backend
+/// (`GET /payments/desglose`): la misma matemática y el mismo acumulado
+/// de la solicitud que fijarán el PaymentIntent. Fuente única de verdad —
+/// la app solo pinta estos números; si los calculara por su cuenta, el
+/// total mostrado podría no coincidir con lo que Stripe cobra después.
+class DesglosePago {
+  /// Base que efectivamente se cobrará (en un cierre de horas puede ser
+  /// menor que la solicitada si no hay autorización suficiente).
+  final double montoBase;
+  final double comision;
+  final double total;
+
+  /// Base ya autorizada antes de este pago en la misma solicitud — el
+  /// tramo del umbral se consume sobre el acumulado, no por pago.
+  final double baseAcumulada;
+
+  const DesglosePago({
+    required this.montoBase,
+    required this.comision,
+    required this.total,
+    required this.baseAcumulada,
+  });
+
+  factory DesglosePago.fromJson(Map<String, dynamic> json) => DesglosePago(
+        montoBase: (json['montoBase'] as num).toDouble(),
+        comision: (json['comision'] as num).toDouble(),
+        total: (json['total'] as num).toDouble(),
+        baseAcumulada: (json['baseAcumulada'] as num? ?? 0).toDouble(),
+      );
 }
 
 /// Una fila del historial de cobros del Centro de Pagos — un pago ya
@@ -118,6 +150,26 @@ class PaymentService {
       comisionClientePorcentaje: (respuesta.data['comisionClientePorcentaje'] as num).toDouble(),
       comisionProfesionalPorcentaje: (respuesta.data['comisionProfesionalPorcentaje'] as num).toDouble(),
     );
+  }
+
+  /// Desglose exacto (base, gastos de gestión, total) de un pago que el
+  /// cliente todavía no ha aceptado — ver [DesglosePago].
+  ///
+  /// `modo` 'autorizacion' para presupuestos y ampliaciones (cuánto
+  /// costará AÑADIR este importe a la solicitud); 'cierre' para el
+  /// cierre de horas (cuánto se cobrará EN TOTAL con esa base final,
+  /// respetando los desgloses ya congelados de cada autorización).
+  Future<DesglosePago> obtenerDesglose(
+    String serviceRequestId,
+    double montoBase, {
+    String modo = 'autorizacion',
+  }) async {
+    final respuesta = await _api.get('/payments/desglose', queryParameters: {
+      'serviceRequestId': serviceRequestId,
+      'montoBase': montoBase.toStringAsFixed(2),
+      'modo': modo,
+    });
+    return DesglosePago.fromJson(respuesta.data as Map<String, dynamic>);
   }
 
   /// Pide al backend que autorice el cargo (modelo escrow — no se
