@@ -375,6 +375,7 @@
   },
   "salirPulsaOtraVez": "Press back again to exit",
   "profesionalSinSolicitudes": "No requests nearby right now. We'll notify you when a new one appears in your area.",
+  "profesionalSinSolicitudesNoDisponible": "You're set to \"Not available\", so you're not receiving new requests right now. When you want to work, turn on your availability from Profile.",
   "profesionalErrorCargar": "Couldn't load requests",
   "profesionalIgnorar": "Ignore",
   "profesionalErrorIgnorar": "Couldn't ignore the request",

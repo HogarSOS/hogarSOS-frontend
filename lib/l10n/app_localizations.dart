@@ -2000,6 +2000,12 @@ abstract class AppLocalizations {
   /// **'No hay solicitudes cerca ahora mismo. Cuando aparezca una nueva en tu zona, te avisaremos con una notificación.'**
   String get profesionalSinSolicitudes;
 
+  /// No description provided for @profesionalSinSolicitudesNoDisponible.
+  ///
+  /// In es, this message translates to:
+  /// **'Estás en \"No disponible\", así que ahora no recibes solicitudes nuevas. Cuando quieras trabajar, activa tu disponibilidad desde Mi perfil.'**
+  String get profesionalSinSolicitudesNoDisponible;
+
   /// No description provided for @profesionalErrorCargar.
   ///
   /// In es, this message translates to:

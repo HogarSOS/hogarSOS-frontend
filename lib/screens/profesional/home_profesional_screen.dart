@@ -241,9 +241,23 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
             solicitudesAsync.when(
               data: (solicitudes) {
                 if (solicitudes.isEmpty) {
+                  // El texto genérico promete "te avisaremos" — mentira si
+                  // el profesional está en "No disponible" (no recibe ni
+                  // solicitudes ni avisos). En ese caso el vacío dice la
+                  // verdad y apunta a Mi perfil, único sitio donde se
+                  // activa. Sin dato de disponibilidad (cargando/error) se
+                  // usa el genérico: mejor una promesa probable que un
+                  // reproche equivocado.
+                  final noDisponible = disponibilidadAsync.maybeWhen(
+                    data: (d) => !d.disponible,
+                    orElse: () => false,
+                  );
                   return SliverFillRemaining(
                     hasScrollBody: false,
-                    child: _EstadoVacio(icono: Icons.inbox_outlined, titulo: t.profesionalSinSolicitudes),
+                    child: _EstadoVacio(
+                      icono: noDisponible ? Icons.notifications_off_outlined : Icons.inbox_outlined,
+                      titulo: noDisponible ? t.profesionalSinSolicitudesNoDisponible : t.profesionalSinSolicitudes,
+                    ),
                   );
                 }
                 // AnimatedSliverList en vez de un SliverList normal: el

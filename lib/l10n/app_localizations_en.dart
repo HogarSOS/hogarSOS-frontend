@@ -1135,6 +1135,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'No requests nearby right now. We\'ll notify you when a new one appears in your area.';
 
   @override
+  String get profesionalSinSolicitudesNoDisponible =>
+      'You\'re set to \"Not available\", so you\'re not receiving new requests right now. When you want to work, turn on your availability from Profile.';
+
+  @override
   String get profesionalErrorCargar => 'Couldn\'t load requests';
 
   @override

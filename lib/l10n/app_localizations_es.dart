@@ -1137,6 +1137,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'No hay solicitudes cerca ahora mismo. Cuando aparezca una nueva en tu zona, te avisaremos con una notificación.';
 
   @override
+  String get profesionalSinSolicitudesNoDisponible =>
+      'Estás en \"No disponible\", así que ahora no recibes solicitudes nuevas. Cuando quieras trabajar, activa tu disponibilidad desde Mi perfil.';
+
+  @override
   String get profesionalErrorCargar => 'No se pudieron cargar las solicitudes';
 
   @override
