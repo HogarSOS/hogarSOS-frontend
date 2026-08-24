@@ -1211,7 +1211,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeSubtitulo.
   ///
   /// In es, this message translates to:
-  /// **'¿Qué necesitas arreglar hoy?'**
+  /// **'¿Cómo podemos ayudarte hoy?'**
   String get homeSubtitulo;
 
   /// No description provided for @homeBuscarPlaceholder.
@@ -1241,7 +1241,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeSolicitarProfesionalAyuda.
   ///
   /// In es, this message translates to:
-  /// **'Cuéntanos qué necesitas y te ponemos en contacto'**
+  /// **'Cuéntanos qué necesitas y te ayudaremos a solucionarlo.'**
   String get homeSolicitarProfesionalAyuda;
 
   /// No description provided for @homeDescribeProblema.
