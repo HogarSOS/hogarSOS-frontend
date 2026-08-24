@@ -81,19 +81,30 @@ class NearbyRequestsNotifier extends StateNotifier<AsyncValue<List<NearbyRequest
     state = state.whenData(
       (lista) => lista
           .map((s) => s.id == solicitudId
-              ? NearbyRequest(
-                  id: s.id,
-                  descripcion: s.descripcion,
-                  distanciaMetros: s.distanciaMetros,
-                  createdAt: s.createdAt,
-                  urgencia: s.urgencia,
-                  clienteNombre: s.clienteNombre,
-                  clienteFotoUrl: s.clienteFotoUrl,
-                  yaPostulado: true,
-                )
+              ? s.copyWith(yaPostulado: true, candidaturaEstado: CandidaturaEstado.pendiente)
               : s)
           .toList(),
     );
+  }
+
+  /// "Eliminar de mis solicitudes" sobre una candidatura NO elegida
+  /// (UX 2026-08-25). Mismo patrón optimista que ignorar(): la quita de
+  /// la lista al instante, llama al backend (que solo la marca ocultada
+  /// para este profesional — no borra nada) y, si falla, la devuelve y
+  /// relanza para que la pantalla avise. Persistente por cuenta: no
+  /// vuelve en el siguiente sondeo, ni en otro dispositivo, ni tras
+  /// cerrar y reabrir la app.
+  Future<void> ocultarNoElegida(String solicitudId) async {
+    final anterior = state;
+    state = state.whenData(
+      (lista) => lista.where((s) => s.id != solicitudId).toList(),
+    );
+    try {
+      await _servicio.ocultarCandidatura(solicitudId);
+    } catch (e) {
+      if (mounted) state = anterior;
+      rethrow;
+    }
   }
 }
 

@@ -101,6 +101,24 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
     }
   }
 
+  /// "Eliminar de mis solicitudes" sobre una tarjeta "Solicitud cerrada"
+  /// (el cliente eligió a otro). Solo la oculta para este profesional —
+  /// ver NearbyRequestsNotifier.ocultarNoElegida.
+  Future<void> _eliminarNoElegida(BuildContext context, WidgetRef ref, String solicitudId) async {
+    final t = AppLocalizations.of(context);
+    try {
+      await ref.read(nearbyRequestsProvider.notifier).ocultarNoElegida(solicitudId);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.profesionalCandidaturaEliminarExito)));
+    } catch (e) {
+      debugPrint('[HomeProfesionalScreen] Error al quitar candidatura no elegida: $e');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensajeDeError(e, contexto: t.profesionalCandidaturaEliminarError, t: t))),
+      );
+    }
+  }
+
   Future<String?> _mostrarDialogoDisponibilidad(BuildContext context, AppLocalizations t) {
     final controller = TextEditingController();
     return showDialog<String>(
@@ -275,10 +293,11 @@ class _HomeProfesionalScreenState extends ConsumerState<HomeProfesionalScreen>
                       padding: const EdgeInsets.only(bottom: 12),
                       child: EntradaAnimada(
                         retraso: Duration(milliseconds: 40 * index),
-                        child: _TarjetaSolicitudCercana(
+                        child: TarjetaSolicitudCercana(
                           solicitud: solicitud,
                           onIgnorar: () => _ignorar(context, ref, solicitud.id),
                           onPostularse: () => _postularse(context, ref, solicitud),
+                          onEliminarNoElegida: () => _eliminarNoElegida(context, ref, solicitud.id),
                         ),
                       ),
                     );
@@ -391,22 +410,36 @@ class _TarjetaTrabajosActivos extends StatelessWidget {
   }
 }
 
-class _TarjetaSolicitudCercana extends StatelessWidget {
-  const _TarjetaSolicitudCercana({
+/// Tarjeta de "Solicitudes cerca". Tres estados según
+/// [NearbyRequest.candidaturaEstado]:
+/// - ninguna → botones Ignorar / Enviar candidatura;
+/// - pendiente → "Candidatura enviada";
+/// - noElegida → "Solicitud cerrada · El cliente ha elegido a otro
+///   profesional." + "Eliminar de mis solicitudes" (UX 2026-08-25). A
+///   propósito sin la palabra "rechazado": no es una valoración del
+///   profesional, solo que el cliente eligió a otro.
+/// Pública (no `_Tarjeta…`) para poder probar los tres estados sin montar
+/// HomeProfesionalScreen entera (sondeos, providers con red real).
+class TarjetaSolicitudCercana extends StatelessWidget {
+  const TarjetaSolicitudCercana({
+    super.key,
     required this.solicitud,
     required this.onIgnorar,
     required this.onPostularse,
+    required this.onEliminarNoElegida,
   });
 
   final NearbyRequest solicitud;
   final VoidCallback onIgnorar;
   final VoidCallback onPostularse;
+  final VoidCallback onEliminarNoElegida;
 
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final distanciaKm = (solicitud.distanciaMetros / 1000).toStringAsFixed(1);
+    final distanciaMetros = solicitud.distanciaMetros;
+    final distanciaKm = distanciaMetros == null ? null : (distanciaMetros / 1000).toStringAsFixed(1);
 
     return Material(
       color: colorScheme.surfaceContainerHigh,
@@ -440,6 +473,7 @@ class _TarjetaSolicitudCercana extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                if (distanciaKm != null)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
@@ -472,7 +506,9 @@ class _TarjetaSolicitudCercana extends StatelessWidget {
               style: const TextStyle(fontSize: 14, height: 1.35),
             ),
             const SizedBox(height: 14),
-            if (solicitud.yaPostulado)
+            if (solicitud.candidaturaEstado == CandidaturaEstado.noElegida)
+              _BloqueSolicitudCerrada(onEliminar: onEliminarNoElegida)
+            else if (solicitud.candidaturaEstado == CandidaturaEstado.pendiente)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 10),
@@ -531,6 +567,66 @@ class _TarjetaSolicitudCercana extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// "Solicitud cerrada — El cliente ha elegido a otro profesional." con el
+/// botón "Eliminar de mis solicitudes". Ocupa el sitio de los botones
+/// Ignorar / Enviar candidatura, que ya no tienen sentido.
+class _BloqueSolicitudCerrada extends StatelessWidget {
+  const _BloqueSolicitudCerrada({required this.onEliminar});
+
+  final VoidCallback onEliminar;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.lock_outline, size: 16, color: colorScheme.onSurfaceVariant),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  t.profesionalCandidaturaCerradaTitulo,
+                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: colorScheme.onSurface),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            t.profesionalCandidaturaCerradaMotivo,
+            style: TextStyle(fontSize: 13, height: 1.3, color: colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10)),
+              onPressed: onEliminar,
+              icon: const Icon(Icons.remove_circle_outline, size: 16),
+              label: Text(
+                t.profesionalCandidaturaEliminar,
+                style: const TextStyle(fontSize: 13),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

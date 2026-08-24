@@ -514,6 +514,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'No puedes ignorar esta solicitud porque ya enviaste una candidatura';
 
   @override
+  String get apiErrCandidaturaNoOcultable =>
+      'Solo puedes quitar de la lista candidaturas que el cliente ya haya resuelto';
+
+  @override
   String get apiErrArchivoNoValido =>
       'Ese tipo de archivo no es válido. Elige una foto (JPG o PNG).';
 
@@ -1165,6 +1169,24 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profesionalYaPostulado => 'Candidatura enviada';
+
+  @override
+  String get profesionalCandidaturaCerradaTitulo => 'Solicitud cerrada';
+
+  @override
+  String get profesionalCandidaturaCerradaMotivo =>
+      'El cliente ha elegido a otro profesional.';
+
+  @override
+  String get profesionalCandidaturaEliminar => 'Eliminar de mis solicitudes';
+
+  @override
+  String get profesionalCandidaturaEliminarExito =>
+      'Solicitud quitada de tu lista';
+
+  @override
+  String get profesionalCandidaturaEliminarError =>
+      'No se pudo quitar la solicitud de tu lista';
 
   @override
   String get profesionalPostulacionEnviada =>

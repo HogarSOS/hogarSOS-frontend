@@ -93,6 +93,12 @@ enum DestinoNotificacionProfesional { solicitudes, trabajosActivos, centroPagos 
 
 DestinoNotificacionProfesional resolverDestinoNotificacionProfesional(String? tipo) {
   if (tipo == 'nueva_solicitud') return DestinoNotificacionProfesional.solicitudes;
+  // 'postulacion_rechazada' ("Selección finalizada": el cliente eligió a
+  // OTRO profesional — auditoría UX 2026-08-25): el profesional NO está
+  // en ese trabajo, así que el fallback a Trabajos activos lo llevaba a
+  // una lista ajena a la notificación. Su sitio es "Solicitudes", donde
+  // estaba la tarjeta "Candidatura enviada" que esta notificación cierra.
+  if (tipo == 'postulacion_rechazada') return DestinoNotificacionProfesional.solicitudes;
   if (tipo == 'pago_autorizado') return DestinoNotificacionProfesional.centroPagos;
   return DestinoNotificacionProfesional.trabajosActivos;
 }
