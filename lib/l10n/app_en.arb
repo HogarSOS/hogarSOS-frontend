@@ -555,6 +555,7 @@
   "altaMsgListo": "🎉 You're ready to receive requests!",
   "altaMsgListoAyuda": "Turn on your availability so clients can find you.",
   "altaMsgStripeCaida": "⚠️ Your payouts need an update in Stripe.",
+  "altaMsgStripeCaidaSinIniciar": "⚠️ You still need to set up your payout account to receive the money for your jobs.",
   "altaBotonContinuar": "Continue",
   "altaResumenPendiente": "{paso} pending",
   "@altaResumenPendiente": {"placeholders": {"paso": {"type": "String"}}},

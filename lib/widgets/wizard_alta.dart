@@ -272,7 +272,14 @@ class _WizardAltaState extends State<WizardAlta> {
     bool esAdvertencia = false;
 
     if (widget.aprobado && !_configurada) {
-      mensaje = t.altaMsgStripeCaida;
+      // Dos historias distintas bajo el mismo estado (feedback de la
+      // prueba visual del build 43): "actualización" implica que Stripe
+      // FUNCIONABA y se cayó — falso para las cuentas del flujo antiguo,
+      // aprobadas por admin sin haber INICIADO nunca Stripe. A esas se
+      // les pide configurar, no actualizar.
+      mensaje = widget.detalle == DetalleCuentaStripe.sinIniciar
+          ? t.altaMsgStripeCaidaSinIniciar
+          : t.altaMsgStripeCaida;
       etiquetaBoton = t.altaBotonContinuar;
       esAdvertencia = true;
     } else if (!_perfilOk) {

@@ -1712,6 +1712,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get altaMsgStripeCaida => '⚠️ Your payouts need an update in Stripe.';
 
   @override
+  String get altaMsgStripeCaidaSinIniciar =>
+      '⚠️ You still need to set up your payout account to receive the money for your jobs.';
+
+  @override
   String get altaBotonContinuar => 'Continue';
 
   @override

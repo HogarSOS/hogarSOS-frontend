@@ -81,6 +81,23 @@ void main() {
     expect(find.text('Continuar'), findsOneWidget);
   });
 
+  // Cuenta del flujo antiguo: aprobada por admin SIN haber iniciado
+  // nunca Stripe (prueba visual del build 43). "Necesitan una
+  // actualización" implicaría que algo funcionaba y se rompió — a estas
+  // cuentas se les pide CONFIGURAR, con la misma ruta de acción.
+  testWidgets('aprobado con Stripe sin iniciar (cuenta legacy) → pide configurar, no "actualizar"', (tester) async {
+    await tester.pumpWidget(montar(
+      aprobado: true,
+      detalle: DetalleCuentaStripe.sinIniciar,
+      disponible: true,
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Te falta configurar tu cuenta de cobro'), findsOneWidget);
+    expect(find.textContaining('necesitan una actualización'), findsNothing);
+    expect(find.text('Continuar'), findsOneWidget);
+  });
+
   testWidgets('profesional nuevo → wizard al 25% con los subpasos del perfil', (tester) async {
     await tester.pumpWidget(montar(fotoOk: false, categoriaOk: false, tipoOk: false));
     await tester.pumpAndSettle();

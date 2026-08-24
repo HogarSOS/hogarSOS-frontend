@@ -555,6 +555,7 @@
   "altaMsgListo": "🎉 ¡Ya estás listo para recibir solicitudes!",
   "altaMsgListoAyuda": "Activa tu disponibilidad para que los clientes puedan encontrarte.",
   "altaMsgStripeCaida": "⚠️ Tus cobros necesitan una actualización en Stripe.",
+  "altaMsgStripeCaidaSinIniciar": "⚠️ Te falta configurar tu cuenta de cobro para poder recibir el dinero de tus trabajos.",
   "altaBotonContinuar": "Continuar",
   "altaResumenPendiente": "{paso} pendiente",
   "@altaResumenPendiente": {"placeholders": {"paso": {"type": "String"}}},

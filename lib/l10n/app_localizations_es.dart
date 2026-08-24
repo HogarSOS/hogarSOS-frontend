@@ -1726,6 +1726,10 @@ class AppLocalizationsEs extends AppLocalizations {
       '⚠️ Tus cobros necesitan una actualización en Stripe.';
 
   @override
+  String get altaMsgStripeCaidaSinIniciar =>
+      '⚠️ Te falta configurar tu cuenta de cobro para poder recibir el dinero de tus trabajos.';
+
+  @override
   String get altaBotonContinuar => 'Continuar';
 
   @override

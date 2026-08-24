@@ -2996,6 +2996,12 @@ abstract class AppLocalizations {
   /// **'⚠️ Tus cobros necesitan una actualización en Stripe.'**
   String get altaMsgStripeCaida;
 
+  /// No description provided for @altaMsgStripeCaidaSinIniciar.
+  ///
+  /// In es, this message translates to:
+  /// **'⚠️ Te falta configurar tu cuenta de cobro para poder recibir el dinero de tus trabajos.'**
+  String get altaMsgStripeCaidaSinIniciar;
+
   /// No description provided for @altaBotonContinuar.
   ///
   /// In es, this message translates to:
