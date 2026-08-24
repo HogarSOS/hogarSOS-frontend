@@ -944,6 +944,12 @@ abstract class AppLocalizations {
   /// **'No puedes ignorar esta solicitud porque ya enviaste una candidatura'**
   String get apiErrNoSePuedeIgnorar;
 
+  /// No description provided for @apiErrCandidaturaNoOcultable.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo puedes quitar de la lista candidaturas que el cliente ya haya resuelto'**
+  String get apiErrCandidaturaNoOcultable;
+
   /// No description provided for @apiErrArchivoNoValido.
   ///
   /// In es, this message translates to:
@@ -2053,6 +2059,36 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Candidatura enviada'**
   String get profesionalYaPostulado;
+
+  /// No description provided for @profesionalCandidaturaCerradaTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud cerrada'**
+  String get profesionalCandidaturaCerradaTitulo;
+
+  /// No description provided for @profesionalCandidaturaCerradaMotivo.
+  ///
+  /// In es, this message translates to:
+  /// **'El cliente ha elegido a otro profesional.'**
+  String get profesionalCandidaturaCerradaMotivo;
+
+  /// No description provided for @profesionalCandidaturaEliminar.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar de mis solicitudes'**
+  String get profesionalCandidaturaEliminar;
+
+  /// No description provided for @profesionalCandidaturaEliminarExito.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud quitada de tu lista'**
+  String get profesionalCandidaturaEliminarExito;
+
+  /// No description provided for @profesionalCandidaturaEliminarError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo quitar la solicitud de tu lista'**
+  String get profesionalCandidaturaEliminarError;
 
   /// No description provided for @profesionalPostulacionEnviada.
   ///

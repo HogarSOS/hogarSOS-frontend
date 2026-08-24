@@ -218,6 +218,8 @@ String? _mensajePorCodigo(String? code, AppLocalizations t) {
       return t.apiErrCierrePendienteUsaReclamacion;
     case 'REQUEST_CANNOT_IGNORE':
       return t.apiErrNoSePuedeIgnorar;
+    case 'APPLICATION_NOT_HIDEABLE':
+      return t.apiErrCandidaturaNoOcultable;
     case 'REQUEST_INVALID_STATE_START':
       return t.apiErrEstadoInvalidoIniciar;
     case 'REQUEST_NOT_IN_PROGRESS':

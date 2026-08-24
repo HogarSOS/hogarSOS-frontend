@@ -511,6 +511,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can\'t ignore this request because you already sent an application';
 
   @override
+  String get apiErrCandidaturaNoOcultable =>
+      'You can only remove applications the customer has already resolved';
+
+  @override
   String get apiErrArchivoNoValido =>
       'That file type isn\'t valid. Choose a photo (JPG or PNG).';
 
@@ -1163,6 +1167,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profesionalYaPostulado => 'Application sent';
+
+  @override
+  String get profesionalCandidaturaCerradaTitulo => 'Request closed';
+
+  @override
+  String get profesionalCandidaturaCerradaMotivo =>
+      'The customer chose another professional.';
+
+  @override
+  String get profesionalCandidaturaEliminar => 'Remove from my requests';
+
+  @override
+  String get profesionalCandidaturaEliminarExito =>
+      'Request removed from your list';
+
+  @override
+  String get profesionalCandidaturaEliminarError =>
+      'Couldn\'t remove the request from your list';
 
   @override
   String get profesionalPostulacionEnviada =>

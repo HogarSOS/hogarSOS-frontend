@@ -73,7 +73,11 @@ class ServiceRequestService {
   }
 
   Future<List<NearbyRequest>> listarCercanas() async {
-    final respuesta = await _api.get('/service-requests/nearby/list');
+    // incluir_no_elegidas=1: esta versión de la app sabe pintar "Solicitud
+    // cerrada — el cliente ha elegido a otro profesional" (ver
+    // candidaturaEstado en NearbyRequest). Un backend anterior ignora el
+    // parámetro y devuelve la lista de siempre.
+    final respuesta = await _api.get('/service-requests/nearby/list?incluir_no_elegidas=1');
     final lista = respuesta.data['solicitudes'] as List;
     return lista.map((json) => NearbyRequest.fromJson(json as Map<String, dynamic>)).toList();
   }
@@ -98,6 +102,13 @@ class ServiceRequestService {
   /// postulacion.controller.ts.
   Future<void> ignorar(String id) async {
     await _api.post('/service-requests/$id/ignorar');
+  }
+
+  /// "Eliminar de mis solicitudes": oculta para este profesional su
+  /// candidatura NO elegida (el backend solo la marca ocultada; no borra
+  /// la solicitud, la candidatura ni el historial).
+  Future<void> ocultarCandidatura(String id) async {
+    await _api.post('/service-requests/$id/candidatura/ocultar');
   }
 
   Future<List<PostulacionCandidate>> listarPostulaciones(String id) async {

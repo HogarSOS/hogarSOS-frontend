@@ -270,15 +270,42 @@ class AssignedRequest {
   }
 }
 
+/// Estado de la candidatura de ESTE profesional en una solicitud de
+/// "Solicitudes cerca", tal como lo devuelve el backend en
+/// `candidatura_estado` (listNearbyRequests, UX candidatura no elegida
+/// 2026-08-25):
+/// - ninguna: no se ha postulado (botones Ignorar / Enviar candidatura).
+/// - pendiente: "Candidatura enviada", el cliente aún no ha elegido.
+/// - noElegida: el cliente eligió a OTRO profesional → "Solicitud cerrada"
+///   + "Eliminar de mis solicitudes". Solo llega con ese valor cuando
+///   la candidatura quedó 'rechazada' en selectPostulacion — nunca por
+///   cancelación ni caducidad.
+enum CandidaturaEstado { ninguna, pendiente, noElegida }
+
+CandidaturaEstado candidaturaEstadoFromJson(Map<String, dynamic> json) {
+  final raw = json['candidatura_estado'] as String?;
+  if (raw == 'no_elegida') return CandidaturaEstado.noElegida;
+  if (raw == 'pendiente') return CandidaturaEstado.pendiente;
+  // Backend anterior a este campo: deducirlo de ya_postulado (una
+  // candidatura visible en la lista solo podía estar pendiente).
+  if (raw == null && (json['ya_postulado'] as bool? ?? false)) return CandidaturaEstado.pendiente;
+  return CandidaturaEstado.ninguna;
+}
+
 class NearbyRequest {
   final String id;
   final String descripcion;
-  final double distanciaMetros;
+
+  /// Null solo en una candidatura no elegida si el profesional no tiene
+  /// ubicación actual (esas filas no pasan por el filtro de radio) — la
+  /// tarjeta oculta el chip de distancia en ese caso.
+  final double? distanciaMetros;
   final DateTime createdAt;
   final UrgenciaSolicitud urgencia;
   final String clienteNombre;
   final String? clienteFotoUrl;
   final bool yaPostulado;
+  final CandidaturaEstado candidaturaEstado;
 
   NearbyRequest({
     required this.id,
@@ -289,18 +316,34 @@ class NearbyRequest {
     required this.clienteNombre,
     this.clienteFotoUrl,
     this.yaPostulado = false,
-  });
+    CandidaturaEstado? candidaturaEstado,
+  }) : candidaturaEstado = candidaturaEstado ?? (yaPostulado ? CandidaturaEstado.pendiente : CandidaturaEstado.ninguna);
 
   factory NearbyRequest.fromJson(Map<String, dynamic> json) {
     return NearbyRequest(
       id: json['id'] as String,
       descripcion: json['descripcion'] as String,
-      distanciaMetros: (json['distancia_metros'] as num).toDouble(),
+      distanciaMetros: (json['distancia_metros'] as num?)?.toDouble(),
       createdAt: DateTime.parse(json['created_at'] as String),
       urgencia: urgenciaFromString(json['urgencia'] as String? ?? 'lo_antes_posible'),
       clienteNombre: json['cliente_nombre'] as String? ?? '',
       clienteFotoUrl: json['cliente_foto_url'] as String?,
       yaPostulado: json['ya_postulado'] as bool? ?? false,
+      candidaturaEstado: candidaturaEstadoFromJson(json),
+    );
+  }
+
+  NearbyRequest copyWith({bool? yaPostulado, CandidaturaEstado? candidaturaEstado}) {
+    return NearbyRequest(
+      id: id,
+      descripcion: descripcion,
+      distanciaMetros: distanciaMetros,
+      createdAt: createdAt,
+      urgencia: urgencia,
+      clienteNombre: clienteNombre,
+      clienteFotoUrl: clienteFotoUrl,
+      yaPostulado: yaPostulado ?? this.yaPostulado,
+      candidaturaEstado: candidaturaEstado ?? this.candidaturaEstado,
     );
   }
 }
