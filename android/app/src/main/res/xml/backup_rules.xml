@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android ≤ 11 (API 24-30). Misma exclusión que data_extraction_rules.xml:
+  el almacén seguro de flutter_secure_storage no debe restaurarse nunca.
+-->
+<full-backup-content>
+    <exclude domain="sharedpref" path="FlutterSecureStorage.xml"/>
+</full-backup-content>

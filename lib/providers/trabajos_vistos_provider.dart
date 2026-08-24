@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../services/secure_storage_guard.dart';
 
 /// IDs de trabajos asignados que el profesional ya abrió en "Trabajos
 /// activos" en ESTE dispositivo — usado solo para saber si hay que
@@ -35,7 +36,9 @@ class TrabajosVistosNotifier extends StateNotifier<Set<String>> {
   Future<void> get listo => _listo;
 
   Future<void> _cargar() async {
-    final raw = await _storage.read(key: _storageKey);
+    // leerSeguro: un almacén restaurado sin clave (BAD_DECRYPT) se vacía y
+    // aquí simplemente no hay "vistos" — dato de conveniencia, sin valor.
+    final raw = await leerSeguro(_storage, _storageKey);
     if (raw == null) return;
     state = (jsonDecode(raw) as List).cast<String>().toSet();
   }

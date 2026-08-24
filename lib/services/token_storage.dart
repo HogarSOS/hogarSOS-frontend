@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'secure_storage_guard.dart';
 
 /// Guarda la sesión — en disco (persiste entre arranques de la app) o
 /// solo en memoria (se pierde al cerrar del todo la app), según lo que
@@ -73,7 +74,10 @@ class TokenStorage {
 
   Future<Map<String, dynamic>?> getUsuario() async {
     if (_memUsuario != null) return _memUsuario;
-    final raw = await _storage.read(key: _usuarioKey);
+    // Lecturas vía leerSeguro (ver secure_storage_guard.dart): un almacén
+    // restaurado sin su clave del Keystore se vacía y se trata como "sin
+    // sesión" en vez de reventar cada petición con BAD_DECRYPT.
+    final raw = await leerSeguro(_storage, _usuarioKey);
     if (raw == null) return null;
     return jsonDecode(raw) as Map<String, dynamic>;
   }
@@ -93,10 +97,10 @@ class TokenStorage {
     // persistente): sin esto, `accessTokenEnMemoria` seguiría a null
     // hasta el primer login de esa ejecución y las imágenes saldrían sin
     // cabecera.
-    _memAccessToken ??= await _storage.read(key: _accessKey);
+    _memAccessToken ??= await leerSeguro(_storage, _accessKey);
     return _memAccessToken;
   }
-  Future<String?> getRefreshToken() async => _memRefreshToken ?? await _storage.read(key: _refreshKey);
+  Future<String?> getRefreshToken() async => _memRefreshToken ?? await leerSeguro(_storage, _refreshKey);
 
   Future<void> clear() async {
     _memAccessToken = null;

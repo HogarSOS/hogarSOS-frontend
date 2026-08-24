@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12+ (API 31). Excluye el almacén seguro de flutter_secure_storage
+  (shared_prefs/FlutterSecureStorage.xml) tanto del backup en la nube como
+  de la transferencia entre dispositivos: sus valores están cifrados con una
+  clave del AndroidKeyStore que NO viaja con el backup, así que restaurarlos
+  solo produce BAD_DECRYPT (auditoría Build 44, 2026-08-25). Nada de lo que
+  guarda la app en local es necesario restaurar: la verdad vive en el backend.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="FlutterSecureStorage.xml"/>
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="FlutterSecureStorage.xml"/>
+    </device-transfer>
+</data-extraction-rules>

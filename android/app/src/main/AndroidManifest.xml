@@ -23,10 +23,23 @@
     <uses-permission android:name="com.huawei.android.launcher.permission.CHANGE_BADGE" />
     <uses-permission android:name="com.huawei.android.launcher.permission.READ_SETTINGS" />
     <uses-permission android:name="com.huawei.android.launcher.permission.WRITE_SETTINGS" />
+    <!--
+      Backup desactivado (auditoría Build 44, 2026-08-25): al reinstalar, el
+      auto-backup restauraba el almacén seguro (flutter_secure_storage) sin
+      la clave del Keystore que lo cifraba y toda lectura fallaba con
+      BAD_DECRYPT, dejando el login en "Ocurrió un error inesperado". La app
+      no guarda en local nada que merezca restaurarse (sesión, id de
+      instalación, avisos vistos): todo vive en el backend. Las reglas de
+      exclusión cubren además la transferencia entre dispositivos de
+      Android 12+, que no respeta allowBackup=false.
+    -->
     <application
     android:label="Hogar SOS"
     android:name="${applicationName}"
-    android:icon="@mipmap/ic_launcher">
+    android:icon="@mipmap/ic_launcher"
+    android:allowBackup="false"
+    android:fullBackupContent="@xml/backup_rules"
+    android:dataExtractionRules="@xml/data_extraction_rules">
         <!--
           Clave de Google Maps restringida en Google Cloud Console
           (proyecto "hogarsos") a Maps SDK for Android + huellas SHA-1

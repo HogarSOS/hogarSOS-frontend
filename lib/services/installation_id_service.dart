@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'secure_storage_guard.dart';
 
 /// Identificador de ESTA instalación de la app (P2 #5) — no de la
 /// sesión. Deliberadamente independiente de `TokenStorage`: debe
@@ -27,7 +28,10 @@ class InstallationIdService {
 
   Future<String> obtener() async {
     if (_cache != null) return _cache!;
-    var id = await _storage.read(key: _key);
+    // leerSeguro: si el almacén fue restaurado sin su clave (BAD_DECRYPT)
+    // se vacía y simplemente se genera un id nuevo — es una instalación
+    // nueva a todos los efectos.
+    var id = await leerSeguro(_storage, _key);
     if (id == null) {
       id = _generar();
       await _storage.write(key: _key, value: id);
