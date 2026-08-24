@@ -8,6 +8,7 @@ import '../l10n/app_localizations.dart';
 import '../models/user_model.dart';
 import '../providers/auth_provider.dart';
 import '../providers/disponibilidad_provider.dart';
+import '../providers/service_request_provider.dart';
 import '../providers/stripe_return_provider.dart';
 import '../screens/chat_screen.dart';
 import '../screens/cliente/seguimiento_solicitud_screen.dart';
@@ -332,6 +333,14 @@ class _DeepLinkListenerState extends ConsumerState<DeepLinkListener> {
           //   ejecución.
           ref.read(pendingProfesionalTabRequestProvider.notifier).state = 1;
           ref.read(profesionalTabIndexProvider.notifier).state = 1;
+          // 'postulacion_rechazada': la solicitud ya no está 'pendiente'
+          // en el backend (listNearbyRequests deja de devolverla), pero
+          // la lista en memoria puede seguir mostrando "Candidatura
+          // enviada" hasta el siguiente sondeo de 10s. Recarga ya para
+          // que lo que ve al aterrizar coincida con la notificación.
+          if (tipo == 'postulacion_rechazada') {
+            unawaited(ref.read(nearbyRequestsProvider.notifier).cargar());
+          }
           break;
         case DestinoNotificacionProfesional.trabajosActivos:
           // Revisión UX 2026-08-16: Trabajos activos dejó de ser una
