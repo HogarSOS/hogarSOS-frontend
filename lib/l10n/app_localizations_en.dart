@@ -174,7 +174,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'You\'ve reached the SMS code limit. Please try again later.';
 
   @override
-  String get apiErrDatosInvalidos => 'Invalid data';
+  String get apiErrDatosInvalidos =>
+      'Check the details you entered and try again';
 
   @override
   String get apiErrSinPermiso => 'You don\'t have permission for this action';
@@ -486,6 +487,38 @@ class AppLocalizationsEn extends AppLocalizations {
       'This account was deleted by the user and can\'t be reactivated';
 
   @override
+  String get apiErrCuentaConTrabajoActivo =>
+      'You can\'t delete your account while you have an active job or a pending payment. Finish or cancel them and try again.';
+
+  @override
+  String get apiErrAmpliacionSinPago =>
+      'There\'s an accepted extension the client hasn\'t paid yet. Ask them to authorise that payment before completing the job.';
+
+  @override
+  String get apiErrCierrePendienteUsaReclamacion =>
+      'The professional has already reported the hours worked — confirm them or, if you disagree, open a claim.';
+
+  @override
+  String get apiErrEstadoInvalidoIniciar =>
+      'The request isn\'t in a valid state to start the job';
+
+  @override
+  String get apiErrTrabajoNoEnCurso =>
+      'The job is no longer in progress — there\'s nothing to undo';
+
+  @override
+  String get apiErrNoSePuedeIgnorar =>
+      'You can\'t ignore this request because you already sent an application';
+
+  @override
+  String get apiErrArchivoNoValido =>
+      'That file type isn\'t valid. Choose a photo (JPG or PNG).';
+
+  @override
+  String get apiErrImagenNoProcesable =>
+      'The image couldn\'t be processed. Try another photo.';
+
+  @override
   String get legalPrivSec1Titulo => '1. Who processes your data';
 
   @override
@@ -645,7 +678,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'View history and ongoing requests';
 
   @override
-  String get homeSubtitulo => 'What do you need fixed today?';
+  String get homeSubtitulo => 'How can we help you today?';
 
   @override
   String get homeBuscarPlaceholder => 'Search for a professional or service...';
@@ -661,7 +694,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeSolicitarProfesionalAyuda =>
-      'Tell us what you need and we\'ll connect you';
+      'Tell us what you need and we\'ll help you solve it.';
 
   @override
   String get homeDescribeProblema => 'Describe the problem';
@@ -780,14 +813,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pagoAceptacionTerminos =>
-      'By continuing, you agree to the Terms of service and cancellation policy';
+      'By continuing, you agree to the Terms of service, including their cancellation policy';
 
   @override
   String get proximamenteTitulo => 'Coming soon';
 
   @override
   String get buscarProximamenteDescripcion =>
-      'Advanced search with price, distance and rating filters is coming in the next phase.';
+      'Very soon you\'ll be able to search with price, distance and rating filters.';
 
   @override
   String get mensajesProximamenteDescripcion =>
@@ -905,7 +938,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get perfilProSolicitarInfo =>
-      'For now, new requests are sent to all available professionals near you, not to one specific professional';
+      'Your request will reach the available professionals in your area — for now it can\'t be sent to just one professional';
 
   @override
   String get categoriaElectricista => 'Electrician';
@@ -1098,7 +1131,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get salirPulsaOtraVez => 'Press back again to exit';
 
   @override
-  String get profesionalSinSolicitudes => 'No requests nearby right now';
+  String get profesionalSinSolicitudes =>
+      'No requests nearby right now. We\'ll notify you when a new one appears in your area.';
 
   @override
   String get profesionalErrorCargar => 'Couldn\'t load requests';
@@ -1199,7 +1233,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trabajosActivosVerTrabajo => 'View job';
 
   @override
-  String get trabajosActivosVacio => 'You have no active jobs right now';
+  String get trabajosActivosVacio =>
+      'You have no active jobs right now. When a client picks you, their job will appear here.';
 
   @override
   String get trabajosActivosErrorCargar => 'Couldn\'t load your jobs';
@@ -1314,7 +1349,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get disponibilidadCompletaAlta =>
-      'Complete your onboarding to start receiving offers. We\'ll guide you from the \"Complete your onboarding\" card at the top of your profile.';
+      'Complete your onboarding to start receiving requests. We\'ll guide you from the \"Complete your onboarding\" card at the top of your profile.';
 
   @override
   String get miPerfilTelefonoAyudaInterno =>
@@ -1627,7 +1662,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get altaPasoIdentidadCobros => 'Identity & payouts';
 
   @override
-  String get altaPasoListo => 'Ready to receive offers';
+  String get altaPasoListo => 'Ready to receive requests';
 
   @override
   String get altaFaltaFoto => 'Add your photo';
@@ -1663,7 +1698,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'We\'re reviewing your onboarding. We\'ll let you know as soon as it\'s approved.';
 
   @override
-  String get altaMsgListo => '🎉 You\'re ready to receive offers!';
+  String get altaMsgListo => '🎉 You\'re ready to receive requests!';
 
   @override
   String get altaMsgListoAyuda =>
@@ -1690,7 +1725,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get altaActivadoExito =>
-      'Availability on! You can now receive offers.';
+      'Availability on! You can now receive requests.';
 
   @override
   String get puenteTituloSeguro => '🔐 Secure verification & payouts';
@@ -1854,7 +1889,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get centroPagosHistorialVacio =>
-      'You don\'t have any released payouts yet.';
+      'You don\'t have any payouts yet. When you complete a job and the client confirms it, it will appear here.';
 
   @override
   String centroPagosImporte(String monto) {
@@ -1941,7 +1976,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatTitulo => 'Chat';
 
   @override
-  String get chatSinMensajes => 'No messages yet';
+  String get chatSinMensajes =>
+      'No messages yet. Write the first one to sort out the details of the job.';
 
   @override
   String get chatErrorCargar => 'Couldn\'t load the chat';
@@ -2025,13 +2061,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get progresoSeleccionado => 'Professional selected';
 
   @override
-  String get progresoFinalizado => 'Job finished';
+  String get progresoFinalizado => 'Service completed';
 
   @override
   String get misSolicitudesError => 'Couldn\'t load your requests';
 
   @override
-  String get misSolicitudesVacio => 'You haven\'t made any requests yet';
+  String get misSolicitudesVacio =>
+      'You haven\'t made any requests yet. Create your first one from Home and professionals in your area will see it right away.';
 
   @override
   String get misSolicitudesBorrarTitulo => 'Delete this request?';
@@ -2526,7 +2563,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get seleccionarProfesionalVacio =>
-      'No applications received yet — check back later';
+      'No applications yet. Professionals in your area can already see your request — we\'ll notify you as soon as someone applies.';
 
   @override
   String get trabajosActivosEnviarPresupuesto => 'Send quote';

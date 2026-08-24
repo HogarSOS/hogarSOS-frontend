@@ -175,7 +175,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'Se alcanzó el límite de códigos por SMS. Inténtalo más tarde.';
 
   @override
-  String get apiErrDatosInvalidos => 'Datos inválidos';
+  String get apiErrDatosInvalidos =>
+      'Revisa los datos introducidos e inténtalo de nuevo';
 
   @override
   String get apiErrSinPermiso => 'No tienes permiso para esta acción';
@@ -489,6 +490,38 @@ class AppLocalizationsEs extends AppLocalizations {
       'Esta cuenta fue eliminada por el propio usuario y no se puede reactivar';
 
   @override
+  String get apiErrCuentaConTrabajoActivo =>
+      'No puedes eliminar tu cuenta mientras tengas un trabajo activo o un pago pendiente. Termínalos o cancélalos y vuelve a intentarlo.';
+
+  @override
+  String get apiErrAmpliacionSinPago =>
+      'Hay una ampliación aceptada que el cliente todavía no ha pagado. Pídele que autorice ese pago antes de completar el trabajo.';
+
+  @override
+  String get apiErrCierrePendienteUsaReclamacion =>
+      'El profesional ya declaró las horas trabajadas — confírmalas o, si no estás de acuerdo, abre una reclamación.';
+
+  @override
+  String get apiErrEstadoInvalidoIniciar =>
+      'La solicitud no está en un estado válido para iniciar el trabajo';
+
+  @override
+  String get apiErrTrabajoNoEnCurso =>
+      'El trabajo ya no está en curso — no hay nada que deshacer';
+
+  @override
+  String get apiErrNoSePuedeIgnorar =>
+      'No puedes ignorar esta solicitud porque ya enviaste una candidatura';
+
+  @override
+  String get apiErrArchivoNoValido =>
+      'Ese tipo de archivo no es válido. Elige una foto (JPG o PNG).';
+
+  @override
+  String get apiErrImagenNoProcesable =>
+      'No se pudo procesar la imagen. Prueba con otra foto.';
+
+  @override
   String get legalPrivSec1Titulo => '1. Quién trata tus datos';
 
   @override
@@ -648,7 +681,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ver historial y solicitudes en curso';
 
   @override
-  String get homeSubtitulo => '¿Qué necesitas arreglar hoy?';
+  String get homeSubtitulo => '¿Cómo podemos ayudarte hoy?';
 
   @override
   String get homeBuscarPlaceholder => 'Busca un profesional o servicio...';
@@ -664,7 +697,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeSolicitarProfesionalAyuda =>
-      'Cuéntanos qué necesitas y te ponemos en contacto';
+      'Cuéntanos qué necesitas y te ayudaremos a solucionarlo.';
 
   @override
   String get homeDescribeProblema => 'Describe el problema';
@@ -783,14 +816,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get pagoAceptacionTerminos =>
-      'Al continuar, aceptas los Términos de servicio y la política de cancelación';
+      'Al continuar, aceptas los Términos de servicio, incluida su política de cancelaciones';
 
   @override
   String get proximamenteTitulo => 'Próximamente';
 
   @override
   String get buscarProximamenteDescripcion =>
-      'La búsqueda avanzada con filtros por precio, distancia y valoración llega en la próxima fase.';
+      'Muy pronto podrás buscar con filtros por precio, distancia y valoración.';
 
   @override
   String get mensajesProximamenteDescripcion =>
@@ -908,7 +941,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get perfilProSolicitarInfo =>
-      'De momento, las solicitudes se envían a los profesionales disponibles cerca de ti desde Inicio, no a uno concreto todavía';
+      'Tu solicitud llegará a los profesionales disponibles de tu zona — de momento no se puede enviar solo a un profesional concreto';
 
   @override
   String get categoriaElectricista => 'Electricista';
@@ -1101,7 +1134,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profesionalSinSolicitudes =>
-      'No hay solicitudes cerca ahora mismo';
+      'No hay solicitudes cerca ahora mismo. Cuando aparezca una nueva en tu zona, te avisaremos con una notificación.';
 
   @override
   String get profesionalErrorCargar => 'No se pudieron cargar las solicitudes';
@@ -1203,7 +1236,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get trabajosActivosVerTrabajo => 'Ver trabajo';
 
   @override
-  String get trabajosActivosVacio => 'No tienes trabajos activos ahora mismo';
+  String get trabajosActivosVacio =>
+      'No tienes trabajos activos ahora mismo. Cuando un cliente te elija, su trabajo aparecerá aquí.';
 
   @override
   String get trabajosActivosErrorCargar => 'No se pudieron cargar tus trabajos';
@@ -1324,7 +1358,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get disponibilidadCompletaAlta =>
-      'Completa tu alta para empezar a recibir ofertas. Te guiamos desde la tarjeta \"Completa tu alta\", arriba en tu perfil.';
+      'Completa tu alta para empezar a recibir solicitudes. Te guiamos desde la tarjeta \"Completa tu alta\", arriba en tu perfil.';
 
   @override
   String get miPerfilTelefonoAyudaInterno =>
@@ -1641,7 +1675,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get altaPasoIdentidadCobros => 'Identidad y cobros';
 
   @override
-  String get altaPasoListo => 'Listo para recibir ofertas';
+  String get altaPasoListo => 'Listo para recibir solicitudes';
 
   @override
   String get altaFaltaFoto => 'Añade tu foto';
@@ -1677,7 +1711,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Estamos revisando tu alta. Te avisaremos en cuanto esté aprobada.';
 
   @override
-  String get altaMsgListo => '🎉 ¡Ya estás listo para recibir ofertas!';
+  String get altaMsgListo => '🎉 ¡Ya estás listo para recibir solicitudes!';
 
   @override
   String get altaMsgListoAyuda =>
@@ -1705,7 +1739,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get altaActivadoExito =>
-      '¡Disponibilidad activada! Ya puedes recibir ofertas.';
+      '¡Disponibilidad activada! Ya puedes recibir solicitudes.';
 
   @override
   String get puenteTituloSeguro => '🔐 Verificación y cobros seguros';
@@ -1784,7 +1818,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get puenteBoton => 'Continuar con Stripe →';
 
   @override
-  String get puenteBotonRetomar => 'Continúa con Stripe';
+  String get puenteBotonRetomar => 'Continuar con Stripe';
 
   @override
   String get puenteEnProgresoTexto =>
@@ -1869,7 +1903,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get centroPagosHistorialVacio =>
-      'Todavía no tienes ningún cobro liberado.';
+      'Todavía no tienes ningún cobro. Cuando completes un trabajo y el cliente lo confirme, aparecerá aquí.';
 
   @override
   String centroPagosImporte(String monto) {
@@ -1957,7 +1991,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get chatTitulo => 'Chat';
 
   @override
-  String get chatSinMensajes => 'Aún no hay mensajes';
+  String get chatSinMensajes =>
+      'Aún no hay mensajes. Escribe el primero para concretar los detalles del trabajo.';
 
   @override
   String get chatErrorCargar => 'No se pudo cargar el chat';
@@ -2041,13 +2076,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get progresoSeleccionado => 'Profesional seleccionado';
 
   @override
-  String get progresoFinalizado => 'Trabajo finalizado';
+  String get progresoFinalizado => 'Servicio completado';
 
   @override
   String get misSolicitudesError => 'No se pudieron cargar tus solicitudes';
 
   @override
-  String get misSolicitudesVacio => 'Aún no has hecho ninguna solicitud';
+  String get misSolicitudesVacio =>
+      'Aún no has hecho ninguna solicitud. Crea la primera desde Inicio y los profesionales de tu zona la verán al momento.';
 
   @override
   String get misSolicitudesBorrarTitulo => '¿Borrar esta solicitud?';
@@ -2550,7 +2586,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get seleccionarProfesionalVacio =>
-      'Todavía no hay ninguna candidatura recibida — vuelve más tarde';
+      'Todavía no hay candidaturas. Los profesionales de tu zona ya pueden ver tu solicitud — te avisaremos en cuanto alguien se postule.';
 
   @override
   String get trabajosActivosEnviarPresupuesto => 'Enviar presupuesto';

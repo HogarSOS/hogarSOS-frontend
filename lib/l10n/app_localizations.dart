@@ -401,7 +401,7 @@ abstract class AppLocalizations {
   /// No description provided for @apiErrDatosInvalidos.
   ///
   /// In es, this message translates to:
-  /// **'Datos inválidos'**
+  /// **'Revisa los datos introducidos e inténtalo de nuevo'**
   String get apiErrDatosInvalidos;
 
   /// No description provided for @apiErrSinPermiso.
@@ -908,6 +908,54 @@ abstract class AppLocalizations {
   /// **'Esta cuenta fue eliminada por el propio usuario y no se puede reactivar'**
   String get apiErrCuentaEliminadaNoReactivable;
 
+  /// No description provided for @apiErrCuentaConTrabajoActivo.
+  ///
+  /// In es, this message translates to:
+  /// **'No puedes eliminar tu cuenta mientras tengas un trabajo activo o un pago pendiente. Termínalos o cancélalos y vuelve a intentarlo.'**
+  String get apiErrCuentaConTrabajoActivo;
+
+  /// No description provided for @apiErrAmpliacionSinPago.
+  ///
+  /// In es, this message translates to:
+  /// **'Hay una ampliación aceptada que el cliente todavía no ha pagado. Pídele que autorice ese pago antes de completar el trabajo.'**
+  String get apiErrAmpliacionSinPago;
+
+  /// No description provided for @apiErrCierrePendienteUsaReclamacion.
+  ///
+  /// In es, this message translates to:
+  /// **'El profesional ya declaró las horas trabajadas — confírmalas o, si no estás de acuerdo, abre una reclamación.'**
+  String get apiErrCierrePendienteUsaReclamacion;
+
+  /// No description provided for @apiErrEstadoInvalidoIniciar.
+  ///
+  /// In es, this message translates to:
+  /// **'La solicitud no está en un estado válido para iniciar el trabajo'**
+  String get apiErrEstadoInvalidoIniciar;
+
+  /// No description provided for @apiErrTrabajoNoEnCurso.
+  ///
+  /// In es, this message translates to:
+  /// **'El trabajo ya no está en curso — no hay nada que deshacer'**
+  String get apiErrTrabajoNoEnCurso;
+
+  /// No description provided for @apiErrNoSePuedeIgnorar.
+  ///
+  /// In es, this message translates to:
+  /// **'No puedes ignorar esta solicitud porque ya enviaste una candidatura'**
+  String get apiErrNoSePuedeIgnorar;
+
+  /// No description provided for @apiErrArchivoNoValido.
+  ///
+  /// In es, this message translates to:
+  /// **'Ese tipo de archivo no es válido. Elige una foto (JPG o PNG).'**
+  String get apiErrArchivoNoValido;
+
+  /// No description provided for @apiErrImagenNoProcesable.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo procesar la imagen. Prueba con otra foto.'**
+  String get apiErrImagenNoProcesable;
+
   /// No description provided for @legalPrivSec1Titulo.
   ///
   /// In es, this message translates to:
@@ -1163,7 +1211,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeSubtitulo.
   ///
   /// In es, this message translates to:
-  /// **'¿Qué necesitas arreglar hoy?'**
+  /// **'¿Cómo podemos ayudarte hoy?'**
   String get homeSubtitulo;
 
   /// No description provided for @homeBuscarPlaceholder.
@@ -1193,7 +1241,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeSolicitarProfesionalAyuda.
   ///
   /// In es, this message translates to:
-  /// **'Cuéntanos qué necesitas y te ponemos en contacto'**
+  /// **'Cuéntanos qué necesitas y te ayudaremos a solucionarlo.'**
   String get homeSolicitarProfesionalAyuda;
 
   /// No description provided for @homeDescribeProblema.
@@ -1409,7 +1457,7 @@ abstract class AppLocalizations {
   /// No description provided for @pagoAceptacionTerminos.
   ///
   /// In es, this message translates to:
-  /// **'Al continuar, aceptas los Términos de servicio y la política de cancelación'**
+  /// **'Al continuar, aceptas los Términos de servicio, incluida su política de cancelaciones'**
   String get pagoAceptacionTerminos;
 
   /// No description provided for @proximamenteTitulo.
@@ -1421,7 +1469,7 @@ abstract class AppLocalizations {
   /// No description provided for @buscarProximamenteDescripcion.
   ///
   /// In es, this message translates to:
-  /// **'La búsqueda avanzada con filtros por precio, distancia y valoración llega en la próxima fase.'**
+  /// **'Muy pronto podrás buscar con filtros por precio, distancia y valoración.'**
   String get buscarProximamenteDescripcion;
 
   /// No description provided for @mensajesProximamenteDescripcion.
@@ -1613,7 +1661,7 @@ abstract class AppLocalizations {
   /// No description provided for @perfilProSolicitarInfo.
   ///
   /// In es, this message translates to:
-  /// **'De momento, las solicitudes se envían a los profesionales disponibles cerca de ti desde Inicio, no a uno concreto todavía'**
+  /// **'Tu solicitud llegará a los profesionales disponibles de tu zona — de momento no se puede enviar solo a un profesional concreto'**
   String get perfilProSolicitarInfo;
 
   /// No description provided for @categoriaElectricista.
@@ -1949,7 +1997,7 @@ abstract class AppLocalizations {
   /// No description provided for @profesionalSinSolicitudes.
   ///
   /// In es, this message translates to:
-  /// **'No hay solicitudes cerca ahora mismo'**
+  /// **'No hay solicitudes cerca ahora mismo. Cuando aparezca una nueva en tu zona, te avisaremos con una notificación.'**
   String get profesionalSinSolicitudes;
 
   /// No description provided for @profesionalErrorCargar.
@@ -2093,7 +2141,7 @@ abstract class AppLocalizations {
   /// No description provided for @trabajosActivosVacio.
   ///
   /// In es, this message translates to:
-  /// **'No tienes trabajos activos ahora mismo'**
+  /// **'No tienes trabajos activos ahora mismo. Cuando un cliente te elija, su trabajo aparecerá aquí.'**
   String get trabajosActivosVacio;
 
   /// No description provided for @trabajosActivosErrorCargar.
@@ -2297,7 +2345,7 @@ abstract class AppLocalizations {
   /// No description provided for @disponibilidadCompletaAlta.
   ///
   /// In es, this message translates to:
-  /// **'Completa tu alta para empezar a recibir ofertas. Te guiamos desde la tarjeta \"Completa tu alta\", arriba en tu perfil.'**
+  /// **'Completa tu alta para empezar a recibir solicitudes. Te guiamos desde la tarjeta \"Completa tu alta\", arriba en tu perfil.'**
   String get disponibilidadCompletaAlta;
 
   /// No description provided for @miPerfilTelefonoAyudaInterno.
@@ -2867,7 +2915,7 @@ abstract class AppLocalizations {
   /// No description provided for @altaPasoListo.
   ///
   /// In es, this message translates to:
-  /// **'Listo para recibir ofertas'**
+  /// **'Listo para recibir solicitudes'**
   String get altaPasoListo;
 
   /// No description provided for @altaFaltaFoto.
@@ -2927,7 +2975,7 @@ abstract class AppLocalizations {
   /// No description provided for @altaMsgListo.
   ///
   /// In es, this message translates to:
-  /// **'🎉 ¡Ya estás listo para recibir ofertas!'**
+  /// **'🎉 ¡Ya estás listo para recibir solicitudes!'**
   String get altaMsgListo;
 
   /// No description provided for @altaMsgListoAyuda.
@@ -2969,7 +3017,7 @@ abstract class AppLocalizations {
   /// No description provided for @altaActivadoExito.
   ///
   /// In es, this message translates to:
-  /// **'¡Disponibilidad activada! Ya puedes recibir ofertas.'**
+  /// **'¡Disponibilidad activada! Ya puedes recibir solicitudes.'**
   String get altaActivadoExito;
 
   /// No description provided for @puenteTituloSeguro.
@@ -3107,7 +3155,7 @@ abstract class AppLocalizations {
   /// No description provided for @puenteBotonRetomar.
   ///
   /// In es, this message translates to:
-  /// **'Continúa con Stripe'**
+  /// **'Continuar con Stripe'**
   String get puenteBotonRetomar;
 
   /// No description provided for @puenteEnProgresoTexto.
@@ -3251,7 +3299,7 @@ abstract class AppLocalizations {
   /// No description provided for @centroPagosHistorialVacio.
   ///
   /// In es, this message translates to:
-  /// **'Todavía no tienes ningún cobro liberado.'**
+  /// **'Todavía no tienes ningún cobro. Cuando completes un trabajo y el cliente lo confirme, aparecerá aquí.'**
   String get centroPagosHistorialVacio;
 
   /// No description provided for @centroPagosImporte.
@@ -3413,7 +3461,7 @@ abstract class AppLocalizations {
   /// No description provided for @chatSinMensajes.
   ///
   /// In es, this message translates to:
-  /// **'Aún no hay mensajes'**
+  /// **'Aún no hay mensajes. Escribe el primero para concretar los detalles del trabajo.'**
   String get chatSinMensajes;
 
   /// No description provided for @chatErrorCargar.
@@ -3569,7 +3617,7 @@ abstract class AppLocalizations {
   /// No description provided for @progresoFinalizado.
   ///
   /// In es, this message translates to:
-  /// **'Trabajo finalizado'**
+  /// **'Servicio completado'**
   String get progresoFinalizado;
 
   /// No description provided for @misSolicitudesError.
@@ -3581,7 +3629,7 @@ abstract class AppLocalizations {
   /// No description provided for @misSolicitudesVacio.
   ///
   /// In es, this message translates to:
-  /// **'Aún no has hecho ninguna solicitud'**
+  /// **'Aún no has hecho ninguna solicitud. Crea la primera desde Inicio y los profesionales de tu zona la verán al momento.'**
   String get misSolicitudesVacio;
 
   /// No description provided for @misSolicitudesBorrarTitulo.
@@ -4451,7 +4499,7 @@ abstract class AppLocalizations {
   /// No description provided for @seleccionarProfesionalVacio.
   ///
   /// In es, this message translates to:
-  /// **'Todavía no hay ninguna candidatura recibida — vuelve más tarde'**
+  /// **'Todavía no hay candidaturas. Los profesionales de tu zona ya pueden ver tu solicitud — te avisaremos en cuanto alguien se postule.'**
   String get seleccionarProfesionalVacio;
 
   /// No description provided for @trabajosActivosEnviarPresupuesto.

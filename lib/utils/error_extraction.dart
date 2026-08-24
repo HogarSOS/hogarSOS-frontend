@@ -203,6 +203,50 @@ String? _mensajePorCodigo(String? code, AppLocalizations t) {
       return t.apiErrUltimoAdminActivo;
     case 'ADMIN_CANNOT_REACTIVATE_DELETED_ACCOUNT':
       return t.apiErrCuentaEliminadaNoReactivable;
+    // Auditoría UX pre-lanzamiento (2026-08-24): códigos que el backend
+    // ya emitía pero que la app degradaba al mensaje genérico — el
+    // usuario veía "ocurrió un error" sin saber ni por qué ni qué hacer.
+    // Los cuatro primeros son los que un usuario normal puede provocar
+    // de verdad (borrar cuenta con trabajo activo, completar con una
+    // ampliación sin pagar, cancelar con horas ya declaradas, doble vía
+    // candidatura/ignorar).
+    case 'ACTIVE_WORK_OR_PAYMENT_PENDING':
+      return t.apiErrCuentaConTrabajoActivo;
+    case 'AMPLIACION_SIN_PAGO_CONFIRMADO':
+      return t.apiErrAmpliacionSinPago;
+    case 'REQUEST_HOURS_CLOSURE_PENDING_USE_DISPUTE':
+      return t.apiErrCierrePendienteUsaReclamacion;
+    case 'REQUEST_CANNOT_IGNORE':
+      return t.apiErrNoSePuedeIgnorar;
+    case 'REQUEST_INVALID_STATE_START':
+      return t.apiErrEstadoInvalidoIniciar;
+    case 'REQUEST_NOT_IN_PROGRESS':
+      return t.apiErrTrabajoNoEnCurso;
+    case 'UPLOAD_INVALID_TYPE':
+      return t.apiErrArchivoNoValido;
+    case 'UPLOAD_INVALID_IMAGE':
+      return t.apiErrImagenNoProcesable;
+    // Registro del upload fallido en BD: para el usuario es lo mismo que
+    // cualquier fallo de subida — reutiliza el texto existente.
+    case 'UPLOAD_REGISTER_FAILED':
+      return t.fotoErrorSubir;
+    // Peticiones malformadas (no deberían ocurrir con la app oficial):
+    // mejor "revisa los datos" que el genérico sin pista.
+    case 'PAYMENT_REQUEST_ID_MISSING':
+    case 'DESGLOSE_PARAMS_INVALID':
+      return t.apiErrDatosInvalidos;
+    // NOT_REQUEST_PARTICIPANT lo emite GET /payments/desglose (rama de
+    // comisión por tramos): mismo significado que REQUEST_NO_ACCESS —
+    // mapeado desde YA para que ese despliegue no degrade el mensaje.
+    case 'NOT_REQUEST_PARTICIPANT':
+      return t.apiErrSinAccesoSolicitud;
+    // Variantes de sesión inválida que compartían significado con
+    // AUTH_TOKEN_INVALID pero caían al genérico.
+    case 'AUTH_TOKEN_MISSING':
+    case 'AUTH_USER_INVALID':
+    case 'AUTH_FIREBASE_TOKEN_INVALID':
+    case 'AUTH_REFRESH_TOKEN_MISSING':
+      return t.apiErrTokenInvalido;
     // Límite de intentos en login/register/forgot-password (auditoría de
     // cierre). Reutiliza el mismo texto que ya existe para el
     // 'too-many-requests' de Firebase — el significado para el usuario
