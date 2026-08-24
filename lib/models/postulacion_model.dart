@@ -1,3 +1,5 @@
+import 'tipo_profesional.dart';
+
 /// Un profesional postulado a una solicitud, tal como lo ve el
 /// cliente al elegir. No reutiliza ProfessionalSummary (modelo de la
 /// búsqueda de profesionales, sin mensaje de disponibilidad ni el
@@ -12,6 +14,12 @@ class PostulacionCandidate {
   final double? distanciaMetros;
   final String mensaje;
   final bool estaVerificado;
+
+  /// Situación fiscal declarada (Autónomo/Empresa/Particular) — el
+  /// backend la sirve en el listado desde 41cac24 (hallazgo C del
+  /// cierre P0), pero el frontend nunca la parseó ni la pintó hasta la
+  /// QA visual del build 43. Nullable: perfiles antiguos sin declarar.
+  final TipoProfesional? tipoProfesional;
   final DateTime createdAt;
 
   PostulacionCandidate({
@@ -24,6 +32,7 @@ class PostulacionCandidate {
     this.distanciaMetros,
     required this.mensaje,
     required this.estaVerificado,
+    this.tipoProfesional,
     required this.createdAt,
   });
 
@@ -38,6 +47,7 @@ class PostulacionCandidate {
       distanciaMetros: (json['distancia_metros'] as num?)?.toDouble(),
       mensaje: json['mensaje'] as String? ?? '',
       estaVerificado: json['estado_verificacion'] == 'aprobado',
+      tipoProfesional: TipoProfesional.fromJson(json['tipo_profesional'] as String?),
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }

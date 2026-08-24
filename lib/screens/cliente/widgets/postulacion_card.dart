@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/postulacion_model.dart';
+import '../../../utils/tipo_profesional_display.dart';
 import '../../../widgets/verification_badge.dart';
 import '../../../utils/imagen_autenticada.dart';
 
@@ -88,6 +89,19 @@ class PostulacionCard extends StatelessWidget {
                           ],
                         ],
                       ),
+                      // Situación fiscal declarada (Autónomo/Empresa/
+                      // Particular) — hallazgo C del cierre P0: el
+                      // cliente debe verla ANTES de elegir. En su propia
+                      // línea (no en la fila de valoración) para no
+                      // desbordar en pantallas estrechas o con fuente
+                      // grande. Nada si el perfil antiguo no la declaró.
+                      if (c.tipoProfesional != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          etiquetaTipoProfesional(t, c.tipoProfesional!),
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: colorScheme.onSurfaceVariant),
+                        ),
+                      ],
                     ],
                   ),
                 ),
