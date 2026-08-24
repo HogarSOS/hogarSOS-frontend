@@ -89,17 +89,32 @@ class PostulacionCard extends StatelessWidget {
                           ],
                         ],
                       ),
-                      // Situación fiscal declarada (Autónomo/Empresa/
-                      // Particular) — hallazgo C del cierre P0: el
-                      // cliente debe verla ANTES de elegir. En su propia
-                      // línea (no en la fila de valoración) para no
-                      // desbordar en pantallas estrechas o con fuente
-                      // grande. Nada si el perfil antiguo no la declaró.
+                      // Tipo declarado (Autónomo/Empresa/Particular) como chip
+                      // propio, separado del nombre: el cliente lo ve ANTES de
+                      // elegir sin entrar al perfil (hallazgo C del cierre P0).
+                      // API antigua o tipo desconocido → null → no se pinta.
+                      // Va en su propia línea (no en la fila del nombre ni la
+                      // de valoración) para que un nombre largo o la fuente
+                      // grande del sistema nunca lo desborden.
+                      // (Merge 2026-08-24: dos implementaciones independientes
+                      // del mismo hallazgo — se conserva esta, la de bcd4709,
+                      // que llegó con test dedicado.)
                       if (c.tipoProfesional != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          etiquetaTipoProfesional(t, c.tipoProfesional!),
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: colorScheme.onSurfaceVariant),
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            etiquetaTipoProfesional(t, c.tipoProfesional!),
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                         ),
                       ],
                     ],

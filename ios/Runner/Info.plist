@@ -51,6 +51,17 @@
 				<string>hogarsos</string>
 			</array>
 		</dict>
+		<!-- URL scheme del REVERSED_CLIENT_ID (cliente OAuth iOS de
+		     GoogleService-Info.plist). Firebase Phone Auth lo necesita
+		     para que el fallback reCAPTCHA pueda volver a la app. -->
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>es.hogarsos.googleauth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.426602101481-09e68ldglo15v84lsdcskj86irf2g04u</string>
+			</array>
+		</dict>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>

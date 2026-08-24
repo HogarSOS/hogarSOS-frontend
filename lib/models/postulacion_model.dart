@@ -15,12 +15,14 @@ class PostulacionCandidate {
   final String mensaje;
   final bool estaVerificado;
 
-  /// Situación fiscal declarada (Autónomo/Empresa/Particular) — el
-  /// backend la sirve en el listado desde 41cac24 (hallazgo C del
-  /// cierre P0), pero el frontend nunca la parseó ni la pintó hasta la
-  /// QA visual del build 43. Nullable: perfiles antiguos sin declarar.
-  final TipoProfesional? tipoProfesional;
   final DateTime createdAt;
+
+  /// Situación fiscal declarada (Autónomo/Empresa/Particular) para que
+  /// el cliente la vea ANTES de elegir. Nullable a propósito: una API
+  /// antigua sin el campo, o un valor desconocido, se queda en null y
+  /// la tarjeta simplemente no pinta el chip (TipoProfesional.fromJson
+  /// ya devuelve null en ambos casos).
+  final TipoProfesional? tipoProfesional;
 
   PostulacionCandidate({
     required this.id,
@@ -32,8 +34,8 @@ class PostulacionCandidate {
     this.distanciaMetros,
     required this.mensaje,
     required this.estaVerificado,
-    this.tipoProfesional,
     required this.createdAt,
+    this.tipoProfesional,
   });
 
   factory PostulacionCandidate.fromJson(Map<String, dynamic> json) {
@@ -47,8 +49,8 @@ class PostulacionCandidate {
       distanciaMetros: (json['distancia_metros'] as num?)?.toDouble(),
       mensaje: json['mensaje'] as String? ?? '',
       estaVerificado: json['estado_verificacion'] == 'aprobado',
-      tipoProfesional: TipoProfesional.fromJson(json['tipo_profesional'] as String?),
       createdAt: DateTime.parse(json['created_at'] as String),
+      tipoProfesional: TipoProfesional.fromJson(json['tipo_profesional'] as String?),
     );
   }
 }
