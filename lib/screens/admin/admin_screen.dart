@@ -22,6 +22,23 @@ class AdminScreen extends ConsumerStatefulWidget {
 
 class _AdminScreenState extends ConsumerState<AdminScreen> {
   final _adminService = AdminService();
+  AdminSummary? _resumen;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarResumen();
+  }
+
+  Future<void> _cargarResumen() async {
+    try {
+      final resumen = await _adminService.obtenerResumen();
+      if (mounted) setState(() => _resumen = resumen);
+    } catch (_) {
+      // Silencioso: los badges son un extra visual, no deben bloquear ni
+      // mostrar error si falla — el resto del panel sigue funcionando igual.
+    }
+  }
 
   // El panel admin, igual que el de profesional, no tenía ningún punto
   // de la UI para cerrar sesión — solo la pantalla de perfil del cliente
@@ -59,9 +76,27 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
           bottom: TabBar(
             isScrollable: true,
             tabs: [
-              Tab(text: t.adminTabVerificaciones),
-              Tab(text: t.adminTabDisputas),
-              Tab(text: t.adminTabPagosAtascados),
+              Tab(
+                child: Badge(
+                  isLabelVisible: (_resumen?.verificacionesPendientes ?? 0) > 0,
+                  label: Text('${_resumen?.verificacionesPendientes ?? 0}'),
+                  child: Text(t.adminTabVerificaciones),
+                ),
+              ),
+              Tab(
+                child: Badge(
+                  isLabelVisible: (_resumen?.disputasAbiertas ?? 0) > 0,
+                  label: Text('${_resumen?.disputasAbiertas ?? 0}'),
+                  child: Text(t.adminTabDisputas),
+                ),
+              ),
+              Tab(
+                child: Badge(
+                  isLabelVisible: (_resumen?.pagosAtascados ?? 0) > 0,
+                  label: Text('${_resumen?.pagosAtascados ?? 0}'),
+                  child: Text(t.adminTabPagosAtascados),
+                ),
+              ),
               Tab(text: t.adminTabTareas),
               Tab(text: t.adminTabUsuarios),
             ],
@@ -1016,10 +1051,53 @@ class _UsuariosTabState extends State<_UsuariosTab> {
   bool _procesando = false;
   String? _errorBusqueda;
 
+  final _busquedaGeneralController = TextEditingController();
+  List<AdminUserLookup> _usuariosGenerales = [];
+  String? _siguienteCursor;
+  bool _cargandoGenerales = false;
+  bool _cargaInicialGenerales = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarUsuariosGenerales();
+  }
+
   @override
   void dispose() {
     _idController.dispose();
+    _busquedaGeneralController.dispose();
     super.dispose();
+  }
+
+  Future<void> _cargarUsuariosGenerales({bool reiniciar = true}) async {
+    if (_cargandoGenerales) return;
+    setState(() => _cargandoGenerales = true);
+    try {
+      final pagina = await widget.adminService.listarUsuarios(
+        q: _busquedaGeneralController.text.trim(),
+        cursor: reiniciar ? null : _siguienteCursor,
+      );
+      if (!mounted) return;
+      setState(() {
+        _usuariosGenerales = reiniciar ? pagina.usuarios : [..._usuariosGenerales, ...pagina.usuarios];
+        _siguienteCursor = pagina.siguienteCursor;
+        _cargaInicialGenerales = false;
+      });
+    } catch (_) {
+      // Silencioso a propósito: esta lista es secundaria a la búsqueda por
+      // ID de arriba, que sigue funcionando aunque esto falle.
+    } finally {
+      if (mounted) setState(() => _cargandoGenerales = false);
+    }
+  }
+
+  void _seleccionarDeLista(AdminUserLookup usuario) {
+    setState(() {
+      _usuario = usuario;
+      _idController.text = usuario.id;
+      _errorBusqueda = null;
+    });
   }
 
   Future<void> _buscar() async {
@@ -1138,6 +1216,70 @@ class _UsuariosTabState extends State<_UsuariosTab> {
             onAlternar: _alternar,
           ),
         ],
+        const SizedBox(height: 28),
+        const Divider(),
+        const SizedBox(height: 12),
+        Text(t.adminUsuariosTodosTitulo, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15.5)),
+        const SizedBox(height: 10),
+        TextField(
+          controller: _busquedaGeneralController,
+          decoration: InputDecoration(
+            labelText: t.adminUsuariosBuscarLabel,
+            hintText: t.adminUsuariosBuscarHint,
+            border: const OutlineInputBorder(),
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () => _cargarUsuariosGenerales(),
+            ),
+          ),
+          textInputAction: TextInputAction.search,
+          onSubmitted: (_) => _cargarUsuariosGenerales(),
+        ),
+        const SizedBox(height: 12),
+        if (_cargaInicialGenerales && _cargandoGenerales)
+          const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()))
+        else if (_usuariosGenerales.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Text(t.adminUsuariosTodosVacio, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+          )
+        else
+          ..._usuariosGenerales.map((u) => Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                child: ListTile(
+                  title: Text(u.nombre, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: Text(u.email ?? u.telefono ?? u.id, style: const TextStyle(fontSize: 12.5)),
+                  trailing: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: (u.activo ? Theme.of(context).colorScheme.tertiary : Theme.of(context).colorScheme.error)
+                          .withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      u.activo ? t.adminUsuarioEstadoActivo : t.adminUsuarioEstadoBloqueado,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: u.activo ? Theme.of(context).colorScheme.tertiary : Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ),
+                  onTap: () => _seleccionarDeLista(u),
+                ),
+              )),
+        if (_siguienteCursor != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Center(
+              child: _cargandoGenerales
+                  ? const CircularProgressIndicator()
+                  : OutlinedButton(
+                      onPressed: () => _cargarUsuariosGenerales(reiniciar: false),
+                      child: Text(t.adminUsuariosCargarMas),
+                    ),
+            ),
+          ),
       ],
     );
   }

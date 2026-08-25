@@ -3806,6 +3806,36 @@ abstract class AppLocalizations {
   /// **'Estado actualizado correctamente'**
   String get adminUsuarioCambioExito;
 
+  /// No description provided for @adminUsuariosTodosTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos los usuarios'**
+  String get adminUsuariosTodosTitulo;
+
+  /// No description provided for @adminUsuariosBuscarLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar'**
+  String get adminUsuariosBuscarLabel;
+
+  /// No description provided for @adminUsuariosBuscarHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre, email o teléfono'**
+  String get adminUsuariosBuscarHint;
+
+  /// No description provided for @adminUsuariosTodosVacio.
+  ///
+  /// In es, this message translates to:
+  /// **'No se encontraron usuarios'**
+  String get adminUsuariosTodosVacio;
+
+  /// No description provided for @adminUsuariosCargarMas.
+  ///
+  /// In es, this message translates to:
+  /// **'Cargar más'**
+  String get adminUsuariosCargarMas;
+
   /// No description provided for @reportarProblemaTitulo.
   ///
   /// In es, this message translates to:

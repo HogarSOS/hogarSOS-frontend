@@ -748,6 +748,11 @@
   "adminUsuarioActivarConfirmarTitulo": "¿Activar a este usuario?",
   "adminUsuarioActivarConfirmarTexto": "Podrá volver a iniciar sesión con normalidad.",
   "adminUsuarioCambioExito": "Estado actualizado correctamente",
+  "adminUsuariosTodosTitulo": "Todos los usuarios",
+  "adminUsuariosBuscarLabel": "Buscar",
+  "adminUsuariosBuscarHint": "Nombre, email o teléfono",
+  "adminUsuariosTodosVacio": "No se encontraron usuarios",
+  "adminUsuariosCargarMas": "Cargar más",
 
   "reportarProblemaTitulo": "Reportar un problema",
   "reportarProblemaMotivoLabel": "¿Qué ha pasado?",

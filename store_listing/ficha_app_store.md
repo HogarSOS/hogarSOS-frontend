@@ -44,14 +44,9 @@ abre directamente el Centro de Pagos. Mejoras de rendimiento y estabilidad.
 
 ---
 
-## Capturas de pantalla (PENDIENTE — hay que capturarlas en iPhone)
-Apple exige capturas en tamaños concretos, NO valen las de Android:
-- **iPhone 6.9"** (p. ej. iPhone 16 Pro Max, 1320×2868) — **obligatorio**.
-- **iPhone 6.5"** (p. ej. iPhone 11 Pro Max, 1242×2688) — recomendado/obligatorio según pantallas.
-- Se pueden reutilizar las MISMAS pantallas que las 8 de Android (`screenshots/`), pero
-  capturadas desde un iPhone (o simulador) a esas resoluciones. Mínimo 3, hasta 10.
-- Sugerencia: inicio cliente, publicar solicitud, elegir profesional, presupuesto con
-  desglose, chat, Centro de Pagos del profesional.
+## Capturas de pantalla — ✅ HECHO (2026-08-18)
+10 capturas subidas al Media Manager de App Store Connect, ranura iPhone 6.9",
+en español de España (simulador iPhone 17 Pro Max, idioma/región España, mapa en Madrid).
 
 ---
 
@@ -75,10 +70,9 @@ La app usa solo **HTTPS/cifrado estándar** (no cifrado propietario). Respuesta 
 *(Se puede pre-responder en Info.plist con ITSAppUsesNonExemptEncryption=false para no
 tener que contestarlo en cada subida — opcional, mejora futura.)*
 
-## App Review Information (para el revisor de Apple) — PENDIENTE
-- **Cuenta demo OBLIGATORIA**: un usuario CLIENTE y, si el revisor debe ver el lado
-  profesional, un usuario PROFESIONAL, con email+contraseña que funcionen (ver
-  `CUENTAS_DEMO.md`). Sin esto, Apple rechaza por "no podemos acceder".
+## App Review Information (para el revisor de Apple) — ✅ LISTO
+- **Cuenta demo**: ver `CUENTAS_DEMO.md` — CLIENTE y PROFESIONAL, email+contraseña
+  verificados con login real contra Firebase el 2026-08-18.
 - **Notas para el revisor**: explicar el flujo (publicar solicitud → candidatura →
   presupuesto → pago retenido con Stripe en modo real; sugerir usar la tarjeta de
   prueba NO aplica en LIVE — indicar que el pago autoriza pero se puede cancelar).

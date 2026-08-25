@@ -225,3 +225,41 @@ class AdminUserLookup {
   }
 }
 
+/// Página del listado general de usuarios (`GET /admin/users`).
+class AdminUsersPage {
+  final List<AdminUserLookup> usuarios;
+  final String? siguienteCursor;
+
+  AdminUsersPage({required this.usuarios, required this.siguienteCursor});
+
+  factory AdminUsersPage.fromJson(Map<String, dynamic> json) {
+    return AdminUsersPage(
+      usuarios: (json['usuarios'] as List)
+          .map((u) => AdminUserLookup.fromJson(u as Map<String, dynamic>))
+          .toList(),
+      siguienteCursor: json['siguienteCursor'] as String?,
+    );
+  }
+}
+
+/// Contadores para los badges del panel (`GET /admin/summary`).
+class AdminSummary {
+  final int verificacionesPendientes;
+  final int disputasAbiertas;
+  final int pagosAtascados;
+
+  AdminSummary({
+    required this.verificacionesPendientes,
+    required this.disputasAbiertas,
+    required this.pagosAtascados,
+  });
+
+  factory AdminSummary.fromJson(Map<String, dynamic> json) {
+    return AdminSummary(
+      verificacionesPendientes: json['verificacionesPendientes'] as int,
+      disputasAbiertas: json['disputasAbiertas'] as int,
+      pagosAtascados: json['pagosAtascados'] as int,
+    );
+  }
+}
+

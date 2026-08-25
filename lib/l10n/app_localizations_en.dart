@@ -2154,6 +2154,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminUsuarioCambioExito => 'Status updated successfully';
 
   @override
+  String get adminUsuariosTodosTitulo => 'All users';
+
+  @override
+  String get adminUsuariosBuscarLabel => 'Search';
+
+  @override
+  String get adminUsuariosBuscarHint => 'Name, email or phone';
+
+  @override
+  String get adminUsuariosTodosVacio => 'No users found';
+
+  @override
+  String get adminUsuariosCargarMas => 'Load more';
+
+  @override
   String get reportarProblemaTitulo => 'Report a problem';
 
   @override

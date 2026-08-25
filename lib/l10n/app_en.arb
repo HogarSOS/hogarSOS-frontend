@@ -748,6 +748,11 @@
   "adminUsuarioActivarConfirmarTitulo": "Activate this user?",
   "adminUsuarioActivarConfirmarTexto": "They'll be able to sign in normally again.",
   "adminUsuarioCambioExito": "Status updated successfully",
+  "adminUsuariosTodosTitulo": "All users",
+  "adminUsuariosBuscarLabel": "Search",
+  "adminUsuariosBuscarHint": "Name, email or phone",
+  "adminUsuariosTodosVacio": "No users found",
+  "adminUsuariosCargarMas": "Load more",
 
   "reportarProblemaTitulo": "Report a problem",
   "reportarProblemaMotivoLabel": "What happened?",

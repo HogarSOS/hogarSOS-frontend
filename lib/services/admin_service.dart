@@ -82,4 +82,17 @@ class AdminService {
     final respuesta = await _api.patch('/admin/users/$id/toggle-active');
     return AdminUserLookup.fromJson(respuesta.data as Map<String, dynamic>);
   }
+
+  Future<AdminUsersPage> listarUsuarios({String? q, String? cursor}) async {
+    final respuesta = await _api.get('/admin/users', queryParameters: {
+      if (q != null && q.isNotEmpty) 'q': q,
+      if (cursor != null) 'cursor': cursor,
+    });
+    return AdminUsersPage.fromJson(respuesta.data as Map<String, dynamic>);
+  }
+
+  Future<AdminSummary> obtenerResumen() async {
+    final respuesta = await _api.get('/admin/summary');
+    return AdminSummary.fromJson(respuesta.data as Map<String, dynamic>);
+  }
 }
