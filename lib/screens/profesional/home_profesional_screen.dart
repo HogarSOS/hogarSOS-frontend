@@ -454,10 +454,11 @@ class TarjetaSolicitudCercana extends StatelessWidget {
                 CircleAvatar(
                   radius: 18,
                   backgroundColor: colorScheme.primaryContainer,
-                  backgroundImage: solicitud.clienteFotoUrl != null
+                  backgroundImage: urlDeImagenValida(solicitud.clienteFotoUrl)
                       ? imagenDeRed(solicitud.clienteFotoUrl!, maxWidth: 120, maxHeight: 120)
                       : null,
-                  child: solicitud.clienteFotoUrl == null
+                  onBackgroundImageError: urlDeImagenValida(solicitud.clienteFotoUrl) ? onErrorImagenDeRed : null,
+                  child: !urlDeImagenValida(solicitud.clienteFotoUrl)
                       ? Text(
                           solicitud.clienteNombre.isNotEmpty ? solicitud.clienteNombre[0].toUpperCase() : '?',
                           style: TextStyle(color: colorScheme.onPrimaryContainer, fontWeight: FontWeight.bold),

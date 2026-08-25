@@ -982,10 +982,11 @@ class _Cabecera extends StatelessWidget {
                 backgroundColor: colorScheme.primaryContainer,
                 backgroundImage: fotoLocal != null
                     ? FileImage(fotoLocal!)
-                    : (fotoUrl != null
+                    : (urlDeImagenValida(fotoUrl)
                         ? imagenDeRed(fotoUrl!, maxWidth: 320, maxHeight: 320)
                         : null) as ImageProvider?,
-                child: (fotoLocal == null && fotoUrl == null)
+                onBackgroundImageError: (fotoLocal != null || urlDeImagenValida(fotoUrl)) ? onErrorImagenDeRed : null,
+                child: (fotoLocal == null && !urlDeImagenValida(fotoUrl))
                     ? Text(
                         nombre.isNotEmpty ? nombre[0].toUpperCase() : '?',
                         style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: colorScheme.onPrimaryContainer),

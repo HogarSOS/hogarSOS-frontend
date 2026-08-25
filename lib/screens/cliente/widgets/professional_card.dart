@@ -50,14 +50,15 @@ class ProfessionalCard extends StatelessWidget {
                     // aparece en la búsqueda, en su detalle y en su perfil,
                     // así que sin caché de disco su foto se re-descarga cada
                     // vez que se reconstruye esta tarjeta.
-                    image: p.fotoPerfilUrl != null
+                    image: urlDeImagenValida(p.fotoPerfilUrl)
                         ? DecorationImage(
                             image: imagenDeRed(p.fotoPerfilUrl!, maxWidth: 160, maxHeight: 160),
                             fit: BoxFit.cover,
+                            onError: onErrorImagenDeRed,
                           )
                         : null,
                   ),
-                  child: p.fotoPerfilUrl == null
+                  child: !urlDeImagenValida(p.fotoPerfilUrl)
                       ? Icon(
                           iconoParaCategoria(categoriaPrincipal),
                           color: colorCategoria,

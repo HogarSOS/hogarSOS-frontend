@@ -871,10 +871,11 @@ class _TarjetaTrabajo extends ConsumerWidget {
               children: [
                 CircleAvatar(
                   backgroundColor: colorScheme.primaryContainer,
-                  backgroundImage: trabajo.clienteFotoUrl != null
+                  backgroundImage: urlDeImagenValida(trabajo.clienteFotoUrl)
                       ? imagenDeRed(trabajo.clienteFotoUrl!, maxWidth: 120, maxHeight: 120)
                       : null,
-                  child: trabajo.clienteFotoUrl == null
+                  onBackgroundImageError: urlDeImagenValida(trabajo.clienteFotoUrl) ? onErrorImagenDeRed : null,
+                  child: !urlDeImagenValida(trabajo.clienteFotoUrl)
                       ? Text(
                           trabajo.clienteNombre.isNotEmpty ? trabajo.clienteNombre[0].toUpperCase() : '?',
                           style: TextStyle(color: colorScheme.onPrimaryContainer, fontWeight: FontWeight.bold),

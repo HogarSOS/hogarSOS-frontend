@@ -134,10 +134,13 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                         backgroundColor: colorScheme.primaryContainer,
                         backgroundImage: _fotoLocalSeleccionada != null
                             ? FileImage(_fotoLocalSeleccionada!)
-                            : (_fotoPerfilUrlActual != null
+                            : (urlDeImagenValida(_fotoPerfilUrlActual)
                                 ? imagenDeRed(_fotoPerfilUrlActual!, maxWidth: 320, maxHeight: 320)
                                 : null) as ImageProvider?,
-                        child: (_fotoLocalSeleccionada == null && _fotoPerfilUrlActual == null)
+                        onBackgroundImageError: (_fotoLocalSeleccionada != null || urlDeImagenValida(_fotoPerfilUrlActual))
+                            ? onErrorImagenDeRed
+                            : null,
+                        child: (_fotoLocalSeleccionada == null && !urlDeImagenValida(_fotoPerfilUrlActual))
                             ? Text(
                                 _nombreController.text.isNotEmpty
                                     ? _nombreController.text[0].toUpperCase()
