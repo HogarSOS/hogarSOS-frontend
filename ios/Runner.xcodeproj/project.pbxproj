@@ -211,6 +211,7 @@
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				8B7878FAD08C6CE52EE9DEA1 /* [CP] Embed Pods Frameworks */,
 				7401764E75088C935FB0E5CF /* [CP] Copy Pods Resources */,
+				72FFD405E2B60BF461CA483B /* [Firebase] Upload dSYM to Crashlytics */,
 			);
 			buildRules = (
 			);
@@ -397,6 +398,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
+		};
+		72FFD405E2B60BF461CA483B /* [Firebase] Upload dSYM to Crashlytics */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"$(SRCROOT)/$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}",
+			);
+			name = "[Firebase] Upload dSYM to Crashlytics";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/FirebaseCrashlytics/run\"\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
