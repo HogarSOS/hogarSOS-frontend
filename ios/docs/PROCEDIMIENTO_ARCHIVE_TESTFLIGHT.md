@@ -1,5 +1,12 @@
 # Procedimiento Archive / TestFlight — candidato iOS pre-build-final
 
+> **Superseded**: `PROCEDIMIENTO_IOS_FINAL.md` (mismo directorio) es la
+> referencia principal desde el 25/8 tarde — `pod install` YA se
+> ejecutó y verificó en Mac ese mismo día, así que el paso 1 de aquí
+> abajo está desactualizado. Este documento conserva el detalle de los
+> problemas conocidos del visor de MacinCloud (teclado, resolución,
+> foco de ventana), sigue siendo útil para eso.
+>
 > Estado: **preparado, NO ejecutado**. Escrito 25/8/2026 tras la auditoría
 > de paridad iOS↔Android. No ejecutar nada de esto sin un GO explícito
 > del usuario — ni siquiera el paso 1 (`pod install`) sin confirmar antes
