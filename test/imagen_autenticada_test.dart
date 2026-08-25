@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hogarsos/utils/imagen_autenticada.dart';
 
@@ -162,5 +166,73 @@ void main() {
         expect(errorCapturado, isNotNull, reason: 'un crash de framework real debe seguir siendo fatal');
       },
     );
+  });
+
+  group('limpiarCacheDeImagenes — logout entre cuentas (auditoría seguridad 25/8)', () {
+    // `DefaultCacheManager` depende de `path_provider` (canal de
+    // plataforma) para encontrar el directorio de caché — se mockea aquí
+    // (sin ninguna dependencia nueva, solo flutter/services.dart) para
+    // poder ejercitar el caso real de verdad, en vez de solo comprobar
+    // que no lanza.
+    late Directory dirTemporal;
+
+    setUp(() async {
+      dirTemporal = await Directory.systemTemp.createTemp('imagen_cache_test_');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('plugins.flutter.io/path_provider'),
+        (MethodCall call) async {
+          switch (call.method) {
+            case 'getTemporaryDirectory':
+            case 'getApplicationSupportDirectory':
+            case 'getApplicationDocumentsDirectory':
+              return dirTemporal.path;
+            default:
+              return null;
+          }
+        },
+      );
+    });
+
+    tearDown(() async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('plugins.flutter.io/path_provider'),
+        null,
+      );
+      if (await dirTemporal.exists()) {
+        await dirTemporal.delete(recursive: true);
+      }
+    });
+
+    test(
+      'cuenta A cachea una imagen → logout limpia la caché → cuenta B ya no la encuentra ahí',
+      () async {
+        const url = 'https://hogarsos.es/uploads/foto-de-A.jpg';
+        final bytes = Uint8List.fromList(List.generate(64, (i) => i));
+
+        // Cuenta A "ve" la imagen — cached_network_image la habría puesto
+        // aquí tras la primera carga con éxito.
+        await DefaultCacheManager().putFile(url, bytes, fileExtension: 'jpg');
+        final antesDelLogout = await DefaultCacheManager().getFileFromCache(url);
+        expect(antesDelLogout, isNotNull, reason: 'la imagen debe estar cacheada antes del logout');
+
+        // Logout de A.
+        await limpiarCacheDeImagenes();
+
+        // Cuenta B entra al mismo dispositivo y llega a la misma URL (p.
+        // ej. el mismo profesional público) — ya NO debe encontrarla en
+        // caché, así que cached_network_image tendría que volver a
+        // pedirla con la sesión (y cabecera de autorización) de B.
+        final despuesDelLogout = await DefaultCacheManager().getFileFromCache(url);
+        expect(despuesDelLogout, isNull, reason: 'cuenta B no debe poder reutilizar la imagen cacheada por A');
+      },
+    );
+
+    test('no lanza si el cache manager no puede inicializarse (canal sin mockear)', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('plugins.flutter.io/path_provider'),
+        null,
+      );
+      await expectLater(limpiarCacheDeImagenes(), completes);
+    });
   });
 }

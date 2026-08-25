@@ -49,6 +49,10 @@ dependencies:
   # UI y utilidades
   intl: ^0.20.2
   cached_network_image: ^3.3.1
+  # Ya era dependencia transitiva de cached_network_image; se declara
+  # aparte porque imagen_autenticada.dart usa DefaultCacheManager
+  # directamente (limpiar caché en logout, auditoría seguridad 25/8).
+  flutter_cache_manager: ^3.4.2
 
   # Tipografía de marca (Sprint 1 — identidad visual)
   google_fonts: ^6.2.1

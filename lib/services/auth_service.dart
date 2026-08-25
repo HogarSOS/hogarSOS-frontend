@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
+import '../utils/imagen_autenticada.dart';
 import 'api_service.dart';
 import 'installation_id_service.dart';
 import 'notification_service.dart';
@@ -360,6 +361,12 @@ class AuthService {
     await NotificationService.instance.desregistrarTokenLocal();
     await _firebaseAuth.signOut();
     await TokenStorage.instance.clear();
+    // Auditoría seguridad 25/8: sin esto, una cuenta distinta en el mismo
+    // dispositivo podía ver una imagen cacheada de la cuenta anterior sin
+    // que se volviera a comprobar la autorización — ver
+    // limpiarCacheDeImagenes(). Solo toca la caché de imágenes, nada de
+    // sesión/tokens (ya limpiados arriba) ni preferencias.
+    await limpiarCacheDeImagenes();
   }
 
   /// Pide al backend que genere el enlace de restablecimiento (Admin

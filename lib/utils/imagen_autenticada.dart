@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import '../services/token_storage.dart';
 
@@ -65,3 +66,20 @@ void onErrorImagenDeRed(Object error, StackTrace? stackTrace) {
 /// string vacío (que SÍ pasaba antes: `CachedNetworkImageProvider('')`
 /// intenta resolver una URI vacía y falla igual que una rota).
 bool urlDeImagenValida(String? url) => url != null && url.trim().isNotEmpty;
+
+/// Vacía la caché EN DISCO de `cached_network_image` (auditoría
+/// seguridad 25/8). `imagenDeRed` cachea por URL sin `cacheKey` propio, y
+/// esa caché no está atada a ninguna sesión: si la cuenta A ve una foto
+/// autorizada (perfil de un profesional/cliente) y luego hace logout, la
+/// cuenta B en el MISMO dispositivo la vería servida desde disco sin
+/// volver a pedir la cabecera de autorización — un cache-hit nunca toca
+/// la red. Llamar desde `AuthService.logout()`, después de cerrar sesión
+/// de verdad; esto SOLO toca la caché de imágenes, nunca sesión/tokens
+/// (`TokenStorage`) ni preferencias.
+Future<void> limpiarCacheDeImagenes() async {
+  try {
+    await DefaultCacheManager().emptyCache();
+  } catch (e) {
+    debugPrint('[imagenDeRed] No se pudo vaciar la caché de imágenes tras logout: $e');
+  }
+}
