@@ -71,10 +71,11 @@ class _Contenido extends StatelessWidget {
                     child: CircleAvatar(
                       radius: 44,
                       backgroundColor: colorScheme.primary,
-                      backgroundImage: perfil.fotoPerfilUrl != null
+                      backgroundImage: urlDeImagenValida(perfil.fotoPerfilUrl)
                           ? imagenDeRed(perfil.fotoPerfilUrl!, maxWidth: 320, maxHeight: 320)
                           : null,
-                      child: perfil.fotoPerfilUrl == null
+                      onBackgroundImageError: urlDeImagenValida(perfil.fotoPerfilUrl) ? onErrorImagenDeRed : null,
+                      child: !urlDeImagenValida(perfil.fotoPerfilUrl)
                           ? Text(
                               perfil.nombre.isNotEmpty ? perfil.nombre[0].toUpperCase() : '?',
                               style: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: Colors.white),

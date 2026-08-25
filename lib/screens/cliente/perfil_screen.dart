@@ -175,10 +175,11 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                 CircleAvatar(
                   radius: 44,
                   backgroundColor: colorScheme.primaryContainer,
-                  backgroundImage: usuario?.fotoPerfilUrl != null
+                  backgroundImage: urlDeImagenValida(usuario?.fotoPerfilUrl)
                       ? imagenDeRed(usuario!.fotoPerfilUrl!, maxWidth: 320, maxHeight: 320)
                       : null,
-                  child: usuario?.fotoPerfilUrl == null
+                  onBackgroundImageError: urlDeImagenValida(usuario?.fotoPerfilUrl) ? onErrorImagenDeRed : null,
+                  child: !urlDeImagenValida(usuario?.fotoPerfilUrl)
                       ? Text(
                           (usuario?.nombre.isNotEmpty ?? false) ? usuario!.nombre[0].toUpperCase() : '?',
                           style: TextStyle(

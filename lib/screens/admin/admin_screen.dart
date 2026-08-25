@@ -1298,6 +1298,11 @@ class _DocumentoIdentidadPreview extends StatelessWidget {
                 // Desde B4 el documento solo se sirve con sesión válida
                 // y rol admin — sin esta cabecera, 404.
                 httpHeaders: cabecerasImagen(),
+                errorListener: (error) => onErrorImagenDeRed(error, null),
+                errorWidget: (context, url, error) => Padding(
+                  padding: const EdgeInsets.all(40),
+                  child: Icon(Icons.broken_image_outlined, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
               ),
             ),
             Positioned(
@@ -1357,6 +1362,7 @@ class _DocumentoIdentidadPreview extends StatelessWidget {
               // revisión en la cola del admin.
               memCacheWidth: 96,
               memCacheHeight: 96,
+              errorListener: (error) => onErrorImagenDeRed(error, null),
               errorWidget: (context, url, error) => Container(
                 width: 48,
                 height: 48,

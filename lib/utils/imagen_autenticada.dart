@@ -1,4 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 
 import '../services/token_storage.dart';
 
@@ -35,3 +37,31 @@ CachedNetworkImageProvider imagenDeRed(
     headers: cabecerasImagen(),
   );
 }
+
+/// Manejador común para un fallo al cargar una imagen remota (auditoría
+/// Crashlytics 25/8: `MultiImageStreamCompleter`/`ImageStreamCompleter`
+/// registró 9 fallos como "Fatal" — con `FlutterError.onError` conectado a
+/// `recordFlutterFatalError` en main.dart, CUALQUIER fallo de imagen sin
+/// listener de error propio cae ahí. Una imagen rota (URL vieja, host
+/// caído, archivo borrado) es un dato esperable, no un crash del
+/// framework: la app sigue funcionando igual, solo falta esa foto.
+///
+/// Pásalo tal cual a `onBackgroundImageError` (CircleAvatar) o `onError`
+/// (DecorationImage) — su firma coincide exactamente. En cuanto ese
+/// callback no es nulo, Flutter entrega el error AHÍ en vez de dejarlo
+/// caer en `FlutterError.reportError` (y por tanto en el handler global
+/// fatal) — ver `ImageStreamCompleter.reportError` en el SDK. Se sigue
+/// mandando a Crashlytics, pero marcado explícitamente como no-fatal, así
+/// que una URL rota sigue siendo detectable sin inflar la tasa de crashes.
+void onErrorImagenDeRed(Object error, StackTrace? stackTrace) {
+  debugPrint('[imagenDeRed] No se pudo cargar la imagen: $error');
+  if (kReleaseMode) {
+    FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: false);
+  }
+}
+
+/// `true` si `url` es una URL de imagen usable — evita pasarle a
+/// `imagenDeRed` un `null` (ya cubierto por los `!= null` existentes) o un
+/// string vacío (que SÍ pasaba antes: `CachedNetworkImageProvider('')`
+/// intenta resolver una URI vacía y falla igual que una rota).
+bool urlDeImagenValida(String? url) => url != null && url.trim().isNotEmpty;
